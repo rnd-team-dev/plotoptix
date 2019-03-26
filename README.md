@@ -21,7 +21,7 @@ plot.show()
 
 Just as a decoration of this readme, here are a few sample images made with PlotOptiX:
 
-![scatter plot](https://github.com/robertsulej/plotoptix/blob/master/scatter.jpg "Scatter Plot") ![parametric curve](https://github.com/robertsulej/plotoptix/blob/master/bezier.jpg "3D Curve Plot")
+![screenshots](https://github.com/robertsulej/plotoptix/blob/master/screenshots.jpg "PlotOptiX screenshots")
 
 See examples for code details and more usage options.
 
