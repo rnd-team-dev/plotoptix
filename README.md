@@ -2,7 +2,7 @@
 
 3D raytracing package for Python, aimed at easy and aesthetic visualization of large datasets (and small as well). Data features can be represented on plots as a position, size and color of markers of several basic shapes, finished with a photorealistic lighting and depth of field.
 
-No need to write shaders, intersection algorithms, handle 3D scene technicalities. Basic usage is even more simple than [matplotlib](https://matplotlib.org/):
+No need to write shaders, intersection algorithms, handle 3D scene technicalities. Basic usage is even more simple than with [matplotlib](https://matplotlib.org/):
 
 ```python
 import numpy as np
