@@ -17,7 +17,7 @@ plot.set_data("my plot", xyz, r=r)
 plot.show()
 ```
 
-...but it is much faster and, with all the nice raytraced shades and DoF, more readable and eye catching.
+...but PlotOptiX is much faster on large data and, with all the raytraced shades and DoF, more readable and eye catching.
 
 Just as a decoration of this readme, here are a few sample images made with PlotOptiX:
 
