@@ -17,10 +17,12 @@ plot.set_data("my plot", xyz, r=r)
 plot.show()
 ```
 
-...but it is much faster and, with the nice raytraced shades, more readable and eye catching.
+...but it is much faster and, with all the nice raytraced shades and DoF, more readable and eye catching.
 
 Just as a decoration of this readme, here are a few sample images made with PlotOptiX:
-... ... ...
+
+![scatter plot](https://github.com/robertsulej/plotoptix/blob/master/scatter.jpg "Scatter Plot") ![parametric curve](https://github.com/robertsulej/plotoptix/blob/master/bezier.jpg "3D Curve Plot")
+
 See examples for code details and more usage options.
 
 PlotOptiX is based on NVIDIA OptiX framework and RnD.SharpOptiX C#/C++/CUDA libraries
