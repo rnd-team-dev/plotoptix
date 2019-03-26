@@ -19,7 +19,7 @@ plot.show()
 
 ...but PlotOptiX is much faster on large data and, with all the raytraced shades and DoF, more readable and eye catching.
 
-Just as a decoration of this readme, here are a few sample images made with PlotOptiX:
+Just as a decoration of this readme, here is a couple of sample images made with PlotOptiX:
 
 ![screenshots](https://github.com/robertsulej/plotoptix/blob/master/screenshots.jpg "PlotOptiX screenshots")
 
