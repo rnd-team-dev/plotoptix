@@ -54,8 +54,8 @@ by R&D Team. In **version 0.1.1.1** we start with:
 - python examples
 
 
-## INSTALLATION
+## Installation
 
-## DEVELOPMENT
+## Development
 
-## EXAMPLES
+## Examples
