@@ -6,7 +6,7 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
 
 ```python
 import numpy as np
-from pyoptix import TkOptiX
+from plotoptix import TkOptiX
 
 n = 1000000                                  # 1M points, better not try this with matplotlib
 xyz = 3 * (np.random.random((n, 3)) - 0.5)   # random 3D positions
