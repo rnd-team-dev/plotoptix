@@ -101,7 +101,7 @@ PlotOptiX is basically an interface to RnD.SharpOptiX library which we are devel
 The idea for development is:
 
 1. Binaries for Linux.
-2. Complete the plot layout / continue adding raytracing features.
+2. Complete the plot layout / cover more raytracing features.
 3. Convenience functions for various plot styles.
 
    Here, the community input is possible and welcome.
