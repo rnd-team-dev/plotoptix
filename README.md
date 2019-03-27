@@ -1,4 +1,8 @@
 # PlotOptiX
+<!--
+<a href="https://pypi.org/project/Pillow/"><img alt="Latest PyPI version" src="https://img.shields.io/pypi/v/pillow.svg" /></a>
+<a href="https://pypi.org/project/Pillow/"><img alt="Number of PyPI downloads" src="https://img.shields.io/pypi/dm/pillow.svg" /></a>
+!-->
 
 3D raytracing package for Python, aimed at easy and aesthetic visualization of large datasets (and small as well). Data features can be represented on plots as a position, size and color of markers of several basic shapes, finished with a photorealistic lighting and depth of field.
 
@@ -92,7 +96,7 @@ Then, try running the code from the top of this readme, or something from the ex
 
 This is the first, beta version. Everything what is implemented should work, but there are some important features not available yet, eg. ticks and labels on plot axes.
 
-PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers much more functionality than it is now available through PlotOptiX. Eg. live streaming of the video raytracing output. We'll progressively add more to PlotOptiX if there is interest in this project (star or donate if you like!).
+PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers much more functionality than it is now available through PlotOptiX. Eg. live streaming of the video raytracing output. We'll progressively add more to PlotOptiX if there is interest in this project (download and star or donate if you like!).
 
 The idea for development is:
 
