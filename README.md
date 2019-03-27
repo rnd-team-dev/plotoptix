@@ -29,7 +29,7 @@ Just as a decoration of this readme, here is a couple of sample images made with
 
 See examples for code details and more usage options.
 
-PlotOptiX is based on NVIDIA OptiX framework and RnD.SharpOptiX C#/C++/CUDA libraries
+PlotOptiX is based on [NVIDIA OptiX framework](https://developer.nvidia.com/optix) wrapped in RnD.SharpOptiX C#/C++/CUDA libraries
 by R&D Team. In **version 0.1.1.1** we start with:
 
 ### Features
@@ -90,7 +90,7 @@ From GitHub sources:
 C:\plotoptix>python setup.py install
 ```
 
-Then, try running the code from the top of this readme, or something from the examples.
+Then, try running code from the top of this readme, or one of the examples.
 
 ## Development path
 
