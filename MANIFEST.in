@@ -4,3 +4,16 @@ include licenses/OptiX_EndUserLicense.pdf
 include licenses/OptiX_ThirdParty_Licenses.txt
 include licenses/LibTiff.Net_License.txt
 include licenses/Newtonsoft.Json_License.txt
+include plotoptix/plotoptix/bin/win/libs/*.dll
+include plotoptix/plotoptix/bin/win/cuda/compute_20/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_21/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_30/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_32/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_35/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_37/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_50/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_52/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_60/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_61/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_70/*.ptx
+include plotoptix/plotoptix/bin/win/cuda/compute_75/*.ptx
