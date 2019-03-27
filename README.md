@@ -62,7 +62,7 @@ by R&D Team. In **version 0.1.1.1** we start with:
 
 ## Installation
 
-**Note**, at this point PlotOptiX binaries are prepared for Windows only. We should be able to extend to Linux / MacOS X, but today you are dealing with the very first version of the project.
+**Note**, at this point, PlotOptiX binaries are prepared for Windows only. We should be able to extend to Linux / MacOS X, but today you are dealing with the very first version of the project.
 
 #### CUDA Toolkit
 
