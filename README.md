@@ -58,6 +58,36 @@ by R&D Team. In **version 0.1.1.1** we start with:
 
 ## Installation
 
+**Note**, at this point PlotOptiX binaries are prepared for Windows only. We should extend to Linux / MacOS X soon, but today you are dealing with the very first version of the project.
+
+#### CUDA Toolkit
+
+CUDA libraries are not included in the package. They are rather huge, PlotOptiX is not coupled to a particular CUDA release, and the installation is quite straight-forward. Simply visit [CUDA download page](https://developer.nvidia.com/cuda-downloads), select your operating system and CUDA version (latest should be fine, PlotOptiX was tested with 9.1, 10.0, 10.1). Download and run the installer.
+
+Make sure the CUDA_PATH environment variable is configured:
+
+```shell session
+C:\>echo %CUDA_PATH%
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0
+```
+It is also a good idea to keep your GPU driver up to date.
+
+#### PlotOptiX
+
+Using pip:
+
+```shell session
+C:\>pip install plotoptix
+```
+
+From GitHub sources:
+
+```shell session
+C:\plotoptix>python setup.py install
+```
+
+Then, try running the code from the top of this readme, or something from the examples.
+
 ## Development
 
 ## Examples
