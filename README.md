@@ -1,4 +1,8 @@
 # PlotOptiX
+<!--
+<a href="https://pypi.org/project/Pillow/"><img alt="Latest PyPI version" src="https://img.shields.io/pypi/v/pillow.svg" /></a>
+<a href="https://pypi.org/project/Pillow/"><img alt="Number of PyPI downloads" src="https://img.shields.io/pypi/dm/pillow.svg" /></a>
+!-->
 
 3D raytracing package for Python, aimed at easy and aesthetic visualization of large datasets (and small as well). Data features can be represented on plots as a position, size and color of markers of several basic shapes, finished with a photorealistic lighting and depth of field.
 
@@ -58,6 +62,50 @@ by R&D Team. In **version 0.1.1.1** we start with:
 
 ## Installation
 
-## Development
+**Note**, at this point PlotOptiX binaries are prepared for Windows only. We should extend to Linux / MacOS X soon, but today you are dealing with the very first version of the project.
+
+#### CUDA Toolkit
+
+CUDA libraries are not included in the package. They are rather huge, PlotOptiX is not coupled to a particular CUDA release, and the installation is quite straight-forward. Simply visit [CUDA download page](https://developer.nvidia.com/cuda-downloads), select your operating system and CUDA version (latest should be fine, PlotOptiX was tested with 9.1, 10.0, 10.1). Download and run the installer.
+
+Make sure the CUDA_PATH environment variable is configured:
+
+```shell session
+C:\>echo %CUDA_PATH%
+C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.0
+```
+It is also a good idea to keep your GPU driver up to date.
+
+#### PlotOptiX
+
+Using pip:
+
+```shell session
+C:\>pip install plotoptix
+```
+
+From GitHub sources:
+
+```shell session
+C:\plotoptix>python setup.py install
+```
+
+Then, try running the code from the top of this readme, or something from the examples.
+
+## Development path
+
+This is the first, beta version. Everything what is implemented should work, but there are some important features not available yet, eg. ticks and labels on plot axes.
+
+PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers much more functionality than it is now available through PlotOptiX. Eg. live streaming of the raytraced video output. We'll progressively add more to PlotOptiX if there is interest in this project (download and star or donate if you like it!).
+
+The idea for development is:
+
+1. Binaries for Linux.
+2. Complete the plot layout / cover more raytracing features.
+3. Convenience functions for various plot styles.
+
+   *Here, the community input is possible and welcome.*
 
 ## Examples
+
+Progressing...

@@ -1,19 +1,19 @@
 Section I: Introduction
 
-PlotOptiX and RnD.SharpOptiX include source code and binary libraries from the following sources. Before proceeding, users must read and agree to this license agreement and the license agreements of all software included in or distributed with PlotOptiX and RnD.SharpOptiX:
+PlotOptiX and RnD.SharpOptiX include binary libraries from the following sources. Before proceeding, users must read and agree to this license agreement and the license agreements of all software included in or distributed with PlotOptiX and RnD.SharpOptiX:
 
-OptiX™ and its dependencies:
+1. OptiXâ„¢ and its dependencies:
    licenses\OptiX_EndUserLicense.pdf
    licenses\OptiX_ThirdParty_Licenses.txt
    read also the notice attached in Section III
 
-LibTiff.Net:
+2. LibTiff.Net:
    licenses\LibTiff.Net_License.txt (https://bitmiracle.github.io/libtiff.net/help/articles/license.html)
 
-Newtonsoft.Json:
+3. Newtonsoft.Json:
    licenses\Newtonsoft.Json_License.txt (https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md)
 
-.NET components:
+4. .NET components:
    MIT License (https://github.com/dotnet)
 
 ------------------------------------------------------------------------------------------------------------------
@@ -23,22 +23,22 @@ Copyright (c) 2019 Robert Sulej, R&D Team, <contact@rnd.team>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, and/or sublicense copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+1. The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-The Software may not be used for commercial purposes of any kind.
+2. The Software may not be used for commercial purposes of any kind.
 
 Please, contact R&D Team <contact@rnd.team> if you need license allowing commercial use of the software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ------------------------------------------------------------------------------------------------------------------
-Section III: OptiX™
+Section III: OptiXâ„¢
 
-This distribution includes OptiX™ binary libraries under the terms of the Software License Agreement for the NVIDIA® OptiX™ ray tracing engine, included in this repository in licenses\OptiX_EndUserLicense.pdf. Users agree to the terms of that license, including the following restrictions:
+This distribution includes OptiXâ„¢ binary libraries under the terms of the Software License Agreement for the NVIDIAÂ® OptiXâ„¢ ray tracing engine, included in this repository in licenses\OptiX_EndUserLicense.pdf. Users agree to the terms of that license, including the following restrictions:
 
-- they will maintain a valid copyright on the end-user application;
-- they are prohibited from modifying, adapting, translating, reverse engineering, decompiling, disassembling, or creating derivative works, in whole or in part, based on the OptiX™ Software, nor may they attempt in any manner to obtain the source code;
-- they disclaim any and all warranties on behalf of NVIDIA and other applicable licensors;
-- they disclaim, to the maximum extent permitted by law, NVIDIA’s, its affiliated companies and its licensors' liability for all damages, direct or indirect, incidental or consequential, that may arise from any use of the OptiX™ Software;
-- they agree not to export the OptiX™ Software, directly or indirectly, in violation of U.S. export control laws or any export or import regulations in other countries; and
-- they will, without limitation, indemnify, hold harmless, and defend NVIDIA and other applicable licensors and their respective affiliates and suppliers from and against any and all claims, lawsuits, costs, and expenses, including attorney's fees, that arise or result from their use or distribution of the end-user application.
+a) they will maintain a valid copyright on the end-user application;
+b) they are prohibited from modifying, adapting, translating, reverse engineering, decompiling, disassembling, or creating derivative works, in whole or in part, based on the OptiXâ„¢ Software, nor may they attempt in any manner to obtain the source code;
+c) they disclaim any and all warranties on behalf of NVIDIA and other applicable licensors;
+d) they disclaim, to the maximum extent permitted by law, NVIDIAâ€™s, its affiliated companies and its licensors' liability for all damages, direct or indirect, incidental or consequential, that may arise from any use of the OptiXâ„¢ Software;
+e) they agree not to export the OptiXâ„¢ Software, directly or indirectly, in violation of U.S. export control laws or any export or import regulations in other countries; and
+f) they will, without limitation, indemnify, hold harmless, and defend NVIDIA and other applicable licensors and their respective affiliates and suppliers from and against any and all claims, lawsuits, costs, and expenses, including attorney's fees, that arise or result from their use or distribution of the end-user application.
