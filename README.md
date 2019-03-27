@@ -104,7 +104,7 @@ The idea for development is:
 2. Complete the plot layout / cover more raytracing features.
 3. Convenience functions for various plot styles.
 
-   *Here, the community input is possible and welcome.*
+   *Here, the community input is possible and warmly welcome!*
 
 ## Examples
 
