@@ -96,7 +96,7 @@ Then, try running the code from the top of this readme, or something from the ex
 
 This is the first, beta version. Everything what is implemented should work, but there are some important features not available yet, eg. ticks and labels on plot axes.
 
-PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers much more functionality than it is now available through PlotOptiX. Eg. live streaming of the video raytracing output. We'll progressively add more to PlotOptiX if there is interest in this project (download and star or donate if you like!).
+PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers much more functionality than it is now available through PlotOptiX. Eg. live streaming of the raytraced video output. We'll progressively add more to PlotOptiX if there is interest in this project (download and star or donate if you like it!).
 
 The idea for development is:
 
@@ -104,7 +104,7 @@ The idea for development is:
 2. Complete the plot layout / cover more raytracing features.
 3. Convenience functions for various plot styles.
 
-   Here, the community input is possible and welcome.
+   *Here, the community input is possible and welcome.*
 
 ## Examples
 
