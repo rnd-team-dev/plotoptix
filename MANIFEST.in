@@ -1,0 +1,6 @@
+include README.md
+include LICENSE.txt
+include licenses/OptiX_EndUserLicense.pdf
+include licenses/OptiX_ThirdParty_Licenses.txt
+include licenses/LibTiff.Net_License.txt
+include licenses/Newtonsoft.Json_License.txt
