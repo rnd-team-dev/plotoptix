@@ -62,7 +62,7 @@ by R&D Team. In **version 0.1.1.1** we start with:
 
 ## Installation
 
-**Note**, at this point PlotOptiX binaries are prepared for Windows only. We should extend to Linux / MacOS X soon, but today you are dealing with the very first version of the project.
+**Note**, at this point PlotOptiX binaries are prepared for Windows only. We should be able to extend to Linux / MacOS X, but today you are dealing with the very first version of the project.
 
 #### CUDA Toolkit
 
@@ -94,7 +94,7 @@ Then, try running the code from the top of this readme, or something from the ex
 
 ## Development path
 
-This is the first, beta version. Everything what is implemented should work, but there are some important features not available yet, eg. ticks and labels on plot axes.
+This is the first, beta version, with binaries released for Windows only. Everything what is implemented should work, but there are some important features not available yet, eg. ticks and labels on plot axes.
 
 PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers much more functionality than it is now available through PlotOptiX. Eg. live streaming of the raytraced video output. We'll progressively add more to PlotOptiX if there is interest in this project (download and star or donate if you like it!).
 
