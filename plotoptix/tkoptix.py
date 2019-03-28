@@ -24,13 +24,13 @@ PARAM_INT_CALLBACK = CFUNCTYPE(None, c_int)
 
 PLATFORM = platform.system()
 if PLATFORM == "Windows":
-    BIN_PATH = "..\\bin\\win"
+    BIN_PATH = "bin\\win"
     LIB_EXT = ".dll"
 elif PLATFORM == "Linux":
-    BIN_PATH = "..\\bin\\linux"
+    BIN_PATH = "bin\\linux"
     LIB_EXT = ".so"
 elif PLATFORM == "Darwin":
-    BIN_PATH = "..\\bin\\mac"
+    BIN_PATH = "bin\\mac"
     LIB_EXT = ".so"
 else:
     BIN_PATH = ""
