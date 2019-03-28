@@ -67,7 +67,7 @@ by R&D Team. In **version 0.1.1.1** we start with:
 
 #### .NET Framework
 
-Most likely you already got it with your Windows installation. Just in case, here is the command verifying the installed version:
+Most likely you already got the right version with your Windows installation. Just in case, here is the command verifying this:
 
 ```shell session
 C:\reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full" /v version
