@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# CUDA sources
+*.cu
+
 # C extensions
 *.so
 
