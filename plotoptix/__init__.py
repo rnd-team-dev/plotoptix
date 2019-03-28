@@ -7,7 +7,8 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd_team/plotoptix.
 """
 
-from tkoptix import TkOptiX
+from plotoptix.enums import *
+from plotoptix.tkoptix import TkOptiX
 
 __all__ = ["enums", "tkoptix"]
 
