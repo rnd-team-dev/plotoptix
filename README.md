@@ -79,7 +79,7 @@ If the number in your output is < 4.6.1, visit [download page](https://dotnet.mi
 
 #### CUDA Toolkit
 
-CUDA libraries are not included in the package. They are rather huge, PlotOptiX is not coupled to a particular CUDA release, and the installation is quite straight-forward. Simply visit [CUDA download page](https://developer.nvidia.com/cuda-downloads), select your operating system and CUDA version (latest should be fine, PlotOptiX was tested with 9.1, 10.0, 10.1). Download and run the installer.
+CUDA libraries are not included in the package. They are rather huge, PlotOptiX is not coupled to a particular CUDA release, and the installation is quite straight-forward. Simply visit [CUDA download page](https://developer.nvidia.com/cuda-downloads), select your operating system and CUDA version (the latest should be fine, PlotOptiX was tested with 9.1, 10.0, 10.1). Download and run the installer.
 
 Make sure the CUDA_PATH environment variable is configured:
 
