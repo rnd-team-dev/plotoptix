@@ -14,8 +14,8 @@ from PIL import Image, ImageTk
 from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_bool, c_char_p, c_wchar_p, c_void_p
 from typing import List, Callable, Optional, Union, Any
 
-from singleton import Singleton
-from enums import *
+from plotoptix.singleton import Singleton
+from plotoptix.enums import *
 
 logging.basicConfig(level=logging.WARN, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
