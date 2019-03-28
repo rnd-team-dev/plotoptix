@@ -48,7 +48,7 @@ by R&D Team. In **version 0.1.1.1** we start with:
 ### System Requirements
 
 - operating system, *currently*: Windows
-- [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) >= 4.6.1 (most likely you already have it on Windows)
+- [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) >= 4.6.1 (most likely you already have it)
 - a [CUDA-enabled GPU](https://developer.nvidia.com/cuda-gpus) with compute capability 2.0 to latest
 - [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
 - Python 3
@@ -56,7 +56,7 @@ by R&D Team. In **version 0.1.1.1** we start with:
 ### What's Included
 
 - OptiX 6.0.0 libraries
-- RnD.SharpOptiX libraries
+- RnD.SharpOptiX and RnD.SharpEncoder libraries
 - all other required 3'rd party libraries: FFmpeg, LibTiff, Newtonsoft.Json, .NET Core
 - python examples
 
