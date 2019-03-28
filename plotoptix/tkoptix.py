@@ -124,6 +124,8 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
         self._optix.fit_camera.argtypes = [c_uint, c_wchar_p, c_float]
         self._optix.fit_camera.restype = c_bool
 
+        self._optix.get_current_camera.restype = c_uint
+
         self._optix.set_current_camera.argtypes = [c_uint]
         self._optix.set_current_camera.restype = c_bool
 
@@ -597,9 +599,8 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
     @staticmethod
     def _default_initialization(wnd) -> None:
         wnd._logger.info("Default scene initialization.")
-        wnd.set_float("ambient_color", x=0.86, y=0.89, z=0.94)
-        wnd.set_float("bg_color", x=0.01, y=0.01, z=0.01)
-        wnd.setup_camera("default", [0, 0, 10], [0, 0, 0])
+        if wnd._optix.get_current_camera() == 0:
+            wnd.setup_camera("default", [0, 0, 10], [0, 0, 0])
 
     def refresh_scene(self) -> None:
         self._optix.refresh_scene()
@@ -714,7 +715,9 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
 
         return a
 
-    def setup_camera(self, name: str, eye: Any, target: Any,
+    def setup_camera(self, name: str,
+                     eye: Optional[Any] = None,
+                     target: Optional[Any] = None,
                      up: Any = np.ascontiguousarray([0, 1, 0], dtype=np.float32),
                      cam_type: Union[Camera, str] = Camera.Pinhole,
                      aperture_radius: float = 0.1,
@@ -731,15 +734,13 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error("Camera %s already exists.")
             return
 
+        eye_ptr = 0
         eye = self._make_contiguous_vector(eye, 3)
-        if eye is None:
-            self._logger.error("Need 3D camera eye coordinates.")
-            return
+        if eye is not None: eye_ptr = eye.ctypes.data
 
+        target_ptr = 0
         target = self._make_contiguous_vector(target, 3)
-        if target is None:
-            self._logger.error("Need 3D camera target coordinates.")
-            return
+        if target is not None: target_ptr = target.ctypes.data
 
         up = self._make_contiguous_vector(up, 3)
         if up is None:
@@ -747,8 +748,10 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
             return
 
         h = self._optix.setup_camera(cam_type.value,
-                                     eye.ctypes.data, target.ctypes.data, up.ctypes.data,
-                                     aperture_radius, aperture_fract, focal_scale, fov, blur, make_current)
+                                     eye_ptr, target_ptr, up.ctypes.data,
+                                     aperture_radius, aperture_fract,
+                                     focal_scale, fov, blur,
+                                     make_current)
         if h > 0:
             self._logger.info("Camera %s handle: %d.", name, h)
             self.camera_handles[name] = h
