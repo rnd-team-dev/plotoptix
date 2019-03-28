@@ -56,7 +56,7 @@ by R&D Team. In **version 0.1.1.1** we start with:
 ### What's Included
 
 - OptiX 6.0.0 libraries
-- RnD.SharpOptiX libraries
+- RnD.SharpOptiX and RnD.SharpEncoder libraries
 - all other required 3'rd party libraries: FFmpeg, LibTiff, Newtonsoft.Json, .NET Core
 - python examples
 
