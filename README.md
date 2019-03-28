@@ -48,6 +48,7 @@ by R&D Team. In **version 0.1.1.1** we start with:
 ### System Requirements
 
 - operating system, *currently*: Windows
+- [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) >= 4.6.1 (most likely you already have it on Windows)
 - a [CUDA-enabled GPU](https://developer.nvidia.com/cuda-gpus) with compute capability 2.0 to latest
 - [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
 - Python 3
@@ -63,6 +64,18 @@ by R&D Team. In **version 0.1.1.1** we start with:
 ## Installation
 
 **Note**, at this point, PlotOptiX binaries are prepared for Windows only. We should be able to extend to Linux / MacOS X, but today you are dealing with the very first version of the project.
+
+#### .NET Framework
+
+Most likely you already got it with your Windows installation. Just in case, here is the command verifying the installed version:
+
+```shell session
+C:\reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full" /v version
+
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full
+    version    REG_SZ    4.7.03056
+```
+If the number in your output is < 4.6.1, visit [download page](https://dotnet.microsoft.com/download/dotnet-framework) and install the most recent release.
 
 #### CUDA Toolkit
 
