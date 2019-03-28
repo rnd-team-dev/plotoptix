@@ -1,6 +1,8 @@
-Section I: Introduction
+﻿Section I: Introduction
 
-PlotOptiX and RnD.SharpOptiX include binary libraries from the following sources. Before proceeding, users must read and agree to this license agreement and the license agreements of all software included in or distributed with PlotOptiX and RnD.SharpOptiX:
+Definition of the "Software": PlotOptiX source code and documentation together with included binaries and their associated source code.
+
+The Software includes binary libraries from the following sources. Before proceeding, users must read and agree to this license agreement and the license agreements of all software included in or distributed with the Software:
 
 1. OptiX™ and its dependencies:
    licenses\OptiX_EndUserLicense.pdf
@@ -17,7 +19,7 @@ PlotOptiX and RnD.SharpOptiX include binary libraries from the following sources
    MIT License (https://github.com/dotnet)
 
 ------------------------------------------------------------------------------------------------------------------
-Section II: PlotOptiX and RnD.SharpOptiX End User License Agreement
+Section II: The Software End User License Agreement
 
 Copyright (c) 2019 Robert Sulej, R&D Team, <contact@rnd.team>
 
@@ -27,9 +29,9 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 2. The Software may not be used for commercial purposes of any kind.
 
-Please, contact R&D Team <contact@rnd.team> if you need license allowing commercial use of the software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Contact R&D Team <contact@rnd.team> if you need license allowing commercial use of the Software.
 
 ------------------------------------------------------------------------------------------------------------------
 Section III: OptiX™
