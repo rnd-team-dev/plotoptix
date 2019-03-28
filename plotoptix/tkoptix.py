@@ -368,7 +368,7 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
                         hd = c_d.value
                         if hd > 0:
                             self._logger.info("Hit 3D coordinates: [%f %f %f], at focal distance %f", hx, hy, hz, hd)
-                            result = self._optix.set_camera_focal_length(hd)
+                            _ = self._optix.set_camera_focal_length(hd)
             else:
                 self._logger.info("No object at [%d %d]", x, y)
 

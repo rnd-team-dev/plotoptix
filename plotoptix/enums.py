@@ -1,4 +1,14 @@
+"""
+Enums for PlotOptiX raytracer.
+
+Copyright (C) 2019 R&D Team. All Rights Reserved.
+
+Have a look at examples on GitHub: https://github.com/rnd_team/plotoptix.
+"""
+
 from enum import Enum
+
+__all__ = ["Coordinates", "Geometry", "Camera", "Light", "RtResult"]
 
 class Coordinates(Enum):
     Hidden = 0
