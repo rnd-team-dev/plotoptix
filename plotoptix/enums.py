@@ -8,8 +8,6 @@ Have a look at examples on GitHub: https://github.com/rnd_team/plotoptix.
 
 from enum import Enum
 
-__all__ = ["Coordinates", "Geometry", "Camera", "Light", "RtResult"]
-
 class Coordinates(Enum):
     Hidden = 0
     Box = 1
