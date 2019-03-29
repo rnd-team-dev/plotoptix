@@ -50,7 +50,7 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
                  on_rt_accum_done = None,
                  width: int = -1,
                  height: int = -1,
-                 show_on_start: bool = False,
+                 start_now: bool = False,
                  log_level: Union[int, str] = logging.WARN) -> None:
 
         self._logger = logging.getLogger(__name__ + "-TkOptiX")
@@ -262,11 +262,7 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
 
             super(TkOptiX, self).__init__()
 
-            if show_on_start:
-                self.start()
-                if not self._started_event.wait(10):
-                    self._logger.error("Raytracing output startup timed out.")
-                    self._is_started = False
+            if start_now: self.start()
             else:
                 self._logger.info("Use show() or start() to open the raytracing output.")
         else:
@@ -280,15 +276,16 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
                 assert callable(item), "Expected callable or list of callable items."
             return items
 
-    # For matplotlib users convinience.
-    def show(self) -> None:
+    def start(self) -> None:
         if not self._is_started:
-            self.start()
+            super(TkOptiX, self).start()
             if not self._started_event.wait(10):
                 self._logger.error("Raytracing output startup timed out.")
                 self._is_started = False
         else:
             self._logger.warn("Raytracing output already running.")
+    # For matplotlib users convenience.
+    def show(self) -> None: self.start()
 
     def close(self) -> None:
         if self._is_started: self._canvas.event_generate("<<CloseScene>>", when="tail")
