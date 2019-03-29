@@ -715,6 +715,30 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
 
         return a
 
+    def get_camera(self, name: Optional[str] = None) -> (Optional[str], Optional[int]):
+        cam_handle = 0
+        if name is None: # try current camera
+            cam_handle = self._optix.get_current_camera()
+            if cam_handle == 0:
+                self._logger.error("Current camera is not set.")
+                return None, None
+
+            for n, h in self.camera_handles.items():
+                if h == cam_handle:
+                    name = n
+                    break
+
+        else: # try camera by name
+           if not isinstance(name, str): name = str(name)
+
+           if name in self.camera_handles:
+               cam_handle = self.camera_handles[name]
+           else:
+               self._logger.error("Camera %s does not exists.")
+               return None, None
+
+        return name, cam_handle
+
     def setup_camera(self, name: str,
                      eye: Optional[Any] = None,
                      target: Optional[Any] = None,
@@ -758,7 +782,7 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
         else:
             self._logger.error("Camera setup failed.")
 
-    def update_camera(self, name: str,
+    def update_camera(self, name: Optional[str] = None,
                       eye: Optional[Any] = None,
                       target: Optional[Any] = None,
                       up: Optional[Any] = None,
@@ -766,32 +790,22 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
                       focal_scale: float = -1.0,
                       fov: float = -1.0) -> None:
         
-        if not isinstance(name, str): name = str(name)
-
-        if name not in self.camera_handles:
-            self._logger.error("Camera %s does not exists.")
-            return
+        name, cam_handle = self.get_camera(name)
+        if (name is None) or (cam_handle == 0): return
 
         eye = self._make_contiguous_vector(eye, 3)
-        if eye is not None:
-            eye_ptr = eye.ctypes.data
-        else:
-            eye_ptr = 0
+        if eye is not None: eye_ptr = eye.ctypes.data
+        else:               eye_ptr = 0
 
         target = self._make_contiguous_vector(target, 3)
-        if target is not None:
-            target_ptr = target.ctypes.data
-        else:
-            target_ptr = 0
+        if target is not None: target_ptr = target.ctypes.data
+        else:                  target_ptr = 0
 
         up = self._make_contiguous_vector(up, 3)
-        if up is not None:
-            up_ptr = up.ctypes.data
-        else:
-            up_ptr = 0
+        if up is not None: up_ptr = up.ctypes.data
+        else:              up_ptr = 0
 
-        if self._optix.update_camera(self.camera_handles[name],
-                                     eye_ptr, target_ptr, up_ptr,
+        if self._optix.update_camera(cam_handle, eye_ptr, target_ptr, up_ptr,
                                      aperture_radius, focal_scale, fov):
             self._logger.info("Camera %s updated.", name)
         else:
@@ -828,7 +842,9 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.fit_camera(cam_handle, geometry, scale)
 
-    def setup_spherical_light(self, name: str, pos: Any, color: Any,
+    def setup_spherical_light(self, name: str, pos: Optional[Any] = None,
+                              autofit_camera: Optional[str] = None,
+                              color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),
                               radius: float = 1.0, in_geometry: bool = True) -> None:
         
         if not isinstance(name, str): name = str(name)
@@ -837,10 +853,16 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error("Light %s already exists.")
             return
 
+        autofit = False
         pos = self._make_contiguous_vector(pos, 3)
         if pos is None:
-            self._logger.error("Need 3D coordinates for the new light.")
-            return
+            cam_name, _ = self.get_camera(autofit_camera)
+            if cam_name is None:
+                self._logger.error("Need 3D coordinates for the new light.")
+                return
+
+            pos = np.ascontiguousarray([0, 0, 0])
+            autofit = True
 
         color = self._make_contiguous_vector(color, 3)
         if color is None:
@@ -852,12 +874,17 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
         if h >= 0:
             self._logger.info("Light %s handle: %d.", name, h)
             self.light_handles[name] = h
+
+            if autofit:
+                self.light_fit(name, camera=cam_name)
         else:
             self._logger.error("Light setup failed.")
 
-    def setup_parallelogram_light(self, name: str, pos: Any, color: Any,
+    def setup_parallelogram_light(self, name: str, pos: Optional[Any] = None,
+                                  autofit_camera: Optional[str] = None,
+                                  color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),
                                   u: Any = np.ascontiguousarray([0, 1, 0], dtype=np.float32),
-                                  v: Any = np.ascontiguousarray([1, 0, 0], dtype=np.float32),
+                                  v: Any = np.ascontiguousarray([-1, 0, 0], dtype=np.float32),
                                   in_geometry: bool = True) -> None:
         
         if not isinstance(name, str): name = str(name)
@@ -866,10 +893,16 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error("Light %s already exists.")
             return
 
+        autofit = False
         pos = self._make_contiguous_vector(pos, 3)
         if pos is None:
-            self._logger.error("Need 3D coordinates for the new light.")
-            return
+            cam_name, _ = self.get_camera(autofit_camera)
+            if cam_name is None:
+                self._logger.error("Need 3D coordinates for the new light.")
+                return
+
+            pos = np.ascontiguousarray([0, 0, 0])
+            autofit = True
 
         color = self._make_contiguous_vector(color, 3)
         if color is None:
@@ -891,9 +924,33 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
         if h >= 0:
             self._logger.info("Light %s handle: %d.", name, h)
             self.light_handles[name] = h
+
+            if autofit:
+                self.light_fit(name, camera=cam_name)
         else:
             self._logger.error("Light setup failed.")
 
+    def setup_light(self, name: str,
+                    light_type: Union[Light, str] = Light.Spherical,
+                    pos: Optional[Any] = None,
+                    autofit_camera: Optional[str] = None,
+                    color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),
+                    u: Any = np.ascontiguousarray([0, 1, 0], dtype=np.float32),
+                    v: Any = np.ascontiguousarray([1, 0, 0], dtype=np.float32),
+                    radius: float = 1.0, in_geometry: bool = True) -> None:
+
+        if isinstance(light_type, str): light_type = Light[light_type]
+
+        if light_type == Light.Spherical:
+            self.setup_spherical_light(name, pos=pos,
+                                       autofit_camera=autofit_camera,
+                                       color=color, radius=radius,
+                                       in_geometry=in_geometry)
+        elif light_type == Light.Parallelogram:
+            self.setup_parallelogram_light(name, pos=pos,
+                                  autofit_camera=autofit_camera,
+                                  color=color, u=u, v=v,
+                                  in_geometry=in_geometry)
 
     def update_light(self, name: str,
                      pos: Optional[Any] = None,
@@ -909,28 +966,20 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
             return
 
         pos = self._make_contiguous_vector(pos, 3)
-        if pos is not None:
-            pos_ptr = pos.ctypes.data
-        else:
-            pos_ptr = 0
+        if pos is not None: pos_ptr = pos.ctypes.data
+        else:               pos_ptr = 0
 
         color = self._make_contiguous_vector(color, 3)
-        if color is not None:
-            color_ptr = color.ctypes.data
-        else:
-            color_ptr = 0
+        if color is not None: color_ptr = color.ctypes.data
+        else:                 color_ptr = 0
 
         u = self._make_contiguous_vector(u, 3)
-        if u is not None:
-            u_ptr = u.ctypes.data
-        else:
-            u_ptr = 0
+        if u is not None: u_ptr = u.ctypes.data
+        else:             u_ptr = 0
 
         v = self._make_contiguous_vector(v, 3)
-        if v is not None:
-            v_ptr = v.ctypes.data
-        else:
-            v_ptr = 0
+        if v is not None: v_ptr = v.ctypes.data
+        else:             v_ptr = 0
 
         if self._optix.update_light(self.light_handles[name],
                                     pos_ptr, color_ptr,
@@ -943,7 +992,7 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
                   camera: Optional[str] = None,
                   horizontal_rot: Optional[float] = 45,
                   vertical_rot: Optional[float] = 25,
-                  dist_scale: Optional[float] = 1.2) -> None:
+                  dist_scale: Optional[float] = 1.5) -> None:
 
         if not isinstance(light, str): light = str(light)
         light_handle = self.light_handles[light]
