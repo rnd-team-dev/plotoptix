@@ -5,7 +5,7 @@ setup(name='plotoptix',
       url='https://github.com/robertsulej/plotoptix',
       author='Robert Sulej, R&D Team',
       author_email='contact@rnd.team',
-      description='Dataset raytracing in Python based on NVIDIA OptiX framework.',
+      description='Dataset visualisation in Python based on NVIDIA OptiX raytracing framework.',
       keywords="gpu nvidia optix raytracing pathtracing visualisation generative plot",
       classifiers=[
           'Development Status :: 4 - Beta',
