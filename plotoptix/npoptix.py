@@ -1,16 +1,14 @@
 """
-Tkinter UI for PlotOptiX raytracer.
+No-UI PlotOptiX raytracer (output to numpy array only).
 
 Copyright (C) 2019 R&D Team. All Rights Reserved.
 
 Have a look at examples on GitHub: https://github.com/rnd_team/plotoptix.
 """
 
-import sys, os, math, platform, logging, operator, functools, threading
+import sys, os, math, platform, logging, operator, functools, threading, time
 import numpy as np
-import tkinter as tk
 
-from PIL import Image, ImageTk
 from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_bool, c_char_p, c_wchar_p, c_void_p
 from typing import List, Callable, Optional, Union, Any
 
@@ -36,12 +34,15 @@ else:
     BIN_PATH = ""
     LIB_EXT == ""
 
-# development shortcut
-#BIN_PATH = "..\\..\\..\\OptiX\\libSharpOptiX\\bin\\Debug"
+###################################################################
+# In UI classes, override:                                        #
+# -  start and run UI event loop:  run_event_loop()               #
+# -  raise UI close event:         close()                        #
+# -  update image in UI:           _launch_finished_callback()    #
+# -  optionally apply UI edits:    _scene_rt_starting_callback()  #
+###################################################################
 
-## NOTE the naming: functions with the names _gui_* can be used from the GUI thread (Tk event loop) only.
-
-class TkOptiX(threading.Thread, metaclass=Singleton):
+class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def __init__(self,
                  on_initialization = None,
@@ -53,17 +54,13 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
                  start_now: bool = False,
                  log_level: Union[int, str] = logging.WARN) -> None:
 
-        self._logger = logging.getLogger(__name__ + "-TkOptiX")
+        self._logger = logging.getLogger(__name__ + "-NpOptiX")
         self._logger.setLevel(log_level)
         self._package_dir = os.path.dirname(__file__)
         self._started_event = threading.Event()
         self._padlock = threading.Lock()
         self._is_started = False
         self._is_closed = False
-        self._update_req = False
-
-        self._ini_width = width
-        self._ini_height = height
 
         # load SharpOptiX library, setup arguments and return types ###
         self._optix = cdll.LoadLibrary(os.path.join(self._package_dir, BIN_PATH, "RnD.SharpOptiX" + LIB_EXT))
@@ -190,6 +187,9 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
         self._optix.register_launch_finished_callback.argtypes = [PARAM_INT_CALLBACK]
         self._optix.register_launch_finished_callback.restype = c_bool
 
+        self._optix.register_accum_done_callback.argtypes = [PARAM_NONE_CALLBACK]
+        self._optix.register_accum_done_callback.restype = c_bool
+
         self._optix.register_scene_rt_starting_callback.argtypes = [PARAM_NONE_CALLBACK]
         self._optix.register_scene_rt_starting_callback.restype = c_bool
 
@@ -219,21 +219,13 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
         self._logger.info("RnD.SharpOptiX library configured.")
         ###############################################################
 
-        if PLATFORM == "Windows":
-            dpi_scale = self._optix.get_display_scaling()
-            self._logger.info("DPI scaling: %d", dpi_scale)
-            if dpi_scale != 1:
-                self._logger.warn("DPI setting may cause blurred raytracing output, see this answer")
-                self._logger.warn("for the solution https://stackoverflow.com/a/52599951/10037996:")
-                self._logger.warn("set python.exe and pythonw.exe files Properties -> Compatibility")
-                self._logger.warn("-> Change high DPI settings -> check Override high DPI scaling")
-                self._logger.warn("behaviour, select Application in the drop-down menu.")
-
         # setup SharpOptiX interface ##################################
         self._logger.info("Preparing empty scene...")
         
         self._width = 16
         self._height = 16
+        if width > 0:  self._width = width
+        if height > 0: self._height = height
 
         self._img_rgba = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint8))
 
@@ -243,7 +235,7 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
         self.camera_handles = {}   # camera name to handle dictionary
         self.light_handles = {}    # light name to handle dictionary
 
-
+        # scene initialization / compute / upload / accumulation done callbacks:
         if on_initialization is not None: self._initialization_cb = self._make_list_of_callable(on_initialization)
         else: self._initialization_cb = [self._default_initialization]
 
@@ -256,21 +248,21 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
         if on_rt_accum_done is not None: self._rt_accum_done_cb = self._make_list_of_callable(on_rt_accum_done)
         else: self._rt_accum_done_cb = []
 
+        # create empty scene / optionally start raytracing thread:
         self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
-        self._logger.info("Scene ready: %r", self._is_scene_created)
-
         if self._is_scene_created:
+            self._logger.info("Empty scene ready.")
 
-            super(TkOptiX, self).__init__()
+            super(NpOptiX, self).__init__()
 
             if start_now: self.start()
-            else:
-                self._logger.info("Use show() or start() to open the raytracing output.")
+            else: self._logger.info("Use start() to start raytracing.")
+
         else:
             self._logger.error("Initial setup failed, see errors above.")
         ###############################################################
 
-    def _make_list_of_callable(self, items) -> List[Callable[["TkOptiX"], None]]:
+    def _make_list_of_callable(self, items) -> List[Callable[["NpOptiX"], None]]:
         if callable(items): return [items]
         else:
             for item in items:
@@ -281,19 +273,72 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
         if self._is_closed:
             self._logger.warn("Raytracing output was closed, cannot re-open.")
             return
-        if not self._is_started:
-            super(TkOptiX, self).start()
-            if not self._started_event.wait(10):
-                self._logger.error("Raytracing output startup timed out.")
-                self._is_started = False
-        else:
-            self._logger.warn("Raytracing output already running.")
-    # For matplotlib users convenience.
-    def show(self) -> None: self.start()
 
+        if self._is_started:
+            self._logger.warn("Raytracing output already running.")
+            return
+
+        for c in self._initialization_cb: c(self)
+        self._logger.info("Initialization done.")
+
+        self._optix.start_rt()
+        self._logger.info("RT loop ready.")
+
+        super(NpOptiX, self).start()
+        if self._started_event.wait(10):
+            self._logger.info("Raytracing started.")
+            self._is_started = True
+        else:
+            self._logger.error("Raytracing output startup timed out.")
+            self._is_started = False
+
+    def run(self):
+        assert self._is_scene_created, "Scene is not ready, see initialization messages."
+
+        c1_ptr = self._get_launch_finished_callback()
+        r1 = self._optix.register_launch_finished_callback(c1_ptr)
+        c2_ptr = self._get_accum_done_callback()
+        r2 = self._optix.register_accum_done_callback(c2_ptr)
+        c3_ptr = self._get_scene_rt_starting_callback()
+        r3 = self._optix.register_scene_rt_starting_callback(c3_ptr)
+        c4_ptr = self._get_start_scene_compute_callback()
+        r4 = self._optix.register_start_scene_compute_callback(c4_ptr)
+        c5_ptr = self._get_scene_rt_completed_callback()
+        r5 = self._optix.register_scene_rt_completed_callback(c5_ptr)
+        if r1 & r2 & r3 & r4 & r5: self._logger.info("Callbacks registered.")
+        else: self._logger.error("Callbacks setup failed.")
+
+        self.run_event_loop()
+
+    ###################################################################
+    # override in UI class, set self._started_event after all UI ######
+    # initialization                                             ######
+    def run_event_loop(self):
+        self._started_event.set()
+        while not self._is_closed: time.sleep(0.5)
+    ###################################################################
+
+    ###################################################################
+    # override in UI class, call this base implementation #############
+    # and raise a close event for UI                      #############
     def close(self) -> None:
-        if self._is_started: self._canvas.event_generate("<<CloseScene>>", when="tail")
-        else: self._logger.warn("Raytracing output not running.")
+        if self._is_closed:
+            self._logger.warn("Raytracing output already closed.")
+            return
+
+        if not self._is_started:
+            self._logger.warn("Raytracing output not yet running.")
+            return
+
+        self._padlock.acquire()
+        self._logger.info("Stopping raytracing output.")
+        self._is_scene_created = False
+        self._is_started = False
+        self._optix.stop_rt()
+        self._optix.destroy_scene()
+        self._is_closed = True
+        self._padlock.release()
+    ###################################################################
 
     def is_started(self) -> bool: return self._is_started
     def is_closed(self) -> bool: return self._is_closed
@@ -305,303 +350,70 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
         self._padlock.release()
         return a
 
-    def _gui_quit_callback(self, *args):
-        assert self._is_started, "Raytracing output not running."
-
-        self._logger.info("Closing raytracing window.")
-        self._is_scene_created = False
-        self._is_started = False
-        self._optix.stop_rt()
-        self._optix.destroy_scene()
-        self._root.quit()
-        self._is_closed = True
-
-
-    def _gui_motion_left(self, event):
-        self._mouse_to_x, self._mouse_to_y = event.x, event.y
-
-    def _gui_motion_right(self, event):
-        self._mouse_to_x, self._mouse_to_y = event.x, event.y
-
-    def _gui_pressed_left(self, event):
-        self._mouse_from_x, self._mouse_from_y = event.x, event.y
-        self._mouse_to_x = self._mouse_from_x
-        self._mouse_to_y = self._mouse_from_y
-        self._left_mouse = True
-
-    def _gui_pressed_right(self, event):
-        self._mouse_from_x, self._mouse_from_y = event.x, event.y
-        self._mouse_to_x = self._mouse_from_x
-        self._mouse_to_y = self._mouse_from_y
-        self._right_mouse = True
-
-    def _gui_released_left(self, event):
-        self._mouse_to_x, self._mouse_to_y = event.x, event.y
-        self._mouse_from_x = self._mouse_to_x
-        self._mouse_from_y = self._mouse_to_y
-        self._left_mouse = False
-
-    def _gui_released_right(self, event):
-        self._mouse_to_x, self._mouse_to_y = event.x, event.y
-        self._mouse_from_x = self._mouse_to_x
-        self._mouse_from_y = self._mouse_to_y
-        self._right_mouse = False
-
-    def _gui_doubleclick_left(self, event):
-        assert self._is_started, "Raytracing output not running."
-
-        x, y = event.x, event.y
-        c_handle = c_uint()
-        c_index = c_uint()
-        if self._optix.get_object_at(x, y, byref(c_handle), byref(c_index)):
-            handle = c_handle.value
-            index = c_index.value
-            if (handle != 0xFFFFFFFF) and (handle in self.geometry_names):
-                if not self._any_key:
-                    self._logger.info("Selected geometry: %s, primitive index %d", self.geometry_names[handle], index)
-                elif self._ctrl_key:
-                    c_x = c_float()
-                    c_y = c_float()
-                    c_z = c_float()
-                    c_d = c_float()
-                    if self._optix.get_hit_at(x, y, c_x, c_y, c_z, c_d):
-                        hx = c_x.value
-                        hy = c_y.value
-                        hz = c_z.value
-                        hd = c_d.value
-                        if hd > 0:
-                            self._logger.info("Hit 3D coordinates: [%f %f %f], at focal distance %f", hx, hy, hz, hd)
-                            _ = self._optix.set_camera_focal_length(hd)
-            else:
-                self._logger.info("No object at [%d %d]", x, y)
-
-    def _gui_key_pressed(self, event):
-        if event.keysym == "Control_L":
-            self._ctrl_key = True
-            self._any_key = True
-        elif event.keysym == "Shift_L":
-            self._shift_key = True
-            self._any_key = True
-        else:
-            self._any_key = False
-
-    def _gui_key_released(self, event):
-        if event.keysym == "Control_L":
-            self._ctrl_key = False
-        elif event.keysym == "Shift_L":
-            self._shift_key = False
-        self._any_key = False
-
-    def _gui_configure(self, event):
-        assert self._is_started, "Raytracing output not running."
-
-        if not self._started_event.is_set(): self._started_event.set()
-
-        self._width, self._height = self._canvas.winfo_width(), self._canvas.winfo_height()
-
-        self._logger.info("New size: %d x %d", self._width, self._height)
+    def resize(width: Optional[int] = None, height: Optional[int] = None) -> None:
+        if width is None: width = self._width
+        if height is None: height = self._height
+        if (width == self._width) and (height == self._height): return
 
         self._padlock.acquire()
+        self._width = width
+        self._height = height
         # allocate new buffer
         img_buffer = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint8))
-        pil_img = Image.fromarray(img_buffer, mode="RGBX")
-        tk_img = ImageTk.PhotoImage(pil_img)
-        # update buffer pointer and size in the raytracer
+        # update buffer pointer and size in the underlying library
         self._optix.resize_scene(self._width, self._height, img_buffer.ctypes.data, img_buffer.size)
-        # swap references stored in the window instance
+        # swap references stored in the raytracer instance
         self._img_rgba = img_buffer
-        self._tk_img = tk_img
-        # update image on canvas
-        self._canvas.itemconfig(self._img_id, image=self._tk_img)
-        # no redraws until the next launch
-        self._update_req = False
         self._padlock.release()
-
-    # update raytraced image in Tk window #############################
-    def _gui_update_content(self, *args):
-        assert self._is_started, "Raytracing output not running."
-
-        if self._update_req:
-            self._padlock.acquire()
-            self._update_req = False
-            pil_img = Image.fromarray(self._img_rgba, mode="RGBX")
-            tk_img = ImageTk.PhotoImage(pil_img)
-            self._canvas.itemconfig(self._img_id, image=tk_img)
-            self._tk_img = tk_img
-            self._padlock.release()
-
-    def _launch_finished_callback(self, rt_result : int):
-        if self._is_started and rt_result != RtResult.NoUpdates.value:
-            self._update_req = True
-            self._canvas.event_generate("<<LaunchFinished>>", when="tail")
-    def _get_launch_finished_callback(self):
-        def func(rt_result: int): self._launch_finished_callback(rt_result)
-        return PARAM_INT_CALLBACK(func)
-    ###################################################################
-
-    # apply scene edits made in ui ####################################
-    def _gui_apply_edits(self, *args):
-        assert self._is_started, "Raytracing output not running."
-
-        if (self._mouse_from_x != self._mouse_to_x) or (self._mouse_from_y != self._mouse_to_y):
-
-            # manipulate camera:
-            if self._left_mouse:
-                if not self._any_key:
-                    self._optix.rotate_camera_eye(self._mouse_from_x, self._mouse_from_y, self._mouse_to_x, self._mouse_to_y)
-                elif self._ctrl_key:
-                    df = 1 + 0.01 * (self._mouse_from_y - self._mouse_to_y)
-                    f = self._optix.get_camera_focal_scale(0) # 0 is current cam
-                    self._optix.set_camera_focal_scale(df * f)
-                elif self._shift_key:
-                    df = 1 + 0.005 * (self._mouse_from_y - self._mouse_to_y)
-                    f = self._optix.get_camera_fov(0) # 0 is current cam
-                    self._optix.set_camera_fov(df * f)
-
-            elif self._right_mouse:
-                if not self._any_key:
-                    self._optix.rotate_camera_tgt(self._mouse_from_x, self._mouse_from_y, self._mouse_to_x, self._mouse_to_y)
-                elif self._ctrl_key:
-                    da = 1 + 0.01 * (self._mouse_from_y - self._mouse_to_y)
-                    a = self._optix.get_camera_aperture(0) # 0 is current cam
-                    self._optix.set_camera_aperture(da * a)
-                elif self._shift_key:
-                    target = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-                    self._optix.get_camera_target(0, target.ctypes.data) # 0 is current cam
-                    eye = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-                    self._optix.get_camera_eye(0, eye.ctypes.data) # 0 is current cam
-                    dl = 0.01 * (self._mouse_from_y - self._mouse_to_y)
-                    eye = eye - dl * (target - eye)
-                    self._optix.set_camera_eye(eye.ctypes.data)
-                    pass
-
-            # ... or manipulate other ogjects (need to save selected object, to be implemented)
-
-            self._mouse_from_x = self._mouse_to_x
-            self._mouse_from_y = self._mouse_to_y
-
-    def _scene_rt_starting_callback(self):
-        if self._is_started: self._canvas.event_generate("<<SceneRtStarting>>", when="tail")
-    def _get_scene_rt_starting_callback(self):
-        def func(): self._scene_rt_starting_callback()
-        return PARAM_NONE_CALLBACK(func)
-    ###################################################################
-
-    # rt-synced scene computation and data uploads to gpu #############
-    def _start_scene_compute_callback(self, n_frames : int):
-        if self._is_started:
-            self._logger.info("Compute, delta %d frames.", n_frames)
-            for c in self._scene_compute_cb: c(self, n_frames)
-    def _get_start_scene_compute_callback(self):
-        def func(n_frames: int): self._start_scene_compute_callback(n_frames)
-        return PARAM_INT_CALLBACK(func)
-
-    def _scene_rt_completed_callback(self, rt_result : int):
-        if self._is_started:
-            self._logger.info("RT completed, result %d.", rt_result)
-            for c in self._rt_completed_cb: c(self)
-            if rt_result == RtResult.AccumDone.value:
-                self._logger.info("RT accumulation finished.")
-                for c in self._rt_accum_done_cb: c(self)
-    def _get_scene_rt_completed_callback(self):
-        def func(rt_result: int): self._scene_rt_completed_callback(rt_result)
-        return PARAM_INT_CALLBACK(func)
-    ###################################################################
-
-    def run(self):
-        assert self._is_scene_created, "Scene is not ready, see initialization messages."
-        assert not self._is_started, "Raytracing output already running."
-
-        # setup Tk window #############################################
-        self._padlock.acquire()
-        self._root = tk.Tk()
-
-        screen_width = self._root.winfo_screenwidth()
-        screen_height = self._root.winfo_screenheight()
-
-        if self._ini_width > 0: self._width = self._ini_width
-        else: self._width = int(screen_width / 2)
-        if self._ini_height > 0: self._height = self._ini_height
-        else: self._height = int(screen_height / 2)
-        self._update_req = False
-
-        self._mouse_from_x = 0
-        self._mouse_from_y = 0
-        self._mouse_to_x = 0
-        self._mouse_to_y = 0
-        self._left_mouse = False
-        self._right_mouse = False
-        self._ctrl_key = False
-        self._shift_key = False
-        self._any_key = False
-
-        self._root.title("R&D PlotOptiX")
-        self._root.protocol("WM_DELETE_WINDOW", self._gui_quit_callback)
-
-        self._canvas = tk.Canvas(self._root, width=self._width, height=self._height)
-        self._canvas.pack(side="top", fill=tk.BOTH, expand=True)
-        self._canvas.pack_propagate(0)
-        self._canvas.bind("<Configure>", self._gui_configure)
-        self._canvas.bind('<B1-Motion>', self._gui_motion_left)
-        self._canvas.bind('<B3-Motion>', self._gui_motion_right)
-        self._canvas.bind("<Button-1>", self._gui_pressed_left)
-        self._canvas.bind("<Button-3>", self._gui_pressed_right)
-        self._canvas.bind("<ButtonRelease-1>", self._gui_released_left)
-        self._canvas.bind("<ButtonRelease-3>", self._gui_released_right)
-        self._canvas.bind("<Double-Button-1>", self._gui_doubleclick_left)
-        self._root.bind_all("<KeyPress>", self._gui_key_pressed)
-        self._root.bind_all("<KeyRelease>", self._gui_key_released)
-        self._canvas.bind("<<LaunchFinished>>", self._gui_update_content)
-        self._canvas.bind("<<SceneRtStarting>>", self._gui_apply_edits)
-        self._canvas.bind("<<CloseScene>>", self._gui_quit_callback)
-        self._logger.info("Tkinter widgets ready.")
-        ###############################################################
-
-        # setup SharpOptiX interface ##################################
-        self._logger.info("Couple scene to the output window...")
-
-        img_buffer = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint8))
-        pil_img = Image.fromarray(img_buffer, mode="RGBX")
-        self._tk_img = ImageTk.PhotoImage(pil_img)
-
-        result = self._optix.resize_scene(self._width, self._height, img_buffer.ctypes.data, img_buffer.size)
-        self._img_id = self._canvas.create_image(0, 0, image=self._tk_img, anchor=tk.NW)
-        self._img_rgba = img_buffer
-
-        for c in self._initialization_cb: c(self)
-
-        if result:
-            c1_ptr = self._get_launch_finished_callback()
-            r1 = self._optix.register_launch_finished_callback(c1_ptr)
-            c2_ptr = self._get_scene_rt_starting_callback()
-            r2 = self._optix.register_scene_rt_starting_callback(c2_ptr)
-            c3_ptr = self._get_start_scene_compute_callback()
-            r3 = self._optix.register_start_scene_compute_callback(c3_ptr)
-            c4_ptr = self._get_scene_rt_completed_callback()
-            r4 = self._optix.register_scene_rt_completed_callback(c4_ptr)
-            self._logger.info("Callbacks registered: %r", r1 & r2 & r3 & r4)
-            result &= r1 & r2 & r3 & r4
-            if result: self._logger.info("...coupling and initialization done.")
-        ###############################################################
-
-        self._padlock.release()
-
-        # start event loop ############################################
-        if result:
-            self._is_started = True
-            self._gui_update_content()
-            self._optix.start_rt()
-            self._root.mainloop()
-        else:
-            self._logger.error("Did not start PlotOptiX window, check errors above.")
-            self._started_event.set()
-        ###############################################################
 
     @staticmethod
     def _default_initialization(wnd) -> None:
         wnd._logger.info("Default scene initialization.")
         if wnd._optix.get_current_camera() == 0:
             wnd.setup_camera("default", [0, 0, 10], [0, 0, 0])
+
+    def _accum_done_callback(self):
+        if self._is_started:
+            self._logger.info("RT accumulation finished.")
+            for c in self._rt_accum_done_cb: c(self)
+    def _get_accum_done_callback(self):
+        def func(): self._accum_done_callback()
+        return PARAM_NONE_CALLBACK(func)
+
+    ###################################################################
+    # override cb in UI class and update raytraced image ##############
+    def _launch_finished_callback(self, rt_result: int): pass
+    def _get_launch_finished_callback(self):
+        def func(rt_result: int): self._launch_finished_callback(rt_result)
+        return PARAM_INT_CALLBACK(func)
+    ###################################################################
+
+    ###################################################################
+    # override cb in UI class and apply scene edits made in ui ########
+    def _scene_rt_starting_callback(self): pass
+    def _get_scene_rt_starting_callback(self):
+        def func(): self._scene_rt_starting_callback()
+        return PARAM_NONE_CALLBACK(func)
+    ###################################################################
+
+    ###################################################################
+    # rt-synced scene computation and data uploads to gpu #############
+    def _start_scene_compute_callback(self, n_frames : int):
+        if self._is_started:
+            self._logger.info("Compute, delta %d frames.", n_frames)
+            for c in self._scene_compute_cb: c(self, n_frames)
+    def _get_start_scene_compute_callback(self):
+        def func(n_frames : int): self._start_scene_compute_callback(n_frames)
+        return PARAM_INT_CALLBACK(func)
+
+    def _scene_rt_completed_callback(self, rt_result : int):
+        if self._is_started:
+            self._logger.info("RT completed, result %d.", rt_result)
+            for c in self._rt_completed_cb: c(self)
+    def _get_scene_rt_completed_callback(self):
+        def func(rt_result : int): self._scene_rt_completed_callback(rt_result)
+        return PARAM_INT_CALLBACK(func)
+    ###################################################################
 
     def refresh_scene(self) -> None:
         self._optix.refresh_scene()
@@ -831,11 +643,8 @@ class TkOptiX(threading.Thread, metaclass=Singleton):
                    geometry: Optional[str] = None,
                    scale: float = 2.5) -> None:
 
-        cam_handle = 0
-        if camera is not None:
-            if not isinstance(camera, str): camera = str(camera)
-            if camera in self.camera_handles:
-                cam_handle = self.camera_handles[camera]
+        camera, cam_handle = self.get_camera(camera)
+        if camera is None: return
 
         if geometry is not None:
            if not isinstance(geometry, str): geometry = str(geometry)

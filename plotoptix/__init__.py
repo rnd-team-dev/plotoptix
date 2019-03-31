@@ -8,9 +8,10 @@ Have a look at examples on GitHub: https://github.com/rnd_team/plotoptix.
 """
 
 from plotoptix.enums import *
+from plotoptix.npoptix import NpOptiX
 from plotoptix.tkoptix import TkOptiX
 
-__all__ = ["enums", "tkoptix"]
+__all__ = ["enums", "npoptix", "tkoptix"]
 
 __author__  = "Robert Sulej, R&D Team <contact@rnd.team>"
 __status__  = "beta"
