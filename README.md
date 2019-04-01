@@ -107,7 +107,7 @@ Then, try running code from the top of this readme, or one of the examples.
 
 ## Development path
 
-This is the first, beta version, with binaries released for Windows only. Everything what is implemented should work, but there are some important features not available yet, eg. ticks and labels on plot axes.
+This is the first, beta version, with binaries released for Windows only. Everything what is implemented should work, but there are some important features not available yet, eg. AI denoiser or even ticks and labels on plot axes.
 
 PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers much more functionality than it is now available through PlotOptiX. Eg. live streaming of the raytraced video output. We'll progressively add more to PlotOptiX if there is interest in this project (download and star or donate if you like it!).
 
@@ -115,7 +115,7 @@ The idea for development is:
 
 1. Binaries for Linux.
 2. Complete the plot layout / cover more raytracing features.
-3. Convenience functions for various plot styles.
+3. Convenience functions for various plot styles. Other UI if useful, eg. Qt.
 
    *Here, the community input is possible and warmly welcome!*
 
