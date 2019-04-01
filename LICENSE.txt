@@ -4,8 +4,8 @@ Definition of the "Software": PlotOptiX source code and documentation together w
 
 The Software includes binary libraries from the following sources. Before proceeding, users must read and agree to this license agreement and the license agreements of all software included in or distributed with the Software:
 
-1. OptiX™ and its dependencies:
-   licenses\OptiX_EndUserLicense.pdf
+1. NVIDIA OptiX™, Video Codec SDK and their dependencies:
+   licenses\DesignWorks_SDKSamplesAndTools_EULA.pdf
    licenses\OptiX_ThirdParty_Licenses.txt
    read also the notice attached in Section III
 
@@ -36,7 +36,7 @@ Contact R&D Team <contact@rnd.team> if you need license allowing commercial use 
 ------------------------------------------------------------------------------------------------------------------
 Section III: OptiX™
 
-This distribution includes OptiX™ binary libraries under the terms of the Software License Agreement for the NVIDIA® OptiX™ ray tracing engine, included in this repository in licenses\OptiX_EndUserLicense.pdf. Users agree to the terms of that license, including the following restrictions:
+This distribution includes OptiX™ binary libraries under the terms of the Software License Agreement for the NVIDIA® OptiX™ ray tracing engine, included in this repository in licenses\DesignWorks_SDKSamplesAndTools_EULA.pdf. Users agree to the terms of that license, including the following restrictions:
 
 a) they will maintain a valid copyright on the end-user application;
 b) they are prohibited from modifying, adapting, translating, reverse engineering, decompiling, disassembling, or creating derivative works, in whole or in part, based on the OptiX™ Software, nor may they attempt in any manner to obtain the source code;
