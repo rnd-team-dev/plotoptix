@@ -6,7 +6,7 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd_team/plotoptix.
 """
 
-import sys, os, math, platform, logging, operator, functools, threading, time
+import os, math, platform, logging, operator, functools, threading, time
 import numpy as np
 
 from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_bool, c_char_p, c_wchar_p, c_void_p
@@ -34,13 +34,15 @@ else:
     BIN_PATH = ""
     LIB_EXT == ""
 
-###################################################################
-# In UI classes, override:                                        #
-# -  start and run UI event loop:  run_event_loop()               #
-# -  raise UI close event:         close()                        #
-# -  update image in UI:           _launch_finished_callback()    #
-# -  optionally apply UI edits:    _scene_rt_starting_callback()  #
-###################################################################
+##########################################################################
+#                                                                        #
+# In UI classes, implement in overriden methods:                         #
+# -  start and run UI event loop in:  _run_event_loop()                  #
+# -  raise UI close event in:         close()                            #
+# -  update image in UI in:           _launch_finished_callback()        #
+# -  optionally apply UI edits in:    _scene_rt_starting_callback()      #
+#                                                                        #
+##########################################################################
 
 class NpOptiX(threading.Thread, metaclass=Singleton):
 
@@ -58,7 +60,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.setLevel(log_level)
         self._package_dir = os.path.dirname(__file__)
         self._started_event = threading.Event()
-        self._padlock = threading.Lock()
+        self._padlock = threading.RLock()
         self._is_started = False
         self._is_closed = False
 
@@ -222,12 +224,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         # setup SharpOptiX interface ##################################
         self._logger.info("Preparing empty scene...")
         
-        self._width = 16
-        self._height = 16
-        if width > 0:  self._width = width
-        if height > 0: self._height = height
-
-        self._img_rgba = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint8))
+        self._width = 0
+        self._height = 0
+        if width < 16: width = 16
+        if height < 16: height = 16
+        self.resize(width, height)
 
         self.geometry_handles = {} # geometry name to handle dictionary
         self.geometry_names = {}   # geometry handle to name dictionary
@@ -308,63 +309,55 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if r1 & r2 & r3 & r4 & r5: self._logger.info("Callbacks registered.")
         else: self._logger.error("Callbacks setup failed.")
 
-        self.run_event_loop()
+        self._run_event_loop()
 
-    ###################################################################
-    # override in UI class, set self._started_event after all UI ######
-    # initialization                                             ######
-    def run_event_loop(self):
+    ###########################################################################
+    # override in UI class (do not call this base implementation),     ########
+    # set self._started_event after all your UI initialization         ########
+    def _run_event_loop(self):
         self._started_event.set()
         while not self._is_closed: time.sleep(0.5)
-    ###################################################################
+    ###########################################################################
 
-    ###################################################################
-    # override in UI class, call this base implementation #############
-    # and raise a close event for UI                      #############
+    ###########################################################################
+    # override in UI class, call this base implementation (or raise    ########
+    # a close event for your UI and call this base impl. there)        ########
     def close(self) -> None:
-        if self._is_closed:
-            self._logger.warn("Raytracing output already closed.")
-            return
+        assert not self._is_closed, "Raytracing output already closed."
+        assert self._is_started, "Raytracing output not yet running."
 
-        if not self._is_started:
-            self._logger.warn("Raytracing output not yet running.")
-            return
-
-        self._padlock.acquire()
-        self._logger.info("Stopping raytracing output.")
-        self._is_scene_created = False
-        self._is_started = False
-        self._optix.stop_rt()
-        self._optix.destroy_scene()
-        self._is_closed = True
-        self._padlock.release()
-    ###################################################################
+        with self._padlock:
+            self._logger.info("Stopping raytracing output.")
+            self._is_scene_created = False
+            self._is_started = False
+            self._optix.stop_rt()
+            self._optix.destroy_scene()
+            self._is_closed = True
+    ###########################################################################
 
     def is_started(self) -> bool: return self._is_started
     def is_closed(self) -> bool: return self._is_closed
 
     def get_rt_output(self) -> np.ndarray:
         assert self._is_started, "Raytracing output not running."
-        self._padlock.acquire()
-        a = self._img_rgba.copy()
-        self._padlock.release()
+        with self._padlock:
+            a = self._img_rgba.copy()
         return a
 
-    def resize(width: Optional[int] = None, height: Optional[int] = None) -> None:
+    def resize(self, width: Optional[int] = None, height: Optional[int] = None) -> None:
         if width is None: width = self._width
         if height is None: height = self._height
         if (width == self._width) and (height == self._height): return
 
-        self._padlock.acquire()
-        self._width = width
-        self._height = height
-        # allocate new buffer
-        img_buffer = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint8))
-        # update buffer pointer and size in the underlying library
-        self._optix.resize_scene(self._width, self._height, img_buffer.ctypes.data, img_buffer.size)
-        # swap references stored in the raytracer instance
-        self._img_rgba = img_buffer
-        self._padlock.release()
+        with self._padlock:
+            self._width = width
+            self._height = height
+            # allocate new buffer
+            img_buffer = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint8))
+            # update buffer pointer and size in the underlying library
+            self._optix.resize_scene(self._width, self._height, img_buffer.ctypes.data, img_buffer.size)
+            # swap references stored in the raytracer instance
+            self._img_rgba = img_buffer
 
     @staticmethod
     def _default_initialization(wnd) -> None:
@@ -372,6 +365,27 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if wnd._optix.get_current_camera() == 0:
             wnd.setup_camera("default", [0, 0, 10], [0, 0, 0])
 
+    ###########################################################################
+    # override cb in the UI class and update raytraced image           ########
+    # (or raise an event to do so)                                     ########
+    def _launch_finished_callback(self, rt_result: int): pass
+    def _get_launch_finished_callback(self):
+        def func(rt_result: int): self._launch_finished_callback(rt_result)
+        return PARAM_INT_CALLBACK(func)
+    ###########################################################################
+
+    ###########################################################################
+    # override cb in UI class and apply scene edits made in ui         ########
+    # (or raise an event to do so)                                     ########
+    def _scene_rt_starting_callback(self): pass
+    def _get_scene_rt_starting_callback(self):
+        def func(): self._scene_rt_starting_callback()
+        return PARAM_NONE_CALLBACK(func)
+    ###########################################################################
+
+    ###########################################################################
+    # actions to executa when all accumulation frames are completed    ########
+    # (don't override, use via callbacks provided at init)             ########
     def _accum_done_callback(self):
         if self._is_started:
             self._logger.info("RT accumulation finished.")
@@ -379,25 +393,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def _get_accum_done_callback(self):
         def func(): self._accum_done_callback()
         return PARAM_NONE_CALLBACK(func)
+    ###########################################################################
 
-    ###################################################################
-    # override cb in UI class and update raytraced image ##############
-    def _launch_finished_callback(self, rt_result: int): pass
-    def _get_launch_finished_callback(self):
-        def func(rt_result: int): self._launch_finished_callback(rt_result)
-        return PARAM_INT_CALLBACK(func)
-    ###################################################################
-
-    ###################################################################
-    # override cb in UI class and apply scene edits made in ui ########
-    def _scene_rt_starting_callback(self): pass
-    def _get_scene_rt_starting_callback(self):
-        def func(): self._scene_rt_starting_callback()
-        return PARAM_NONE_CALLBACK(func)
-    ###################################################################
-
-    ###################################################################
-    # rt-synced scene computation and data uploads to gpu #############
+    ###########################################################################
+    # rt-synced scene computation and data uploads to gpu              ########
+    # (don't override, use via callbacks provided at init)             ########
     def _start_scene_compute_callback(self, n_frames : int):
         if self._is_started:
             self._logger.info("Compute, delta %d frames.", n_frames)
@@ -413,7 +413,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def _get_scene_rt_completed_callback(self):
         def func(rt_result : int): self._scene_rt_completed_callback(rt_result)
         return PARAM_INT_CALLBACK(func)
-    ###################################################################
+    ###########################################################################
 
     def refresh_scene(self) -> None:
         self._optix.refresh_scene()
