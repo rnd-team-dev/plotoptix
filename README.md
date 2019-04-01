@@ -41,9 +41,9 @@ by R&D Team. In **version 0.1.1.1** we start with:
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
 - GPU acceleration using RT Cores, and everything else what comes with [OptiX](https://developer.nvidia.com/optix)
-- image output in [numpy](http://www.numpy.org/) array
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
-- Tkinter based UI
+- image output in [numpy](http://www.numpy.org/) array
+- Tkinter based UI or headless raytracer
 
 ### System Requirements
 
