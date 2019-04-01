@@ -8,12 +8,6 @@ include plotoptix/bin/win/*.dll
 include plotoptix/bin/win/*.xml
 include plotoptix/bin/win/*.config
 include plotoptix/bin/win/libs/*.dll
-include plotoptix/bin/win/cuda/compute_20/*.ptx
-include plotoptix/bin/win/cuda/compute_21/*.ptx
-include plotoptix/bin/win/cuda/compute_30/*.ptx
-include plotoptix/bin/win/cuda/compute_32/*.ptx
-include plotoptix/bin/win/cuda/compute_35/*.ptx
-include plotoptix/bin/win/cuda/compute_37/*.ptx
 include plotoptix/bin/win/cuda/compute_50/*.ptx
 include plotoptix/bin/win/cuda/compute_52/*.ptx
 include plotoptix/bin/win/cuda/compute_60/*.ptx
