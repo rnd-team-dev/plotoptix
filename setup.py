@@ -1,5 +1,22 @@
 from setuptools import setup, find_packages
 
+try:
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+
+    class bdist_wheel(_bdist_wheel):
+
+        def finalize_options(self):
+            _bdist_wheel.finalize_options(self)
+            self.root_is_pure = False
+
+        def get_tag(self):
+            python, abi, plat = _bdist_wheel.get_tag(self)
+            python, abi = 'py3', 'none'
+            return python, abi, plat
+
+except ImportError:
+    bdist_wheel = None
+
 setup(name='plotoptix',
       version='0.1.1.1',
       url='https://github.com/robertsulej/plotoptix',
@@ -7,6 +24,7 @@ setup(name='plotoptix',
       author_email='contact@rnd.team',
       description='Dataset visualisation in Python based on NVIDIA OptiX raytracing framework.',
       keywords="gpu nvidia optix raytracing pathtracing visualisation generative plot",
+      cmdclass={'bdist_wheel': bdist_wheel},
       classifiers=[
           'Development Status :: 4 - Beta',
           'Environment :: Win32 (MS Windows)',
