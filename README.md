@@ -1,6 +1,7 @@
 # PlotOptiX
 <a href="https://pypi.org/project/plotoptix/"><img alt="Latest PlotOptiX version" src="https://img.shields.io/pypi/v/plotoptix.svg" /></a>
-<a href="https://pypi.org/project/plotoptix/"><img alt="Number of PlotOptiX downloads" src="https://img.shields.io/pypi/dm/plotoptix.svg" /></a>
+<a href="https://pypi.org/project/plotoptix/"><img alt="Number of PlotOptiX downloads" src="https://img.shields.io/pypi/dm/plotoptix.svg" /></a><br />
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RG47ZEL5GKLNA&source=url"><img src="https://img.shields.io/badge/Support%20project-paypal-brightgreen.svg"></a>
 
 3D raytracing package for Python, aimed at easy and aesthetic visualization of large datasets (and small as well). Data features can be represented on plots as a position, size and color of markers of several basic shapes, finished with a photorealistic lighting and depth of field.
 
