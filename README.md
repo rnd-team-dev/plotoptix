@@ -115,7 +115,7 @@ The idea for development is:
 
 1. Binaries for Linux.
 2. Complete the plot layout / cover more raytracing features.
-3. Convenience functions for various plot styles. Other UI if useful, eg. Qt.
+3. Convenience functions for various plot styles. Other UI's if useful, eg. Qt.
 
    *Here, the community input is possible and warmly welcome!*
 
