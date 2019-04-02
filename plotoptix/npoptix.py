@@ -65,6 +65,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._is_closed = False
 
         # load SharpOptiX library, setup arguments and return types ###
+        self._logger.info("RnD.SharpOptiX path: " + BIN_PATH)
         self._optix = cdll.LoadLibrary(os.path.join(self._package_dir, BIN_PATH, "RnD.SharpOptiX" + LIB_EXT))
 
         self._optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int]
