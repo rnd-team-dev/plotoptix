@@ -4,7 +4,7 @@
 
 Collection of short and simple scripts to get started.
 
-Most of the scripts is using Tkinter UI, so here is a summary of mouse and keys actions:
+Many scripts are using Tkinter UI, so here is a summary of mouse and keys actions:
 - rotate camera eye around the target: hold and drag left mouse button
 - rotate camera target around the eye: hold and drag right mouse button
 - zoom out/in (change camera field of view): hold shift + left mouse button and drag up/down
