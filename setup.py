@@ -19,9 +19,9 @@ except ImportError:
 
 setup(name='plotoptix',
       version='0.1.1.1',
-      url='https://github.com/robertsulej/plotoptix',
+      url='https://github.com/rnd-team-dev/plotoptix',
       author='Robert Sulej, R&D Team',
-      author_email='contact@rnd.team',
+      author_email='dev@rnd.team',
       description='Dataset visualisation in Python based on NVIDIA OptiX raytracing framework.',
       keywords="gpu nvidia optix raytracing pathtracing visualisation generative plot",
       cmdclass={'bdist_wheel': bdist_wheel},
