@@ -123,4 +123,4 @@ The idea for development is:
 
 ## Examples
 
-Progressing...
+Looking at examples is the best way to get started and explore PlotOptiX features, before we write a complete reference manual. Have look at the <a href="https://github.com/rnd-team-dev/plotoptix/tree/master/examples">readme and sample codes here</a>.
