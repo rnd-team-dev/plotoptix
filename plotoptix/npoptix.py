@@ -50,11 +50,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                  on_initialization = None,
                  on_scene_compute = None,
                  on_rt_completed = None,
+                 on_launch_finished = None,
                  on_rt_accum_done = None,
                  width: int = -1,
                  height: int = -1,
                  start_now: bool = False,
                  log_level: Union[int, str] = logging.WARN) -> None:
+
+        super().__init__()
 
         self._logger = logging.getLogger(__name__ + "-NpOptiX")
         self._logger.setLevel(log_level)
@@ -85,6 +88,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.start_rt.restype = c_bool
         self._optix.stop_rt.restype = c_bool
+
+        self._optix.set_compute_paused.argtypes = [c_bool]
+        self._optix.set_compute_paused.restype = c_bool
 
         self._optix.set_int.argtypes = [c_wchar_p, c_int, c_bool]
         self._optix.set_int.restype = c_bool
@@ -247,6 +253,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if on_rt_completed is not None: self._rt_completed_cb = self._make_list_of_callable(on_rt_completed)
         else: self._rt_completed_cb = []
 
+        if on_launch_finished is not None: self._launch_finished_cb = self._make_list_of_callable(on_launch_finished)
+        else: self._launch_finished_cb = []
+
         if on_rt_accum_done is not None: self._rt_accum_done_cb = self._make_list_of_callable(on_rt_accum_done)
         else: self._rt_accum_done_cb = []
 
@@ -254,8 +263,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
         if self._is_scene_created:
             self._logger.info("Empty scene ready.")
-
-            super(NpOptiX, self).__init__()
 
             if start_now: self.start()
             else: self._logger.info("Use start() to start raytracing.")
@@ -286,7 +293,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.start_rt()
         self._logger.info("RT loop ready.")
 
-        super(NpOptiX, self).start()
+        super().start()
         if self._started_event.wait(10):
             self._logger.info("Raytracing started.")
             self._is_started = True
@@ -368,9 +375,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             wnd.setup_camera("default", [0, 0, 10], [0, 0, 0])
 
     ###########################################################################
-    # override cb in the UI class and update raytraced image           ########
-    # (or raise an event to do so)                                     ########
-    def _launch_finished_callback(self, rt_result: int): pass
+    # override cb in the UI class, call this base implementation and   ########
+    # update raytraced image (or raise an event to do so)              ########
+    def _launch_finished_callback(self, rt_result: int):
+        if self._is_started and rt_result != RtResult.NoUpdates.value:
+            for c in self._launch_finished_cb: c(self)
     def _get_launch_finished_callback(self):
         def func(rt_result: int): self._launch_finished_callback(rt_result)
         return PARAM_INT_CALLBACK(func)
@@ -416,6 +425,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         def func(rt_result : int): self._scene_rt_completed_callback(rt_result)
         return PARAM_INT_CALLBACK(func)
     ###########################################################################
+
+    def pause_compute(self) -> None:
+        if self._optix.set_compute_paused(True):
+            self._logger.info("Compute thread paused.")
+        else:
+            self._logger.warn("Pausing compute thread had no effect.")
+
+    def resume_compute(self) -> None:
+        if self._optix.set_compute_paused(False):
+            self._logger.info("Compute thread resumed.")
+        else:
+            self._logger.error("Resuming compute thread had no effect.")
 
     def refresh_scene(self) -> None:
         self._optix.refresh_scene()

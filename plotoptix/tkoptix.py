@@ -25,25 +25,27 @@ class TkOptiX(NpOptiX):
                  on_initialization = None,
                  on_scene_compute = None,
                  on_rt_completed = None,
+                 on_launch_finished = None,
                  on_rt_accum_done = None,
                  width: int = -1,
                  height: int = -1,
                  start_now: bool = False,
                  log_level: Union[int, str] = logging.WARN) -> None:
 
-        # save initial values to set size of Tk window on startup 
-        self._ini_width = width
-        self._ini_height = height
-
         # pass all arguments, except start_now - we'll do that later
-        super(TkOptiX, self).__init__(
+        super().__init__(
             on_initialization=on_initialization,
             on_scene_compute=on_scene_compute,
             on_rt_completed=on_rt_completed,
+            on_launch_finished=on_launch_finished,
             on_rt_accum_done=on_rt_accum_done,
             width=width, height=height,
             start_now=False, # do not start yet
             log_level=log_level)
+
+        # save initial values to set size of Tk window on startup 
+        self._ini_width = width
+        self._ini_height = height
 
         if PLATFORM == "Windows":
             dpi_scale = self._optix.get_display_scaling()
@@ -125,7 +127,7 @@ class TkOptiX(NpOptiX):
         self._canvas.event_generate("<<CloseScene>>", when="head")
 
     def _gui_quit_callback(self, *args):
-        super(TkOptiX, self).close()
+        super().close()
         self._root.quit()
 
     def _gui_motion_left(self, event):
@@ -237,6 +239,7 @@ class TkOptiX(NpOptiX):
                 self._gui_internal_image_update()
 
     def _launch_finished_callback(self, rt_result: int):
+        super()._launch_finished_callback(rt_result)
         if self._is_started and rt_result != RtResult.NoUpdates.value:
             self._update_req = True
             self._canvas.event_generate("<<LaunchFinished>>", when="now")
