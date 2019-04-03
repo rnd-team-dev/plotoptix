@@ -3,7 +3,7 @@ No-UI PlotOptiX raytracer (output to numpy array only).
 
 Copyright (C) 2019 R&D Team. All Rights Reserved.
 
-Have a look at examples on GitHub: https://github.com/rnd_team/plotoptix.
+Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
 import os, math, platform, logging, operator, functools, threading, time

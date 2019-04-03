@@ -3,7 +3,7 @@ Singleton metaclass for PlotOptiX raytracer.
 
 Copyright (C) 2019 R&D Team. All Rights Reserved.
 
-Have a look at examples on GitHub: https://github.com/rnd_team/plotoptix.
+Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
 ## OptiX does not support multiple coxtexts. It works other way around: leverages multiple GPU
