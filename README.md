@@ -1,8 +1,9 @@
 # PlotOptiX
 
 *Last minutes before uploading to pip!*
-
+<!--
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RG47ZEL5GKLNA&source=url"><img src="https://img.shields.io/badge/support%20project-paypal-brightgreen.svg"></a>
+--!>
 <a href="https://pypi.org/project/plotoptix/"><img alt="Latest PlotOptiX version" src="https://img.shields.io/pypi/v/plotoptix.svg" /></a>
 <a href="https://pypi.org/project/plotoptix/"><img alt="Number of PlotOptiX downloads" src="https://img.shields.io/pypi/dm/plotoptix.svg" /></a>
 
@@ -111,7 +112,7 @@ Then, try running code from the top of this readme, or one of the examples.
 
 This is the first, beta version, with binaries released for Windows only. Everything what is implemented should work, but there are some important features not available yet, eg. AI denoiser or even ticks and labels on plot axes.
 
-PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers much more functionality than it is now available through PlotOptiX. Eg. live streaming of the raytraced video output. We'll progressively add more to PlotOptiX if there is interest in this project (download and star or <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RG47ZEL5GKLNA&source=url">donate</a> if you like it!).
+PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers much more functionality than it is now available through PlotOptiX. Eg. live streaming of the raytraced video output. We'll progressively add more to PlotOptiX if there is interest in this project (download, star, and <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RG47ZEL5GKLNA&source=url">donate</a> if you like it!).
 
 The idea for development is:
 
