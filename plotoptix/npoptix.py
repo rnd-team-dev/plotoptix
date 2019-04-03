@@ -363,6 +363,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     @staticmethod
     def _default_initialization(wnd) -> None:
         wnd._logger.info("Default scene initialization.")
+        wnd.set_param(max_accumulation_frames=4)
         if wnd._optix.get_current_camera() == 0:
             wnd.setup_camera("default", [0, 0, 10], [0, 0, 0])
 
