@@ -18,6 +18,6 @@ Many scripts are using Tkinter UI, so here is a summary of mouse and keys action
 
 Callbacks in PlotOptiX are available in many points of the raytracing process. You can provide functions that will be executed on each frame raytracing start, completion, etc., allowing for image updates, saving output to file or making animated plots. Callbacks designed for heavy compute are executed in parallel to the raytracing. That is a really powerfull pattern!
 
-GitHub can render notebook content, so it is best to look at descriptions inlined in the code there.
+GitHub can render notebooks content, so it is best to look at descriptions inlined in the code there.
 
 *Progressing...*
