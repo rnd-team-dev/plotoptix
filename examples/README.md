@@ -22,4 +22,4 @@ GitHub can render notebooks content, so it is best to look at descriptions inlin
 
 ![screenshots](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/notebook_screens.jpg "Notebook screenshots")
 
-*Progressing...*
+*Progressing with more examples...*
