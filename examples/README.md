@@ -20,5 +20,6 @@ Callbacks in PlotOptiX are available in many points of the raytracing process. Y
 
 GitHub can render notebooks content, so it is best to look at descriptions inlined in the code there.
 
+![screenshots](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/notebook_screens.jpg "Notebook screenshots")
 
 *Progressing...*
