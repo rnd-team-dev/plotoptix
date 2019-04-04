@@ -49,7 +49,7 @@ by R&D Team. In this early version we start with:
 - operating system, *currently*: Windows
 - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) >= 4.6.1 (most likely you already have it)
 - a [CUDA-enabled GPU](https://developer.nvidia.com/cuda-gpus) with compute capability 5.0 (Maxwell) to latest
-- [CUDA Toolkit](https://developer.nvidia.com/cuda-downloads)
+- [CUDA Toolkit **10.1**](https://developer.nvidia.com/cuda-downloads)
 - Python 3
 
 ### What's Included
