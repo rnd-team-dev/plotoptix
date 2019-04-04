@@ -18,7 +18,7 @@ except ImportError:
     bdist_wheel = None
 
 setup(name='plotoptix',
-      version='0.1.1.3',
+      version='0.1.1.4',
       url='https://github.com/rnd-team-dev/plotoptix',
       author='Robert Sulej, R&D Team',
       author_email='dev@rnd.team',
@@ -42,7 +42,6 @@ setup(name='plotoptix',
       packages=find_packages(exclude=['tests']),
       install_requires=[
           'enum34;python_version<"3.4"',
-          'logging>=0.4',
           'numpy>=1.0',
           'Pillow>=5.3'
       ],
