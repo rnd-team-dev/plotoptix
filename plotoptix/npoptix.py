@@ -9,7 +9,7 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 import os, subprocess, math, platform, logging, operator, functools, threading, time
 import numpy as np
 
-from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_bool, c_char_p, c_wchar_p, c_void_p
+from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_long, c_bool, c_char_p, c_wchar_p, c_void_p
 from typing import List, Callable, Optional, Union, Any
 
 from plotoptix.singleton import Singleton
@@ -43,7 +43,7 @@ except KeyError:
     logging.error(80 * "*"); logging.error(80 * "*")
     raise ImportError
 
-# verify CUDA release is 10.1 ############################################
+# verify CUDA release ####################################################
 _rel_required = "10.1"
 try:
     _proc = subprocess.Popen('nvcc --version', stdout=subprocess.PIPE)
@@ -163,6 +163,24 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.update_geometry.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
         self._optix.update_geometry.restype = c_uint
+
+        self._optix.move_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float]
+        self._optix.move_geometry.restype = c_bool
+
+        self._optix.move_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float]
+        self._optix.move_primitive.restype = c_bool
+
+        self._optix.rotate_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float]
+        self._optix.rotate_geometry.restype = c_bool
+
+        self._optix.rotate_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float]
+        self._optix.rotate_primitive.restype = c_bool
+
+        self._optix.scale_geometry.argtypes = [c_wchar_p, c_float]
+        self._optix.scale_geometry.restype = c_bool
+
+        self._optix.scale_primitive.argtypes = [c_wchar_p, c_long, c_float]
+        self._optix.scale_primitive.restype = c_bool
 
         self._optix.set_coordinates_geom.argtypes = [c_int, c_float]
         self._optix.set_coordinates_geom.restype = c_bool
@@ -365,17 +383,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._run_event_loop()
 
     ###########################################################################
-    # override in UI class (do not call this base implementation),     ########
-    # set self._started_event after all your UI initialization         ########
     def _run_event_loop(self):
+        """
+        Internal method for running the UI event loop. Should be overriden
+        in derived UI class (but do not call this base implementation), and
+        remember to set self._started_event after all your UI initialization
+        """
         self._started_event.set()
         while not self._is_closed: time.sleep(0.5)
     ###########################################################################
 
     ###########################################################################
-    # override in UI class, call this base implementation (or raise    ########
-    # a close event for your UI and call this base impl. there)        ########
     def close(self) -> None:
+        """
+        Stop the raytracing thread, release resources. Raytracing cannot be
+        restarted.
+
+        Override in UI class, call this base implementation (or raise a close
+        event for your UI and call this base impl. there).
+        """
         assert not self._is_closed, "Raytracing output already closed."
         assert self._is_started, "Raytracing output not yet running."
 
@@ -392,12 +418,31 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def is_closed(self) -> bool: return self._is_closed
 
     def get_rt_output(self) -> np.ndarray:
+        """
+        Return a copy of the output image. Safe to call at any time, from any thread.
+
+        Returns
+        -------
+        out : ndarray
+            RGBA array of shape (height, width, 4), with type np.uint8.
+        """
         assert self._is_started, "Raytracing output not running."
         with self._padlock:
             a = self._img_rgba.copy()
         return a
 
     def resize(self, width: Optional[int] = None, height: Optional[int] = None) -> None:
+        """
+        Change dimensions of the raytracing output. Both or one of the dimensions may
+        be provided. No effect if width and height is same as of the current output.
+
+        Parameters
+        ----------
+        width : int, optional
+            New width of the raytracing output.
+        height : int, optional
+            New height of the raytracing output.
+        """
         if width is None: width = self._width
         if height is None: height = self._height
         if (width == self._width) and (height == self._height): return
@@ -1147,6 +1192,30 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(str(e))
         finally:
             self._padlock.release()
+
+    def move_geometry(self, name: str, x: float, y: float, z: float) -> None:
+        if not self._optix.move_geometry(name, x, y, z):
+            self._logger.error("Geometry move failed.")
+
+    def move_primitive(self, name: str, idx: int, x: float, y: float, z: float) -> None:
+        if not self._optix.move_primitive(name, idx, x, y, z):
+            self._logger.error("Primitive move failed.")
+
+    def rotate_geometry(self, name: str, x: float, y: float, z: float) -> None:
+        if not self._optix.rotate_geometry(name, x, y, z):
+            self._logger.error("Geometry rotate failed.")
+
+    def rotate_primitive(self, name: str, idx: int, x: float, y: float, z: float) -> None:
+        if not self._optix.rotate_primitive(name, idx, x, y, z):
+            self._logger.error("Primitive rotate failed.")
+
+    def scale_geometry(self, name: str, s: float) -> None:
+        if not self._optix.scale_geometry(name, s):
+            self._logger.error("Geometry scale failed.")
+
+    def scale_primitive(self, name: str, idx: int, s: float) -> None:
+        if not self._optix.scale_primitive(name, idx, s):
+            self._logger.error("Primitive scale failed.")
 
     def set_coordinates(self, mode: Union[Coordinates, str] = Coordinates.Box, thickness: float = 1.0) -> None:
 
