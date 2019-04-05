@@ -44,6 +44,7 @@ except KeyError:
     raise ImportError
 
 # verify CUDA release is 10.1 ############################################
+_rel_required = "10.1"
 try:
     _proc = subprocess.Popen('nvcc --version', stdout=subprocess.PIPE)
     _outp = _proc.stdout.read().decode("utf-8").split(" ")
@@ -51,26 +52,29 @@ try:
         _idx = _outp.index("release")
         if _idx + 1 < len(_outp):
             _rel = _outp[_idx + 1].strip(" ,")
-            if _rel.startswith("10.1"):
+            if _rel.startswith(_rel_required):
                 logging.info("OK: found CUDA %s", _rel)
             else:
                 logging.error(80 * "*"); logging.error(80 * "*")
-                logging.error("Found CUDA release %s. This PlotOptiX release requires CUDA 10.1,", _rel)
+                logging.error("Found CUDA release %s. This PlotOptiX release requires CUDA %s,", _rel, _rel_required)
                 logging.error("available at: https://developer.nvidia.com/cuda-downloads")
                 logging.error(80 * "*"); logging.error(80 * "*")
+                raise ImportError
         else: raise ValueError
     except:
         logging.error(80 * "*"); logging.error(80 * "*")
-        logging.error("CUDA release not recognized. This PlotOptiX release requires CUDA 10.1,")
+        logging.error("CUDA release not recognized. This PlotOptiX release requires CUDA %s,", _rel_required)
         logging.error("available at: https://developer.nvidia.com/cuda-downloads")
         logging.error(80 * "*"); logging.error(80 * "*")
+        raise ImportError
 except FileNotFoundError:
     logging.error(80 * "*"); logging.error(80 * "*")
     logging.error("Cannot access nvcc. Please check your CUDA installation.")
-    logging.error("This PlotOptiX release requires CUDA 10.1, available at:")
+    logging.error("This PlotOptiX release requires CUDA %s, available at:", _rel_required)
     logging.error("     https://developer.nvidia.com/cuda-downloads")
     logging.error(80 * "*"); logging.error(80 * "*")
     raise ImportError
+except ImportError: raise ImportError
 except Exception as e:
     logging.error("Cannot verify CUDA installation: " + str(e))
     raise ImportError
