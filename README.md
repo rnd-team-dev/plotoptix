@@ -27,7 +27,7 @@ Just as a decoration of this readme, here is a couple of sample images made with
 
 ![screenshots](https://github.com/robertsulej/plotoptix/blob/master/screenshots.jpg "PlotOptiX screenshots")
 
-See examples for code details and more usage options.
+See [examples](https://github.com/rnd-team-dev/plotoptix/tree/master/examples) for code details and more usage options.
 
 PlotOptiX is based on [NVIDIA OptiX framework](https://developer.nvidia.com/optix) wrapped in RnD.SharpOptiX C#/C++/CUDA libraries
 by R&D Team. In this early version we start with:
