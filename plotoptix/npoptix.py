@@ -6,7 +6,7 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
-import os, math, platform, logging, operator, functools, threading, time
+import os, subprocess, math, platform, logging, operator, functools, threading, time
 import numpy as np
 
 from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_bool, c_char_p, c_wchar_p, c_void_p
@@ -33,6 +33,47 @@ elif PLATFORM == "Darwin":
 else:
     BIN_PATH = ""
     LIB_EXT == ""
+
+# verify CUDA_PATH is defined ############################################
+try:
+    _cuda_path = os.environ["CUDA_PATH"]
+except KeyError:
+    logging.error(80 * "*"); logging.error(80 * "*")
+    logging.error("CUDA_PATH environment variable not defined. Please check your CUDA installation.")
+    logging.error(80 * "*"); logging.error(80 * "*")
+    raise ImportError
+
+# verify CUDA release is 10.1 ############################################
+try:
+    _proc = subprocess.Popen('nvcc --version', stdout=subprocess.PIPE)
+    _outp = _proc.stdout.read().decode("utf-8").split(" ")
+    try:
+        _idx = _outp.index("release")
+        if _idx + 1 < len(_outp):
+            _rel = _outp[_idx + 1].strip(" ,")
+            if _rel.startswith("10.1"):
+                logging.info("OK: found CUDA %s", _rel)
+            else:
+                logging.error(80 * "*"); logging.error(80 * "*")
+                logging.error("Found CUDA release %s. This PlotOptiX release requires CUDA 10.1,", _rel)
+                logging.error("available at: https://developer.nvidia.com/cuda-downloads")
+                logging.error(80 * "*"); logging.error(80 * "*")
+        else: raise ValueError
+    except:
+        logging.error(80 * "*"); logging.error(80 * "*")
+        logging.error("CUDA release not recognized. This PlotOptiX release requires CUDA 10.1,")
+        logging.error("available at: https://developer.nvidia.com/cuda-downloads")
+        logging.error(80 * "*"); logging.error(80 * "*")
+except FileNotFoundError:
+    logging.error(80 * "*"); logging.error(80 * "*")
+    logging.error("Cannot access nvcc. Please check your CUDA installation.")
+    logging.error("This PlotOptiX release requires CUDA 10.1, available at:")
+    logging.error("     https://developer.nvidia.com/cuda-downloads")
+    logging.error(80 * "*"); logging.error(80 * "*")
+    raise ImportError
+except Exception as e:
+    logging.error("Cannot verify CUDA installation: " + str(e))
+    raise ImportError
 
 ##########################################################################
 #                                                                        #
