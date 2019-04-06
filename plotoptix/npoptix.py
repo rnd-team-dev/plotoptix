@@ -601,6 +601,30 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.refresh_scene()
 
     def set_float(self, name: str, x: float, y: Optional[float], z: Optional[float], refresh: bool = False) -> None:
+        """
+        Set shader variable with given name and of the type float, float2
+        (if y provided), or float3 (if y and z provided). Raytrace the whole
+        scene if refresh is set to True.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+        x : float
+            Variable value (x component in case of float2 and float3).
+        y : float, optional
+            Y component value for float2 and float3 variables.
+        z : float, optional
+            Z component value for float2 and float3 variables.
+        refresh : bool
+            Set to True if the image should be re-computed.
+
+        Examples
+        --------
+        >>> optix = TkOptiX()
+        >>> optix.set_float("tonemap_exposure", 0.8)
+        >>> optix.set_float("tonemap_igamma", 1/2.2) # set sRGB gamma 2.2
+        """
         if not isinstance(name, str): name = str(name)
         if not isinstance(x, float): x = float(x)
 
@@ -621,6 +645,28 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def set_uint(self, name: str, x: int, y: Optional[int], refresh: bool = False) -> None:
+        """
+        Set shader variable with given name and of the type uint or uint2
+        (if y provided). Raytrace the whole scene if refresh is set to True.
+        Note, shader variables distinguish int and uint, while the type
+        provided by Python methods is int in both cases.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+        x : int
+            Variable value (x component in case of uint2).
+        y : int, optional
+            Y component value for uint2 variable.
+        refresh : bool
+            Set to True if the image should be re-computed.
+
+        Examples
+        --------
+        >>> optix = TkOptiX()
+        >>> optix.set_uint("path_seg_range", 4, 16) # set longer range of traced path segments
+        """
         if not isinstance(name, str): name = str(name)
         if not isinstance(x, int): x = int(x)
 
@@ -634,6 +680,21 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def set_int(self, name: str, x: int, refresh: bool = False) -> None:
+        """
+        Set shader variable with given name and of the type int. Raytrace
+        the whole scene if refresh is set to True.
+        Note, shader variables distinguish int and uint, while the type
+        provided by Python methods is int in both cases.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+        x : int
+            Variable value.
+        refresh : bool
+            Set to True if the image should be re-computed.
+        """
         if not isinstance(name, str): name = str(name)
         if not isinstance(x, int): x = int(x)
 
@@ -641,6 +702,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def set_background(self, color: Any, refresh: bool = False) -> None:
+        """
+        Set background color of the scene (shader variable "bg_color",
+        default value is [0.01, 0.01, 0.01]). Raytrace the whole scene
+        if refresh is set to True.
+        Note, color components range is <0; 1>.
+
+        Parameters
+        ----------
+        color : Any
+            New backgroud color value; single value is a grayscale level,
+            RGB color components can be provided as array-like values.
+        refresh : bool
+            Set to True if the image should be re-computed.
+
+        Examples
+        --------
+        >>> optix = TkOptiX()
+        >>> optix.set_background(0.5) # set gray background
+        >>> optix.set_background([0.5, 0.7, 0.9]) # set light bluish background
+        """
         if isinstance(color, float) or isinstance(color, int):
             x = float(color)
             y = float(color)
@@ -658,6 +739,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.info("Background color updated.")
 
     def set_ambient(self, color: Any, refresh: bool = False) -> None:
+        """
+        Set ambient light color of the scene (shader variable "ambient_color",
+        default value is [0.86, 0.89, 0.94]). Raytrace the whole scene if
+        refresh is set to True.
+        Note, color components range is <0; 1>.
+
+        Parameters
+        ----------
+        color : Any
+            New ambient light color value; single value is a grayscale level,
+            RGB color components can be provided as array-like values.
+        refresh : bool
+            Set to True if the image should be re-computed.
+
+        Examples
+        --------
+        >>> optix = TkOptiX()
+        >>> optix.set_ambient(0.5) # set dim gray light
+        >>> optix.set_ambient([0.1, 0.2, 0.3]) # set dim bluish light
+        """
         if isinstance(color, float) or isinstance(color, int):
             x = float(color)
             y = float(color)
@@ -676,6 +777,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def set_param(self, **kwargs) -> None:
+        """
+        Set raytracing parameters (one or more) and raytrace the whole scene.
+
+        Parameters
+        ----------
+        kwargs : Any
+            Values of parameters corresponding to provided names.
+
+        Examples
+        --------
+        >>> optix = TkOptiX()
+        >>> optix.set_param(min_accumulation_step=4, max_accumulation_frames=200)
+        """
         try:
             self._padlock.acquire()
             for key, value in kwargs.items():
@@ -711,6 +825,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         return a
 
     def get_camera(self, name: Optional[str] = None) -> (Optional[str], Optional[int]):
+        """
+        Get camera name and handle. Mostly for the internal use.
+
+        Parameters
+        ----------
+        name : string, optional
+            Camera name; current camera is used if name not provided.
+
+        Returns
+        -------
+        out : tuple (name, handle)
+            Name and handle of the camera.
+        """
         cam_handle = 0
         if name is None: # try current camera
             cam_handle = self._optix.get_current_camera()
@@ -745,7 +872,38 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                      fov: float = 35.0,
                      blur: float = 1,
                      make_current: bool = True) -> None:
-        
+        """
+        Setup new camera with given name.
+
+        Parameters
+        ----------
+        name : string
+            Name of the new camera.
+        eye : array_like, optional
+            Eye 3D position. Best fit for the current scene is computed if
+            argument is not provided.
+        target : array_like, optional
+            Target 3D position. Center of all geometries if argument not provided.
+        up : array_like, optional
+            Up (vertical) direction. Y axis if argument not provided.
+        cam_type : Camera enum or string
+            Type (pinhole, depth of field, ...). Cannot be changed after construction.
+        aperture_radius : float
+            Aperture radius (increases focus blur for depth of field cameras).
+        aperture_fract : float
+            Fraction of blind central spot of the aperture (results with ring-like
+            bokeh if >0). Cannot be changed after construction.
+        focal_scale : float
+            Focus distance / (eye - target).length.
+        fov : float
+            Field of view in degrees.
+        blur : float
+            Weight of the new frame in averaging with already accumulated frames.
+            Range is (0; 1>, lower values result with a higher motion blur, value
+            1.0 turns off the blur (default). Cannot be changed after construction.
+        make_current : bool
+            Automatically switch to this camera if set to True.
+        """
         if not isinstance(name, str): name = str(name)
         if isinstance(cam_type, str): cam_type = Camera[cam_type]
 
@@ -784,7 +942,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                       aperture_radius: float = -1.0,
                       focal_scale: float = -1.0,
                       fov: float = -1.0) -> None:
-        
+        """
+        Update camera parameters.
+
+        Parameters
+        ----------
+        name : string
+            Name of the camera to update.
+        eye : array_like, optional
+            Eye 3D position.
+        target : array_like, optional
+            Target 3D position.
+        up : array_like, optional
+            Up (vertical) direction.
+        aperture_radius : float
+            Aperture radius (increases focus blur for depth of field cameras).
+        focal_scale : float
+            Focus distance / (eye - target).length.
+        fov : float
+            Field of view in degrees.
+        """
         name, cam_handle = self.get_camera(name)
         if (name is None) or (cam_handle == 0): return
 
@@ -807,7 +984,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error("Camera %s update failed.", name)
 
     def set_current_camera(self, name: str) -> None:
-        
+        """
+        Switch to another camera.
+
+        Parameters
+        ----------
+        name : string
+            Name of the new current camera.
+        """
         if not isinstance(name, str): name = str(name)
 
         if name not in self.camera_handles:
@@ -824,7 +1008,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                    camera: Optional[str] = None,
                    geometry: Optional[str] = None,
                    scale: float = 2.5) -> None:
+        """
+        Fit the camera eye and target to contain geometry in the field of view.
 
+        Parameters
+        ----------
+        camera : string, optional
+            Name of the new camera to fit; current camera if name not provided.
+        geometry : string, optional
+            Name of the geometry to fit in view; all geometries if not provided.
+        scale : float, optional
+            Adjustment of the prefered distance (useful for wide angle cameras).
+        """
         camera, cam_handle = self.get_camera(camera)
         if camera is None: return
 
@@ -838,7 +1033,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                               autofit_camera: Optional[str] = None,
                               color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),
                               radius: float = 1.0, in_geometry: bool = True) -> None:
-        
+        """
+        Setup new spherical light.
+
+        Parameters
+        ----------
+        name : string
+            Name of the new light.
+        pos : array_like, optional
+            3D position.
+        autofit_camera : string, optional
+            Name of the camera used to compute light position automatically.
+        color : Any, optional
+            RGB color of the light; single value is gray, array_like is RGB
+            color components. Color value range is (0; inf) as it means the
+            light intensity.
+        radius : float, optional
+            Sphere radius.
+        in_geometry: bool, optional
+            Visible in the scene if set to True.
+        """
         if not isinstance(name, str): name = str(name)
 
         if name in self.light_handles:
@@ -878,7 +1092,30 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                                   u: Any = np.ascontiguousarray([0, 1, 0], dtype=np.float32),
                                   v: Any = np.ascontiguousarray([-1, 0, 0], dtype=np.float32),
                                   in_geometry: bool = True) -> None:
-        
+        """
+        Setup new parallelogram light.
+
+        Parameters
+        ----------
+        name : string
+            Name of the new light.
+        pos : array_like, optional
+            3D position.
+        autofit_camera : string, optional
+            Name of the camera used to compute light position automatically.
+        color : Any, optional
+            RGB color of the light; single value is gray, array_like is RGB
+            color components. Color value range is (0; inf) as it means the
+            light intensity.
+        u : array_like, optional
+            Parallelogram U vector.
+        v : array_like, optional
+            Parallelogram V vector.
+        in_geometry: bool, optional
+            Visible in the scene if set to True.
+
+        Note, the light direction is UxV, the back side is black.
+        """
         if not isinstance(name, str): name = str(name)
 
         if name in self.light_handles:
@@ -930,7 +1167,34 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     u: Any = np.ascontiguousarray([0, 1, 0], dtype=np.float32),
                     v: Any = np.ascontiguousarray([1, 0, 0], dtype=np.float32),
                     radius: float = 1.0, in_geometry: bool = True) -> None:
+        """
+        Setup new light.
 
+        Parameters
+        ----------
+        name : string
+            Name of the new light.
+        light_type : Light enum or string
+            Light type (parallelogram, spherical, ...), see Light enum.
+        pos : array_like, optional
+            3D position.
+        autofit_camera : string, optional
+            Name of the camera used to compute light position automatically.
+        color : Any, optional
+            RGB color of the light; single value is gray, array_like is RGB
+            color components. Color value range is (0; inf) as it means the
+            light intensity.
+        u : array_like, optional
+            Parallelogram U vector.
+        v : array_like, optional
+            Parallelogram V vector.
+        radius : float, optional
+            Sphere radius.
+        in_geometry: bool, optional
+            Visible in the scene if set to True.
+
+        Note, the parallelogram light direction is UxV, the back side is black.
+        """
         if isinstance(light_type, str): light_type = Light[light_type]
 
         if light_type == Light.Spherical:
@@ -950,7 +1214,28 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                      radius: float = -1,
                      u: Optional[Any] = None,
                      v: Optional[Any] = None) -> None:
-        
+        """
+        Update light parameters.
+
+        Parameters
+        ----------
+        name : string
+            Name of the light.
+        pos : array_like, optional
+            3D position.
+        color : Any, optional
+            RGB color of the light; single value is gray, array_like is RGB
+            color components. Color value range is (0; inf) as it means the
+            light intensity.
+        radius : float, optional
+            Sphere radius.
+        u : array_like, optional
+            Parallelogram U vector.
+        v : array_like, optional
+            Parallelogram V vector.
+
+        Note, the parallelogram light direction is UxV, the back side is black.
+        """
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
@@ -985,7 +1270,22 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                   horizontal_rot: Optional[float] = 45,
                   vertical_rot: Optional[float] = 25,
                   dist_scale: Optional[float] = 1.5) -> None:
+        """
+        Fit light position and direction to the camera.
 
+        Parameters
+        ----------
+        name : string
+            Name of the light.
+        camera : string, optional
+            Name of the camera; current camera is used if not provided.
+        horizontal_rot : float, optional
+            Angle: eye - target - light in the camera horizontal plane.
+        vertical_rot : float, optional
+            Angle: eye - target - light in the camera vertical plane.
+        dist_scale : float, optional
+            Light to target distance with reespect to the eye to target distance.
+        """
         if not isinstance(light, str): light = str(light)
         light_handle = self.light_handles[light]
 
@@ -1055,7 +1355,39 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                  u = None, v = None, w = None,
                  geom: Union[Geometry, str] = Geometry.ParticleSet,
                  mat: str = "diffuse") -> None:
+        """
+        Create geometry for the dataset.
 
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        pos : array_like
+            Positions of data points.
+        c : Any
+            Colors of the primitives. Single value means a constant gray level.
+            3-component array means constant RGB color. Array with the shape[0]
+            equal to the number of primitives will set individual gray/color for
+            each primitive.
+        r : Any
+            Radii of particles / bezier primitives or U / V / W lengths of
+            parallelograms / parallelepipeds (if u / v / w not provided). Single
+            value sets const. size for all primitives.
+        u : array_like
+            U vector(s) of parallelograms / parallelepipeds. Single vector sets
+            const. vlue for all primitives.
+        v : array_like
+            V vector(s) of parallelograms / parallelepipeds. Single vector sets
+            const. vlue for all primitives.
+        w : array_like
+            W vector(s) of parallelepipeds. Single vector sets const. vlue for
+            all primitives.
+        geom : Geometry enum or string
+            Geometry of primitives (spherical, parallelogram, ...). See Geometry
+            enum.
+        mat : string
+            Material name.
+        """
         if not isinstance(name, str): name = str(name)
         if isinstance(geom, str): geom = Geometry[geom]
 
@@ -1182,7 +1514,33 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def update_data(self, name: str,
                     pos: Optional[Any] = None, c: Optional[Any] = None, r: Optional[Any] = None,
                     u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None) -> None:
+        """
+        Update data.
 
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        pos : array_like
+            Positions of data points.
+        c : Any
+            Colors of the primitives. Single value means a constant gray level.
+            3-component array means constant RGB color. Array with the shape[0]
+            equal to the number of primitives will set individual grey/color for
+            each primitive.
+        r : Any
+            Radii of particles / bezier primitives. Single value sets constant
+            radius for all primitives.
+        u : array_like
+            U vector(s) of parallelograms / parallelepipeds. Single vector sets
+            const. vlue for all primitives.
+        v : array_like
+            V vector(s) of parallelograms / parallelepipeds. Single vector sets
+            const. vlue for all primitives.
+        w : array_like
+            W vector(s) of parallelepipeds. Single vector sets const. vlue for
+            all primitives.
+        """
         if not isinstance(name, str): name = str(name)
 
         if not name in self.geometry_handles:
@@ -1263,31 +1621,127 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
     def move_geometry(self, name: str, x: float, y: float, z: float) -> None:
+        """
+        Move all primitives by [x, y, z] vector.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        x : float
+            X shift.
+        y : float
+            Y shift.
+        z : float
+            Z shift.
+        """
         if not self._optix.move_geometry(name, x, y, z):
             self._logger.error("Geometry move failed.")
 
     def move_primitive(self, name: str, idx: int, x: float, y: float, z: float) -> None:
+        """
+        Move selected primitive by [x, y, z] vector.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        idx : int
+            Primitive index.
+        x : float
+            X shift.
+        y : float
+            Y shift.
+        z : float
+            Z shift.
+        """
         if not self._optix.move_primitive(name, idx, x, y, z):
             self._logger.error("Primitive move failed.")
 
     def rotate_geometry(self, name: str, x: float, y: float, z: float) -> None:
+        """
+        Rotate all primitives by specified degrees around x, y, z axis, with
+        respect to the center of the geometry.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        x : float
+            Rotation around X axis.
+        y : float
+            Rotation around Y axis.
+        z : float
+            Rotation around Z axis.
+        """
         if not self._optix.rotate_geometry(name, x, y, z):
             self._logger.error("Geometry rotate failed.")
 
     def rotate_primitive(self, name: str, idx: int, x: float, y: float, z: float) -> None:
+        """
+        Rotate selected primitive by specified degrees around x, y, z axis,
+        with respect to the center of the selected primitive.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        idx : int
+            Primitive index.
+        x : float
+            Rotation around X axis.
+        y : float
+            Rotation around Y axis.
+        z : float
+            Rotation around Z axis.
+        """
         if not self._optix.rotate_primitive(name, idx, x, y, z):
             self._logger.error("Primitive rotate failed.")
 
     def scale_geometry(self, name: str, s: float) -> None:
+        """
+        Scale all primitive's positions and sizes by specified factor,
+        with respect to the center of the geometry.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        s : float
+            Scaling factor.
+        """
         if not self._optix.scale_geometry(name, s):
             self._logger.error("Geometry scale failed.")
 
     def scale_primitive(self, name: str, idx: int, s: float) -> None:
+        """
+        Scale selected primitive by specified factor, with respect
+        to the center of the selected primitive.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        idx : int
+            Primitive index.
+        s : float
+            Scaling factor.
+        """
         if not self._optix.scale_primitive(name, idx, s):
             self._logger.error("Primitive scale failed.")
 
     def set_coordinates(self, mode: Union[Coordinates, str] = Coordinates.Box, thickness: float = 1.0) -> None:
+        """
+        Set style of the coordinate system geometry (or hide it).
 
+        Parameters
+        ----------
+        mode : Coordinates enum or string
+            Style of the coordinate system geometry. See Coordinates
+            enum
+        thickness : float
+            Thickness of lines.
+        """
         if isinstance(mode, str): mode = Coordinates[mode]
 
         if self._optix.set_coordinates_geom(mode.value, thickness):
