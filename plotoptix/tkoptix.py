@@ -124,7 +124,10 @@ class TkOptiX(NpOptiX):
         ###############################################################
 
     def close(self) -> None:
-        self._canvas.event_generate("<<CloseScene>>", when="head")
+        if not self._is_closed:
+            self._canvas.event_generate("<<CloseScene>>", when="head")
+        else:
+            self._logger.warn("UI already closed.")
 
     def _gui_quit_callback(self, *args):
         super().close()
