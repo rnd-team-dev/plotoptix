@@ -9,11 +9,17 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 from enum import Enum
 
 class Coordinates(Enum):
+    """
+    Coordinate system styles.
+    """
     Hidden = 0
     Box = 1
     #Axes = 2
 
 class Geometry(Enum):
+    """
+    Geometry shapes.
+    """
     Unknown = 0
     ParticleSet = 1
     #ParticleNetConstL = 2
@@ -25,15 +31,24 @@ class Geometry(Enum):
     Parallelepipeds = 8
 
 class Camera(Enum):
+    """
+    Cameras (ray generation programs).
+    """
     Pinhole = 0
     DoF = 1
     #Ortho = 2
 
 class Light(Enum):
+    """
+    Light sources.
+    """
     Parallelogram = 0
     Spherical = 1
 
 class RtResult(Enum):
+    """
+    Raytracing result codes.
+    """
     Success = 0
     AccumDone = 1
     NoUpdates = 2

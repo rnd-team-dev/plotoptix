@@ -79,17 +79,19 @@ except Exception as e:
     logging.error("Cannot verify CUDA installation: " + str(e))
     raise ImportError
 
-##########################################################################
-#                                                                        #
-# In UI classes, implement in overriden methods:                         #
-# -  start and run UI event loop in:  _run_event_loop()                  #
-# -  raise UI close event in:         close()                            #
-# -  update image in UI in:           _launch_finished_callback()        #
-# -  optionally apply UI edits in:    _scene_rt_starting_callback()      #
-#                                                                        #
-##########################################################################
 
 class NpOptiX(threading.Thread, metaclass=Singleton):
+    """
+    Base, headless interface to the RnD.SharpOptiX raytracing engine. Provides
+    infrastructure for running the raytracing and compute threads and exposes
+    their callbacks to the user. Outputs the raytraced image to the numpy array.
+
+    In derived UI classes, implement in overriden methods:
+    -  start and run UI event loop in:  _run_event_loop()
+    -  raise UI close event in:         close()
+    -  update image in UI in:           _launch_finished_callback()
+    -  optionally apply UI edits in:    _scene_rt_starting_callback()
+    """
 
     def __init__(self,
                  on_initialization = None,

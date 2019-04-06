@@ -17,9 +17,13 @@ from typing import Union
 from plotoptix.enums import *
 from plotoptix.npoptix import PLATFORM, NpOptiX
 
-## NOTE naming: functions with the names _gui_* can be used from the GUI thread (Tk event loop) only.
-
 class TkOptiX(NpOptiX):
+    """
+    Tkinter based UI for PlotOptiX.
+
+    NOTE naming: functions with the names _gui_* can be used from the
+    GUI thread (Tk event loop) only.
+    """
 
     def __init__(self,
                  on_initialization = None,
