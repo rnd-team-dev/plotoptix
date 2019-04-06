@@ -342,6 +342,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return items
 
     def start(self) -> None:
+        """
+        Start the raytracing, compute, and UI threads. Actions provided
+        with on_initialization parameter of __init__ are executed here.
+        """
         if self._is_closed:
             self._logger.warn("Raytracing output was closed, cannot re-open.")
             return
@@ -365,6 +369,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._is_started = False
 
     def run(self):
+        """
+        Derived from threading.Thread. Starts UI event loop. Do not override,
+        use _run_event_loop() instead.
+        """
         assert self._is_scene_created, "Scene is not ready, see initialization messages."
 
         c1_ptr = self._get_launch_finished_callback()
@@ -465,9 +473,21 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             wnd.setup_camera("default", [0, 0, 10], [0, 0, 0])
 
     ###########################################################################
-    # override cb in the UI class, call this base implementation and   ########
-    # update raytraced image (or raise an event to do so)              ########
-    def _launch_finished_callback(self, rt_result: int):
+    def _launch_finished_callback(self, rt_result: int) -> None:
+        """
+        Callback executed after each finished frame (min_accumulation_step
+        accumulation frames are raytraced together). This callback is
+        executed in the raytracing thread and should not compute extensively,
+        make a copy of the image data and process it another thread.
+        Override in the UI class, call this base implementation and update
+        image in UI (or raise an event to do so). Actions provided with
+        on_launch_finished parameter of __init__ are executed here.
+
+        Parameters
+        ----------
+        rt_result : int
+            Raytracing result code corresponding to RtResult enum.
+        """
         if self._is_started and rt_result != RtResult.NoUpdates.value:
             for c in self._launch_finished_cb: c(self)
     def _get_launch_finished_callback(self):
@@ -476,18 +496,27 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
 
     ###########################################################################
-    # override cb in UI class and apply scene edits made in ui         ########
-    # (or raise an event to do so)                                     ########
-    def _scene_rt_starting_callback(self): pass
+    def _scene_rt_starting_callback(self) -> None:
+        """
+        Callback executed before starting frame raytracing. Appropriate to
+        overrid in UI class and apply scene edits (or raise an event to do
+        so) like camera rotations, etc. made by a user in UI. This callback
+        is executed in the raytracing thread and should not compute extensively.
+        """
+        pass
     def _get_scene_rt_starting_callback(self):
         def func(): self._scene_rt_starting_callback()
         return PARAM_NONE_CALLBACK(func)
     ###########################################################################
 
     ###########################################################################
-    # actions to executa when all accumulation frames are completed    ########
-    # (don't override, use via callbacks provided at init)             ########
-    def _accum_done_callback(self):
+    def _accum_done_callback(self) -> None:
+        """
+        Callback executed when all accumulation frames are completed. Do not
+        override, intended to launch on_rt_accum_done actions provided with
+        __init__. Executed in the raytracing thread, so do not compute or write
+        files, make a copy of the image data and process it in another thread.
+        """
         if self._is_started:
             self._logger.info("RT accumulation finished.")
             for c in self._rt_accum_done_cb: c(self)
@@ -497,9 +526,24 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
 
     ###########################################################################
-    # rt-synced scene computation and data uploads to gpu              ########
-    # (don't override, use via callbacks provided at init)             ########
-    def _start_scene_compute_callback(self, n_frames : int):
+    def _start_scene_compute_callback(self, n_frames : int) -> None:
+        """
+        Compute callback executed together with the start of each frame raytracing.
+        This callback is executed in parallel to the raytracing and is intended
+        for CPU intensive computations. Do not set, update data, cameras, lights,
+        etc. here, as it will block until the end of raytracing in the parallel
+        thread.
+        Callback execution can be suspended / resumed with pause_compute() /
+        resume_compute() methods.
+        Do not override, intended to launch on_scene_compute actions provided
+        with __init__.
+
+        Parameters
+        ----------
+        n_frames : int
+            Number of the raytraced frames since the last call (excluding paused
+            cycles).
+        """
         if self._is_started:
             self._logger.info("Compute, delta %d frames.", n_frames)
             for c in self._scene_compute_cb: c(self, n_frames)
@@ -507,7 +551,23 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         def func(n_frames : int): self._start_scene_compute_callback(n_frames)
         return PARAM_INT_CALLBACK(func)
 
-    def _scene_rt_completed_callback(self, rt_result : int):
+    def _scene_rt_completed_callback(self, rt_result : int) -> None:
+        """
+        Callback executed in the same thread as _start_scene_compute_callback,
+        after it finishes computations. This callback is synchronized also with
+        the raytracing thread and should be used for any uploads of the updated
+        scene to GPU: data, cameras, lights setup or updates.
+        Image updates in UI are also possible here, but note that callback
+        execution can be suspended / resumed with pause_compute() / resume_compute()
+        methods.
+        Do not override, intended to launch on_rt_completed actions provided with
+        __init__.
+
+        Parameters
+        ----------
+        rt_result : int
+            Raytracing result code corresponding to RtResult enum.
+        """
         if self._is_started:
             self._logger.info("RT completed, result %d.", rt_result)
             for c in self._rt_completed_cb: c(self)
@@ -517,18 +577,27 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
 
     def pause_compute(self) -> None:
+        """
+        Suspend execution of on_scene_compute / on_rt_completed actions.
+        """
         if self._optix.set_compute_paused(True):
             self._logger.info("Compute thread paused.")
         else:
             self._logger.warn("Pausing compute thread had no effect.")
 
     def resume_compute(self) -> None:
+        """
+        Resume execution of on_scene_compute / on_rt_completed actions.
+        """
         if self._optix.set_compute_paused(False):
             self._logger.info("Compute thread resumed.")
         else:
             self._logger.error("Resuming compute thread had no effect.")
 
     def refresh_scene(self) -> None:
+        """
+        Refresh scene (start raytracing accumulation from scratch).
+        """
         self._optix.refresh_scene()
 
     def set_float(self, name: str, x: float, y: Optional[float], z: Optional[float], refresh: bool = False) -> None:
