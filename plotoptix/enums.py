@@ -53,3 +53,12 @@ class RtResult(Enum):
     AccumDone = 1
     NoUpdates = 2
 
+class RtFormat:
+    """
+    OptiX buffer formats.
+    """
+    Unknown = 0x100
+    Float = 0x101
+    Float2 = 0x102
+    Float3 = 0x103
+    Float4 = 0x104
