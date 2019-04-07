@@ -23,7 +23,7 @@ setup(name='plotoptix',
       author='Robert Sulej, R&D Team',
       author_email='dev@rnd.team',
       description='Data visualisation in Python based on NVIDIA OptiX raytracing framework.',
-      keywords="gpu nvidia optix raytracing pathtracing visualisation generative plot",
+      keywords="gpu nvidia optix raytracing pathtracing visualisation generative plot animation real-time",
       cmdclass={'bdist_wheel': bdist_wheel},
       classifiers=[
           'Development Status :: 4 - Beta',
