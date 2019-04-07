@@ -53,7 +53,7 @@ class RtResult(Enum):
     AccumDone = 1
     NoUpdates = 2
 
-class RtFormat:
+class RtFormat(Enum):
     """
     OptiX buffer formats.
     """

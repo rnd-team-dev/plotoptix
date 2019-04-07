@@ -731,11 +731,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             x = float(color)
             y = float(color)
             z = float(color)
-        elif not isinstance(color, np.ndarray):
-            color = np.asarray(color, dtype=np.float32)
-            if (len(color.shape) != 1) or (color.shape[0] != 3):
-                self._logger.error("Color should be a single value or 3-element array/list/tupe.")
-                return
+        else:
+            if not isinstance(color, np.ndarray):
+                color = np.asarray(color, dtype=np.float32)
+                if (len(color.shape) != 1) or (color.shape[0] != 3):
+                    self._logger.error("Color should be a single value or 3-element array/list/tupe.")
+                    return
             x = color[0]
             y = color[1]
             z = color[2]
@@ -768,11 +769,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             x = float(color)
             y = float(color)
             z = float(color)
-        elif not isinstance(color, np.ndarray):
-            color = np.asarray(color, dtype=np.float32)
-            if (len(color.shape) != 1) or (color.shape[0] != 3):
-                self._logger.error("Color should be a single value or 3-element array/list/tupe.")
-                return
+        else:
+            if not isinstance(color, np.ndarray):
+                color = np.asarray(color, dtype=np.float32)
+                if (len(color.shape) != 1) or (color.shape[0] != 3):
+                    self._logger.error("Color should be a single value or 3-element array/list/tupe.")
+                    return
             x = color[0]
             y = color[1]
             z = color[2]
