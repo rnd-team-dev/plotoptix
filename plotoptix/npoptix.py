@@ -6,7 +6,7 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
-import os, subprocess, math, platform, logging, operator, functools, threading, time
+import os, json, subprocess, math, platform, logging, operator, functools, threading, time
 import numpy as np
 
 from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_long, c_bool, c_char_p, c_wchar_p, c_void_p
@@ -159,6 +159,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.resize_scene.argtypes = [c_int, c_int, c_void_p, c_int]
         self._optix.resize_scene.restype = c_bool
+
+        self._optix.setup_material.argtypes = [c_wchar_p, c_wchar_p]
+        self._optix.setup_material.restype = c_bool
 
         self._optix.setup_geometry.argtypes = [c_int, c_wchar_p, c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
         self._optix.setup_geometry.restype = c_uint
@@ -1302,6 +1305,24 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.fit_light(light_handle, cam_handle, horizontal_rot, vertical_rot, dist_scale)
 
+
+    def setup_material(self, name: str, data: dict) -> None:
+        """
+        Setup new material.
+
+        Parameters
+        ----------
+        name : string
+            Name of the material.
+
+        data : dict
+            Parameters of the material.
+        """
+        if self._optix.setup_material(name, json.dumps(data)):
+            self._logger.info("Added new material %s.", name)
+        else:
+            self._logger.error("Material %s not created.", name)
+    
 
     def _make_contiguous_3d(self, a: Optional[Any], n: int = -1, extend_scalars = False) -> Optional[np.ndarray]:
         if a is None: return None
