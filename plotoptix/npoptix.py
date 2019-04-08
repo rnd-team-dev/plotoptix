@@ -160,6 +160,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.resize_scene.argtypes = [c_int, c_int, c_void_p, c_int]
         self._optix.resize_scene.restype = c_bool
 
+        self._optix.get_material.argtypes = [c_wchar_p]
+        self._optix.get_material.restype = c_wchar_p
+
         self._optix.setup_material.argtypes = [c_wchar_p, c_wchar_p]
         self._optix.setup_material.restype = c_bool
 
@@ -1310,6 +1313,27 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.fit_light(light_handle, cam_handle, horizontal_rot, vertical_rot, dist_scale)
 
+
+    def get_material(self, name: str) -> Optional[dict]:
+        """
+        Get material parameters.
+
+        Parameters
+        ----------
+        name : string
+            Name of the material.
+
+        Returns
+        -------
+        out : dict, optional
+            Dictionary of the material parameters or None if failed on
+            accessing material data.
+        """
+        s = self._optix.get_material(name)
+        if len(s) > 2: return json.loads(s)
+        else:
+            self._logger.error("Failed on reading material %s.", name)
+            return None
 
     def setup_material(self, name: str, data: dict) -> None:
         """
