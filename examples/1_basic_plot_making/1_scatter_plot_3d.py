@@ -37,7 +37,7 @@ def main():
     # components.
     cc = map_to_colors(cubes[:,1], "RdYlBu")
 
-    # Create the plos:
+    # Create the plots:
 
     optix = TkOptiX() # create and configure, show the window later
 
