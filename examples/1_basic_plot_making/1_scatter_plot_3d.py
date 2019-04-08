@@ -10,7 +10,7 @@ This example shows how to:
 
 import numpy as np
 from plotoptix import TkOptiX
-from plotoptix.utils import map_to_colors  # feature to color map conversion
+from plotoptix.utils import map_to_colors  # feature to color conversion
 
 
 def main():
