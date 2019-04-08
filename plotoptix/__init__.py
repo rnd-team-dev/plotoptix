@@ -11,9 +11,9 @@ from plotoptix.enums import *
 from plotoptix.npoptix import NpOptiX
 from plotoptix.tkoptix import TkOptiX
 
-__all__ = ["enums", "materials", "npoptix", "tkoptix"]
+__all__ = ["enums", "materials", "utils", "npoptix", "tkoptix"]
 
 __author__  = "Robert Sulej, R&D Team <dev@rnd.team>"
 __status__  = "beta"
 __version__ = "0.1.1.5"
-__date__    = "07 April 2019"
+__date__    = "08 April 2019"

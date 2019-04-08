@@ -17,7 +17,7 @@ m_flat = {
       "AnyHitPrograms": [ "1::path_tracing_materials.cu::any_hit" ]
     }
 """
-Super-fast material, color is not shaded anyhow.
+Super-fast material, color is not shaded anyhow. Use color components range <0; 1>.
 """
 
 m_eye_normal_cos = {
@@ -25,7 +25,8 @@ m_eye_normal_cos = {
       "AnyHitPrograms": [ "1::path_tracing_materials.cu::any_hit" ]
     }
 """
-Fast material, color is shaded by the cos(eye-hit-normal).
+Fast material, color is shaded by the cos(eye-hit-normal). Use color components range
+<0; 1>.
 """
 
 m_diffuse = {
@@ -35,6 +36,7 @@ m_diffuse = {
     }
 """
 Standard diffuse material. Note it is available by default under the name "diffuse".
+Use color components range <0; 1>.
 """
 
 m_clear_glass = {
@@ -56,5 +58,6 @@ m_clear_glass = {
       }
     }
 """
-Glass, with reflection and refraction.
+Glass, with reflection and refraction. Color components meaning is "attenuation length"
+and the range is <0; inf>.
 """
