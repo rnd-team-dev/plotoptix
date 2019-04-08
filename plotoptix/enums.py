@@ -6,7 +6,7 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
-from enum import Enum
+from enum import Enum, IntFlag
 
 class Coordinates(Enum):
     """
@@ -29,6 +29,28 @@ class Geometry(Enum):
     BezierChain = 6
     Parallelograms = 7
     Parallelepipeds = 8
+
+class GeomBuffer(IntFlag):
+    """
+    Geometry buffer flags. Used for selection of buffers which should
+    be updated in GPU (update geometry() method) after geometry modifications
+    made with move_geometry()/move_primitive() and similar functions.
+    """
+    Positions = 1
+    Colors0 = 4
+    Colors1 = 8
+    Colors = Colors0 | Colors1
+    Radii = 16
+    U = 32
+    V = 64
+    W = 128
+    Vectors = U | V | W
+    V0 = 256
+    V1 = 512
+    V2 = 1024
+    V3 = 2048
+    VNodes = V0 | V1 | V2 | V3
+    All = 0xFFFFFFFF
 
 class Camera(Enum):
     """

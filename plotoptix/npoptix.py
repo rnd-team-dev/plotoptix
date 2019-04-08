@@ -169,23 +169,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.update_geometry.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
         self._optix.update_geometry.restype = c_uint
 
-        self._optix.move_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float]
+        self._optix.move_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
         self._optix.move_geometry.restype = c_bool
 
-        self._optix.move_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float]
+        self._optix.move_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_bool]
         self._optix.move_primitive.restype = c_bool
 
-        self._optix.rotate_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float]
+        self._optix.rotate_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
         self._optix.rotate_geometry.restype = c_bool
 
-        self._optix.rotate_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float]
+        self._optix.rotate_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_bool]
         self._optix.rotate_primitive.restype = c_bool
 
-        self._optix.scale_geometry.argtypes = [c_wchar_p, c_float]
+        self._optix.scale_geometry.argtypes = [c_wchar_p, c_float, c_bool]
         self._optix.scale_geometry.restype = c_bool
 
-        self._optix.scale_primitive.argtypes = [c_wchar_p, c_long, c_float]
+        self._optix.scale_primitive.argtypes = [c_wchar_p, c_long, c_float, c_bool]
         self._optix.scale_primitive.restype = c_bool
+
+        self._optix.update_geom_buffers.argtypes = [c_wchar_p, c_uint]
+        self._optix.update_geom_buffers.restype = c_bool
 
         self._optix.set_coordinates_geom.argtypes = [c_int, c_float]
         self._optix.set_coordinates_geom.restype = c_bool
@@ -1645,9 +1648,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         finally:
             self._padlock.release()
 
-    def move_geometry(self, name: str, x: float, y: float, z: float) -> None:
+    def move_geometry(self, name: str, x: float, y: float, z: float,
+                      update: Optional[bool] = True) -> None:
         """
-        Move all primitives by [x, y, z] vector.
+        Move all primitives by [x, y, z] vector. Update GPU buffers immediately
+        if update is set to True (default), oterwise update should be made using
+        update_geom_buffers() method after all geometry modifications are finished.
 
         Parameters
         ----------
@@ -1659,13 +1665,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Y shift.
         z : float
             Z shift.
+        update : bool, optional
+            Update GPU buffer.
         """
-        if not self._optix.move_geometry(name, x, y, z):
+        if not self._optix.move_geometry(name, x, y, z, update):
             self._logger.error("Geometry move failed.")
 
-    def move_primitive(self, name: str, idx: int, x: float, y: float, z: float) -> None:
+    def move_primitive(self, name: str, idx: int, x: float, y: float, z: float,
+                       update: Optional[bool] = True) -> None:
         """
-        Move selected primitive by [x, y, z] vector.
+        Move selected primitive by [x, y, z] vector. Update GPU buffers immediately
+        if update is set to True (default), oterwise update should be made using
+        update_geom_buffers() method after all geometry modifications are finished.
 
         Parameters
         ----------
@@ -1679,14 +1690,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Y shift.
         z : float
             Z shift.
+        update : bool, optional
+            Update GPU buffer.
         """
-        if not self._optix.move_primitive(name, idx, x, y, z):
+        if not self._optix.move_primitive(name, idx, x, y, z, update):
             self._logger.error("Primitive move failed.")
 
-    def rotate_geometry(self, name: str, x: float, y: float, z: float) -> None:
+    def rotate_geometry(self, name: str, x: float, y: float, z: float,
+                        update: Optional[bool] = True) -> None:
         """
         Rotate all primitives by specified degrees around x, y, z axis, with
-        respect to the center of the geometry.
+        respect to the center of the geometry. Update GPU buffers immediately
+        if update is set to True (default), oterwise update should be made using
+        update_geom_buffers() method after all geometry modifications are finished.
 
         Parameters
         ----------
@@ -1698,14 +1714,20 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Rotation around Y axis.
         z : float
             Rotation around Z axis.
+        update : bool, optional
+            Update GPU buffer.
         """
-        if not self._optix.rotate_geometry(name, x, y, z):
+        if not self._optix.rotate_geometry(name, x, y, z, update):
             self._logger.error("Geometry rotate failed.")
 
-    def rotate_primitive(self, name: str, idx: int, x: float, y: float, z: float) -> None:
+    def rotate_primitive(self, name: str, idx: int, x: float, y: float, z: float,
+                         update: Optional[bool] = True) -> None:
         """
-        Rotate selected primitive by specified degrees around x, y, z axis,
-        with respect to the center of the selected primitive.
+        Rotate selected primitive by specified degrees around x, y, z axis, with
+        respect to the center of the selected primitive. Update GPU buffers
+        immediately if update is set to True (default), oterwise update should be
+        made using update_geom_buffers() method after all geometry modifications
+        are finished.
 
         Parameters
         ----------
@@ -1719,14 +1741,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Rotation around Y axis.
         z : float
             Rotation around Z axis.
+        update : bool, optional
+            Update GPU buffer.
         """
-        if not self._optix.rotate_primitive(name, idx, x, y, z):
+        if not self._optix.rotate_primitive(name, idx, x, y, z, update):
             self._logger.error("Primitive rotate failed.")
 
-    def scale_geometry(self, name: str, s: float) -> None:
+    def scale_geometry(self, name: str, s: float,
+                       update: Optional[bool] = True) -> None:
         """
-        Scale all primitive's positions and sizes by specified factor,
-        with respect to the center of the geometry.
+        Scale all primitive's positions and sizes by specified factor, with respect
+        to the center of the geometry. Update GPU buffers immediately if update is
+        set to True (default), oterwise update should be made using update_geom_buffers()
+        method after all geometry modifications are finished.
 
         Parameters
         ----------
@@ -1734,14 +1761,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Name of the geometry.
         s : float
             Scaling factor.
+        update : bool, optional
+            Update GPU buffer.
         """
-        if not self._optix.scale_geometry(name, s):
+        if not self._optix.scale_geometry(name, s, update):
             self._logger.error("Geometry scale failed.")
 
-    def scale_primitive(self, name: str, idx: int, s: float) -> None:
+    def scale_primitive(self, name: str, idx: int, s: float,
+                        update: Optional[bool] = True) -> None:
         """
-        Scale selected primitive by specified factor, with respect
-        to the center of the selected primitive.
+        Scale selected primitive by specified factor, with respect to the center of
+        the selected primitive. Update GPU buffers immediately if update is set to
+        True (default), oterwise update should be made using update_geom_buffers()
+        method after all geometry modifications are finished.
 
         Parameters
         ----------
@@ -1751,9 +1783,29 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Primitive index.
         s : float
             Scaling factor.
+        update : bool, optional
+            Update GPU buffer.
         """
-        if not self._optix.scale_primitive(name, idx, s):
+        if not self._optix.scale_primitive(name, idx, s, update):
             self._logger.error("Primitive scale failed.")
+
+    def update_geom_buffers(self, name: str,
+                            mask: Optional[Union[GeomBuffer, str]] = GeomBuffer.All) -> None:
+        """
+        Update geometry buffers in GPU after modifications made with
+        move_geometry() / move_primitive() and similar methods.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        mask : GeomBuffer or string, optional
+            Which buffers to update. All buffers if not specified.
+        """
+        if isinstance(mask, str): mask = GeomBuffer[mask]
+
+        if not self._optix.update_geom_buffers(name, mask.value):
+            self._logger.error("Geometry buffers update failed.")
 
     def set_coordinates(self, mode: Union[Coordinates, str] = Coordinates.Box, thickness: float = 1.0) -> None:
         """
