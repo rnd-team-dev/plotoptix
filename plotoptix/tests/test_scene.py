@@ -39,5 +39,5 @@ class TestScene(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        if cls.is_alive: raise ValueError
+        cls.assertFalse(cls, cls.is_alive, msg="Wrong state of the test class.")
 
