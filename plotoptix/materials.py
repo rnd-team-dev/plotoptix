@@ -13,16 +13,16 @@ from plotoptix.enums import RtFormat
 __pkg_dir__ = os.path.dirname(__file__)
 
 m_flat = {
-      "ClosestHitPrograms": [ "0::path_tracing_materials.cu::flat_closest_hit" ],
-      "AnyHitPrograms": [ "1::path_tracing_materials.cu::any_hit" ]
+      "ClosestHitPrograms": [ "0::path_tracing_materials.ptx::flat_closest_hit" ],
+      "AnyHitPrograms": [ "1::path_tracing_materials.ptx::any_hit" ]
     }
 """
 Super-fast material, color is not shaded anyhow. Use color components range <0; 1>.
 """
 
 m_eye_normal_cos = {
-      "ClosestHitPrograms": [ "0::path_tracing_materials.cu::cos_closest_hit" ],
-      "AnyHitPrograms": [ "1::path_tracing_materials.cu::any_hit" ]
+      "ClosestHitPrograms": [ "0::path_tracing_materials.ptx::cos_closest_hit" ],
+      "AnyHitPrograms": [ "1::path_tracing_materials.ptx::any_hit" ]
     }
 """
 Fast material, color is shaded by the cos(eye-hit-normal). Use color components range
@@ -30,8 +30,8 @@ Fast material, color is shaded by the cos(eye-hit-normal). Use color components 
 """
 
 m_diffuse = {
-      "ClosestHitPrograms": [ "0::path_tracing_materials.cu::diffuse_closest_hit" ],
-      "AnyHitPrograms": [ "1::path_tracing_materials.cu::any_hit" ],
+      "ClosestHitPrograms": [ "0::path_tracing_materials.ptx::diffuse_closest_hit" ],
+      "AnyHitPrograms": [ "1::path_tracing_materials.ptx::any_hit" ],
       "VarInt": { "material_flags": 2 }
     }
 """
@@ -40,8 +40,8 @@ Use color components range <0; 1>.
 """
 
 m_clear_glass = {
-      "ClosestHitPrograms": [ "0::path_tracing_materials.cu::glass_closest_hit" ],
-      "AnyHitPrograms": [ "1::path_tracing_materials.cu::any_hit" ],
+      "ClosestHitPrograms": [ "0::path_tracing_materials.ptx::glass_closest_hit" ],
+      "AnyHitPrograms": [ "1::path_tracing_materials.ptx::any_hit" ],
       "VarInt": { "material_flags": 12 },
       "VarFloat": {
         "refraction_index": 1.4,
