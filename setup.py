@@ -48,6 +48,6 @@ setup(name='plotoptix',
       long_description=open('README.md').read(),
       include_package_data=True,
       exclude_package_data={'': ['README.md']},
-      test_suite='nose.collector',
-      tests_require=['nose>=1.0'],
+      test_suite='nose2.collector.collector',
+      tests_require=['nose2>=0.9'],
       zip_safe=False)
