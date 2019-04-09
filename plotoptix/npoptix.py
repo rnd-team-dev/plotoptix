@@ -249,6 +249,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.set_camera_target.argtypes = [c_void_p]
         self._optix.set_camera_target.restype = c_bool
 
+        self._optix.get_camera.argtypes = [c_uint]
+        self._optix.get_camera.restype = c_wchar_p
+
         self._optix.setup_spherical_light.argtypes = [c_void_p, c_void_p, c_float, c_bool]
         self._optix.setup_spherical_light.restype = c_int
 
@@ -837,7 +840,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         return a
 
-    def get_camera(self, name: Optional[str] = None) -> (Optional[str], Optional[int]):
+    def get_camera_name_handle(self, name: Optional[str] = None) -> (Optional[str], Optional[int]):
         """
         Get camera name and handle. Mostly for the internal use.
 
@@ -873,6 +876,30 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                return None, None
 
         return name, cam_handle
+
+    def get_camera(self, name: Optional[str] = None) -> Optional[dict]:
+        """
+        Get camera parameters.
+
+        Parameters
+        ----------
+        name : string, optional
+            Name of the camera, use current camera if name not provided.
+
+        Returns
+        -------
+        out : dict, optional
+            Dictionary of the camera parameters or None if failed on
+            accessing camera data.
+        """
+        name, cam_handle = self.get_camera_name_handle(name)
+        if name is None: return None
+
+        s = self._optix.get_camera(cam_handle)
+        if len(s) > 2: return json.loads(s)
+        else:
+            self._logger.error("Failed on reading camera %s.", name)
+            return None
 
     def setup_camera(self, name: str,
                      eye: Optional[Any] = None,
@@ -975,7 +1002,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         fov : float
             Field of view in degrees.
         """
-        name, cam_handle = self.get_camera(name)
+        name, cam_handle = self.get_camera_name_handle(name)
         if (name is None) or (cam_handle == 0): return
 
         eye = self._make_contiguous_vector(eye, 3)
@@ -1033,7 +1060,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         scale : float, optional
             Adjustment of the prefered distance (useful for wide angle cameras).
         """
-        camera, cam_handle = self.get_camera(camera)
+        camera, cam_handle = self.get_camera_name_handle(camera)
         if camera is None: return
 
         if geometry is not None:
@@ -1075,7 +1102,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         autofit = False
         pos = self._make_contiguous_vector(pos, 3)
         if pos is None:
-            cam_name, _ = self.get_camera(autofit_camera)
+            cam_name, _ = self.get_camera_name_handle(autofit_camera)
             if cam_name is None:
                 self._logger.error("Need 3D coordinates for the new light.")
                 return
@@ -1138,7 +1165,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         autofit = False
         pos = self._make_contiguous_vector(pos, 3)
         if pos is None:
-            cam_name, _ = self.get_camera(autofit_camera)
+            cam_name, _ = self.get_camera_name_handle(autofit_camera)
             if cam_name is None:
                 self._logger.error("Need 3D coordinates for the new light.")
                 return

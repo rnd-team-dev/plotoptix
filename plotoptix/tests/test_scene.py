@@ -20,7 +20,7 @@ class TestScene(TestCase):
     def test010_default_init_values(self):
         self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
 
-        cam, handle = TestScene.scene.get_camera()
+        cam, handle = TestScene.scene.get_camera_name_handle()
         self.assertFalse((cam is None) or (handle is None), msg="Could not get default camera.")
         self.assertTrue((cam == "default") and (handle == 1), msg="Wrong name/handle of the default camera: %s / %d." % (cam, handle))
 
