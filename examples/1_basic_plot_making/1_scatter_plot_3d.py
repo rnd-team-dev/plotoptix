@@ -4,7 +4,7 @@ Scatter plot 3D.
 This example shows how to:
    - create a basic scatter plot
    - present data feature as a color or size
-   - use matplotlib color map
+   - use matplotlib color map (see https://matplotlib.org/users/colormaps.html)
    - turn on coordinate system (under development!).
 """
 
