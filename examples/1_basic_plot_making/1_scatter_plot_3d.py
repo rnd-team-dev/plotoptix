@@ -17,10 +17,10 @@ def main():
 
     # Make some data first:
 
-    n = 100000 # 100k
+    n = 50000
 
     xyz = 3 * (np.random.random((n, 3)) - 0.5)
-    r = 0.05 * (1 - (xyz[:,0]/3 + 0.5)) + 0.02
+    r = 0.1 * (1 - (xyz[:,0]/3 + 0.5)) + 0.02
     s = np.sum(xyz, axis=1)
 
     particles = xyz[s > 0.2]
@@ -51,6 +51,13 @@ def main():
     # but here we only provide the r parameter - this results with
     # randomly rotated cubes of U, V, W lenghts equal to r 
     optix.set_data("cubes", pos=cubes, r=rc, c=cc, geom="Parallelepipeds")
+
+    # if you prefer cubes aligned with xyz:
+    #nc = rc.shape[0]
+    #u = np.zeros((nc,3)); u[:,0] = rc[:]
+    #v = np.zeros((nc,3)); v[:,1] = rc[:]
+    #w = np.zeros((nc,3)); w[:,2] = rc[:]
+    #optix.set_data("cubes", pos=cubes, u=u, v=v, w=w, c=cc, geom="Parallelepipeds")
 
     # show coordinates box
     optix.set_coordinates()
