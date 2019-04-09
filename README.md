@@ -25,11 +25,11 @@ plot.show()
 
 ...but PlotOptiX is much faster on large data and, with all the raytraced shades and DoF, more readable and eye catching.
 
-Just as a decoration of this readme, here is a couple of sample images made with PlotOptiX:
+Just to decorate this readme, here is a couple of images made with PlotOptiX:
 
 ![screenshots](https://github.com/robertsulej/plotoptix/blob/master/screenshots.jpg "PlotOptiX screenshots")
 
-See [examples](https://github.com/rnd-team-dev/plotoptix/tree/master/examples) for code details and more usage options.
+See [examples](https://github.com/rnd-team-dev/plotoptix/tree/master/examples) for code samples and more usage options.
 
 PlotOptiX is based on [NVIDIA OptiX framework](https://developer.nvidia.com/optix) wrapped in RnD.SharpOptiX C#/C++/CUDA libraries
 by R&D Team. In this early version we start with:
