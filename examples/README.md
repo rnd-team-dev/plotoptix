@@ -14,7 +14,7 @@ Many scripts are using Tkinter UI, so here is a summary of mouse and keys action
 - focus at an object: hold ctrl + double-click left mouse button
 - select an object: double-click left mouse button (info on terminal output)
 
-![screenshots1](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/basic_scripts_screens.jpg)
+![screenshots1](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/basic_scripts_screens.jpg "PlotOptiX output screenshots")
 
 ### 2. Animations and callbacks
 
@@ -22,6 +22,6 @@ Callbacks in PlotOptiX are widely available throughout the raytracing process. Y
 
 GitHub can render notebooks content, so it is best to look at descriptions inlined in the code there.
 
-![screenshots2](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/notebook_screens.jpg "Notebook screenshots")
+![screenshots2](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/notebook_screens.jpg "PlotOptiX in notebook screenshots")
 
 *Progressing with more examples...*
