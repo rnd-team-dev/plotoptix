@@ -42,7 +42,7 @@ by R&D Team. In this early version we start with:
 - flat, diffuse, specular and glass shading
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
-- GPU acceleration using RT Cores, and everything else what comes with [OptiX](https://developer.nvidia.com/optix)
+- GPU acceleration using RT Cores, and everything else what comes with [OptiX 6.0](https://developer.nvidia.com/optix)
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - image output in [numpy](http://www.numpy.org/) array
 - Tkinter based UI or headless raytracer
@@ -59,7 +59,7 @@ by R&D Team. In this early version we start with:
 
 - OptiX 6.0.0 libraries
 - RnD.SharpOptiX and RnD.SharpEncoder libraries
-- all other required 3'rd party libraries: FFmpeg, LibTiff, Newtonsoft.Json, .NET bits
+- all other required 3'rd party libraries: FFmpeg, LibTiff, Newtonsoft.Json
 - python examples
 
 
@@ -117,7 +117,7 @@ The idea for development is:
 
 1. Binaries for Linux.
 2. Complete the plot layout / cover more raytracing features.
-3. Convenience functions for various plot styles. Other UI's if useful, eg. Qt.
+3. Convenience functions for various plot styles. Other GUI's.
 
    *Here, the community input is possible and warmly welcome!*
 
