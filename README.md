@@ -2,11 +2,11 @@
 
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RG47ZEL5GKLNA&source=url"><img src="https://img.shields.io/badge/support%20project-paypal-brightgreen.svg"></a>
 <a href="https://pypi.org/project/plotoptix/"><img alt="Latest PlotOptiX version" src="https://img.shields.io/pypi/v/plotoptix.svg" /></a>
-<a href="https://pypi.org/project/plotoptix/"><img alt="Number of PlotOptiX downloads" src="https://img.shields.io/pypi/dw/plotoptix.svg" /></a>
+<a href="https://pypi.org/project/plotoptix/"><img alt="Number of PlotOptiX downloads" src="https://img.shields.io/pypi/dm/plotoptix.svg" /></a>
 
 **Note:** this is an early, beta version. Active development and documentation is ongoing.
 
-3D raytracing package for Python, aimed at easy and aesthetic visualization of large datasets (and small as well). Data features can be represented on plots as a position, size and color of markers of several basic shapes, finished with a photorealistic lighting and depth of field.
+3D [raytracing](https://en.wikipedia.org/wiki/Ray_tracing_(graphics)) package for Python, aimed at easy and aesthetic visualization of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers of several basic shapes, finished with a photorealistic lighting and depth of field.
 
 No need to write shaders, intersection algorithms, handle 3D scene technicalities. Basic usage is even more simple than with [matplotlib](https://matplotlib.org/):
 
@@ -25,11 +25,11 @@ plot.show()
 
 ...but PlotOptiX is much faster on large data and, with all the raytraced shades and DoF, more readable and eye catching.
 
-Just as a decoration of this readme, here is a couple of sample images made with PlotOptiX:
+Just to decorate this readme, here is a couple of images made with PlotOptiX:
 
 ![screenshots](https://github.com/robertsulej/plotoptix/blob/master/screenshots.jpg "PlotOptiX screenshots")
 
-See [examples](https://github.com/rnd-team-dev/plotoptix/tree/master/examples) for code details and more usage options.
+See [examples](https://github.com/rnd-team-dev/plotoptix/tree/master/examples) for code samples and more usage options.
 
 PlotOptiX is based on [NVIDIA OptiX framework](https://developer.nvidia.com/optix) wrapped in RnD.SharpOptiX C#/C++/CUDA libraries
 by R&D Team. In this early version we start with:
@@ -42,7 +42,7 @@ by R&D Team. In this early version we start with:
 - flat, diffuse, specular and glass shading
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
-- GPU acceleration using RT Cores, and everything else what comes with [OptiX](https://developer.nvidia.com/optix)
+- GPU acceleration using RT Cores, and everything else what comes with [OptiX 6.0](https://developer.nvidia.com/optix)
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - image output in [numpy](http://www.numpy.org/) array
 - Tkinter based UI or headless raytracer
@@ -59,7 +59,7 @@ by R&D Team. In this early version we start with:
 
 - OptiX 6.0.0 libraries
 - RnD.SharpOptiX and RnD.SharpEncoder libraries
-- all other required 3'rd party libraries: FFmpeg, LibTiff, Newtonsoft.Json, .NET bits
+- all other required 3'rd party libraries: FFmpeg, LibTiff, Newtonsoft.Json
 - python examples
 
 
@@ -117,7 +117,7 @@ The idea for development is:
 
 1. Binaries for Linux.
 2. Complete the plot layout / cover more raytracing features.
-3. Convenience functions for various plot styles. Other UI's if useful, eg. Qt.
+3. Convenience functions for various plot styles. Other GUI's.
 
    *Here, the community input is possible and warmly welcome!*
 
