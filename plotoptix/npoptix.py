@@ -9,30 +9,14 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 import os, json, subprocess, math, platform, logging, operator, functools, threading, time
 import numpy as np
 
-from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_long, c_bool, c_char_p, c_wchar_p, c_void_p
+from ctypes import byref, c_float, c_uint, c_int
 from typing import List, Callable, Optional, Union, Any
 
+from plotoptix._load_lib import load_optix, BIN_PATH, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
 from plotoptix.singleton import Singleton
 from plotoptix.enums import *
 
 logging.basicConfig(level=logging.WARN, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
-
-PARAM_NONE_CALLBACK = CFUNCTYPE(None)
-PARAM_INT_CALLBACK = CFUNCTYPE(None, c_int)
-
-PLATFORM = platform.system()
-if PLATFORM == "Windows":
-    BIN_PATH = "bin\\win"
-    LIB_EXT = ".dll"
-elif PLATFORM == "Linux":
-    BIN_PATH = "bin\\linux"
-    LIB_EXT = ".so"
-elif PLATFORM == "Darwin":
-    BIN_PATH = "bin\\mac"
-    LIB_EXT = ".so"
-else:
-    BIN_PATH = ""
-    LIB_EXT == ""
 
 # verify CUDA_PATH is defined ############################################
 try:
@@ -113,194 +97,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._is_started = False
         self._is_closed = False
 
-        # load SharpOptiX library, setup arguments and return types ###
+        # load SharpOptiX library, configure paths ####################
         self._logger.info("RnD.SharpOptiX path: " + BIN_PATH)
-        self._optix = cdll.LoadLibrary(os.path.join(self._package_dir, BIN_PATH, "RnD.SharpOptiX" + LIB_EXT))
-
-        self._optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int]
-        self._optix.create_empty_scene.restype = c_bool
-
-        self._optix.create_scene_from_json.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int]
-        self._optix.create_scene_from_json.restype = c_bool
-
-        self._optix.load_scene_from_json.argtypes = [c_wchar_p]
-        self._optix.load_scene_from_json.restype = c_bool
-
-        self._optix.load_scene_from_file.argtypes = [c_wchar_p]
-        self._optix.load_scene_from_file.restype = c_bool
-
-        self._optix.save_scene_to_file.argtypes = [c_wchar_p]
-        self._optix.save_scene_to_file.restype = c_bool
-
-        self._optix.start_rt.restype = c_bool
-        self._optix.stop_rt.restype = c_bool
-
-        self._optix.set_compute_paused.argtypes = [c_bool]
-        self._optix.set_compute_paused.restype = c_bool
-
-        self._optix.set_int.argtypes = [c_wchar_p, c_int, c_bool]
-        self._optix.set_int.restype = c_bool
-
-        self._optix.set_uint.argtypes = [c_wchar_p, c_uint, c_bool]
-        self._optix.set_uint.restype = c_bool
-
-        self._optix.set_uint2.argtypes = [c_wchar_p, c_uint, c_uint, c_bool]
-        self._optix.set_uint2.restype = c_bool
-
-        self._optix.set_float.argtypes = [c_wchar_p, c_float, c_bool]
-        self._optix.set_float.restype = c_bool
-
-        self._optix.set_float2.argtypes = [c_wchar_p, c_float, c_float, c_bool]
-        self._optix.set_float2.restype = c_bool
-
-        self._optix.set_float3.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
-        self._optix.set_float3.restype = c_bool
-
-        self._optix.resize_scene.argtypes = [c_int, c_int, c_void_p, c_int]
-        self._optix.resize_scene.restype = c_bool
-
-        self._optix.get_material.argtypes = [c_wchar_p]
-        self._optix.get_material.restype = c_wchar_p
-
-        self._optix.setup_material.argtypes = [c_wchar_p, c_wchar_p]
-        self._optix.setup_material.restype = c_bool
-
-        self._optix.setup_geometry.argtypes = [c_int, c_wchar_p, c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
-        self._optix.setup_geometry.restype = c_uint
-
-        self._optix.update_geometry.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
-        self._optix.update_geometry.restype = c_uint
-
-        self._optix.move_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
-        self._optix.move_geometry.restype = c_bool
-
-        self._optix.move_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_bool]
-        self._optix.move_primitive.restype = c_bool
-
-        self._optix.rotate_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
-        self._optix.rotate_geometry.restype = c_bool
-
-        self._optix.rotate_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_bool]
-        self._optix.rotate_primitive.restype = c_bool
-
-        self._optix.scale_geometry.argtypes = [c_wchar_p, c_float, c_bool]
-        self._optix.scale_geometry.restype = c_bool
-
-        self._optix.scale_primitive.argtypes = [c_wchar_p, c_long, c_float, c_bool]
-        self._optix.scale_primitive.restype = c_bool
-
-        self._optix.update_geom_buffers.argtypes = [c_wchar_p, c_uint]
-        self._optix.update_geom_buffers.restype = c_bool
-
-        self._optix.set_coordinates_geom.argtypes = [c_int, c_float]
-        self._optix.set_coordinates_geom.restype = c_bool
-
-        self._optix.setup_camera.argtypes = [c_int, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_bool]
-        self._optix.setup_camera.restype = c_int
-
-        self._optix.update_camera.argtypes = [c_uint, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float]
-        self._optix.update_camera.restype = c_bool
-
-        self._optix.fit_camera.argtypes = [c_uint, c_wchar_p, c_float]
-        self._optix.fit_camera.restype = c_bool
-
-        self._optix.get_current_camera.restype = c_uint
-
-        self._optix.set_current_camera.argtypes = [c_uint]
-        self._optix.set_current_camera.restype = c_bool
-
-        self._optix.rotate_camera_eye.argtypes = [c_int, c_int, c_int, c_int]
-        self._optix.rotate_camera_eye.restype = c_bool
-
-        self._optix.rotate_camera_tgt.argtypes = [c_int, c_int, c_int, c_int]
-        self._optix.rotate_camera_tgt.restype = c_bool
-
-        self._optix.get_camera_focal_scale.argtypes = [c_uint]
-        self._optix.get_camera_focal_scale.restype = c_float
-
-        self._optix.set_camera_focal_scale.argtypes = [c_float]
-        self._optix.set_camera_focal_scale.restype = c_bool
-
-        self._optix.set_camera_focal_length.argtypes = [c_float]
-        self._optix.set_camera_focal_length.restype = c_bool
-
-        self._optix.get_camera_fov.argtypes = [c_uint]
-        self._optix.get_camera_fov.restype = c_float
-
-        self._optix.set_camera_fov.argtypes = [c_float]
-        self._optix.set_camera_fov.restype = c_bool
-
-        self._optix.get_camera_aperture.argtypes = [c_uint]
-        self._optix.get_camera_aperture.restype = c_float
-
-        self._optix.set_camera_aperture.argtypes = [c_float]
-        self._optix.set_camera_aperture.restype = c_bool
-
-        self._optix.get_camera_eye.argtypes = [c_uint, c_void_p]
-        self._optix.get_camera_eye.restype = c_bool
-
-        self._optix.set_camera_eye.argtypes = [c_void_p]
-        self._optix.set_camera_eye.restype = c_bool
-
-        self._optix.get_camera_target.argtypes = [c_uint, c_void_p]
-        self._optix.get_camera_target.restype = c_bool
-
-        self._optix.set_camera_target.argtypes = [c_void_p]
-        self._optix.set_camera_target.restype = c_bool
-
-        self._optix.get_camera.argtypes = [c_uint]
-        self._optix.get_camera.restype = c_wchar_p
-
-        self._optix.setup_spherical_light.argtypes = [c_void_p, c_void_p, c_float, c_bool]
-        self._optix.setup_spherical_light.restype = c_int
-
-        self._optix.setup_parallelogram_light.argtypes = [c_void_p, c_void_p, c_void_p, c_void_p, c_bool]
-        self._optix.setup_parallelogram_light.restype = c_int
-
-        self._optix.update_light.argtypes = [c_int, c_void_p, c_void_p, c_float, c_void_p, c_void_p]
-        self._optix.update_light.restype = c_bool
-
-        self._optix.fit_light.argtypes = [c_int, c_uint, c_float, c_float, c_float]
-        self._optix.fit_light.restype = c_bool
-
-        self._optix.get_object_at.argtypes = [c_int, c_int, POINTER(c_uint), POINTER(c_uint)]
-        self._optix.get_object_at.restype = c_bool
-
-        self._optix.get_hit_at.argtypes = [c_int, c_int, POINTER(c_float), POINTER(c_float), POINTER(c_float), POINTER(c_float)]
-        self._optix.get_hit_at.restype = c_bool
-
-        self._optix.register_launch_finished_callback.argtypes = [PARAM_INT_CALLBACK]
-        self._optix.register_launch_finished_callback.restype = c_bool
-
-        self._optix.register_accum_done_callback.argtypes = [PARAM_NONE_CALLBACK]
-        self._optix.register_accum_done_callback.restype = c_bool
-
-        self._optix.register_scene_rt_starting_callback.argtypes = [PARAM_NONE_CALLBACK]
-        self._optix.register_scene_rt_starting_callback.restype = c_bool
-
-        self._optix.register_start_scene_compute_callback.argtypes = [PARAM_INT_CALLBACK]
-        self._optix.register_start_scene_compute_callback.restype = c_bool
-
-        self._optix.register_scene_rt_completed_callback.argtypes = [PARAM_INT_CALLBACK]
-        self._optix.register_scene_rt_completed_callback.restype = c_bool
-
-        self._optix.set_min_accumulation_step.argtypes = [c_int]
-        self._optix.set_min_accumulation_step.restype = c_bool
-
-        self._optix.set_max_accumulation_frames.argtypes = [c_int]
-        self._optix.set_max_accumulation_frames.restype = c_bool
-
-        self._optix.set_gpu_architecture.argtypes = [c_int]
-
-        self._optix.set_library_dir.argtypes = [c_wchar_p]
+        self._optix = load_optix()
         self._optix.set_library_dir(os.path.join(self._package_dir, BIN_PATH))
-
-        self._optix.set_include_dir.argtypes = [c_wchar_p]
         self._optix.set_include_dir(os.path.join(self._package_dir, BIN_PATH, "cuda"))
-
-        if PLATFORM == "Windows":
-            self._optix.get_display_scaling.restype = c_float
-
         self._logger.info("RnD.SharpOptiX library configured.")
         ###############################################################
 
@@ -613,6 +414,81 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         self._optix.refresh_scene()
 
+    def get_float(self, name: str) -> Optional[float]:
+        """
+        Get shader float variable with given name.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+
+        Returns
+        -------
+        out : float
+            Value of the variable.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        c_x = c_float()
+        if self._optix.get_float(name, byref(c_x)):
+            self._logger.info("Variable float %s = %f", name, c_x.value)
+            return c_x.value
+        else:
+            self._logger.error("Variable float %s not found.", name)
+            return None
+
+    def get_float2(self, name: str) -> (Optional[float], Optional[float]):
+        """
+        Get shader float2 variable with given name.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+
+        Returns
+        -------
+        out : tuple (float, float)
+            Value (x, y) of the variable.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        c_x = c_float()
+        c_y = c_float()
+        if self._optix.get_float2(name, byref(c_x), byref(c_y)):
+            self._logger.info("Variable float2 %s = (%f, %f)", name, c_x.value, c_y.value)
+            return c_x.value, c_y.value
+        else:
+            self._logger.error("Variable float2 %s not found.", name)
+            return None, None
+
+    def get_float3(self, name: str) -> (Optional[float], Optional[float], Optional[float]):
+        """
+        Get shader float3 variable with given name.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+
+        Returns
+        -------
+        out : tuple (float, float, float)
+            Value (x, y, z) of the variable.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        c_x = c_float()
+        c_y = c_float()
+        c_z = c_float()
+        if self._optix.get_float3(name, byref(c_x), byref(c_y), byref(c_z)):
+            self._logger.info("Variable float3 %s = (%f, %f, %f)", name, c_x.value, c_y.value, c_z.value)
+            return c_x.value, c_y.value, c_z.value
+        else:
+            self._logger.error("Variable float3 %s not found.", name)
+            return None, None, None
+
     def set_float(self, name: str, x: float, y: Optional[float] = None, z: Optional[float] = None, refresh: bool = False) -> None:
         """
         Set shader variable with given name and of the type float, float2
@@ -656,6 +532,55 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.set_float(name, x, refresh)
 
+    def get_uint(self, name: str) -> Optional[int]:
+        """
+        Get shader uint variable with given name.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+
+        Returns
+        -------
+        out : int
+            Value of the variable.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        c_x = c_uint()
+        if self._optix.get_uint(name, byref(c_x)):
+            self._logger.info("Variable uint %s = %d", name, c_x.value)
+            return c_x.value
+        else:
+            self._logger.error("Variable uint %s not found.", name)
+            return None
+
+    def get_uint2(self, name: str) -> (Optional[int], Optional[int]):
+        """
+        Get shader uint2 variable with given name.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+
+        Returns
+        -------
+        out : tuple (int, int)
+            Value (x, y) of the variable.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        c_x = c_uint()
+        c_y = c_uint()
+        if self._optix.get_uint2(name, byref(c_x), byref(c_y)):
+            self._logger.info("Variable uint2 %s = (%d, %d)", name, c_x.value, c_y.value)
+            return c_x.value, c_y.value
+        else:
+            self._logger.error("Variable uint2 %s not found.", name)
+            return None, None
+
 
     def set_uint(self, name: str, x: int, y: Optional[int] = None, refresh: bool = False) -> None:
         """
@@ -692,6 +617,30 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.set_uint(name, x, refresh)
 
 
+    def get_int(self, name: str) -> Optional[int]:
+        """
+        Get shader int variable with given name.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+
+        Returns
+        -------
+        out : int
+            Value of the variable.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        c_x = c_int()
+        if self._optix.get_int(name, byref(c_x)):
+            self._logger.info("Variable int %s = %d", name, c_x.value)
+            return c_x.value
+        else:
+            self._logger.error("Variable int %s not found.", name)
+            return None
+
     def set_int(self, name: str, x: int, refresh: bool = False) -> None:
         """
         Set shader variable with given name and of the type int. Raytrace
@@ -713,6 +662,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.set_int(name, x, refresh)
 
+
+    def get_background(self) -> (float, float, float):
+        """
+        Get background color.
+
+        Returns
+        -------
+        out : tuple (float, float, float)
+            Color values (r, g, b) of the background color.
+        """
+        return self.get_float3("bg_color")
 
     def set_background(self, color: Any, refresh: bool = False) -> None:
         """
@@ -751,6 +711,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.set_float3("bg_color", x, y, z, refresh)
         self._logger.info("Background color updated.")
+
+    def get_ambient(self) -> (float, float, float):
+        """
+        Get ambient color.
+
+        Returns
+        -------
+        out : tuple (float, float, float)
+            Color values (r, g, b) of the ambient light color.
+        """
+        return self.get_float3("ambient_color")
 
     def set_ambient(self, color: Any, refresh: bool = False) -> None:
         """

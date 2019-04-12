@@ -15,7 +15,8 @@ from ctypes import byref, c_float, c_uint
 from typing import Union
 
 from plotoptix.enums import *
-from plotoptix.npoptix import PLATFORM, NpOptiX
+from plotoptix._load_lib import PLATFORM
+from plotoptix.npoptix import NpOptiX
 
 class TkOptiX(NpOptiX):
     """
@@ -184,7 +185,7 @@ class TkOptiX(NpOptiX):
                     c_y = c_float()
                     c_z = c_float()
                     c_d = c_float()
-                    if self._optix.get_hit_at(x, y, c_x, c_y, c_z, c_d):
+                    if self._optix.get_hit_at(x, y, byref(c_x), byref(c_y), byref(c_z), byref(c_d)):
                         hx = c_x.value
                         hy = c_y.value
                         hz = c_z.value
