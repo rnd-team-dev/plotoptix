@@ -46,8 +46,7 @@ except KeyError:
 # verify CUDA release ####################################################
 _rel_required = "10.1"
 try:
-    _proc = subprocess.Popen('nvcc --version', stdout=subprocess.PIPE)
-    _outp = _proc.stdout.read().decode("utf-8").split(" ")
+    _outp = subprocess.check_output(["nvcc", "--version"]).decode("utf-8").split(" ")
     try:
         _idx = _outp.index("release")
         if _idx + 1 < len(_outp):
@@ -614,7 +613,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         self._optix.refresh_scene()
 
-    def set_float(self, name: str, x: float, y: Optional[float], z: Optional[float], refresh: bool = False) -> None:
+    def set_float(self, name: str, x: float, y: Optional[float] = None, z: Optional[float] = None, refresh: bool = False) -> None:
         """
         Set shader variable with given name and of the type float, float2
         (if y provided), or float3 (if y and z provided). Raytrace the whole
@@ -658,7 +657,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.set_float(name, x, refresh)
 
 
-    def set_uint(self, name: str, x: int, y: Optional[int], refresh: bool = False) -> None:
+    def set_uint(self, name: str, x: int, y: Optional[int] = None, refresh: bool = False) -> None:
         """
         Set shader variable with given name and of the type uint or uint2
         (if y provided). Raytrace the whole scene if refresh is set to True.
@@ -948,7 +947,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(cam_type, str): cam_type = Camera[cam_type]
 
         if name in self.camera_handles:
-            self._logger.error("Camera %s already exists.")
+            self._logger.error("Camera %s already exists.", name)
             return
 
         eye_ptr = 0
@@ -1096,7 +1095,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name in self.light_handles:
-            self._logger.error("Light %s already exists.")
+            self._logger.error("Light %s already exists.", name)
             return
 
         autofit = False
@@ -1159,7 +1158,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name in self.light_handles:
-            self._logger.error("Light %s already exists.")
+            self._logger.error("Light %s already exists.", name)
             return
 
         autofit = False
@@ -1365,6 +1364,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def setup_material(self, name: str, data: dict) -> None:
         """
         Setup new material.
+        Note: in order to keep maximum performance, setup only those materials
+        you need in the plot.
 
         Parameters
         ----------
