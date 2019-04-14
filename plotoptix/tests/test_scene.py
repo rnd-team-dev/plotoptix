@@ -1,5 +1,7 @@
 from unittest import TestCase
+
 from plotoptix import TkOptiX
+from plotoptix.materials import *
 
 class TestScene(TestCase):
 
@@ -81,6 +83,16 @@ class TestScene(TestCase):
         mat = TestScene.scene.get_material("diffuse")
         self.assertFalse(mat is None, msg="Could not read diffuse material.")
         self.assertTrue(("ClosestHitPrograms" in mat) and ("AnyHitPrograms" in mat), msg="Default material data is incomplete.")
+
+    def test010_predefined_materials(self):
+        self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
+
+        m_list = ["m_flat", "m_eye_normal_cos", "m_diffuse", "m_mirror", "m_metalic", "m_plastic", "m_clear_glass"]
+
+        for m in m_list:
+            TestScene.scene.setup_material(m, globals()[m])
+            mat = TestScene.scene.get_material(m)
+            self.assertFalse(mat is None, msg="Could not read back %s material." % m)
 
     def test999_close(self):
         self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
