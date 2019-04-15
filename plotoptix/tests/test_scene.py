@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from plotoptix import TkOptiX
 from plotoptix.materials import *
+from plotoptix.enums import *
 
 class TestScene(TestCase):
 
@@ -93,6 +94,13 @@ class TestScene(TestCase):
             TestScene.scene.setup_material(m, globals()[m])
             mat = TestScene.scene.get_material(m)
             self.assertFalse(mat is None, msg="Could not read back %s material." % m)
+
+    def test020_light_shading(self):
+        self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
+
+        TestScene.scene.set_light_shading(LightShading.Hard)
+        m = TestScene.scene.get_light_shading()
+        self.assertTrue(m is not None and m == LightShading.Hard, msg="Returned light shading mode different than value set.")
 
     def test999_close(self):
         self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")

@@ -185,6 +185,11 @@ def load_optix():
     optix.get_camera.argtypes = [c_uint]
     optix.get_camera.restype = c_wchar_p
 
+    optix.get_light_shading.restype = c_int
+
+    optix.set_light_shading.argtypes = [c_int]
+    optix.set_light_shading.restype = c_bool
+
     optix.setup_spherical_light.argtypes = [c_void_p, c_void_p, c_float, c_bool]
     optix.setup_spherical_light.restype = c_int
 

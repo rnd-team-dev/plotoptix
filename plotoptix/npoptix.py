@@ -1039,6 +1039,47 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.fit_camera(cam_handle, geometry, scale)
 
+
+    def get_light_shading(self) -> Optional[LightShading]:
+        """
+        Get light shading mode.
+
+        Returns
+        ----------
+        out : LightShading or None
+            Light shading mode. None is returned if function could
+            not read the mode from the raytracer.
+        """
+        shading = self._optix.get_light_shading()
+        if shading >= 0:
+            mode = LightShading(shading)
+            self._logger.info("Current light shading is: %s", mode.name)
+            return mode
+        else:
+            self._logger.error("Failed on reading the light shading mode.")
+            return None
+
+    def set_light_shading(self, mode: Union[LightShading, str]) -> None:
+        """
+        Set light shading mode. Use LightShading.Hard for best caustics or
+        LightShading.Soft for fast convergence. Set mode before adding lights.
+
+        Parameters
+        ----------
+        mode : LightShading or string
+            Light shading mode.
+        """
+        if isinstance(mode, str): mode = LightShading[mode]
+
+        if len(self.light_handles) > 0:
+            self._logger.error("Light shading has to be selected before adding lights.")
+            return
+
+        if self._optix.set_light_shading(mode.value):
+            self._logger.info("Light shading %s is selected.", mode.name)
+        else:
+            self._logger.error("Light shading setup failed.")
+
     def setup_spherical_light(self, name: str, pos: Optional[Any] = None,
                               autofit_camera: Optional[str] = None,
                               color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),

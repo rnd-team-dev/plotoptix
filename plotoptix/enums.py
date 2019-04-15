@@ -60,6 +60,15 @@ class Camera(Enum):
     DoF = 1
     #Ortho = 2
 
+class LightShading(Enum):
+    """
+    Light shading program. Soft converges quickly and
+    is well balanced for most scenes and light sources.
+    Hard is better suited for scenes with caustics.
+    """
+    Soft = 0
+    Hard = 1
+
 class Light(Enum):
     """
     Light sources.

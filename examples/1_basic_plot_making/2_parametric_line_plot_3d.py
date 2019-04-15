@@ -60,9 +60,9 @@ def main():
     # 2 spherical light sources, warm and cool, fit positions with respect to
     # the current camera plane: 45 deg right/left and 25 deg up;
     # do not include lights in geometry, so they do not appear in the image
-    optix.setup_light("light1", color=20*np.array([0.99, 0.9, 0.7]), radius=250, in_geometry=False)
+    optix.setup_light("light1", color=15*np.array([0.99, 0.9, 0.7]), radius=250, in_geometry=False)
     optix.light_fit("light1", horizontal_rot=45, vertical_rot=25, dist_scale=1.1)
-    optix.setup_light("light2", color=25*np.array([0.7, 0.9, 0.99]), radius=200, in_geometry=False)
+    optix.setup_light("light2", color=20*np.array([0.7, 0.9, 0.99]), radius=200, in_geometry=False)
     optix.light_fit("light2", horizontal_rot=-45, vertical_rot=25, dist_scale=1.1)
 
     # accumulate up to 30 frames (override default of 4 frames)

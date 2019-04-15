@@ -89,7 +89,7 @@ m_plastic = {
       "VarInt": { "material_flags": 6 },
       "VarFloat": {
         "reflectivity_index": 0.0,
-        "reflectivity_range": 0.8,
+        "reflectivity_range": 0.5,
         "refraction_index": 2.0
       },
       "VarFloat3": {
