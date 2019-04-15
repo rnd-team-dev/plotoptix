@@ -6,7 +6,7 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
-import os, json, subprocess, math, platform, logging, operator, functools, threading, time
+import os, json, math, platform, logging, operator, functools, threading, time
 import numpy as np
 
 from ctypes import byref, c_float, c_uint, c_int
@@ -15,52 +15,6 @@ from typing import List, Callable, Optional, Union, Any
 from plotoptix._load_lib import load_optix, BIN_PATH, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
 from plotoptix.singleton import Singleton
 from plotoptix.enums import *
-
-logging.basicConfig(level=logging.WARN, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
-
-# verify CUDA_PATH is defined ############################################
-try:
-    _cuda_path = os.environ["CUDA_PATH"]
-except KeyError:
-    logging.error(80 * "*"); logging.error(80 * "*")
-    logging.error("CUDA_PATH environment variable not defined. Please check your CUDA installation.")
-    logging.error(80 * "*"); logging.error(80 * "*")
-    raise ImportError
-
-# verify CUDA release ####################################################
-_rel_required = "10.1"
-try:
-    _outp = subprocess.check_output(["nvcc", "--version"]).decode("utf-8").split(" ")
-    try:
-        _idx = _outp.index("release")
-        if _idx + 1 < len(_outp):
-            _rel = _outp[_idx + 1].strip(" ,")
-            if _rel.startswith(_rel_required):
-                logging.info("OK: found CUDA %s", _rel)
-            else:
-                logging.error(80 * "*"); logging.error(80 * "*")
-                logging.error("Found CUDA release %s. This PlotOptiX release requires CUDA %s,", _rel, _rel_required)
-                logging.error("available at: https://developer.nvidia.com/cuda-downloads")
-                logging.error(80 * "*"); logging.error(80 * "*")
-                raise ImportError
-        else: raise ValueError
-    except:
-        logging.error(80 * "*"); logging.error(80 * "*")
-        logging.error("CUDA release not recognized. This PlotOptiX release requires CUDA %s,", _rel_required)
-        logging.error("available at: https://developer.nvidia.com/cuda-downloads")
-        logging.error(80 * "*"); logging.error(80 * "*")
-        raise ImportError
-except FileNotFoundError:
-    logging.error(80 * "*"); logging.error(80 * "*")
-    logging.error("Cannot access nvcc. Please check your CUDA installation.")
-    logging.error("This PlotOptiX release requires CUDA %s, available at:", _rel_required)
-    logging.error("     https://developer.nvidia.com/cuda-downloads")
-    logging.error(80 * "*"); logging.error(80 * "*")
-    raise ImportError
-except ImportError: raise ImportError
-except Exception as e:
-    logging.error("Cannot verify CUDA installation: " + str(e))
-    raise ImportError
 
 
 class NpOptiX(threading.Thread, metaclass=Singleton):
