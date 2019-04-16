@@ -6,7 +6,7 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
-import os, json, math, platform, logging, operator, functools, threading, time
+import os, json, math, logging, operator, functools, threading, time
 import numpy as np
 
 from ctypes import byref, c_float, c_uint, c_int

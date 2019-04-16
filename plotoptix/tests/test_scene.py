@@ -11,17 +11,10 @@ class TestScene(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.scene = TkOptiX(width=128, height=64, start_now=True, log_level='INFO')
-
-    def test000_isAlive(self):
-        self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
-
-        self.assertTrue(TestScene.scene.is_started(), msg="Scene did not flip to _is_started=True state.")
-        self.assertTrue(TestScene.scene.isAlive(), msg="Raytracing thread is not alive.")
-        TestScene.is_alive = True
+        cls.scene = TkOptiX(width=128, height=64, start_now=False, log_level='INFO')
 
     def test010_default_init_values(self):
-        self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
+        self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         # test for failures
 
@@ -77,16 +70,12 @@ class TestScene(TestCase):
         self.assertTrue(cy is not None and cy >= 0, msg="Unreasonable ambient color g: %f." % cy)
         self.assertTrue(cz is not None and cz >= 0, msg="Unreasonable ambient color b: %f." % cz)
 
-        cam, handle = TestScene.scene.get_camera_name_handle()
-        self.assertFalse((cam is None) or (handle is None), msg="Could not get default camera.")
-        self.assertTrue((cam == "default") and (handle == 1), msg="Wrong name/handle of the default camera: %s / %d." % (cam, handle))
-
         mat = TestScene.scene.get_material("diffuse")
         self.assertFalse(mat is None, msg="Could not read diffuse material.")
         self.assertTrue(("ClosestHitPrograms" in mat) and ("AnyHitPrograms" in mat), msg="Default material data is incomplete.")
 
-    def test010_predefined_materials(self):
-        self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
+    def test020_predefined_materials(self):
+        self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         m_list = ["m_flat", "m_eye_normal_cos", "m_diffuse", "m_mirror", "m_metalic", "m_plastic", "m_clear_glass"]
 
@@ -95,12 +84,56 @@ class TestScene(TestCase):
             mat = TestScene.scene.get_material(m)
             self.assertFalse(mat is None, msg="Could not read back %s material." % m)
 
-    def test020_light_shading(self):
-        self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
+    def test030_light_shading(self):
+        self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         TestScene.scene.set_light_shading(LightShading.Hard)
         m = TestScene.scene.get_light_shading()
         self.assertTrue(m is not None and m == LightShading.Hard, msg="Returned light shading mode different than value set.")
+
+    #todo test new geometry
+
+    def test040_start_rt(self):
+        self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
+
+        TestScene.scene.start()
+        self.assertTrue(TestScene.scene.is_started(), msg="Scene did not flip to _is_started=True state.")
+        self.assertTrue(TestScene.scene.isAlive(), msg="Raytracing thread is not alive.")
+        TestScene.is_alive = True
+
+    def test050_camera(self):
+        self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
+
+        cam, handle = TestScene.scene.get_camera_name_handle()
+        self.assertFalse((cam is None) or (handle is None), msg="Could not get default camera.")
+        self.assertTrue((cam == "default") and (handle == 1), msg="Wrong name/handle of the default camera: %s / %d." % (cam, handle))
+
+        eye=[10, 10, 10]
+        target=[1, 1, 1]
+        up=[0, 0, 1]
+        cam_type=Camera.DoF
+        aperture_radius=0.2
+        aperture_fract=0.3
+        focal_scale=0.9
+        fov=35
+        blur=0.5
+        make_current=True
+        TestScene.scene.setup_camera("test_cam1",
+                                     eye=eye, target=target, up=up,
+                                     cam_type=cam_type,
+                                     aperture_radius=aperture_radius,
+                                     aperture_fract=aperture_fract,
+                                     focal_scale=focal_scale,
+                                     fov=fov, blur=blur,
+                                     make_current=make_current)
+        cam, handle = TestScene.scene.get_camera_name_handle()
+        self.assertFalse((cam is None) or (handle is None), msg="Could not get back the new camera.")
+        self.assertTrue((cam == "test_cam1") and (handle > 1), msg="Wrong name/handle of the default camera: %s / %d." % (cam, handle))
+
+        cam_params = TestScene.scene.get_camera("test_cam1")
+        self.assertFalse(cam_params is None, msg="Could not get back parameters dictionary of the new camera.")
+
+        #todo test camera with default values
 
     def test999_close(self):
         self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
