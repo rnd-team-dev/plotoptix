@@ -18,7 +18,7 @@ except ImportError:
     bdist_wheel = None
 
 setup(name='plotoptix',
-      version='0.1.2.5',
+      version='0.1.2.6',
       url='https://github.com/rnd-team-dev/plotoptix',
       author='Robert Sulej, R&D Team',
       author_email='dev@rnd.team',
@@ -47,6 +47,7 @@ setup(name='plotoptix',
           'Pillow>=5.3'
       ],
       long_description=open('README.md').read(),
+      long_description_content_type="text/markdown",
       include_package_data=True,
       exclude_package_data={'': ['README.md']},
       test_suite='nose2.collector.collector',
