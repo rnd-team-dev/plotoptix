@@ -31,8 +31,7 @@ Just to decorate this readme, here is a couple of images made with PlotOptiX:
 
 See [examples](https://github.com/rnd-team-dev/plotoptix/tree/master/examples) for code samples and more usage options.
 
-PlotOptiX is based on [NVIDIA OptiX framework](https://developer.nvidia.com/optix) wrapped in RnD.SharpOptiX C#/C++/CUDA libraries
-by R&D Team. In this early version we start with:
+PlotOptiX is based on [NVIDIA OptiX](https://developer.nvidia.com/optix) framework wrapped in RnD.SharpOptiX C#/C++ libraries and CUDA shaders by R&D Team. In this early version we start with:
 
 ### Features
 
@@ -50,7 +49,7 @@ by R&D Team. In this early version we start with:
 ### System Requirements
 
 - operating system, *currently*: Windows
-- [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) >= 4.6.1 (most likely you already have it)
+- [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) >= 4.6.1 (but you should already have it)
 - a [CUDA-enabled GPU](https://developer.nvidia.com/cuda-gpus) with compute capability 5.0 (Maxwell) to latest
 - [CUDA Toolkit **10.1**](https://developer.nvidia.com/cuda-downloads)
 - Python 3
@@ -60,7 +59,7 @@ by R&D Team. In this early version we start with:
 - OptiX 6.0.0 libraries
 - RnD.SharpOptiX and RnD.SharpEncoder libraries
 - all other required 3'rd party libraries: FFmpeg, LibTiff, Newtonsoft.Json
-- python examples
+- Python examples
 
 
 ## Installation
