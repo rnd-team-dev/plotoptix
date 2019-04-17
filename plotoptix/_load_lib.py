@@ -187,6 +187,21 @@ def load_optix():
 
     optix.get_light_shading.restype = c_int
 
+    optix.get_light_pos.argtypes = [c_int, c_void_p]
+    optix.get_light_pos.restype = c_bool
+
+    optix.get_light_color.argtypes = [c_int, c_void_p]
+    optix.get_light_color.restype = c_bool
+
+    optix.get_light_u.argtypes = [c_int, c_void_p]
+    optix.get_light_u.restype = c_bool
+
+    optix.get_light_v.argtypes = [c_int, c_void_p]
+    optix.get_light_v.restype = c_bool
+
+    optix.get_light_r.argtypes = [c_int]
+    optix.get_light_r.restype = c_float
+
     optix.set_light_shading.argtypes = [c_int]
     optix.set_light_shading.restype = c_bool
 

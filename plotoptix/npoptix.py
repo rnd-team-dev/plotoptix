@@ -840,6 +840,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             3D coordinates of the camera eye or None if failed on
             accessing camera data.
         """
+        if not isinstance(name, str): name = str(name)
+
         name, cam_handle = self.get_camera_name_handle(name)
         if name is None: return None
 
@@ -862,6 +864,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             3D coordinates of the camera target or None if failed on
             accessing camera data.
         """
+        if not isinstance(name, str): name = str(name)
+
         name, cam_handle = self.get_camera_name_handle(name)
         if name is None: return None
 
@@ -1011,7 +1015,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         else:
             self._logger.error("Current camera not changed.")
 
-
     def camera_fit(self,
                    camera: Optional[str] = None,
                    geometry: Optional[str] = None,
@@ -1077,6 +1080,124 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Light shading %s is selected.", mode.name)
         else:
             self._logger.error("Light shading setup failed.")
+
+    def get_light_pos(self, name: Optional[str] = None) -> Optional[np.ndarray]:
+        """
+        Get light 3D position.
+
+        Parameters
+        ----------
+        name : string, optional
+            Name of the light.
+
+        Returns
+        -------
+        out : np.ndarray, optional
+            3D of the light or None if failed on accessing light data.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        if name not in self.light_handles:
+            self._logger.error("Light %s does not exists.")
+            return None
+
+        pos = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
+        self._optix.get_light_pos(self.light_handles[name], pos.ctypes.data)
+        return pos
+
+    def get_light_color(self, name: Optional[str] = None) -> Optional[np.ndarray]:
+        """
+        Get light color.
+
+        Parameters
+        ----------
+        name : string, optional
+            Name of the light.
+
+        Returns
+        -------
+        out : np.ndarray, optional
+            Light color RGB or None if failed on accessing light data.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        if name not in self.light_handles:
+            self._logger.error("Light %s does not exists.")
+            return None
+
+        col = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
+        self._optix.get_light_color(self.light_handles[name], col.ctypes.data)
+        return col
+
+    def get_light_u(self, name: Optional[str] = None) -> Optional[np.ndarray]:
+        """
+        Get parallelogram light U vector.
+
+        Parameters
+        ----------
+        name : string, optional
+            Name of the light.
+
+        Returns
+        -------
+        out : np.ndarray, optional
+            Light U vector or None if failed on accessing light data.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        if name not in self.light_handles:
+            self._logger.error("Light %s does not exists.")
+            return None
+
+        u = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
+        self._optix.get_light_u(self.light_handles[name], u.ctypes.data)
+        return u
+
+    def get_light_v(self, name: Optional[str] = None) -> Optional[np.ndarray]:
+        """
+        Get parallelogram light V vector.
+
+        Parameters
+        ----------
+        name : string, optional
+            Name of the light.
+
+        Returns
+        -------
+        out : np.ndarray, optional
+            Light V vector or None if failed on accessing light data.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        if name not in self.light_handles:
+            self._logger.error("Light %s does not exists.")
+            return None
+
+        v = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
+        self._optix.get_light_v(self.light_handles[name], v.ctypes.data)
+        return v
+
+    def get_light_r(self, name: Optional[str] = None) -> Optional[float]:
+        """
+        Get spherical light radius.
+
+        Parameters
+        ----------
+        name : string, optional
+            Name of the light.
+
+        Returns
+        -------
+        out : float, optional
+            Light readius or None if failed on accessing light data.
+        """
+        if not isinstance(name, str): name = str(name)
+
+        if name not in self.light_handles:
+            self._logger.error("Light %s does not exists.")
+            return None
+
+        return self._optix.get_light_r(self.light_handles[name])
 
     def setup_spherical_light(self, name: str, pos: Optional[Any] = None,
                               autofit_camera: Optional[str] = None,

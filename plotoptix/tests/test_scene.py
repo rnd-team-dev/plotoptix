@@ -93,9 +93,36 @@ class TestScene(TestCase):
         m = TestScene.scene.get_light_shading()
         self.assertTrue(m is not None and m == LightShading.Hard, msg="Returned light shading mode different than value set.")
 
+    def test040_light(self):
+        self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
+
+        pos1=[20, 10, 10]
+        col1=[1, 0.5, 0.5]
+        r=2
+        TestScene.scene.setup_light("test_light1", light_type=Light.Spherical,
+                    pos=pos1, color=col1, radius=r, in_geometry=True)
+
+        pos2=[-20, 10, 10]
+        col2=[0.5, 0.5, 1]
+        u=[1, 0, 0]
+        v=[0, 1, 0]
+        TestScene.scene.setup_light("test_light2", light_type=Light.Parallelogram,
+                    pos=pos2, color=col2, u=u, v=v, in_geometry=True)
+
+        self.assertTrue(np.array_equal(TestScene.scene.get_light_pos("test_light1"), pos1), msg="Light 1 position did not match.")
+        self.assertTrue(np.array_equal(TestScene.scene.get_light_pos("test_light2"), pos2), msg="Light 2 position did not match.")
+
+        self.assertTrue(np.array_equal(TestScene.scene.get_light_color("test_light1"), col1), msg="Light 1 color did not match.")
+        self.assertTrue(np.array_equal(TestScene.scene.get_light_color("test_light2"), col2), msg="Light 2 color did not match.")
+
+        self.assertTrue(TestScene.scene.get_light_r("test_light1") == r, msg="Light 1 radius did not match.")
+
+        self.assertTrue(np.array_equal(TestScene.scene.get_light_u("test_light2"), u), msg="Light 2 U did not match.")
+        self.assertTrue(np.array_equal(TestScene.scene.get_light_v("test_light2"), v), msg="Light 2 V did not match.")
+
     #todo test new geometry
 
-    def test040_start_rt(self):
+    def test050_start_rt(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         TestScene.scene.start()
@@ -103,7 +130,7 @@ class TestScene(TestCase):
         self.assertTrue(TestScene.scene.isAlive(), msg="Raytracing thread is not alive.")
         TestScene.is_alive = True
 
-    def test050_camera(self):
+    def test060_camera(self):
         self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
 
         cam, handle = TestScene.scene.get_camera_name_handle()
