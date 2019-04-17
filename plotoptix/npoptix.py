@@ -825,6 +825,50 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error("Failed on reading camera %s.", name)
             return None
 
+    def get_camera_eye(self, name: Optional[str] = None) -> Optional[np.ndarray]:
+        """
+        Get camera eye coordinates.
+
+        Parameters
+        ----------
+        name : string, optional
+            Name of the camera, use current camera if name not provided.
+
+        Returns
+        -------
+        out : np.ndarray, optional
+            3D coordinates of the camera eye or None if failed on
+            accessing camera data.
+        """
+        name, cam_handle = self.get_camera_name_handle(name)
+        if name is None: return None
+
+        eye = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
+        self._optix.get_camera_eye(cam_handle, eye.ctypes.data)
+        return eye
+
+    def get_camera_target(self, name: Optional[str] = None) -> Optional[np.ndarray]:
+        """
+        Get camera target coordinates.
+
+        Parameters
+        ----------
+        name : string, optional
+            Name of the camera, use current camera if name not provided.
+
+        Returns
+        -------
+        out : np.ndarray, optional
+            3D coordinates of the camera target or None if failed on
+            accessing camera data.
+        """
+        name, cam_handle = self.get_camera_name_handle(name)
+        if name is None: return None
+
+        target = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
+        self._optix.get_camera_target(cam_handle, target.ctypes.data)
+        return target
+
     def setup_camera(self, name: str,
                      eye: Optional[Any] = None,
                      target: Optional[Any] = None,

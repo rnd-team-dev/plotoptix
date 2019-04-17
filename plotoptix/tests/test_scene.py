@@ -4,6 +4,8 @@ from plotoptix import TkOptiX
 from plotoptix.materials import *
 from plotoptix.enums import *
 
+import numpy as np
+
 class TestScene(TestCase):
 
     scene = None
@@ -128,7 +130,9 @@ class TestScene(TestCase):
                                      make_current=make_current)
         cam, handle = TestScene.scene.get_camera_name_handle()
         self.assertFalse((cam is None) or (handle is None), msg="Could not get back the new camera.")
-        self.assertTrue((cam == "test_cam1") and (handle > 1), msg="Wrong name/handle of the default camera: %s / %d." % (cam, handle))
+        self.assertTrue((cam == "test_cam1") and (handle > 1), msg="Wrong name/handle of the new camera: %s / %d." % (cam, handle))
+        self.assertTrue(np.array_equal(TestScene.scene.get_camera_eye(cam), eye), msg="Camera eye did not match.")
+        self.assertTrue(np.array_equal(TestScene.scene.get_camera_target(cam), target), msg="Camera target did not match.")
 
         cam_params = TestScene.scene.get_camera("test_cam1")
         self.assertFalse(cam_params is None, msg="Could not get back parameters dictionary of the new camera.")
