@@ -18,7 +18,7 @@ You'll find here super-basic examples of displaying data, like scatter plots or 
 
 ![screenshots1](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/basic_scripts_screens.jpg "PlotOptiX output screenshots")
 
-...and a bit more on tuning the available options, like the material and light shading modes selection:
+...and a bit more on tuning the available options, like the material and light shading modes:
 
 ![screenshots2](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/light_shading_modes.jpg "PlotOptiX light shading")
 
