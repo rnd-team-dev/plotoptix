@@ -99,7 +99,7 @@ def load_optix():
     optix.setup_material.argtypes = [c_wchar_p, c_wchar_p]
     optix.setup_material.restype = c_bool
 
-    optix.setup_geometry.argtypes = [c_int, c_wchar_p, c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.setup_geometry.argtypes = [c_int, c_wchar_p, c_wchar_p, c_bool, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.setup_geometry.restype = c_uint
 
     optix.update_geometry.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
@@ -238,8 +238,12 @@ def load_optix():
     optix.register_scene_rt_completed_callback.argtypes = [PARAM_INT_CALLBACK]
     optix.register_scene_rt_completed_callback.restype = c_bool
 
+    optix.get_min_accumulation_step.restype = c_int
+
     optix.set_min_accumulation_step.argtypes = [c_int]
     optix.set_min_accumulation_step.restype = c_bool
+
+    optix.get_max_accumulation_frames.restype = c_int
 
     optix.set_max_accumulation_frames.argtypes = [c_int]
     optix.set_max_accumulation_frames.restype = c_bool

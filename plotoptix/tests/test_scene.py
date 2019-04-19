@@ -76,7 +76,24 @@ class TestScene(TestCase):
         self.assertFalse(mat is None, msg="Could not read diffuse material.")
         self.assertTrue(("ClosestHitPrograms" in mat) and ("AnyHitPrograms" in mat), msg="Default material data is incomplete.")
 
-    def test020_predefined_materials(self):
+        frames_min = TestScene.scene.get_param("min_accumulation_step")
+        self.assertTrue(frames_min is not None and frames_min > 0, msg="Unreasonable min accumulation step value: %d." % frames_min)
+        frames_max = TestScene.scene.get_param("max_accumulation_frames")
+        self.assertTrue(frames_max is not None and frames_max >= frames_min, msg="Unreasonable max accumulation frames value: %d." % frames_max)
+
+    def test020_rt_parameters(self):
+        self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
+
+        frames_min = 2
+        frames_max = 4
+        TestScene.scene.set_param(
+            min_accumulation_step=frames_min,
+            max_accumulation_frames=frames_max
+        )
+        self.assertTrue(TestScene.scene.get_param("min_accumulation_step") == frames_min, msg="Min accumulation step did not match.")
+        self.assertTrue(TestScene.scene.get_param("max_accumulation_frames") == frames_max, msg="Max accumulation frames did not match.")
+
+    def test030_predefined_materials(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         m_list = ["m_flat", "m_eye_normal_cos", "m_diffuse", "m_mirror", "m_metalic", "m_plastic", "m_clear_glass"]
@@ -86,14 +103,14 @@ class TestScene(TestCase):
             mat = TestScene.scene.get_material(m)
             self.assertFalse(mat is None, msg="Could not read back %s material." % m)
 
-    def test030_light_shading(self):
+    def test040_light_shading(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         TestScene.scene.set_light_shading(LightShading.Hard)
         m = TestScene.scene.get_light_shading()
         self.assertTrue(m is not None and m == LightShading.Hard, msg="Returned light shading mode different than value set.")
 
-    def test040_light(self):
+    def test050_light(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         pos1=[20, 10, 10]
@@ -122,7 +139,7 @@ class TestScene(TestCase):
 
     #todo test new geometry
 
-    def test050_start_rt(self):
+    def test060_start_rt(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         TestScene.scene.start()
@@ -130,7 +147,7 @@ class TestScene(TestCase):
         self.assertTrue(TestScene.scene.isAlive(), msg="Raytracing thread is not alive.")
         TestScene.is_alive = True
 
-    def test060_camera(self):
+    def test070_camera(self):
         self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
 
         cam, handle = TestScene.scene.get_camera_name_handle()

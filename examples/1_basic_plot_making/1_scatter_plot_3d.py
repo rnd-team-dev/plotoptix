@@ -46,18 +46,21 @@ def main():
 
     # add plots, ParticleSet geometry is default
     optix.set_data("particles", pos=particles, r=rp, c=cp)
-    # and use geom parameter to specify cubes Parallelepipeds geometry;
+    # and use geom parameter to specify cubes geometry;
     # Parallelepipeds can be described precisely with U, V, W vectors,
     # but here we only provide the r parameter - this results with
     # randomly rotated cubes of U, V, W lenghts equal to r 
     optix.set_data("cubes", pos=cubes, r=rc, c=cc, geom="Parallelepipeds")
 
+    # tetrahedrons look good as well, and they are really fast on RTX devices:
+    #optix.set_data("tetras", pos=cubes, r=rc, c=cc, geom="Tetrahedrons")
+
     # if you prefer cubes aligned with xyz:
-    #nc = rc.shape[0]
-    #u = np.zeros((nc,3)); u[:,0] = rc[:]
-    #v = np.zeros((nc,3)); v[:,1] = rc[:]
-    #w = np.zeros((nc,3)); w[:,2] = rc[:]
-    #optix.set_data("cubes", pos=cubes, u=u, v=v, w=w, c=cc, geom="Parallelepipeds")
+    #optix.set_data("cubes", pos=cubes, r=rc, c=cc, geom="Parallelepipeds", rnd=False)
+
+    # or if you'd like some edges fixed:
+    #v = np.zeros((rc.shape[0], 3)); v[:,1] = rc[:]
+    #optix.set_data("cubes", pos=cubes, u=[0.05,0,0], v=v, w=[0,0,0.05,0], c=cc, geom="Parallelepipeds")
 
     # show coordinates box
     optix.set_coordinates()

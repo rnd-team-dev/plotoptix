@@ -29,12 +29,13 @@ class Geometry(Enum):
     BezierChain = 6
     Parallelograms = 7
     Parallelepipeds = 8
+    Tetrahedrons = 9
 
 class GeomBuffer(IntFlag):
     """
-    Geometry buffer flags. Used for selection of buffers which should
-    be updated in GPU (update geometry() method) after geometry modifications
-    made with move_geometry()/move_primitive() and similar functions.
+    Geometry buffer flags. Used for selection of buffers which should be updated
+    in GPU (update geometry() method) after geometry modifications made with
+    move_geometry()/move_primitive() and similar functions.
     """
     Positions = 1
     Colors0 = 4
@@ -62,9 +63,8 @@ class Camera(Enum):
 
 class LightShading(Enum):
     """
-    Light shading program. Soft converges quickly and
-    is well balanced for most scenes and light sources.
-    Hard is better suited for scenes with caustics.
+    Light shading program. Soft converges quickly and is well balanced for most
+    scenes and light sources. Hard is better suited for scenes with caustics.
     """
     Soft = 0
     Hard = 1

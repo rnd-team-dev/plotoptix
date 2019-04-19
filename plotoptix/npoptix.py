@@ -236,7 +236,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     @staticmethod
     def _default_initialization(wnd) -> None:
         wnd._logger.info("Default scene initialization.")
-        wnd.set_param(max_accumulation_frames=4)
+        if wnd._optix.get_max_accumulation_frames() < 4:
+            wnd._optix.set_max_accumulation_frames(4)
         if wnd._optix.get_current_camera() == 0:
             wnd.setup_camera("default", [0, 0, 10], [0, 0, 0])
 
@@ -716,9 +717,48 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.info("Ambient color updated.")
 
 
+    def get_param(self, name: str) -> None:
+        """
+        Get raytracing parameter.
+
+        Parameters
+        ----------
+        name : string
+            Parameter name.
+
+        Returns
+        -------
+        out : Any, optional
+            Value of the parameter or None if parameter not found.
+
+        Examples
+        --------
+        >>> optix = TkOptiX()
+        >>> print(optix.get_param("max_accumulation_frames"))
+        """
+        try:
+            v = None
+
+            self._padlock.acquire()
+            if name == "min_accumulation_step":
+                v = self._optix.get_min_accumulation_step()
+            elif name == "max_accumulation_frames":
+                v = self._optix.get_max_accumulation_frames()
+            else:
+                self._logger.error("Unknown parameter " + name)
+
+        except Exception as e:
+            self._logger.error(str(e))
+
+        finally:
+            self._padlock.release()
+
+        self._logger.info("Value of %s is %s", name, v)
+        return v
+
     def set_param(self, **kwargs) -> None:
         """
-        Set raytracing parameters (one or more) and raytrace the whole scene.
+        Set raytracing parameters (one or more) and start raytracing of the scene.
 
         Parameters
         ----------
@@ -735,12 +775,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             for key, value in kwargs.items():
                 self._logger.info("Set %s to %s", key, value)
 
-                if key == 'min_accumulation_step':
+                if key == "min_accumulation_step":
                     self._optix.set_min_accumulation_step(int(value))
-                elif key == 'max_accumulation_frames':
+                elif key == "max_accumulation_frames":
                     self._optix.set_max_accumulation_frames(int(value))
                 else:
-                    self._logger.error('Unknown parameter ' + key)
+                    self._logger.error("Unknown parameter " + key)
 
         except Exception as e:
             self._logger.error(str(e))
@@ -1565,7 +1605,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                  r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
                  u = None, v = None, w = None,
                  geom: Union[Geometry, str] = Geometry.ParticleSet,
-                 mat: str = "diffuse") -> None:
+                 mat: str = "diffuse",
+                 rnd: bool = True) -> None:
         """
         Create geometry for the dataset.
 
@@ -1582,22 +1623,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             each primitive.
         r : Any
             Radii of particles / bezier primitives or U / V / W lengths of
-            parallelograms / parallelepipeds (if u / v / w not provided). Single
-            value sets const. size for all primitives.
+            parallelograms / parallelepipeds / tetrahedrons (if u / v / w not provided).
+            Single value sets const. size for all primitives.
         u : array_like
-            U vector(s) of parallelograms / parallelepipeds. Single vector sets
-            const. vlue for all primitives.
+            U vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
+            vector sets const. value for all primitives.
         v : array_like
-            V vector(s) of parallelograms / parallelepipeds. Single vector sets
-            const. vlue for all primitives.
+            V vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
+            vector sets const. value for all primitives.
         w : array_like
-            W vector(s) of parallelepipeds. Single vector sets const. vlue for
-            all primitives.
+            W vector(s) of parallelepipeds / tetrahedrons. Single vector sets const.
+            value for all primitives.
         geom : Geometry enum or string
-            Geometry of primitives (spherical, parallelogram, ...). See Geometry
+            Geometry of primitives (ParticleSet, Tetrahedrons, ...). See Geometry
             enum.
         mat : string
             Material name.
+        rnd : bool
+            Randomize not provided U / V / W vectors so regular but randomly rotated
+            primitives are generated using available vectors (default). If rnd=False
+            all primitives are aligned in the same direction.
         """
         if not isinstance(name, str): name = str(name)
         if isinstance(geom, str): geom = Geometry[geom]
@@ -1677,14 +1722,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 self._logger.error("ParticleSet setup failed, radii data is missing.")
                 is_ok = False
 
-        elif geom == Geometry.Parallelepipeds:
+        elif (geom == Geometry.Parallelepipeds) or (geom == Geometry.Tetrahedrons):
             if c is None:
-                self._logger.error("Parallelepipeds setup failed, colors data is missing.")
+                self._logger.error("Plot setup failed, colors data is missing.")
                 is_ok = False
 
             if (u is None) or (v is None) or (w is None):
                 if r is None:
-                    self._logger.error("Parallelepipeds setup failed, need U, V, W vectors or radii data.")
+                    self._logger.error("Plot setup failed, need U, V, W vectors or radii data.")
                     is_ok = False
 
         elif geom == Geometry.BezierChain:
@@ -1705,7 +1750,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 self._padlock.acquire()
 
                 self._logger.info("Create %s %s, %d primitives...", geom.name, name, n_primitives)
-                g_handle = self._optix.setup_geometry(geom.value, name, mat, n_primitives,
+                g_handle = self._optix.setup_geometry(geom.value, name, mat, rnd, n_primitives,
                                                       pos_ptr, col_ptr, radii_ptr, u_ptr, v_ptr, w_ptr)
 
                 if g_handle > 0:
@@ -1743,14 +1788,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Radii of particles / bezier primitives. Single value sets constant
             radius for all primitives.
         u : array_like
-            U vector(s) of parallelograms / parallelepipeds. Single vector sets
-            const. vlue for all primitives.
+            U vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
+            vector sets const. value for all primitives.
         v : array_like
-            V vector(s) of parallelograms / parallelepipeds. Single vector sets
-            const. vlue for all primitives.
+            V vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
+            vector sets const. value for all primitives.
         w : array_like
-            W vector(s) of parallelepipeds. Single vector sets const. vlue for
-            all primitives.
+            W vector(s) of parallelepipeds / tetrahedrons. Single vector sets const.
+            value for all primitives.
         """
         if not isinstance(name, str): name = str(name)
 
