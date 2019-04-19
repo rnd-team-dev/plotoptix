@@ -6,7 +6,7 @@
 
 ### Added
 - RTX-accelerated tetrahedrons geometry
-- generate aligned or randomly rotated data markers if some vectors are missong
+- generate aligned or randomly rotated data markers if some vectors are missing
 - methods to read back camera eye/target, light position, color and r/u/v
 - get_param() to read back the rt parameters
 - this changelog, markdown description content type tag for PyPI
