@@ -37,7 +37,7 @@ PlotOptiX is based on [NVIDIA OptiX](https://developer.nvidia.com/optix) framewo
 
 - progressive path tracing with explicit light sampling
 - pinhole cameras and cameras with depth of field simulation
-- particle (sphere), parallelepiped, parallelogram and bezier geometries
+- geometries: particles (spheres), parallelepipeds, parallelograms, tetrahedrons and bezier lines
 - flat, diffuse, specular and glass shading
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
