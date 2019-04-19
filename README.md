@@ -31,7 +31,7 @@ Just to decorate this readme, here is a couple of images made with PlotOptiX:
 
 See [examples](https://github.com/rnd-team-dev/plotoptix/tree/master/examples) for code samples and more usage options.
 
-PlotOptiX is based on [NVIDIA OptiX](https://developer.nvidia.com/optix) framework wrapped in RnD.SharpOptiX C#/C++ libraries and CUDA shaders by R&D Team. In this early version we start with:
+PlotOptiX is based on [NVIDIA OptiX](https://developer.nvidia.com/optix) framework wrapped in RnD.SharpOptiX C#/C++ libraries and CUDA shaders by R&D Team. PlotOptiX makes use of RTX-capable GPU's. In this early version we start with:
 
 ### Features
 
