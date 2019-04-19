@@ -1,8 +1,6 @@
 # Changelog
 
-## 0.1.3 - unreleased
-
-**Note** This version is not yet released and is under active development.
+## v0.1.3 - 2019-04-19
 
 ### Added
 - RTX-accelerated tetrahedrons geometry
