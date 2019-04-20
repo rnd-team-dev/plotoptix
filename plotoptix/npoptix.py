@@ -1880,7 +1880,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                       update: Optional[bool] = True) -> None:
         """
         Move all primitives by [x, y, z] vector. Update GPU buffers immediately
-        if update is set to True (default), oterwise update should be made using
+        if update is set to True (default), otherwise update should be made using
         update_geom_buffers() method after all geometry modifications are finished.
 
         Parameters
@@ -1903,7 +1903,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                        update: Optional[bool] = True) -> None:
         """
         Move selected primitive by [x, y, z] vector. Update GPU buffers immediately
-        if update is set to True (default), oterwise update should be made using
+        if update is set to True (default), otherwise update should be made using
         update_geom_buffers() method after all geometry modifications are finished.
 
         Parameters
@@ -1929,7 +1929,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         Rotate all primitives by specified degrees around x, y, z axis, with
         respect to the center of the geometry. Update GPU buffers immediately
-        if update is set to True (default), oterwise update should be made using
+        if update is set to True (default), otherwise update should be made using
         update_geom_buffers() method after all geometry modifications are finished.
 
         Parameters
@@ -1953,7 +1953,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         Rotate selected primitive by specified degrees around x, y, z axis, with
         respect to the center of the selected primitive. Update GPU buffers
-        immediately if update is set to True (default), oterwise update should be
+        immediately if update is set to True (default), otherwise update should be
         made using update_geom_buffers() method after all geometry modifications
         are finished.
 
@@ -1980,7 +1980,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         Scale all primitive's positions and sizes by specified factor, with respect
         to the center of the geometry. Update GPU buffers immediately if update is
-        set to True (default), oterwise update should be made using update_geom_buffers()
+        set to True (default), otherwise update should be made using update_geom_buffers()
         method after all geometry modifications are finished.
 
         Parameters
@@ -2000,7 +2000,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         Scale selected primitive by specified factor, with respect to the center of
         the selected primitive. Update GPU buffers immediately if update is set to
-        True (default), oterwise update should be made using update_geom_buffers()
+        True (default), otherwise update should be made using update_geom_buffers()
         method after all geometry modifications are finished.
 
         Parameters
@@ -2042,8 +2042,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         mode : Coordinates enum or string
-            Style of the coordinate system geometry. See Coordinates
-            enum
+            Style of the coordinate system geometry. See Coordinates enum.
         thickness : float
             Thickness of lines.
         """

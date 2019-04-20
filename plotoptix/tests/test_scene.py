@@ -19,6 +19,7 @@ class TestScene(TestCase):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         # test for failures
+        print("---- Now you'll see logger error messages, this is OK.")
 
         fx = TestScene.scene.get_float("non_existing_float")
         self.assertTrue(fx is None, msg="Should return None")
@@ -34,6 +35,8 @@ class TestScene(TestCase):
 
         ix = TestScene.scene.get_int("non_existing_int")
         self.assertTrue(ix is None, msg="Should return None")
+
+        print("---- End of error messages.")
 
         # test for required values
 
