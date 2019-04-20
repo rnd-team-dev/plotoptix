@@ -1,4 +1,8 @@
-﻿Section I: Introduction
+Short, non-binding summary: PlotOptiX is free for non-comercial use.
+
+Full legal terms:
+
+Section I: Introduction
 
 Definition of the "Software": PlotOptiX source code and documentation together with included binaries and their associated source code.
 
