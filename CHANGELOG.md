@@ -2,7 +2,10 @@
 
 ## v0.1.4 - unreleased
 
-**Note:** this version is not yet relased and under active development.
+**Note:** this version is not yet relased and it is under active development.
+
+### Added
+- methods to rotate geometry/primitive about provided 3D point
 
 ## v0.1.3 - 2019-04-19
 

@@ -1925,6 +1925,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error("Primitive move failed.")
 
     def rotate_geometry(self, name: str, x: float, y: float, z: float,
+                        center: Optional[Any] = None,
                         update: Optional[bool] = True) -> None:
         """
         Rotate all primitives by specified degrees around x, y, z axis, with
@@ -1942,13 +1943,23 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Rotation around Y axis.
         z : float
             Rotation around Z axis.
+        center : array_like, optional
+            Rotation center. If not provided, rotation is made about the geometry
+            center.
         update : bool, optional
             Update GPU buffer.
         """
-        if not self._optix.rotate_geometry(name, x, y, z, update):
-            self._logger.error("Geometry rotate failed.")
+        if center is None:
+            if not self._optix.rotate_geometry(name, x, y, z, update):
+                self._logger.error("Geometry rotate failed.")
+        else:
+            if not isinstance(center, np.ndarray):
+                center = np.asarray(center, dtype=np.float32)
+            if not self._optix.rotate_geometry_about(name, x, y, z, center[0], center[1], center[2], update):
+                self._logger.error("Geometry rotate failed.")
 
     def rotate_primitive(self, name: str, idx: int, x: float, y: float, z: float,
+                         center: Optional[Any] = None,
                          update: Optional[bool] = True) -> None:
         """
         Rotate selected primitive by specified degrees around x, y, z axis, with
@@ -1969,11 +1980,20 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Rotation around Y axis.
         z : float
             Rotation around Z axis.
+        center : array_like, optional
+            Rotation center. If not provided, rotation is made about the primitive
+            center.
         update : bool, optional
             Update GPU buffer.
         """
-        if not self._optix.rotate_primitive(name, idx, x, y, z, update):
-            self._logger.error("Primitive rotate failed.")
+        if center is None:
+            if not self._optix.rotate_primitive(name, idx, x, y, z, update):
+                self._logger.error("Primitive rotate failed.")
+        else:
+            if not isinstance(center, np.ndarray):
+                center = np.asarray(center, dtype=np.float32)
+            if not self._optix.rotate_primitive_about(name, idx, x, y, z, center[0], center[1], center[2], update):
+                self._logger.error("Geometry rotate failed.")
 
     def scale_geometry(self, name: str, s: float,
                        update: Optional[bool] = True) -> None:

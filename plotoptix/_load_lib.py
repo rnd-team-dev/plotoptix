@@ -117,6 +117,12 @@ def load_optix():
     optix.rotate_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_bool]
     optix.rotate_primitive.restype = c_bool
 
+    optix.rotate_geometry_about.argtypes = [c_wchar_p, c_float, c_float, c_float, c_float, c_float, c_float, c_bool]
+    optix.rotate_geometry_about.restype = c_bool
+
+    optix.rotate_primitive_about.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_float, c_float, c_float, c_bool]
+    optix.rotate_primitive_about.restype = c_bool
+
     optix.scale_geometry.argtypes = [c_wchar_p, c_float, c_bool]
     optix.scale_geometry.restype = c_bool
 
