@@ -40,7 +40,7 @@ A couple of images made with PlotOptiX, for decoration of this introduction:
 .. image:: images/screenshots.jpg
    :alt: PlotOptiX screenshots
 
-`Documentation pages <http://plotoptix.rnd.team>`__ are currently generated from the source code docstrings. Please,
+`Documentation pages <https://plotoptix.rnd.team>`__ are currently generated from the source code docstrings. Please,
 see `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__
 for practical code samples.
 

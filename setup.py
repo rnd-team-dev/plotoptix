@@ -21,7 +21,7 @@ setup(name='plotoptix',
       version='0.1.4',
       url='https://github.com/rnd-team-dev/plotoptix',
       project_urls={
-          'Documentation': 'http://plotoptix.rnd.team',
+          'Documentation': 'https://plotoptix.rnd.team',
           'Examples': 'https://github.com/rnd-team-dev/plotoptix/tree/master/examples',
           'Source': 'https://github.com/rnd-team-dev/plotoptix'
           },
