@@ -981,22 +981,22 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Target 3D position. Center of all geometries if argument not provided.
         up : array_like, optional
             Up (vertical) direction. Y axis if argument not provided.
-        cam_type : Camera enum or string
+        cam_type : Camera enum or string, optional
             Type (pinhole, depth of field, ...). Cannot be changed after construction.
-        aperture_radius : float
+        aperture_radius : float, optional
             Aperture radius (increases focus blur for depth of field cameras).
-        aperture_fract : float
+        aperture_fract : float, optional
             Fraction of blind central spot of the aperture (results with ring-like
             bokeh if >0). Cannot be changed after construction.
-        focal_scale : float
+        focal_scale : float, optional
             Focus distance / (eye - target).length.
-        fov : float
+        fov : float, optional
             Field of view in degrees.
-        blur : float
+        blur : float, optional
             Weight of the new frame in averaging with already accumulated frames.
             Range is (0; 1>, lower values result with a higher motion blur, value
             1.0 turns off the blur (default). Cannot be changed after construction.
-        make_current : bool
+        make_current : bool, optional
             Automatically switch to this camera if set to True.
         """
         if not isinstance(name, str): name = str(name)
@@ -1049,11 +1049,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Target 3D position.
         up : array_like, optional
             Up (vertical) direction.
-        aperture_radius : float
+        aperture_radius : float, optional
             Aperture radius (increases focus blur for depth of field cameras).
-        focal_scale : float
+        focal_scale : float, optional
             Focus distance / (eye - target).length.
-        fov : float
+        fov : float, optional
             Field of view in degrees.
         """
         name, cam_handle = self.get_camera_name_handle(name)
