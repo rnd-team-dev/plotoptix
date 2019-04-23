@@ -1,8 +1,6 @@
 PlotOptiX
 =========
 
-**Data visualisation in Python based on NVIDIA OptiX ray tracing framework.**
-
 .. image:: https://img.shields.io/pypi/v/plotoptix.svg
    :target: https://pypi.org/project/plotoptix
    :alt: Latest PlotOptiX version
@@ -12,6 +10,8 @@ PlotOptiX
 .. image:: https://img.shields.io/badge/support%20project-paypal-brightgreen.svg
    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RG47ZEL5GKLNA&source=url
    :alt: Support project
+
+**Data visualisation in Python based on NVIDIA OptiX ray tracing framework.**
 
 **Note:** this is an early, beta version. Active development and documentation is ongoing.
 
