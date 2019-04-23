@@ -20,6 +20,11 @@ except ImportError:
 setup(name='plotoptix',
       version='0.1.4',
       url='https://github.com/rnd-team-dev/plotoptix',
+      project_urls={
+          'Documentation': 'http://plotoptix.rnd.team',
+          'Examples': 'https://github.com/rnd-team-dev/plotoptix/tree/master/examples',
+          'Source': 'https://github.com/rnd-team-dev/plotoptix'
+          },
       author='Robert Sulej, R&D Team',
       author_email='dev@rnd.team',
       description='Data visualisation in Python based on NVIDIA OptiX ray tracing framework.',
@@ -46,10 +51,14 @@ setup(name='plotoptix',
           'numpy>=1.0',
           'Pillow>=5.3'
       ],
-      long_description=open('README.md').read(),
-      long_description_content_type="text/markdown",
+      long_description=open('README.rst').read(),
       include_package_data=True,
-      exclude_package_data={'': ['README.md']},
+      exclude_package_data={
+          '': [
+              'README.rst',
+              'README.md'
+              ]
+          },
       test_suite='nose2.collector.collector',
       tests_require=['nose2>=0.9'],
       zip_safe=False)

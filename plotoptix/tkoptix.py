@@ -39,10 +39,32 @@ class TkOptiX(NpOptiX):
     ----------
     on_initialization : callable or list, optional
         Callable or list of callables to execute upon starting the raytracing
-        thread (these callbacks are executed on the main thread).
+        thread. These callbacks are executed on the main thread.
     on_scene_compute : callable or list, optional
-        Callable or list of callables to execute upon starting the new frame
-        (callbacks are executed in a thread parallel to the raytracing).
+        Callable or list of callables to execute upon starting the new frame.
+        Callbacks are executed in a thread parallel to the raytracing.
+    on_rt_completed : callable or list, optional
+        Callable or list of callables to execute when the frame raytracing
+        is completed (execution may be paused with pause_compute() method).
+        Callbacks are executed in a thread parallel to the raytracing.
+    on_launch_finished : callable or list, optional
+        Callable or list of callables to execute when the frame raytracing
+        is completed. These callbacks are executed on the raytracing thread.
+    on_rt_accum_done : callable or list, optional
+        Callable or list of callables to execute when the last accumulation
+        frame is finished. These callbacks are executed on the raytracing thread.
+    width : int, optional
+        Pixel width of the raytracing output. Default value is half of the
+        screen width.
+    height : int, optional
+        Pixel height of the raytracing output. Default value is half of the
+        screen height.
+    start_now : bool, optional
+        Open the GUI window and start raytracing thread immediately. If set
+        to False, then user should call start() or show() method. Default is
+        False.
+    log_level : int or string, optional
+        Log output level. Default is "WARN".
     """
 
     def __init__(self,
@@ -89,9 +111,23 @@ class TkOptiX(NpOptiX):
         ###############################################################
 
     # For matplotlib users convenience.
-    def show(self) -> None: self.start()
+    def show(self) -> None:
+        """Start raytracing thread and open the GUI window.
+        
+        Convenience method to call NpOptiX.start() method.
+
+        Actions provided with on_initialization parameter of __init__
+        are executed by this method on the main thread, before the
+        ratracing thread is started and GUI window open.
+        """
+        self.start()
 
     def _run_event_loop(self):
+        """Override NpOptiX's method for running the UI event loop.
+
+        Configure the GUI window properties and events, prepare image
+        to display raytracing output.
+        """
         # setup Tk window #############################################
         self._root = tk.Tk()
 
@@ -150,6 +186,10 @@ class TkOptiX(NpOptiX):
         ###############################################################
 
     def close(self) -> None:
+        """Stop the raytracing thread, release resources.
+
+        Raytracing cannot be restarted after this method is called.
+        """
         if not self._is_closed:
             self._canvas.event_generate("<<CloseScene>>", when="head")
         else:

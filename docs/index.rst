@@ -13,7 +13,7 @@
 .. toctree::
    :caption: Quick Links
 
-   R&D Team Studio <http://rnd.team>
+   R&D Team Design Studio <http://rnd.team>
    GitHub Sources <https://github.com/rnd-team-dev/plotoptix>
    PyPI Releases <https://pypi.org/project/plotoptix>
 

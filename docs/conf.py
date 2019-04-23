@@ -12,21 +12,24 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
+import os
+import sys
+sys.path.append(os.path.abspath('..'))
 # sys.path.insert(0, os.path.abspath('.'))
 
 
 # -- Project information -----------------------------------------------------
 
+from plotoptix import __version__, __author__
+
 project = 'PlotOptiX'
-copyright = '2019, Robert Sulej, R&D Team'
-author = 'Robert Sulej, R&D Team'
+copyright = '2019, ' + __author__
+author = __author__
 
 # The short X.Y version
-version = ''
+version = __version__
 # The full version, including alpha/beta/rc tags
-release = 'v0.1.3'
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -90,7 +93,7 @@ html_logo = 'images/rnd_logo.png'
 # documentation.
 #
 html_theme_options = {
-    'logo_only': True
+    #'logo_only': True
     }
 
 # Add any paths that contain custom static files (such as style sheets) here,
