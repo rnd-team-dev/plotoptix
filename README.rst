@@ -35,14 +35,14 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
    plot.set_data("my plot", xyz, r=r)
    plot.show()
 
+`Documentation pages <https://plotoptix.rnd.team>`__ are currently generated from the source code docstrings. Please,
+see `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__
+for practical code samples.
+
 A couple of images made with PlotOptiX, for decoration of this introduction:
 
 .. image:: images/screenshots.jpg
    :alt: PlotOptiX screenshots
-
-`Documentation pages <https://plotoptix.rnd.team>`__ are currently generated from the source code docstrings. Please,
-see `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__
-for practical code samples.
 
 PlotOptiX is based on `NVIDIA OptiX <https://developer.nvidia.com/optix>`_ framework wrapped in RnD.SharpOptiX C#/C++ libraries and CUDA
 shaders by R&D Team. PlotOptiX makes use of RTX-capable GPU's. In this early version we start with:
