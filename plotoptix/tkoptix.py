@@ -19,11 +19,30 @@ from plotoptix._load_lib import PLATFORM
 from plotoptix.npoptix import NpOptiX
 
 class TkOptiX(NpOptiX):
-    """
-    Tkinter based UI for PlotOptiX.
+    """Tkinter based UI for PlotOptiX.
 
-    NOTE naming: functions with the names _gui_* can be used from the
+    Summary of mouse and keys actions:
+
+    - rotate camera eye around the target: hold and drag left mouse button
+    - rotate camera target around the eye: hold and drag right mouse button
+    - zoom out/in (change camera field of view): hold shift + left mouse button and drag up/down
+    - move camera eye backward/forward: hold shift + right mouse button and drag up/down
+    - change focus distance in "depth of field" cameras: hold ctrl + left mouse button and drag up/down
+    - change aperture radius in "depth of field" cameras: hold ctrl + right mouse button and drag up/down
+    - focus at an object: hold ctrl + double-click left mouse button
+    - select an object: double-click left mouse button (info on terminal output)
+
+    Note: functions with the names _gui_* can be used from the
     GUI thread (Tk event loop) only.
+
+    Parameters
+    ----------
+    on_initialization : callable or list, optional
+        Callable or list of callables to execute upon starting the raytracing
+        thread (these callbacks are executed on the main thread).
+    on_scene_compute : callable or list, optional
+        Callable or list of callables to execute upon starting the new frame
+        (callbacks are executed in a thread parallel to the raytracing).
     """
 
     def __init__(self,
@@ -36,6 +55,8 @@ class TkOptiX(NpOptiX):
                  height: int = -1,
                  start_now: bool = False,
                  log_level: Union[int, str] = logging.WARN) -> None:
+        """TkOptiX constructor
+        """
 
         # pass all arguments, except start_now - we'll do that later
         super().__init__(

@@ -1,0 +1,25 @@
+.. include:: ../README.rst
+
+.. toctree::
+   :caption: API Reference
+   :maxdepth: 2
+
+   npoptix
+   tkoptix
+   enums
+   materials
+   utils
+
+.. toctree::
+   :caption: Quick Links
+
+   R&D Team Studio <http://rnd.team>
+   GitHub Sources <https://github.com/rnd-team-dev/plotoptix>
+   PyPI Releases <https://pypi.org/project/plotoptix>
+
+Indices
+=======
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

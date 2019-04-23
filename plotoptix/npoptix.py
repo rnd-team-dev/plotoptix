@@ -18,16 +18,27 @@ from plotoptix.enums import *
 
 
 class NpOptiX(threading.Thread, metaclass=Singleton):
-    """
+    """No-UI raytracer, output to numpy array only.
+
     Base, headless interface to the RnD.SharpOptiX raytracing engine. Provides
     infrastructure for running the raytracing and compute threads and exposes
-    their callbacks to the user. Outputs the raytraced image to the numpy array.
+    their callbacks to the user. Outputs raytraced image to numpy array.
 
     In derived UI classes, implement in overriden methods:
-    -  start and run UI event loop in:  _run_event_loop()
-    -  raise UI close event in:         close()
-    -  update image in UI in:           _launch_finished_callback()
-    -  optionally apply UI edits in:    _scene_rt_starting_callback()
+
+    - start and run UI event loop in:  _run_event_loop()
+    - raise UI close event in:         close()
+    - update image in UI in:           _launch_finished_callback()
+    - optionally apply UI edits in:    _scene_rt_starting_callback()
+
+    Parameters
+    ----------
+    on_initialization : callable or list, optional
+        Callable or list of callables to execute upon starting the raytracing
+        thread (these callbacks are executed on the main thread).
+    on_scene_compute : callable or list, optional
+        Callable or list of callables to execute upon starting the new frame
+        (callbacks are executed in a thread parallel to the raytracing).
     """
 
     def __init__(self,
@@ -40,6 +51,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                  height: int = -1,
                  start_now: bool = False,
                  log_level: Union[int, str] = logging.WARN) -> None:
+        """NpOptiX constructor.
+        """
 
         super().__init__()
 

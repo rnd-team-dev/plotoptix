@@ -1,9 +1,4 @@
-"""
-PlotOptiX predefined materials.
-
-Copyright (C) 2019 R&D Team. All Rights Reserved.
-
-Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
+"""PlotOptiX predefined materials.
 """
 
 import os
@@ -78,9 +73,10 @@ Strongly reflective, metalic material. Use surface_albedo (range <0; 1>) to colo
 reflection. Standard color assigned to each primitive is affecting the diffuse contribution
 color (range <0; 1>). Reflection to diffuse proportion is set with reflectivity_index
 and reflectivity_range (both in range <0; 1>), where:
-    - (1, 1) results with a mirror-like appearance
-    - (0, 0) results with a diffuse-like appearance
-    - intermediate values result with a plastic-like appearance and various gloss profiles. 
+
+- (1, 1) results with a mirror-like appearance
+- (0, 0) results with a diffuse-like appearance
+- intermediate values result with a plastic-like appearance and various gloss profiles. 
 """
 
 m_plastic = {

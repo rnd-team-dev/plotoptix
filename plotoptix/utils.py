@@ -1,9 +1,4 @@
-"""
-PlotOptiX utility functions.
-
-Copyright (C) 2019 R&D Team. All Rights Reserved.
-
-Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
+"""Utility and convenience functions.
 """
 
 import numpy as np
