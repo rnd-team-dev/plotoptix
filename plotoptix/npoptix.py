@@ -55,7 +55,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Pixel height of the raytracing output. Default value is 16.
     start_now : bool, optional
         Start raytracing thread immediately. If set to False, then user should
-        call start() method. Default is False.
+        call start() method. Default is ``False``.
     log_level : int or string, optional
         Log output level. Default is ``WARN``.
     """
@@ -201,8 +201,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Internal method for running the UI event loop.
 
         This method should be overriden in derived UI class (but **do not call
-        this base implementation**), and remember to set self._started_event
-        after all your UI initialization.
+        this base implementation**).
+        
+        Remember to set self._started_event after all your UI initialization.
         """
         self._started_event.set()
         while not self._is_closed: time.sleep(0.5)
@@ -240,7 +241,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : ndarray
-            RGBA array of shape (height, width, 4), with type ``numpy.uint8``.
+            RGBA array of shape (height, width, 4) and type ``numpy.uint8``.
         """
         assert self._is_started, "Raytracing output not running."
         with self._padlock:

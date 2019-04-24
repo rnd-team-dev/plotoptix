@@ -35,6 +35,8 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
    plot.set_data("my plot", xyz, r=r)
    plot.show()
 
+... but PlotOptiX is much faster on large data and, with all the raytraced shades and DoF, more readable and eye catching.
+
 `Documentation pages <https://plotoptix.rnd.team>`__ are currently generated from the source code docstrings. Please,
 see `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__
 for practical code samples.
@@ -67,7 +69,7 @@ System Requirements
 - operating system, *currently*: Windows
 - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (but you should already have it)
 - a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest
-- `CUDA Toolkit **10.1** <https://developer.nvidia.com/cuda-downloads>`__
+- `CUDA Toolkit v10.1 <https://developer.nvidia.com/cuda-downloads>`__
 - Python 3
 
 What's Included
