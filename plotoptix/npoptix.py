@@ -20,16 +20,16 @@ from plotoptix.enums import *
 class NpOptiX(threading.Thread, metaclass=Singleton):
     """No-UI raytracer, output to numpy array only.
 
-    Base, headless interface to the RnD.SharpOptiX raytracing engine. Provides
+    Base, headless interface to the `RnD.SharpOptiX` raytracing engine. Provides
     infrastructure for running the raytracing and compute threads and exposes
     their callbacks to the user. Outputs raytraced image to numpy array.
 
     In derived UI classes, implement in overriden methods:
 
-    - start and run UI event loop in:  _run_event_loop()
-    - raise UI close event in:         close()
-    - update image in UI in:           _launch_finished_callback()
-    - optionally apply UI edits in:    _scene_rt_starting_callback()
+    - start and run UI event loop in:  :meth:`plotoptix.NpOptiX._run_event_loop`
+    - raise UI close event in:         :meth:`plotoptix.NpOptiX.close`
+    - update image in UI in:           :meth:`plotoptix.NpOptiX._launch_finished_callback`
+    - optionally apply UI edits in:    :meth:`plotoptix.NpOptiX._scene_rt_starting_callback`
 
     Parameters
     ----------
@@ -57,7 +57,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Start raytracing thread immediately. If set to False, then user should
         call start() method. Default is False.
     log_level : int or string, optional
-        Log output level. Default is "WARN".
+        Log output level. Default is ``WARN``.
     """
 
     def __init__(self,
@@ -144,9 +144,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def start(self) -> None:
         """Start the raytracing, compute, and UI threads.
 
-        Actions provided with on_initialization parameter of __init__ are
-        executed by this method on the main thread, before starting the
-        ratracing thread.
+        Actions provided with ``on_initialization`` parameter of NpOptiX
+        constructor are executed by this method on the main thread,
+        before starting the ratracing thread.
         """
         if self._is_closed:
             self._logger.warn("Raytracing output was closed, cannot re-open.")
@@ -173,8 +173,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def run(self):
         """Starts UI event loop.
 
-        Derived from threading.Thread. **Do not override**, use _run_event_loop()
-        instead.
+        Derived from `threading.Thread <https://docs.python.org/3/library/threading.html>`__.
+
+        Use :meth:`plotoptix.NpOptiX.start` to perform complete initialization.
+
+        **Do not override**, use :meth:`plotoptix.NpOptiX._run_event_loop` instead.
         """
         assert self._is_scene_created, "Scene is not ready, see initialization messages."
 
@@ -237,7 +240,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : ndarray
-            RGBA array of shape (height, width, 4), with type np.uint8.
+            RGBA array of shape (height, width, 4), with type ``numpy.uint8``.
         """
         assert self._is_started, "Raytracing output not running."
         with self._padlock:
@@ -282,7 +285,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
     def _launch_finished_callback(self, rt_result: int) -> None:
         """
-        Callback executed after each finished frame (min_accumulation_step
+        Callback executed after each finished frame (``min_accumulation_step``
         accumulation frames are raytraced together). This callback is
         executed in the raytracing thread and should not compute extensively
         (make a copy of the image data and process it in another thread).
@@ -290,13 +293,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Override this method in the UI class, call this base implementation
         and update image in UI (or raise an event to do so).
         
-        Actions provided with on_launch_finished parameter of __init__ are
-        executed here.
+        Actions provided with ``on_launch_finished`` parameter of NpOptiX
+        constructor are executed here.
 
         Parameters
         ----------
         rt_result : int
-            Raytracing result code corresponding to RtResult enum.
+            Raytracing result code corresponding to :class:`plotoptix.enums.RtResult`.
         """
         if self._is_started and rt_result != RtResult.NoUpdates.value:
             for c in self._launch_finished_cb: c(self)
@@ -324,9 +327,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
     def _accum_done_callback(self) -> None:
         """
-        Callback executed when all accumulation frames are completed. **Do not
-        override**, it is intended to launch on_rt_accum_done actions provided
-        with __init__ method parameters.
+        Callback executed when all accumulation frames are completed.
+        
+        **Do not override**, it is intended to launch ``on_rt_accum_done``
+        actions provided with NpOptiX constructor parameters.
         
         Executed in the raytracing thread, so do not compute or write files
         (make a copy of the image data and process it in another thread).
@@ -349,11 +353,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         etc. here, as it will block until the end of raytracing in the parallel
         thread.
 
-        Callback execution can be suspended / resumed with pause_compute() /
-        resume_compute() methods.
+        Callback execution can be suspended / resumed with :meth:`plotoptix.NpOptiX.pause_compute` /
+        :meth:`plotoptix.NpOptiX.resume_compute` methods.
 
-        **Do not override**, this method is intended to launch on_scene_compute
-        actions provided with __init__ method parameters.
+        **Do not override**, this method is intended to launch ``on_scene_compute``
+        actions provided with NpOptiX constructor parameters.
 
         Parameters
         ----------
@@ -396,7 +400,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
 
     def pause_compute(self) -> None:
-        """Suspend execution of on_scene_compute / on_rt_completed actions.
+        """Suspend execution of ``on_scene_compute`` / ``on_rt_completed`` actions.
         """
         if self._optix.set_compute_paused(True):
             self._logger.info("Compute thread paused.")
@@ -404,7 +408,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.warn("Pausing compute thread had no effect.")
 
     def resume_compute(self) -> None:
-        """Resume execution of on_scene_compute / on_rt_completed actions.
+        """Resume execution of ``on_scene_compute`` / ``on_rt_completed actions``.
         """
         if self._optix.set_compute_paused(False):
             self._logger.info("Compute thread resumed.")
@@ -419,7 +423,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.refresh_scene()
 
     def get_float(self, name: str) -> Optional[float]:
-        """Get shader float variable with given name.
+        """Get shader ``float`` variable with given name.
 
         Parameters
         ----------
@@ -429,7 +433,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : float
-            Value of the variable.
+            Value of the variable or ``None`` if variable not found.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -442,7 +446,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
     def get_float2(self, name: str) -> (Optional[float], Optional[float]):
-        """Get shader float2 variable with given name.
+        """Get shader ``float2`` variable with given name.
 
         Parameters
         ----------
@@ -452,7 +456,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : tuple (float, float)
-            Value (x, y) of the variable.
+            Value (x, y) of the variable or ``(None, None)`` if variable not found.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -466,7 +470,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None, None
 
     def get_float3(self, name: str) -> (Optional[float], Optional[float], Optional[float]):
-        """Get shader float3 variable with given name.
+        """Get shader ``float3`` variable with given name.
 
         Parameters
         ----------
@@ -476,7 +480,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : tuple (float, float, float)
-            Value (x, y, z) of the variable.
+            Value (x, y, z) of the variable or ``(None, None, None)`` if variable not found.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -493,22 +497,22 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_float(self, name: str, x: float, y: Optional[float] = None, z: Optional[float] = None, refresh: bool = False) -> None:
         """Set shader variable.
 
-        Set shader variable with given name and of the type float, float2
-        (if y provided), or float3 (if y and z provided). Raytrace the whole
-        scene if refresh is set to True.
+        Set shader variable with given name and of the type ``float``, ``float2``
+        (if y provided), or ``float3`` (if y and z provided). Raytrace the whole
+        scene if refresh is set to ``True``.
 
         Parameters
         ----------
         name : string
             Varable name.
         x : float
-            Variable value (x component in case of float2 and float3).
+            Variable value (x component in case of ``float2`` and ``float3``).
         y : float, optional
-            Y component value for float2 and float3 variables.
+            Y component value for ``float2`` and ``float3`` variables.
         z : float, optional
-            Z component value for float2 and float3 variables.
+            Z component value for ``float3`` variables.
         refresh : bool
-            Set to True if the image should be re-computed.
+            Set to ``True`` if the image should be re-computed.
 
         Examples
         --------
@@ -535,7 +539,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.set_float(name, x, refresh)
 
     def get_uint(self, name: str) -> Optional[int]:
-        """Get shader uint variable with given name.
+        """Get shader ``uint`` variable with given name.
 
         Parameters
         ----------
@@ -545,7 +549,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : int
-            Value of the variable.
+            Value of the variable or ``None`` if variable not found.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -558,7 +562,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
     def get_uint2(self, name: str) -> (Optional[int], Optional[int]):
-        """Get shader uint2 variable with given name.
+        """Get shader ``uint2`` variable with given name.
 
         Parameters
         ----------
@@ -568,7 +572,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : tuple (int, int)
-            Value (x, y) of the variable.
+            Value (x, y) of the variable or ``(None, None)`` if variable not found.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -585,21 +589,21 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_uint(self, name: str, x: int, y: Optional[int] = None, refresh: bool = False) -> None:
         """Set shader variable.
 
-        Set shader variable with given name and of the type uint or uint2
-        (if y provided). Raytrace the whole scene if refresh is set to True.
-        Note, shader variables distinguish int and uint, while the type
-        provided by Python methods is int in both cases.
+        Set shader variable with given name and of the type ``uint`` or ``uint2``
+        (if y provided). Raytrace the whole scene if refresh is set to ``True``.
+        Note, shader variables distinguish ``int`` and ``uint``, while the type
+        provided by Python methods is ``int`` in both cases.
 
         Parameters
         ----------
         name : string
             Varable name.
         x : int
-            Variable value (x component in case of uint2).
+            Variable value (x component in case of ``uint2``).
         y : int, optional
-            Y component value for uint2 variable.
+            Y component value for ``uint2`` variable.
         refresh : bool
-            Set to True if the image should be re-computed.
+            Set to ``True`` if the image should be re-computed.
 
         Examples
         --------
@@ -619,7 +623,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def get_int(self, name: str) -> Optional[int]:
-        """Get shader int variable with given name.
+        """Get shader ``int`` variable with given name.
 
         Parameters
         ----------
@@ -629,7 +633,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : int
-            Value of the variable.
+            Value of the variable or ``None`` if variable not found.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -644,10 +648,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_int(self, name: str, x: int, refresh: bool = False) -> None:
         """Set shader variable.
 
-        Set shader variable with given name and of the type int. Raytrace
-        the whole scene if refresh is set to True.
-        Note, shader variables distinguish int and uint, while the type
-        provided by Python methods is int in both cases.
+        Set shader variable with given name and of the type ``int``. Raytrace
+        the whole scene if refresh is set to ``True``.
+        Note, shader variables distinguish ``int`` and ``uint``, while the type
+        provided by Python methods is ``int`` in both cases.
 
         Parameters
         ----------
@@ -656,7 +660,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         x : int
             Variable value.
         refresh : bool
-            Set to True if the image should be re-computed.
+            Set to ``True`` if the image should be re-computed.
         """
         if not isinstance(name, str): name = str(name)
         if not isinstance(x, int): x = int(x)
@@ -677,9 +681,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_background(self, color: Any, refresh: bool = False) -> None:
         """Set background color.
 
-        Set background color of the scene (shader variable "bg_color",
+        Set background color of the scene (shader variable ``bg_color``,
         default value is [0.01, 0.01, 0.01]). Raytrace the whole scene
-        if refresh is set to True.
+        if refresh is set to ``True``.
         Note, color components range is <0; 1>.
 
         Parameters
@@ -688,7 +692,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             New backgroud color value; single value is a grayscale level,
             RGB color components can be provided as array-like values.
         refresh : bool
-            Set to True if the image should be re-computed.
+            Set to ``True`` if the image should be re-computed.
 
         Examples
         --------
@@ -726,9 +730,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_ambient(self, color: Any, refresh: bool = False) -> None:
         """Set ambient light color.
 
-        Set ambient light color of the scene (shader variable "ambient_color",
+        Set ambient light color of the scene (shader variable ``ambient_color``,
         default value is [0.86, 0.89, 0.94]). Raytrace the whole scene if
-        refresh is set to True.
+        refresh is set to ``True``.
         Note, color components range is <0; 1>.
 
         Parameters
@@ -737,7 +741,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             New ambient light color value; single value is a grayscale level,
             RGB color components can be provided as array-like values.
         refresh : bool
-            Set to True if the image should be re-computed.
+            Set to ``True`` if the image should be re-computed.
 
         Examples
         --------
@@ -774,7 +778,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : Any, optional
-            Value of the parameter or None if parameter not found.
+            Value of the parameter or ``None`` if parameter not found.
 
         Examples
         --------
@@ -863,7 +867,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : tuple (name, handle)
-            Name and handle of the camera.
+            Name and handle of the camera or ``(None, None)`` if camera not found.
         """
         cam_handle = 0
         if name is None: # try current camera
@@ -899,7 +903,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : dict, optional
-            Dictionary of the camera parameters or None if failed on
+            Dictionary of the camera parameters or ``None`` if failed on
             accessing camera data.
         """
         name, cam_handle = self.get_camera_name_handle(name)
@@ -945,7 +949,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : np.ndarray, optional
-            3D coordinates of the camera target or None if failed on
+            3D coordinates of the camera target or ``None`` if failed on
             accessing camera data.
         """
         if not isinstance(name, str): name = str(name)
@@ -987,7 +991,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Aperture radius (increases focus blur for depth of field cameras).
         aperture_fract : float, optional
             Fraction of blind central spot of the aperture (results with ring-like
-            bokeh if >0). Cannot be changed after construction.
+            bokeh if > 0). Cannot be changed after construction.
         focal_scale : float, optional
             Focus distance / (eye - target).length.
         fov : float, optional
@@ -997,7 +1001,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Range is (0; 1>, lower values result with a higher motion blur, value
             1.0 turns off the blur (default). Cannot be changed after construction.
         make_current : bool, optional
-            Automatically switch to this camera if set to True.
+            Automatically switch to this camera if set to ``True``.
         """
         if not isinstance(name, str): name = str(name)
         if isinstance(cam_type, str): cam_type = Camera[cam_type]
@@ -1127,7 +1131,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         ----------
         out : LightShading or None
-            Light shading mode. None is returned if function could
+            Light shading mode. ``None`` is returned if function could
             not read the mode from the raytracer.
         """
         shading = self._optix.get_light_shading()
@@ -1142,8 +1146,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_light_shading(self, mode: Union[LightShading, str]) -> None:
         """Set light shading mode.
 
-        Use LightShading.Hard for best caustics or LightShading.Soft for fast
-        convergence. Set mode before adding lights.
+        Use :attr:`plotoptix.enums.LightShading.Hard` for best caustics or
+        :attr:`plotoptix.enums.LightShading.Soft` for fast convergence.
+        
+        Set mode before adding lights.
 
         Parameters
         ----------
@@ -1172,7 +1178,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : np.ndarray, optional
-            3D of the light or None if failed on accessing light data.
+            3D of the light or ``None`` if failed on accessing light data.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -1195,7 +1201,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : np.ndarray, optional
-            Light color RGB or None if failed on accessing light data.
+            Light color RGB or ``None`` if failed on accessing light data.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -1218,7 +1224,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : np.ndarray, optional
-            Light U vector or None if failed on accessing light data.
+            Light U vector or ``None`` if failed on accessing light data.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -1241,7 +1247,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : np.ndarray, optional
-            Light V vector or None if failed on accessing light data.
+            Light V vector or ``None`` if failed on accessing light data.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -1264,7 +1270,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : float, optional
-            Light readius or None if failed on accessing light data.
+            Light readius or ``None`` if failed on accessing light data.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -1295,7 +1301,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         radius : float, optional
             Sphere radius.
         in_geometry: bool, optional
-            Visible in the scene if set to True.
+            Visible in the scene if set to ``True``.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -1338,6 +1344,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                                   in_geometry: bool = True) -> None:
         """Setup new parallelogram light.
 
+        Note, the light direction is UxV, the back side is black.
+
         Parameters
         ----------
         name : string
@@ -1355,9 +1363,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         v : array_like, optional
             Parallelogram V vector.
         in_geometry: bool, optional
-            Visible in the scene if set to True.
-
-        Note, the light direction is UxV, the back side is black.
+            Visible in the scene if set to ``True``.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -1412,6 +1418,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     radius: float = 1.0, in_geometry: bool = True) -> None:
         """Setup new light.
 
+        Note, the parallelogram light direction is UxV, the back side is black.
+
         Parameters
         ----------
         name : string
@@ -1433,9 +1441,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         radius : float, optional
             Sphere radius.
         in_geometry: bool, optional
-            Visible in the scene if set to True.
-
-        Note, the parallelogram light direction is UxV, the back side is black.
+            Visible in the scene if set to ``True``.
         """
         if isinstance(light_type, str): light_type = Light[light_type]
 
@@ -1458,6 +1464,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                      v: Optional[Any] = None) -> None:
         """Update light parameters.
 
+        Note, the parallelogram light direction is UxV, the back side is black.
+
         Parameters
         ----------
         name : string
@@ -1474,8 +1482,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Parallelogram U vector.
         v : array_like, optional
             Parallelogram V vector.
-
-        Note, the parallelogram light direction is UxV, the back side is black.
         """
         if not isinstance(name, str): name = str(name)
 
@@ -1552,7 +1558,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Returns
         -------
         out : dict, optional
-            Dictionary of the material parameters or None if failed on
+            Dictionary of the material parameters or ``None`` if failed on
             accessing material data.
         """
         s = self._optix.get_material(name)
@@ -1574,6 +1580,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         data : dict
             Parameters of the material.
+
+        See Also
+        --------
+        :py:mod:`plotoptix.materials`
         """
         if self._optix.setup_material(name, json.dumps(data)):
             self._logger.info("Added new material %s.", name)
@@ -1669,8 +1679,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Material name.
         rnd : bool
             Randomize not provided U / V / W vectors so regular but randomly rotated
-            primitives are generated using available vectors (default). If rnd=False
-            all primitives are aligned in the same direction.
+            primitives are generated using available vectors (default). If set to
+            ``False`` all primitives are aligned in the same direction.
         """
         if not isinstance(name, str): name = str(name)
         if isinstance(geom, str): geom = Geometry[geom]
@@ -1907,8 +1917,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                       update: Optional[bool] = True) -> None:
         """Move all primitives by (x, y, z) vector.
 
-        Updates GPU buffers immediately if update is set to True (default),
-        otherwise update should be made using update_geom_buffers() method
+        Updates GPU buffers immediately if update is set to ``True`` (default),
+        otherwise update should be made using :meth:`plotoptix.NpOptiX.update_geom_buffers`
         after all geometry modifications are finished.
 
         Parameters
@@ -1927,8 +1937,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                        update: Optional[bool] = True) -> None:
         """Move selected primitive by (x, y, z) vector.
 
-        Updates GPU buffers immediately if update is set to True (default),
-        otherwise update should be made using update_geom_buffers() method
+        Updates GPU buffers immediately if update is set to ``True`` (default),
+        otherwise update should be made using :meth:`plotoptix.NpOptiX.update_geom_buffers`
         after all geometry modifications are finished.
 
         Parameters
@@ -1952,8 +1962,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Rotate all primitives by specified degrees around x, y, z axis, with
         respect to the center of the geometry. Update GPU buffers immediately
-        if update is set to True (default), otherwise update should be made using
-        update_geom_buffers() method after all geometry modifications are finished.
+        if update is set to ``True`` (default), otherwise update should be made using
+        :meth:`plotoptix.NpOptiX.update_geom_buffers` after all geometry modifications
+        are finished.
 
         Parameters
         ----------
@@ -1982,9 +1993,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Rotate selected primitive by specified degrees around x, y, z axis, with
         respect to the center of the selected primitive. Update GPU buffers
-        immediately if update is set to True (default), otherwise update should be
-        made using update_geom_buffers() method after all geometry modifications
-        are finished.
+        immediately if update is set to ``True`` (default), otherwise update should be
+        made using :meth:`plotoptix.NpOptiX.update_geom_buffers` after all geometry
+        modifications are finished.
 
         Parameters
         ----------
@@ -2014,8 +2025,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Scale all primitive's positions and sizes by specified factor, with respect
         to the center of the geometry. Update GPU buffers immediately if update is
-        set to True (default), otherwise update should be made using update_geom_buffers()
-        method after all geometry modifications are finished.
+        set to ``True`` (default), otherwise update should be made using
+        :meth:`plotoptix.NpOptiX.update_geom_buffers` after all geometry modifications
+        are finished.
 
         Parameters
         ----------
@@ -2035,8 +2047,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Scale selected primitive by specified factor, with respect to the center of
         the selected primitive. Update GPU buffers immediately if update is set to
-        True (default), otherwise update should be made using update_geom_buffers()
-        method after all geometry modifications are finished.
+        ``True`` (default), otherwise update should be made using
+        :meth:`plotoptix.NpOptiX.update_geom_buffers` after all geometry modifications
+        are finished.
 
         Parameters
         ----------
@@ -2057,7 +2070,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Update geometry buffers.
 
         Update geometry buffers in GPU after modifications made with
-        move_geometry() / move_primitive() and similar methods.
+        :meth:`plotoptix.NpOptiX.move_geometry` / :meth:`plotoptix.NpOptiX.move_primitive`
+        and similar methods.
 
         Parameters
         ----------
@@ -2077,9 +2091,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         mode : Coordinates enum or string
-            Style of the coordinate system geometry. See Coordinates enum.
+            Style of the coordinate system geometry.
         thickness : float
             Thickness of lines.
+
+        See Also
+        --------
+        :class:`plotoptix.enums.Coordinates`
         """
         if isinstance(mode, str): mode = Coordinates[mode]
 

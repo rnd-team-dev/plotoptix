@@ -9,8 +9,8 @@ from matplotlib import cm
 
 def map_to_colors(x: Any, cm_name: str) -> np.ndarray:
     """
-    Scale variable x to the range <0; 1> and map it to RGB colors from
-    matplotlib's colormap with cm_name.
+    Scale variable ``x`` to the range <0; 1> and map it to RGB colors from
+    matplotlib's colormap with ``cm_name``.
 
     Parameters
     ----------

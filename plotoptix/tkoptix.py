@@ -19,7 +19,7 @@ from plotoptix._load_lib import PLATFORM
 from plotoptix.npoptix import NpOptiX
 
 class TkOptiX(NpOptiX):
-    """Tkinter based UI for PlotOptiX.
+    """Tkinter based UI for PlotOptiX. Derived from :class:`plotoptix.NpOptiX`.
 
     Summary of mouse and keys actions:
 
@@ -32,7 +32,7 @@ class TkOptiX(NpOptiX):
     - focus at an object: hold ctrl + double-click left mouse button
     - select an object: double-click left mouse button (info on terminal output)
 
-    Note: functions with the names _gui_* can be used from the
+    Note: functions with the names ``_gui_*`` can be used from the
     GUI thread (Tk event loop) only.
 
     Parameters
@@ -64,7 +64,7 @@ class TkOptiX(NpOptiX):
         to False, then user should call start() or show() method. Default is
         False.
     log_level : int or string, optional
-        Log output level. Default is "WARN".
+        Log output level. Default is ``WARN``.
     """
 
     def __init__(self,
@@ -114,11 +114,11 @@ class TkOptiX(NpOptiX):
     def show(self) -> None:
         """Start raytracing thread and open the GUI window.
         
-        Convenience method to call NpOptiX.start() method.
+        Convenience method to call :meth:`plotoptix.NpOptiX.start`.
 
-        Actions provided with on_initialization parameter of __init__
-        are executed by this method on the main thread, before the
-        ratracing thread is started and GUI window open.
+        Actions provided with ``on_initialization`` parameter of TkOptiX
+        constructor are executed by this method on the main thread, before
+        the ratracing thread is started and GUI window open.
         """
         self.start()
 
@@ -189,6 +189,10 @@ class TkOptiX(NpOptiX):
         """Stop the raytracing thread, release resources.
 
         Raytracing cannot be restarted after this method is called.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.close`
         """
         if not self._is_closed:
             self._canvas.event_generate("<<CloseScene>>", when="head")

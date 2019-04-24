@@ -5,6 +5,7 @@ Start, configure, read output
 .. automethod:: plotoptix.NpOptiX.close
 .. automethod:: plotoptix.NpOptiX.get_rt_output
 .. automethod:: plotoptix.NpOptiX._run_event_loop
+.. automethod:: plotoptix.NpOptiX.run
 
 Scene configuration
 -------------------

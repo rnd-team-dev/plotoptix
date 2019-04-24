@@ -145,5 +145,5 @@ The idea for development is:
 Examples
 --------
 
-Looking at examples is the best way to get started and explore PlotOptiX features. Have look at the
+Looking at examples is the best way to get started and explore PlotOptiX features. Have a look at the
 `readme and sample codes here <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__.
