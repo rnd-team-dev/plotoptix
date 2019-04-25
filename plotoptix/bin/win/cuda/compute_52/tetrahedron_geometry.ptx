@@ -169,5 +169,132 @@
 	ret;
 }
 
+	// .globl	_Z29tetrahedron_shaded_attributesv
+.visible .entry _Z29tetrahedron_shaded_attributesv(
+
+)
+{
+	.reg .f32 	%f<65>;
+	.reg .b32 	%r<15>;
+	.reg .b64 	%rd<39>;
+
+
+	// inline asm
+	call (%r1), _rt_get_primitive_index, ();
+	// inline asm
+	cvt.s64.s32	%rd3, %r1;
+	mov.u64 	%rd31, index_buffer;
+	cvta.global.u64 	%rd2, %rd31;
+	mov.u32 	%r10, 1;
+	mov.u32 	%r11, 12;
+	mov.u64 	%rd30, 0;
+	// inline asm
+	call (%rd1), _rt_buffer_get_64, (%rd2, %r10, %r11, %rd3, %rd30, %rd30, %rd30);
+	// inline asm
+	ld.s32 	%rd9, [%rd1];
+	mov.u64 	%rd32, vertex_buffer;
+	cvta.global.u64 	%rd8, %rd32;
+	ld.s32 	%rd15, [%rd1+4];
+	ld.s32 	%rd21, [%rd1+8];
+	// inline asm
+	call (%rd7), _rt_buffer_get_64, (%rd8, %r10, %r11, %rd9, %rd30, %rd30, %rd30);
+	// inline asm
+	ld.f32 	%f3, [%rd7];
+	ld.f32 	%f4, [%rd7+4];
+	ld.f32 	%f5, [%rd7+8];
+	// inline asm
+	call (%rd13), _rt_buffer_get_64, (%rd8, %r10, %r11, %rd15, %rd30, %rd30, %rd30);
+	// inline asm
+	ld.f32 	%f6, [%rd13];
+	ld.f32 	%f7, [%rd13+4];
+	ld.f32 	%f8, [%rd13+8];
+	// inline asm
+	call (%rd19), _rt_buffer_get_64, (%rd8, %r10, %r11, %rd21, %rd30, %rd30, %rd30);
+	// inline asm
+	ld.f32 	%f9, [%rd19];
+	ld.f32 	%f10, [%rd19+4];
+	ld.f32 	%f11, [%rd19+8];
+	// inline asm
+	call (%f1, %f2), _rt_get_triangle_barycentrics, ();
+	// inline asm
+	tex.2d.v4.f32.f32	{%f12, %f13, %f14, %f15}, [tetrahedron_normaltilt_tex, {%f1, %f2}];
+	sub.ftz.f32 	%f16, %f7, %f4;
+	sub.ftz.f32 	%f17, %f6, %f3;
+	sub.ftz.f32 	%f18, %f10, %f4;
+	sub.ftz.f32 	%f19, %f9, %f3;
+	mul.ftz.f32 	%f20, %f16, %f16;
+	sub.ftz.f32 	%f21, %f8, %f5;
+	mul.ftz.f32 	%f22, %f18, %f18;
+	sub.ftz.f32 	%f23, %f11, %f5;
+	fma.rn.ftz.f32 	%f24, %f17, %f17, %f20;
+	fma.rn.ftz.f32 	%f25, %f19, %f19, %f22;
+	fma.rn.ftz.f32 	%f26, %f21, %f21, %f24;
+	fma.rn.ftz.f32 	%f27, %f23, %f23, %f25;
+	rsqrt.approx.ftz.f32 	%f28, %f26;
+	rsqrt.approx.ftz.f32 	%f29, %f27;
+	mul.ftz.f32 	%f30, %f17, %f28;
+	mul.ftz.f32 	%f31, %f16, %f28;
+	mul.ftz.f32 	%f32, %f21, %f28;
+	mul.ftz.f32 	%f33, %f19, %f29;
+	mul.ftz.f32 	%f34, %f18, %f29;
+	mul.ftz.f32 	%f35, %f23, %f29;
+	mul.ftz.f32 	%f36, %f28, %f12;
+	mul.ftz.f32 	%f37, %f29, %f13;
+	mul.ftz.f32 	%f38, %f16, %f23;
+	mul.ftz.f32 	%f39, %f21, %f18;
+	sub.ftz.f32 	%f40, %f38, %f39;
+	mul.ftz.f32 	%f41, %f21, %f19;
+	mul.ftz.f32 	%f42, %f17, %f23;
+	sub.ftz.f32 	%f43, %f41, %f42;
+	mul.ftz.f32 	%f44, %f17, %f18;
+	mul.ftz.f32 	%f45, %f16, %f19;
+	sub.ftz.f32 	%f46, %f44, %f45;
+	mul.ftz.f32 	%f47, %f43, %f43;
+	fma.rn.ftz.f32 	%f48, %f40, %f40, %f47;
+	fma.rn.ftz.f32 	%f49, %f46, %f46, %f48;
+	rsqrt.approx.ftz.f32 	%f50, %f49;
+	mul.ftz.f32 	%f51, %f30, %f36;
+	mul.ftz.f32 	%f52, %f31, %f36;
+	mul.ftz.f32 	%f53, %f32, %f36;
+	fma.rn.ftz.f32 	%f54, %f40, %f50, %f51;
+	fma.rn.ftz.f32 	%f55, %f43, %f50, %f52;
+	fma.rn.ftz.f32 	%f56, %f46, %f50, %f53;
+	mul.ftz.f32 	%f57, %f33, %f37;
+	mul.ftz.f32 	%f58, %f34, %f37;
+	mul.ftz.f32 	%f59, %f35, %f37;
+	sub.ftz.f32 	%f60, %f54, %f57;
+	sub.ftz.f32 	%f61, %f55, %f58;
+	sub.ftz.f32 	%f62, %f56, %f59;
+	st.global.f32 	[geo_normal], %f60;
+	st.global.f32 	[geo_normal+4], %f61;
+	st.global.f32 	[geo_normal+8], %f62;
+	st.global.f32 	[shading_normal], %f60;
+	st.global.f32 	[shading_normal+4], %f61;
+	st.global.f32 	[shading_normal+8], %f62;
+	shr.s32 	%r12, %r1, 2;
+	cvt.s64.s32	%rd27, %r12;
+	mov.u64 	%rd34, tetrahedron_col_buffer;
+	cvta.global.u64 	%rd26, %rd34;
+	// inline asm
+	call (%rd25), _rt_buffer_get_64, (%rd26, %r10, %r11, %rd27, %rd30, %rd30, %rd30);
+	// inline asm
+	ld.u32 	%rd35, [%rd25];
+	ld.u32 	%rd36, [%rd25+4];
+	bfi.b64 	%rd37, %rd36, %rd35, 32, 32;
+	ld.f32 	%f63, [%rd25+8];
+	st.global.u32 	[shading_color], %rd37;
+	shr.u64 	%rd38, %rd37, 32;
+	st.global.u32 	[shading_color+4], %rd38;
+	st.global.f32 	[shading_color+8], %f63;
+	ld.global.u32 	%r13, [geom_handle];
+	st.global.v2.u32 	[geom_uid], {%r13, %r12};
+	and.b32  	%r14, %r1, 3;
+	cvt.rn.f32.s32	%f64, %r14;
+	st.global.f32 	[tex_coord], %f1;
+	st.global.f32 	[tex_coord+4], %f2;
+	st.global.f32 	[tex_coord+8], %f64;
+	ret;
+}
+
 
  
