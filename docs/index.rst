@@ -9,6 +9,7 @@
    enums
    materials
    utils
+   changelog
 
 .. toctree::
    :caption: Quick Links

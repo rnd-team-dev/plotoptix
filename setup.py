@@ -18,8 +18,8 @@ except ImportError:
     bdist_wheel = None
 
 setup(name='plotoptix',
-      version='0.1.4',
-      url='https://github.com/rnd-team-dev/plotoptix',
+      version='0.2.0',
+      url='https://plotoptix.rnd.team',
       project_urls={
           'Documentation': 'https://plotoptix.rnd.team',
           'Examples': 'https://github.com/rnd-team-dev/plotoptix/tree/master/examples',
@@ -28,7 +28,7 @@ setup(name='plotoptix',
       author='Robert Sulej, R&D Team',
       author_email='dev@rnd.team',
       description='Data visualisation in Python based on NVIDIA OptiX ray tracing framework.',
-      keywords="gpu nvidia optix raytracing pathtracing visualisation generative plot animation real-time",
+      keywords="gpu nvidia optix ray-tracing path-tracing visualisation generative plot animation real-time",
       cmdclass={'bdist_wheel': bdist_wheel},
       classifiers=[
           'Development Status :: 4 - Beta',

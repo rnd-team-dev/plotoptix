@@ -15,7 +15,7 @@ PlotOptiX
 
 **Note:** this is an early, beta version. Active development and documentation is ongoing.
 
-3D `raytracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
+3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
 of several basic shapes, finished with a photorealistic lighting and depth of field.
 
@@ -54,13 +54,14 @@ Features
 
 - progressive path tracing with explicit light sampling
 - pinhole cameras and cameras with depth of field simulation
-- geometries: particles (spheres), parallelepipeds, parallelograms, tetrahedrons and bezier lines
+- geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, mesh
 - flat, diffuse, specular and glass shading
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
+- post-processing: tonal curves and level adjustment
 - GPU acceleration using RT Cores, and everything else what comes with `OptiX 6.0 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
-- image output in `numpy <http://www.numpy.org>`__ array
+- image output to `numpy <http://www.numpy.org>`__ array
 - Tkinter based UI or headless raytracer
 
 System Requirements
