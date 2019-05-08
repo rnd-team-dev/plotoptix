@@ -15,8 +15,8 @@ __all__ = ["enums", "materials", "utils", "npoptix", "tkoptix"]
 
 __author__  = "Robert Sulej, R&D Team <dev@rnd.team>"
 __status__  = "beta"
-__version__ = "0.1.4"
-__date__    = "25 April 2019"
+__version__ = "0.2.0"
+__date__    = "08 May 2019"
 
 
 import os, subprocess, logging

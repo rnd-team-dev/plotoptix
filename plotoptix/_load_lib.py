@@ -105,6 +105,24 @@ def load_optix():
     optix.update_geometry.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_geometry.restype = c_uint
 
+    optix.get_surface_size.argtypes = [c_wchar_p, POINTER(c_uint), POINTER(c_uint)]
+    optix.get_surface_size.restype = c_bool
+
+    optix.update_surface.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float]
+    optix.update_surface.restype = c_uint
+
+    optix.setup_surface.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_bool]
+    optix.setup_surface.restype = c_uint
+
+    optix.setup_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.setup_mesh.restype = c_uint
+
+    optix.update_mesh.argtypes = [c_wchar_p, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.update_mesh.restype = c_uint
+
+    optix.load_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
+    optix.load_mesh_obj.restype = c_uint
+
     optix.move_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
     optix.move_geometry.restype = c_bool
 

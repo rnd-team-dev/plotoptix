@@ -9,8 +9,13 @@ v0.2.0 - (unreleased)
 Added
 ~~~~~
 
-- RTX-accelerated mesh geometry for surface plots, reading 3D meshes from Wavefront .obj fromat.
-- tone curves defined with control points
+- RTX-accelerated mesh geometry for surface plots, reading 3D meshes from Wavefront .obj fromat
+- tonal correction curves defined with control points
+
+Fixed
+~~~~~
+
+- bug on geometry update when data size was changed with u/v/w vectors not provided
 
 `v0.1.4`_ - 2019-04-25
 ----------------------

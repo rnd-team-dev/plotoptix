@@ -37,7 +37,6 @@ class Geometry(Enum):
     #ParticleSetVarL = 3
     #ParticleSetTextured = 4
     #BezierCurves = 5
-    #SegmentChain = 10
     
     BezierChain = 6
     """Bezier line interpolating data points.
@@ -56,13 +55,19 @@ class Geometry(Enum):
     Parallelepipeds = 8
     """Parallelepipeds.
 
-    Color and U/V/W vectors can be provided for each data point.
+    Color and U / V / W vectors can be provided for each data point.
     """
 
     Tetrahedrons = 9
     """Tetrahedrons.
 
-    Color and U/V/W vectors can be provided for each data point.
+    Color and U / V / W vectors can be provided for each data point.
+    """
+
+    Mesh = 10
+    """Mesh.
+
+    Color and normal vectors can be provided for each data point.
     """
 
 class GeomBuffer(IntFlag):
@@ -128,6 +133,14 @@ class GeomBuffer(IntFlag):
 
     VNodes = V0 | V1 | V2 | V3
     """All nodes of bezier and line segments.
+    """
+
+    VertexIdx = 4096
+    """Mesh vertex indexes.
+    """
+
+    NormalIdx = 8192
+    """Mesh normal indexes.
     """
 
     All = 0xFFFFFFFF

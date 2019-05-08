@@ -23,7 +23,7 @@ def map_to_colors(x: Any, cm_name: str) -> np.ndarray:
     -------
     out : np.ndarray
         Numpy array with RGB color values mapped from the input array values.
-        The output shape is x.shape + (3,).
+        The output shape is ``x.shape + (3,)``.
     """
     if x is None: raise ValueError()
 

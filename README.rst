@@ -54,11 +54,11 @@ Features
 
 - progressive path tracing with explicit light sampling
 - pinhole cameras and cameras with depth of field simulation
-- geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, mesh
+- geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, surface mesh
 - flat, diffuse, specular and glass shading
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
-- post-processing: tonal curves and level adjustment
+- post-processing: tonal correction curves and levels adjustment
 - GPU acceleration using RT Cores, and everything else what comes with `OptiX 6.0 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - image output to `numpy <http://www.numpy.org>`__ array

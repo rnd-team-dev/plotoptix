@@ -1,11 +1,14 @@
 Plot geometry
 =============
 
-Create and update plot
-----------------------
+Create, load, update plot
+-------------------------
 
 .. automethod:: plotoptix.NpOptiX.set_data
 .. automethod:: plotoptix.NpOptiX.update_data
+.. automethod:: plotoptix.NpOptiX.set_data_2d
+.. automethod:: plotoptix.NpOptiX.update_data_2d
+.. automethod:: plotoptix.NpOptiX.load_mesh_obj
 
 Direct modifications of data
 ----------------------------

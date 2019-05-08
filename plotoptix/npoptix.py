@@ -512,7 +512,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Y component value for ``float2`` and ``float3`` variables.
         z : float, optional
             Z component value for ``float3`` variables.
-        refresh : bool
+        refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
 
         Examples
@@ -603,7 +603,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Variable value (x component in case of ``uint2``).
         y : int, optional
             Y component value for ``uint2`` variable.
-        refresh : bool
+        refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
 
         Examples
@@ -660,7 +660,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Varable name.
         x : int
             Variable value.
-        refresh : bool
+        refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
         """
         if not isinstance(name, str): name = str(name)
@@ -692,7 +692,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         color : Any
             New backgroud color value; single value is a grayscale level,
             RGB color components can be provided as array-like values.
-        refresh : bool
+        refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
 
         Examples
@@ -741,7 +741,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         color : Any
             New ambient light color value; single value is a grayscale level,
             RGB color components can be provided as array-like values.
-        refresh : bool
+        refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
 
         Examples
@@ -888,7 +888,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
            if name in self.camera_handles:
                cam_handle = self.camera_handles[name]
            else:
-               self._logger.error("Camera %s does not exists.")
+               self._logger.error("Camera %s does not exists.", name)
                return None, None
 
         return name, cam_handle
@@ -930,7 +930,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             3D coordinates of the camera eye or None if failed on
             accessing camera data.
         """
-        if not isinstance(name, str): name = str(name)
+        if name is not None and not isinstance(name, str): name = str(name)
 
         name, cam_handle = self.get_camera_name_handle(name)
         if name is None: return None
@@ -953,7 +953,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             3D coordinates of the camera target or ``None`` if failed on
             accessing camera data.
         """
-        if not isinstance(name, str): name = str(name)
+        if name is not None and not isinstance(name, str): name = str(name)
 
         name, cam_handle = self.get_camera_name_handle(name)
         if name is None: return None
@@ -1004,6 +1004,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         make_current : bool, optional
             Automatically switch to this camera if set to ``True``.
         """
+        if name is None: raise ValueError()
+        
         if not isinstance(name, str): name = str(name)
         if isinstance(cam_type, str): cam_type = Camera[cam_type]
 
@@ -1090,6 +1092,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         name : string
             Name of the new current camera.
         """
+        if name is None: raise ValueError()
+        
         if not isinstance(name, str): name = str(name)
 
         if name not in self.camera_handles:
@@ -1174,13 +1178,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string, optional
-            Name of the light.
+            Name of the light (last added light if ``None``).
 
         Returns
         -------
         out : np.ndarray, optional
             3D of the light or ``None`` if failed on accessing light data.
         """
+        if name is None:
+            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            else: raise ValueError()
+
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
@@ -1197,13 +1205,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string, optional
-            Name of the light.
+            Name of the light (last added light if ``None``).
 
         Returns
         -------
         out : np.ndarray, optional
             Light color RGB or ``None`` if failed on accessing light data.
         """
+        if name is None:
+            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            else: raise ValueError()
+
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
@@ -1220,13 +1232,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string, optional
-            Name of the light.
+            Name of the light (last added light if ``None``).
 
         Returns
         -------
         out : np.ndarray, optional
             Light U vector or ``None`` if failed on accessing light data.
         """
+        if name is None:
+            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            else: raise ValueError()
+
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
@@ -1243,13 +1259,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string, optional
-            Name of the light.
+            Name of the light (last added light if ``None``).
 
         Returns
         -------
         out : np.ndarray, optional
             Light V vector or ``None`` if failed on accessing light data.
         """
+        if name is None:
+            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            else: raise ValueError()
+
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
@@ -1266,13 +1286,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string, optional
-            Name of the light.
+            Name of the light (last added light if ``None``).
 
         Returns
         -------
         out : float, optional
             Light readius or ``None`` if failed on accessing light data.
         """
+        if name is None:
+            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            else: raise ValueError()
+
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
@@ -1304,6 +1328,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         in_geometry: bool, optional
             Visible in the scene if set to ``True``.
         """
+        if name is None: raise ValueError()
+
         if not isinstance(name, str): name = str(name)
 
         if name in self.light_handles:
@@ -1366,6 +1392,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         in_geometry: bool, optional
             Visible in the scene if set to ``True``.
         """
+        if name is None: raise ValueError()
+
         if not isinstance(name, str): name = str(name)
 
         if name in self.light_handles:
@@ -1444,6 +1472,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         in_geometry: bool, optional
             Visible in the scene if set to ``True``.
         """
+        if name is None: raise ValueError()
+
         if isinstance(light_type, str): light_type = Light[light_type]
 
         if light_type == Light.Spherical:
@@ -1469,7 +1499,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Parameters
         ----------
-        name : string
+        name : string, optional
             Name of the light.
         pos : array_like, optional
             3D position.
@@ -1484,6 +1514,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         v : array_like, optional
             Parallelogram V vector.
         """
+        if name is None: raise ValueError()
+
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
@@ -1515,9 +1547,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def light_fit(self, light: str,
                   camera: Optional[str] = None,
-                  horizontal_rot: Optional[float] = 45,
-                  vertical_rot: Optional[float] = 25,
-                  dist_scale: Optional[float] = 1.5) -> None:
+                  horizontal_rot: float = 45,
+                  vertical_rot: float = 25,
+                  dist_scale: float = 1.5) -> None:
         """Fit light position and direction to the camera.
 
         Parameters
@@ -1533,6 +1565,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         dist_scale : float, optional
             Light to target distance with reespect to the eye to target distance.
         """
+        if light is None: raise ValueError()
+
         if not isinstance(light, str): light = str(light)
         light_handle = self.light_handles[light]
 
@@ -1562,6 +1596,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Dictionary of the material parameters or ``None`` if failed on
             accessing material data.
         """
+        if name is None: raise ValueError()
+
+        if not isinstance(name, str): name = str(name)
+
         s = self._optix.get_material(name)
         if len(s) > 2: return json.loads(s)
         else:
@@ -1586,6 +1624,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         --------
         :py:mod:`plotoptix.materials`
         """
+        if name is None or data is None: raise ValueError()
+
         if self._optix.setup_material(name, json.dumps(data)):
             self._logger.info("Added new material %s.", name)
         else:
@@ -1643,7 +1683,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_data(self, name: str, pos: Any,
                  c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                  r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
-                 u = None, v = None, w = None,
+                 u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None,
                  geom: Union[Geometry, str] = Geometry.ParticleSet,
                  mat: str = "diffuse",
                  rnd: bool = True) -> None:
@@ -1655,34 +1695,36 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Name of the geometry.
         pos : array_like
             Positions of data points.
-        c : Any
+        c : Any, optional
             Colors of the primitives. Single value means a constant gray level.
             3-component array means constant RGB color. Array with the shape[0]
             equal to the number of primitives will set individual gray/color for
             each primitive.
-        r : Any
+        r : Any, optional
             Radii of particles / bezier primitives or U / V / W lengths of
             parallelograms / parallelepipeds / tetrahedrons (if u / v / w not provided).
             Single value sets const. size for all primitives.
-        u : array_like
+        u : array_like, optional
             U vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
             vector sets const. value for all primitives.
-        v : array_like
+        v : array_like, optional
             V vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
             vector sets const. value for all primitives.
-        w : array_like
+        w : array_like, optional
             W vector(s) of parallelepipeds / tetrahedrons. Single vector sets const.
             value for all primitives.
-        geom : Geometry enum or string
+        geom : Geometry enum or string, optional
             Geometry of primitives (ParticleSet, Tetrahedrons, ...). See Geometry
             enum.
-        mat : string
+        mat : string, optional
             Material name.
-        rnd : bool
+        rnd : bool, optional
             Randomize not provided U / V / W vectors so regular but randomly rotated
             primitives are generated using available vectors (default). If set to
             ``False`` all primitives are aligned in the same direction.
         """
+        if name is None: raise ValueError()
+
         if not isinstance(name, str): name = str(name)
         if isinstance(geom, str): geom = Geometry[geom]
 
@@ -1811,34 +1853,39 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None) -> None:
         """Update data of an existing geometry.
 
+        Note that on data size changes (``pos`` array size different than provided on :meth:`plotoptix.NpOptiX.set_data`)
+        also other properties must be provided matching the new size, otherwise default values are used.
+
         Parameters
         ----------
         name : string
             Name of the geometry.
         pos : array_like
             Positions of data points.
-        c : Any
+        c : Any, optional
             Colors of the primitives. Single value means a constant gray level.
             3-component array means constant RGB color. Array with the shape[0]
             equal to the number of primitives will set individual grey/color for
             each primitive.
-        r : Any
+        r : Any, optional
             Radii of particles / bezier primitives. Single value sets constant
             radius for all primitives.
-        u : array_like
+        u : array_like, optional
             U vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
             vector sets const. value for all primitives.
-        v : array_like
+        v : array_like, optional
             V vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
             vector sets const. value for all primitives.
-        w : array_like
+        w : array_like, optional
             W vector(s) of parallelepipeds / tetrahedrons. Single vector sets const.
             value for all primitives.
         """
+        if name is None: raise ValueError()
+
         if not isinstance(name, str): name = str(name)
 
         if not name in self.geometry_handles:
-            self._logger.error("Geometry %s does not exists yet, use setup_data() instead.", name)
+            self._logger.error("Geometry %s does not exists yet, use set_data() instead.", name)
             return
 
         n_primitives = self.geometry_sizes[name]
@@ -1914,8 +1961,335 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         finally:
             self._padlock.release()
 
+
+    def set_data_2d(self, name: str, pos: Any,
+                    c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
+                    normals: Optional[Any] = None,
+                    range_x: Optional[Tuple[float, float]] = None,
+                    range_z: Optional[Tuple[float, float]] = None,
+                    floor_y: Optional[float] = None,
+                    floor_c: Optional[Any] = None,
+                    mat: str = "diffuse",
+                    make_normals: bool = False) -> None:
+        """Create new surface geometry for the 2D dataset.
+
+        Data is provided as 2D numpy array of :math:`z = f(x, y)` values, with the shape ``(n,m)``,
+        where ``n`` and ``m`` are at least 2.
+        
+        Currently, convention of vertical Y and horizontal XZ plane is adopted.
+
+        Parameters
+        ----------
+        name : string
+            Name of the new surface geometry.
+        pos : array_like
+            Z values of data points.
+        c : Any, optional
+            Colors of data points. Single value means a constant gray level.
+            3-component array means a constant RGB color. Array of the shape
+            ``(n,m,3)`` will set individual color for each data point,
+            interpolated between points; ``n`` and ``m`` have to be the same
+            as in data points shape.
+        normals : array_like, optional
+            Surface normal vectors at data points. Array shape has to be ``(n,m,3)``,
+            with ``n`` and ``m`` the same as in data points shape.
+        range_x : tuple (float, float), optional
+            Data range along X axis. Data array indexes are used if range is
+            not provided.
+        range_z : tuple (float, float), optional
+            Data range along Z axis. Data array indexes are used if range is
+            not provided.
+        floor_y : float, optional
+            Y level of XZ plane forming the base of the new geometry. Surface
+            only is created if ``floor_y`` is not provided.
+        floor_c: Any, optional
+            Color of the base volume. Single value or array_like RGB color values.
+        mat : string, optional
+            Material name.
+        make_normals : bool, optional
+            Calculate normals for data points, if not provided with ``normals``
+            argument. Normals of all triangles attached to the point are averaged.
+        """
+        if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if name in self.geometry_handles:
+            self._logger.error("Geometry %s already exists, use update_data_2d() instead.", name)
+            return
+
+        if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
+        assert len(pos.shape) == 2 and pos.shape[0] > 1 and pos.shape[1] > 1, "Required vertex data shape is (z,x), where z >= 2 and x >= 2."
+        if pos.dtype != np.float32: pos = np.ascontiguousarray(pos, dtype=np.float32)
+        if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
+        pos_ptr = pos.ctypes.data
+
+        n_ptr = 0
+        if normals is not None:
+            if not isinstance(normals, np.ndarray): normals = np.ascontiguousarray(normals, dtype=np.float32)
+            assert len(normals.shape) == 3 and normals.shape == pos.shape + (3,), "Normals shape must be (z,x,3), where (z,x) id the vertex data shape."
+            if normals.dtype != np.float32: normals = np.ascontiguousarray(normals, dtype=np.float32)
+            if not normals.flags['C_CONTIGUOUS']: normals = np.ascontiguousarray(normals, dtype=np.float32)
+            n_ptr = normals.ctypes.data
+            make_normals = False
+
+        c_ptr = 0
+        c_const = None
+        if c is not None:
+            if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
+            if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
+            if len(c.shape) == 1 and c.shape[0] == 3:
+                c_const = c
+                cm = np.zeros(pos.shape + (3,), dtype=np.float32)
+                cm[:,:] = c
+                c = cm
+            assert len(c.shape) == 3 and c.shape == pos.shape + (3,), "Colors shape must be (m,n,3), where (m,n) id the vertex data shape."
+            if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
+            if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+            c_ptr = c.ctypes.data
+
+        make_floor = floor_y is not None
+        if not make_floor: floor_y = np.float32(np.nan)
+
+        cl_ptr = 0
+        if make_floor:
+            if floor_c is not None:
+                if isinstance(floor_c, float) or isinstance(floor_c, int): floor_c = np.full(3, floor_c, dtype=np.float32)
+                if not isinstance(floor_c, np.ndarray): floor_c = np.ascontiguousarray(floor_c, dtype=np.float32)
+                if len(floor_c.shape) == 1 and floor_c.shape[0] == 3:
+                    if floor_c.dtype != np.float32: floor_c = np.ascontiguousarray(floor_c, dtype=np.float32)
+                    if not floor_c.flags['C_CONTIGUOUS']: floor_c = np.ascontiguousarray(floor_c, dtype=np.float32)
+                    cl_ptr = floor_c.ctypes.data
+                else:
+                    self._logger.warn("Floor color should be a single value or RGB array.")
+            elif c_const is not None:
+                floor_c = np.ascontiguousarray(c_const, dtype=np.float32)
+                cl_ptr = floor_c.ctypes.data
+
+        if range_x is None: range_x = (np.float32(np.nan), np.float32(np.nan))
+        if range_z is None: range_z = (np.float32(np.nan), np.float32(np.nan))
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Setup surface %s...", name)
+            g_handle = self._optix.setup_surface(name, mat, pos.shape[1], pos.shape[0], pos_ptr, n_ptr, c_ptr, cl_ptr,
+                                                 range_x[0], range_x[1], range_z[0], range_z[1], floor_y, make_normals)
+
+            if g_handle > 0:
+                self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_names[g_handle] = name
+                self.geometry_handles[name] = g_handle
+                self.geometry_sizes[name] = pos.shape[0] * pos.shape[1]
+            else:
+                self._logger.error("Surface setup failed.")
+
+        except Exception as e:
+            self._logger.error(str(e))
+        finally:
+            self._padlock.release()
+
+    def update_data_2d(self, name: str,
+                       pos: Optional[Any] = None,
+                       c: Optional[Any] = None,
+                       normals: Optional[Any] = None,
+                       range_x: Optional[Tuple[float, float]] = None,
+                       range_z: Optional[Tuple[float, float]] = None,
+                       floor_y: Optional[float] = None,
+                       floor_c: Optional[Any] = None) -> None:
+        """Update surface geometry data or properties.
+
+        Parameters
+        ----------
+        name : string
+            Name of the surface geometry.
+        pos : array_like, optional
+            Z values of data points.
+        c : Any, optional
+            Colors of data points. Single value means a constant gray level.
+            3-component array means a constant RGB color. Array of the shape
+            ``(n,m,3)`` will set individual color for each data point,
+            interpolated between points; ``n`` and ``m`` have to be the same
+            as in data points shape.
+        normals : array_like, optional
+            Surface normal vectors at data points. Array shape has to be
+            ``(n,m,3)``, with ``n`` and``m`` the same as in data points shape.
+        range_x : tuple (float, float), optional
+            Data range along X axis.
+        range_z : tuple (float, float), optional
+            Data range along Z axis.
+        floor_y : float, optional
+            Y level of XZ plane forming the base of the geometry.
+        floor_c: Any, optional
+            Color of the base volume. Single value or array_like RGB color values.
+        """
+        if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if not name in self.geometry_handles:
+            self._logger.error("Surface %s does not exists yet, use set_data_2d() instead.", name)
+            return
+
+        s_x = c_uint()
+        s_z = c_uint()
+        if not self._optix.get_surface_size(name, byref(s_x), byref(s_z)):
+            self._logger.error("Cannot get surface %s size.", name)
+            return
+        size_xz = (s_z.value, s_x.value)
+        size_changed = False
+
+        pos_ptr = 0
+        if pos is not None:
+            if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
+            assert len(pos.shape) == 2 and pos.shape[0] > 1 and pos.shape[1] > 1, "Required vertex data shape is (z,x), where z >= 2 and x >= 2."
+            if pos.dtype != np.float32: pos = np.ascontiguousarray(pos, dtype=np.float32)
+            if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
+            if pos.shape != size_xz: size_changed = True
+            size_xz = pos.shape
+            pos_ptr = pos.ctypes.data
+
+        c_ptr = 0
+        c_const = None
+        if size_changed and c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
+        if c is not None:
+            if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
+            if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
+            if len(c.shape) == 1 and c.shape[0] == 3:
+                c_const = c
+                cm = np.zeros(size_xz + (3,), dtype=np.float32)
+                cm[:,:] = c
+                c = cm
+            assert len(c.shape) == 3 and c.shape == size_xz + (3,), "Colors shape must be (m,n,3), where (m,n) id the vertex data shape."
+            if c.shape[0] != size_xz[0] or c.shape[1] != size_xz[1]:
+                self._logger.error("Colors (c) shape does not match vertex data shape.")
+                return
+            if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
+            if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+            c_ptr = c.ctypes.data
+
+        n_ptr = 0
+        if normals is not None:
+            if not isinstance(normals, np.ndarray): normals = np.ascontiguousarray(normals, dtype=np.float32)
+            assert len(normals.shape) == 3 and normals.shape == size_xz + (3,), "Normals shape must be (z,x,3), where (z,x) id the vertex data shape."
+            if normals.shape[0] != size_xz[0] or normals.shape[1] != size_xz[1]:
+                self._logger.error("Normals shape does not match vertex data shape.")
+                return
+            if normals.dtype != np.float32: normals = np.ascontiguousarray(normals, dtype=np.float32)
+            if not normals.flags['C_CONTIGUOUS']: normals = np.ascontiguousarray(normals, dtype=np.float32)
+            n_ptr = normals.ctypes.data
+
+        cl_ptr = 0
+        if floor_c is not None:
+            if isinstance(floor_c, float) or isinstance(floor_c, int): floor_c = np.full(3, floor_c, dtype=np.float32)
+            if not isinstance(floor_c, np.ndarray): floor_c = np.ascontiguousarray(floor_c, dtype=np.float32)
+            if len(floor_c.shape) == 1 and floor_c.shape[0] == 3:
+                if floor_c.dtype != np.float32: floor_c = np.ascontiguousarray(floor_c, dtype=np.float32)
+                if not floor_c.flags['C_CONTIGUOUS']: floor_c = np.ascontiguousarray(floor_c, dtype=np.float32)
+                cl_ptr = floor_c.ctypes.data
+            else:
+                self._logger.warn("Floor color should be a single value or RGB array.")
+
+        if range_x is None: range_x = (np.float32(np.nan), np.float32(np.nan))
+        if range_z is None: range_z = (np.float32(np.nan), np.float32(np.nan))
+
+        if floor_y is None: floor_y = np.float32(np.nan)
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Update surface %s, size (%d, %d)...", name, size_xz[1], size_xz[0])
+            g_handle = self._optix.update_surface(name, size_xz[1], size_xz[0],
+                                                  pos_ptr, n_ptr, c_ptr, cl_ptr,
+                                                  range_x[0], range_x[1], range_z[0], range_z[1],
+                                                  floor_y)
+
+            if (g_handle > 0) and (g_handle == self.geometry_handles[name]):
+                self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_sizes[name] = size_xz[0] * size_xz[1]
+            else:
+                self._logger.error("Geometry update failed.")
+                
+        except Exception as e:
+            self._logger.error(str(e))
+        finally:
+            self._padlock.release()
+
+
+    def set_mesh(self, name: str, pos: Any, pidx = None, normals = None, nidx = None,
+                 c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
+                 mat: str = "diffuse", make_normals: bool = False) -> None:
+
+        if name is None: raise ValueError()
+
+        if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
+        assert len(pos.shape) == 2 and pos.shape[0] > 2 and pos.shape[1] == 3, "Required vertex data shape is (n,3), where n >= 3."
+
+        if pidx is not None and not isinstance(pidx, np.ndarray): pidx = np.ascontiguousarray(pidx, dtype=np.int32)
+        pidx_ptr = 0
+        if pidx is not None:
+            assert (len(pidx.shape) == 2 and pidx.shape[0] > 0 and pos.shape[1] == 3) or (len(pidx.shape) == 1 and pidx.shape[0] > 3 and (pidx.shape[0] % 3) == 0), "Required index shape is (n,3) or (m), where m % 3 == 0."
+            pidx_ptr = pidx.ctypes.data
+
+        c = self._make_contiguous_3d(c, n=pos.shape[0], extend_scalars=True)
+        col_ptr = 0
+        if c is not None:
+            col_ptr = c.ctypes.data
+
+
+    def load_mesh_obj(self, file_name: str, mesh_name: str,
+                      c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
+                      mat: str = "diffuse", make_normals: bool = False) -> None:
+        """Load mesh geometry from Wavefront .obj file.
+
+        Parameters
+        ----------
+        file_name : string
+            File name (local file path or url) to read from.
+        mesh_name : string
+            Name of the new mesh geometry.
+        c : Any, optional
+            Color of the mesh. Single value means a constant gray level.
+            3-component array means constant RGB color.
+        mat : string, optional
+            Material name.
+        make_normals : bool, optional
+            Calculate new normal for each vertex by averaging normals of connected
+            mesh triangles. If set to ``False`` (default) then original normals from
+            the .obj file are preserved or normals are not used (mesh triangles
+            define normals).
+        """
+        if file_name is None or mesh_name is None: raise ValueError()
+
+        if not isinstance(file_name, str): file_name = str(file_name)
+
+        if not isinstance(mesh_name, str): mesh_name = str(mesh_name)
+
+        if mesh_name in self.geometry_handles:
+            self._logger.error("Geometry %s already exists, use update_mesh() instead.", mesh_name)
+            return
+
+        c = self._make_contiguous_vector(c, n_dim=3)
+        if c is not None: col_ptr = c.ctypes.data
+        else: col_ptr = 0
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Load mesh %s, from file %s ...", mesh_name, file_name)
+            g_handle = self._optix.load_mesh_obj(file_name, mesh_name, mat, col_ptr, make_normals)
+
+            if g_handle > 0:
+                self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_names[g_handle] = mesh_name
+                self.geometry_handles[mesh_name] = g_handle
+                self.geometry_sizes[mesh_name] = 1 # todo: read mesh size
+            else:
+                self._logger.error("Mesh loading failed.")
+
+        except Exception as e:
+            self._logger.error(str(e))
+        finally:
+            self._padlock.release()
+
+
     def move_geometry(self, name: str, v: Tuple[float, float, float],
-                      update: Optional[bool] = True) -> None:
+                      update: bool = True) -> None:
         """Move all primitives by (x, y, z) vector.
 
         Updates GPU buffers immediately if update is set to ``True`` (default),
@@ -1931,11 +2305,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         update : bool, optional
             Update GPU buffer.
         """
+        if name is None: raise ValueError()
+
         if not self._optix.move_geometry(name, v[0], v[1], v[2], update):
             self._logger.error("Geometry move failed.")
 
     def move_primitive(self, name: str, idx: int, v: Tuple[float, float, float],
-                       update: Optional[bool] = True) -> None:
+                       update: bool = True) -> None:
         """Move selected primitive by (x, y, z) vector.
 
         Updates GPU buffers immediately if update is set to ``True`` (default),
@@ -1953,12 +2329,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         update : bool, optional
             Update GPU buffer.
         """
+        if name is None: raise ValueError()
+
         if not self._optix.move_primitive(name, idx, v[0], v[1], v[2], update):
             self._logger.error("Primitive move failed.")
 
     def rotate_geometry(self, name: str, rot: Tuple[float, float, float],
                         center: Optional[Tuple[float, float, float]] = None,
-                        update: Optional[bool] = True) -> None:
+                        update: bool = True) -> None:
         """Rotate all primitives by specified degrees.
 
         Rotate all primitives by specified degrees around x, y, z axis, with
@@ -1979,6 +2357,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         update : bool, optional
             Update GPU buffer.
         """
+        if name is None: raise ValueError()
+
         if center is None:
             if not self._optix.rotate_geometry(name, rot[0], rot[1], rot[2], update):
                 self._logger.error("Geometry rotate failed.")
@@ -1989,7 +2369,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def rotate_primitive(self, name: str, idx: int, rot: Tuple[float, float, float],
                          center: Optional[Tuple[float, float, float]] = None,
-                         update: Optional[bool] = True) -> None:
+                         update: bool = True) -> None:
         """Rotate selected primitive by specified degrees.
 
         Rotate selected primitive by specified degrees around x, y, z axis, with
@@ -2012,6 +2392,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         update : bool, optional
             Update GPU buffer.
         """
+        if name is None: raise ValueError()
+
         if center is None:
             if not self._optix.rotate_primitive(name, idx, rot[0], rot[1], rot[2], update):
                 self._logger.error("Primitive rotate failed.")
@@ -2021,7 +2403,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 self._logger.error("Geometry rotate failed.")
 
     def scale_geometry(self, name: str, s: float,
-                       update: Optional[bool] = True) -> None:
+                       update: bool = True) -> None:
         """Scale all primitive's positions and sizes.
 
         Scale all primitive's positions and sizes by specified factor, with respect
@@ -2039,11 +2421,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         update : bool, optional
             Update GPU buffer.
         """
+        if name is None: raise ValueError()
+
         if not self._optix.scale_geometry(name, s, update):
             self._logger.error("Geometry scale failed.")
 
     def scale_primitive(self, name: str, idx: int, s: float,
-                        update: Optional[bool] = True) -> None:
+                        update: bool = True) -> None:
         """Scale selected primitive.
 
         Scale selected primitive by specified factor, with respect to the center of
@@ -2063,11 +2447,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         update : bool, optional
             Update GPU buffer.
         """
+        if name is None: raise ValueError()
+
         if not self._optix.scale_primitive(name, idx, s, update):
             self._logger.error("Primitive scale failed.")
 
     def update_geom_buffers(self, name: str,
-                            mask: Optional[Union[GeomBuffer, str]] = GeomBuffer.All) -> None:
+                            mask: Union[GeomBuffer, str] = GeomBuffer.All) -> None:
         """Update geometry buffers.
 
         Update geometry buffers in GPU after modifications made with
@@ -2081,6 +2467,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         mask : GeomBuffer or string, optional
             Which buffers to update. All buffers if not specified.
         """
+        if name is None: raise ValueError()
+
         if isinstance(mask, str): mask = GeomBuffer[mask]
 
         if not self._optix.update_geom_buffers(name, mask.value):
@@ -2091,15 +2479,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Parameters
         ----------
-        mode : Coordinates enum or string
+        mode : Coordinates enum or string, optional
             Style of the coordinate system geometry.
-        thickness : float
+        thickness : float, optional
             Thickness of lines.
 
         See Also
         --------
         :class:`plotoptix.enums.Coordinates`
         """
+        if mode is None: raise ValueError()
+
         if isinstance(mode, str): mode = Coordinates[mode]
 
         if self._optix.set_coordinates_geom(mode.value, thickness):
