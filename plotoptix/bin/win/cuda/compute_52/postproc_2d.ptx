@@ -19,6 +19,7 @@
 .visible .global .align 4 .b8 levels_high_range[12] = {119, 190, 127, 63, 119, 190, 127, 63, 119, 190, 127, 63};
 .visible .global .align 4 .f32 tonemap_exposure = 0f3F800000;
 .visible .global .align 4 .f32 tonemap_igamma = 0f3F800000;
+.visible .global .texref tone_curve_gray;
 .visible .global .texref frame_mask;
 .visible .global .align 4 .b8 _ZN21rti_internal_typeinfo12launch_indexE[8] = {82, 97, 121, 0, 8, 0, 0, 0};
 .visible .global .align 4 .b8 _ZN21rti_internal_typeinfo10launch_dimE[8] = {82, 97, 121, 0, 8, 0, 0, 0};
@@ -164,6 +165,45 @@
 	ex2.approx.ftz.f32 	%f21, %f16;
 	ex2.approx.ftz.f32 	%f22, %f14;
 	st.v4.f32 	[%rd7], {%f22, %f21, %f20, %f4};
+	ret;
+}
+
+	// .globl	_Z23tone_curve_gray_mappingv
+.visible .entry _Z23tone_curve_gray_mappingv(
+
+)
+{
+	.reg .f32 	%f<25>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<15>;
+
+
+	ld.global.v2.u32 	{%r5, %r6}, [launch_index];
+	cvt.u64.u32	%rd3, %r5;
+	cvt.u64.u32	%rd4, %r6;
+	mov.u64 	%rd13, output_buffer;
+	cvta.global.u64 	%rd2, %rd13;
+	mov.u32 	%r3, 2;
+	mov.u32 	%r4, 16;
+	mov.u64 	%rd12, 0;
+	// inline asm
+	call (%rd1), _rt_buffer_get_64, (%rd2, %r3, %r4, %rd3, %rd4, %rd12, %rd12);
+	// inline asm
+	ld.v4.f32 	{%f1, %f2, %f3, %f4}, [%rd1];
+	ld.global.f32 	%f8, [tonemap_exposure];
+	mul.ftz.f32 	%f9, %f8, %f1;
+	mul.ftz.f32 	%f10, %f8, %f2;
+	mul.ftz.f32 	%f11, %f8, %f3;
+	tex.1d.v4.f32.f32	{%f12, %f13, %f14, %f15}, [tone_curve_gray, {%f9}];
+	tex.1d.v4.f32.f32	{%f16, %f17, %f18, %f19}, [tone_curve_gray, {%f10}];
+	tex.1d.v4.f32.f32	{%f20, %f21, %f22, %f23}, [tone_curve_gray, {%f11}];
+	ld.global.v2.u32 	{%r9, %r10}, [launch_index];
+	cvt.u64.u32	%rd9, %r9;
+	cvt.u64.u32	%rd10, %r10;
+	// inline asm
+	call (%rd7), _rt_buffer_get_64, (%rd2, %r3, %r4, %rd9, %rd10, %rd12, %rd12);
+	// inline asm
+	st.v4.f32 	[%rd7], {%f12, %f16, %f20, %f4};
 	ret;
 }
 
