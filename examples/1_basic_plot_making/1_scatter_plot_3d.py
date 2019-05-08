@@ -41,6 +41,9 @@ def main():
 
     optix = TkOptiX() # create and configure, show the window later
 
+    # accumulate up to 30 frames (override default of 4 frames)
+    optix.set_param(max_accumulation_frames=30)
+
     # white background
     optix.set_background(0.99)
 
@@ -74,9 +77,6 @@ def main():
     # camera and lighting configured by hand
     optix.update_camera(eye=[5, 0, -8])
     optix.setup_light("light1", color=15*np.array([0.99, 0.9, 0.7]), radius=2)
-
-    # accumulate up to 30 frames (override default of 4 frames)
-    optix.set_param(max_accumulation_frames=30)
 
     print("done")
 
