@@ -190,6 +190,128 @@ class Light(Enum):
     """Spherical light, shining in all directions.
     """
 
+class Channel(Enum):
+    """Image color channel.
+    """
+
+    Gray = 0
+    """Brightness.
+    """
+
+    R = 1
+    """Red channel.
+    """
+
+    G = 2
+    """Green channel.
+    """
+
+    B = 3
+    """Blue channel.
+    """
+
+class Postprocessing(Enum):
+    """2D postprocessing stages.
+
+    Postprocessing stages can be added with :meth:`plotoptix.NpOptiX.add_postproc`
+    to correct ray traced 2D image. Each algorithm has its own variables that should
+    be configured before adding the postprocessing stage.
+    """
+
+    Levels = 1
+    """Image levels correction.
+
+    Variables to configure:
+    - levels_low_range, float3, RGB values
+    - levels_high_range, float3, RGB values.
+
+    Examples
+    --------
+    >>> optix = TkOptiX()
+    >>> optix.set_float("levels_low_range", 0.1, 0.15, 0.2)
+    >>> optix.set_float("levels_high_range", 0.9, 0.8, 0.7)
+    >>> optix.add_postproc("Levels")
+    """
+
+    Gamma = 2
+    """Image gamma correction.
+
+    Variables to configure:
+    - tonemap_exposure, float, exposure value
+    - tonemap_igamma, float, 1/gamma value.
+
+    Examples
+    --------
+    >>> optix = TkOptiX()
+    >>> optix.set_float("tonemap_exposure", 0.6)
+    >>> optix.set_float("tonemap_igamma", 1/2.2)
+    >>> optix.add_postproc("Gamma")
+    """
+
+    GrayCurve = 3
+    """Brightness correction curve.
+
+    Variables to configure:
+    
+    - tonemap_exposure, float, exposure value
+    - tone_curve_gray, texture 1D, correction curve; can be configured by
+      passing the values directly (:meth:`plotoptix.NpOptiX.set_texture_1d`) or
+      with :meth:`plotoptix.NpOptiX.set_correction_curve`
+
+    Examples
+    --------
+    >>> optix = TkOptiX()
+    >>> optix.set_float("tonemap_exposure", 0.6)
+    >>> optix.set_texture_1d("tone_curve_gray", [0, 0.33, 0.75, 1])
+    >>> optix.add_postproc("GrayCurve")
+    """
+
+    RgbCurve = 4
+    """RGB correction curve.
+
+    Variables to configure:
+    
+    - tonemap_exposure, float, exposure value
+    - tone_curve_r, texture 1D, red channel correction curve
+    - tone_curve_g, texture 1D, green channel correction curve
+    - tone_curve_b, texture 1D, blue channel correction curve
+    
+    Correction curves can be configured by passing the values directly
+    (using :meth:`plotoptix.NpOptiX.set_texture_1d`) or with
+    :meth:`plotoptix.NpOptiX.set_correction_curve`
+
+    Examples
+    --------
+    >>> optix = TkOptiX()
+    >>> optix.set_float("tonemap_exposure", 0.6)
+    >>> optix.set_texture_1d("tone_curve_r", [0, 0.31, 0.75, 1])
+    >>> optix.set_texture_1d("tone_curve_g", [0, 0.33, 0.78, 1])
+    >>> optix.set_texture_1d("tone_curve_b", [0, 0.35, 0.81, 1])
+    >>> optix.add_postproc("RgbCurve")
+    """
+
+    Mask = 5
+    """2D mask multiplied by the image.
+
+    Variables to configure:
+    
+    - frame_mask, texture 2D, mask to apply
+
+    Examples
+    --------
+    >>> optix = TkOptiX()
+    >>>
+    >>> x = np.linspace(-1, 1, 20)
+    >>> z = np.linspace(-1, 1, 20)
+    >>> Mx, Mz = np.meshgrid(x, z)
+    >>> M = np.abs(Mx) ** 3 + np.abs(Mz) ** 3
+    >>> M = 1 - (0.6 / np.max(M)) * M
+    >>>
+    >>> optix.set_texture_2d("frame_mask", M)
+    >>> optix.add_postproc("Mask")
+    """
+
+    #Denoiser = 6 # interface not yet implemented
 
 class RtResult(Enum):
     """Raytracing result codes.

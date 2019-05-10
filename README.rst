@@ -58,7 +58,7 @@ Features
 - flat, diffuse, specular and glass shading
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
-- post-processing: tonal correction curves and levels adjustment
+- post-processing: tonal correction curves, levels adjustment, mask overlay
 - GPU acceleration using RT Cores, and everything else what comes with `OptiX 6.0 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - image output to `numpy <http://www.numpy.org>`__ array
@@ -84,7 +84,7 @@ What's Included
 Installation
 ============
 
-**Note**, at this point, PlotOptiX binaries are prepared for Windows only. We should be able to extend to Linux / MacOS X,
+**Note**, at this point, PlotOptiX binaries are prepared for Windows only. We should be able to extend also to Linux,
 but today you are dealing with the very early version of the project.
 
 **.NET Framework**

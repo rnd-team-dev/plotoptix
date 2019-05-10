@@ -10,7 +10,7 @@ Added
 ~~~~~
 
 - RTX-accelerated mesh geometry for surface plots, reading 3D meshes from Wavefront .obj fromat
-- tonal correction curves defined with control points
+- several configurable 2D postprocessing stages
 
 Fixed
 ~~~~~

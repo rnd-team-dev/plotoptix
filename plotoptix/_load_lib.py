@@ -90,6 +90,12 @@ def load_optix():
     optix.set_float3.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
     optix.set_float3.restype = c_bool
 
+    optix.set_texture_1d.argtypes = [c_wchar_p, c_void_p, c_int, c_uint, c_bool]
+    optix.set_texture_1d.restype = c_bool
+
+    optix.set_texture_2d.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_uint, c_bool]
+    optix.set_texture_2d.restype = c_bool
+
     optix.resize_scene.argtypes = [c_int, c_int, c_void_p, c_int]
     optix.resize_scene.restype = c_bool
 
@@ -98,6 +104,12 @@ def load_optix():
 
     optix.setup_material.argtypes = [c_wchar_p, c_wchar_p]
     optix.setup_material.restype = c_bool
+
+    optix.set_correction_curve.argtypes = [c_void_p, c_int, c_int, c_int, c_float, c_bool]
+    optix.set_correction_curve.restype = c_bool
+
+    optix.add_postproc.argtypes = [c_int, c_bool]
+    optix.add_postproc.restype = c_bool
 
     optix.setup_geometry.argtypes = [c_int, c_wchar_p, c_wchar_p, c_bool, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.setup_geometry.restype = c_uint

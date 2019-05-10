@@ -29,7 +29,7 @@ def main():
     optix.set_ambient(0.25) # some ambient light
 
 
-    # try commenting out vaious arguments
+    # try commenting out optional arguments
     optix.set_data_2d("surface", Y,
                       range_x=rx, range_z=rz,
                       c=map_to_colors(Y, "OrRd"),
@@ -39,7 +39,7 @@ def main():
                      )
 
 
-    # camera and light position fit the scene
+    # set camera and light position to fit the scene
     optix.setup_camera("cam1")
     eye = optix.get_camera_eye()
     eye[1] = 0.5 * eye[2]

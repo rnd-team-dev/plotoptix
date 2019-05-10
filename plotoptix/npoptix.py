@@ -424,7 +424,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.refresh_scene()
 
     def get_float(self, name: str) -> Optional[float]:
-        """Get shader ``float`` variable with given name.
+        """Get shader ``float`` variable with given ``name``.
 
         Parameters
         ----------
@@ -447,7 +447,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
     def get_float2(self, name: str) -> (Optional[float], Optional[float]):
-        """Get shader ``float2`` variable with given name.
+        """Get shader ``float2`` variable with given ``name``.
 
         Parameters
         ----------
@@ -471,7 +471,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None, None
 
     def get_float3(self, name: str) -> (Optional[float], Optional[float], Optional[float]):
-        """Get shader ``float3`` variable with given name.
+        """Get shader ``float3`` variable with given ``name``.
 
         Parameters
         ----------
@@ -498,7 +498,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_float(self, name: str, x: float, y: Optional[float] = None, z: Optional[float] = None, refresh: bool = False) -> None:
         """Set shader variable.
 
-        Set shader variable with given name and of the type ``float``, ``float2``
+        Set shader variable with given ``name`` and of the type ``float``, ``float2``
         (if y provided), or ``float3`` (if y and z provided). Raytrace the whole
         scene if refresh is set to ``True``.
 
@@ -540,7 +540,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.set_float(name, x, refresh)
 
     def get_uint(self, name: str) -> Optional[int]:
-        """Get shader ``uint`` variable with given name.
+        """Get shader ``uint`` variable with given ``name``.
 
         Parameters
         ----------
@@ -563,7 +563,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
     def get_uint2(self, name: str) -> (Optional[int], Optional[int]):
-        """Get shader ``uint2`` variable with given name.
+        """Get shader ``uint2`` variable with given ``name``.
 
         Parameters
         ----------
@@ -590,7 +590,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_uint(self, name: str, x: int, y: Optional[int] = None, refresh: bool = False) -> None:
         """Set shader variable.
 
-        Set shader variable with given name and of the type ``uint`` or ``uint2``
+        Set shader variable with given ``name`` and of the type ``uint`` or ``uint2``
         (if y provided). Raytrace the whole scene if refresh is set to ``True``.
         Note, shader variables distinguish ``int`` and ``uint``, while the type
         provided by Python methods is ``int`` in both cases.
@@ -624,7 +624,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def get_int(self, name: str) -> Optional[int]:
-        """Get shader ``int`` variable with given name.
+        """Get shader ``int`` variable with given ``name``.
 
         Parameters
         ----------
@@ -649,7 +649,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_int(self, name: str, x: int, refresh: bool = False) -> None:
         """Set shader variable.
 
-        Set shader variable with given name and of the type ``int``. Raytrace
+        Set shader variable with given ``name`` and of the type ``int``. Raytrace
         the whole scene if refresh is set to ``True``.
         Note, shader variables distinguish ``int`` and ``uint``, while the type
         provided by Python methods is ``int`` in both cases.
@@ -668,6 +668,82 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.set_int(name, x, refresh)
 
+
+    def set_texture_1d(self, name: str, data: Any, refresh: bool = False) -> None:
+        """Set texture data.
+
+        Set data of the shader texture with given ``name``. Texture format
+        (float, float2 or float4) and lenght are deduced from the ``data`` array
+        shape.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+        data : array_like
+            Texture data.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+        if not isinstance(name, str): name = str(name)
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if len(data.shape) == 1:     rt_format = RtFormat.Float
+        elif len(data.shape) == 2:
+            if data.shape[1] == 1:   rt_format = RtFormat.Float
+            elif data.shape[1] == 2: rt_format = RtFormat.Float2
+            elif data.shape[1] == 4: rt_format = RtFormat.Float4
+            else:
+                self._logger.error("Texture 1D shape should be (length,n), where n=1,2,4.")
+                return
+        else:
+            self._logger.error("Texture 1D shape should be (length,) or (length,n), where n=1,2,4.")
+            return
+            
+        if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
+        if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        self._logger.info("Set texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
+        if not self._optix.set_texture_1d(name, data.ctypes.data, data.shape[0], rt_format.value, refresh):
+            self._logger.error("Texture 1D %s not uploaded.", name)
+
+    def set_texture_2d(self, name: str, data: Any, refresh: bool = False) -> None:
+        """Set texture data.
+
+        Set data of the shader texture with given ``name``. Texture format
+        (float, float2 or float4) and width/height are deduced from the ``data``
+        array shape.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+        data : array_like
+            Texture data.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+        if not isinstance(name, str): name = str(name)
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if len(data.shape) == 2:     rt_format = RtFormat.Float
+        elif len(data.shape) == 3:
+            if data.shape[2] == 1:   rt_format = RtFormat.Float
+            elif data.shape[2] == 2: rt_format = RtFormat.Float2
+            elif data.shape[2] == 4: rt_format = RtFormat.Float4
+            else:
+                self._logger.error("Texture 2D shape should be (height,width,n), where n=1,2,4.")
+                return
+        else:
+            self._logger.error("Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4.")
+            return
+
+        if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
+        if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        self._logger.info("Set texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
+        if not self._optix.set_texture_2d(name, data.ctypes.data, data.shape[1], data.shape[0], rt_format.value, refresh):
+            self._logger.error("Texture 2D %s not uploaded.", name)
 
     def get_background(self) -> (float, float, float):
         """Get background color.
@@ -1616,7 +1692,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         name : string
             Name of the material.
-
         data : dict
             Parameters of the material.
 
@@ -1631,6 +1706,84 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         else:
             self._logger.error("Material %s not created.", name)
     
+
+    def set_correction_curve(self, ctrl_points: Any,
+                             channel: Union[Channel, str] = Channel.Gray,
+                             n_points: int = 256,
+                             range: float = 255,
+                             refresh: bool = False) -> None:
+        """Set correction curve.
+
+        Calculate and setup a color correction curve using control points provided with
+        ``ctrl_points``. Curve is applied in 2D postprocessing stage to the selected
+        ``channel``. Control points should be an array_like set of input-output values
+        (array shape is ``(m,2)``). Control point input and output maximum value can be
+        provided with the ``range`` parameter. Control points are scaled to the range
+        <0;1>, extreme values (0,0) and (1,1) are added if not present in ``ctrl_points``
+        (use :meth:`plotoptix.NpOptiX.set_texture_1d` if custom correction curve should
+        e.g. start above 0 or saturate at a level lower than 1).
+        Smooth bezier curve is calculated from the control points and stored in 1D texture
+        with ``n_points`` length.
+
+        Parameters
+        ----------
+        ctrl_points : array_like
+            Control points to construct curve.
+        channel : Channel or string, optional
+            Destination color for the correction curve.
+        n_points : int, optional
+            Number of curve points to be stored in texture.
+        range : float, optional
+            Maximum input / output value corresponding to provided ``ctrl_points``.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+
+        See Also
+        --------
+        :py:mod:`plotoptix.enums.Postprocessing`
+        :py:mod:`plotoptix.enums.Channel`
+        """
+        if isinstance(channel, str): channel = Channel[channel]
+
+        if not isinstance(ctrl_points, np.ndarray): ctrl_points = np.ascontiguousarray(ctrl_points, dtype=np.float32)
+
+        if len(ctrl_points.shape) != 2 or ctrl_points.shape[1] != 2:
+            self._logger.error("Control points shape should be (n,2).")
+            return
+
+        if ctrl_points.dtype != np.float32: ctrl_points = np.ascontiguousarray(ctrl_points, dtype=np.float32)
+        if not ctrl_points.flags['C_CONTIGUOUS']: ctrl_points = np.ascontiguousarray(ctrl_points, dtype=np.float32)
+
+        self._logger.info("Set correction curve in %s channel.", channel.name)
+        if not self._optix.set_correction_curve(ctrl_points.ctypes.data, ctrl_points.shape[0], n_points, channel.value, range, refresh):
+            self._logger.error("Correction curve setup failed.")
+
+    def add_postproc(self, stage: Union[Postprocessing, str], refresh: bool = False) -> None:
+        """Add 2D postprocessing stage.
+
+        Stages are applied to image in the order they are added with this
+        method. Each stage algorithm has its own variables that should be
+        configured before adding the postprocessing stage. Configuration
+        can be updated at any time, but stages cannot be disabled after
+        adding. See :py:mod:`plotoptix.enums.Postprocessing` for algorithms
+        configuration examples.
+
+        Parameters
+        ----------
+        stage : Postprocessing or string
+            Postprocessing algorithm to add.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+
+        See Also
+        --------
+        :py:mod:`plotoptix.enums.Postprocessing`
+        """
+        if isinstance(stage, str): stage = Postprocessing[stage]
+        self._logger.info("Add postprocessing stage: %s.", stage.name)
+        if not self._optix.add_postproc(stage.value, refresh):
+            self._logger.error("Configuration of postprocessing stage %s failed.", stage.name)
+
 
     def _make_contiguous_3d(self, a: Optional[Any], n: int = -1, extend_scalars = False) -> Optional[np.ndarray]:
         if a is None: return None
@@ -1679,6 +1832,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not a.flags['C_CONTIGUOUS']: a = np.ascontiguousarray(a, dtype=np.float32)
 
         return a
+
 
     def set_data(self, name: str, pos: Any,
                  c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),

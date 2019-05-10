@@ -31,6 +31,13 @@ Raytracer configuration
 .. automethod:: plotoptix.NpOptiX.get_float
 .. automethod:: plotoptix.NpOptiX.get_float2
 .. automethod:: plotoptix.NpOptiX.get_float3
+.. automethod:: plotoptix.NpOptiX.set_texture_1d
+.. automethod:: plotoptix.NpOptiX.set_texture_2d
+
+Postprocessing 2D
+-----------------
+.. automethod:: plotoptix.NpOptiX.add_postproc
+.. automethod:: plotoptix.NpOptiX.set_correction_curve
 
 .. toctree::
    :caption: API Reference
