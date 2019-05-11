@@ -1,10 +1,11 @@
 """
-3D raytracing package for Python. Based on NVIDIA OptiX framework,
-and RnD.SharpOptiX C#/C++/CUDA libraries by R&D Team.
+3D ray tracing package for Python. Based on NVIDIA OptiX framework,
+wrapped in RnD.SharpOptiX C#/C++/CUDA libraries by R&D Team.
 
 Copyright (C) 2019 R&D Team. All Rights Reserved.
 
-Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
+Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix
+Documentation: https://plotoptix.rnd.team
 """
 
 from plotoptix.enums import *
