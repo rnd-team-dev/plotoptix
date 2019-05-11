@@ -13,6 +13,7 @@ class TestScene(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        print("################  Test 020: scene basic config and GUI startup.   ################")
         cls.scene = TkOptiX(width=128, height=64, start_now=False, log_level='INFO')
 
     def test010_default_init_values(self):
@@ -198,4 +199,5 @@ class TestScene(TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.assertFalse(cls, cls.is_alive, msg="Wrong state of the test class.")
+        print("Test 020: completed.")
 

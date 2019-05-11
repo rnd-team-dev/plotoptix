@@ -75,6 +75,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         super().__init__()
 
+        self._raise_on_error = False
         self._logger = logging.getLogger(__name__ + "-NpOptiX")
         self._logger.setLevel(log_level)
         self._package_dir = os.path.dirname(__file__)
@@ -131,7 +132,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             else: self._logger.info("Use start() to start raytracing.")
 
         else:
-            self._logger.error("Initial setup failed, see errors above.")
+            msg = "Initial setup failed, see errors above."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
         ###############################################################
 
     def _make_list_of_callable(self, items) -> List[Callable[["NpOptiX"], None]]:
@@ -167,8 +170,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Raytracing started.")
             self._is_started = True
         else:
-            self._logger.error("Raytracing output startup timed out.")
+            msg = "Raytracing output startup timed out."
+            self._logger.error(msg)
             self._is_started = False
+
+            if self._raise_on_error: raise TimeoutError(msg)
 
     def run(self):
         """Starts UI event loop.
@@ -192,7 +198,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         c5_ptr = self._get_scene_rt_completed_callback()
         r5 = self._optix.register_scene_rt_completed_callback(c5_ptr)
         if r1 & r2 & r3 & r4 & r5: self._logger.info("Callbacks registered.")
-        else: self._logger.error("Callbacks setup failed.")
+        else:
+            msg = "Callbacks setup failed."
+            self._logger.error()
+            if self._raise_on_error: raise RuntimeError(msg)
 
         self._run_event_loop()
 
@@ -414,7 +423,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if self._optix.set_compute_paused(False):
             self._logger.info("Compute thread resumed.")
         else:
-            self._logger.error("Resuming compute thread had no effect.")
+            msg = "Resuming compute thread had no effect."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def refresh_scene(self) -> None:
         """Refresh scene
@@ -443,7 +454,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Variable float %s = %f", name, c_x.value)
             return c_x.value
         else:
-            self._logger.error("Variable float %s not found.", name)
+            msg = "Variable float %s not found." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None
 
     def get_float2(self, name: str) -> (Optional[float], Optional[float]):
@@ -467,7 +480,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Variable float2 %s = (%f, %f)", name, c_x.value, c_y.value)
             return c_x.value, c_y.value
         else:
-            self._logger.error("Variable float2 %s not found.", name)
+            msg = "Variable float2 %s not found." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None, None
 
     def get_float3(self, name: str) -> (Optional[float], Optional[float], Optional[float]):
@@ -488,11 +503,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         c_x = c_float()
         c_y = c_float()
         c_z = c_float()
-        if self._optix.get_float3(name, byref(c_x), byref(c_y), byref(c_z)):
+        if self._optix.get_float3(name, byref(c_x), byref(  c_y), byref(c_z)):
             self._logger.info("Variable float3 %s = (%f, %f, %f)", name, c_x.value, c_y.value, c_z.value)
             return c_x.value, c_y.value, c_z.value
         else:
-            self._logger.error("Variable float3 %s not found.", name)
+            msg = "Variable float3 %s not found." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None, None, None
 
     def set_float(self, name: str, x: float, y: Optional[float] = None, z: Optional[float] = None, refresh: bool = False) -> None:
@@ -559,7 +576,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Variable uint %s = %d", name, c_x.value)
             return c_x.value
         else:
-            self._logger.error("Variable uint %s not found.", name)
+            msg = "Variable uint %s not found." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None
 
     def get_uint2(self, name: str) -> (Optional[int], Optional[int]):
@@ -583,7 +602,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Variable uint2 %s = (%d, %d)", name, c_x.value, c_y.value)
             return c_x.value, c_y.value
         else:
-            self._logger.error("Variable uint2 %s not found.", name)
+            msg = "Variable uint2 %s not found." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None, None
 
 
@@ -643,7 +664,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Variable int %s = %d", name, c_x.value)
             return c_x.value
         else:
-            self._logger.error("Variable int %s not found.", name)
+            msg = "Variable int %s not found." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None
 
     def set_int(self, name: str, x: int, refresh: bool = False) -> None:
@@ -694,10 +717,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             elif data.shape[1] == 2: rt_format = RtFormat.Float2
             elif data.shape[1] == 4: rt_format = RtFormat.Float4
             else:
-                self._logger.error("Texture 1D shape should be (length,n), where n=1,2,4.")
+                msg = "Texture 1D shape should be (length,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return
         else:
-            self._logger.error("Texture 1D shape should be (length,) or (length,n), where n=1,2,4.")
+            msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
             
         if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
@@ -705,7 +732,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._logger.info("Set texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
         if not self._optix.set_texture_1d(name, data.ctypes.data, data.shape[0], rt_format.value, refresh):
-            self._logger.error("Texture 1D %s not uploaded.", name)
+            msg = "Texture 1D %s not uploaded." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def set_texture_2d(self, name: str, data: Any, refresh: bool = False) -> None:
         """Set texture data.
@@ -732,10 +761,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             elif data.shape[2] == 2: rt_format = RtFormat.Float2
             elif data.shape[2] == 4: rt_format = RtFormat.Float4
             else:
-                self._logger.error("Texture 2D shape should be (height,width,n), where n=1,2,4.")
+                msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return
         else:
-            self._logger.error("Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4.")
+            msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
@@ -743,7 +776,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._logger.info("Set texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
         if not self._optix.set_texture_2d(name, data.ctypes.data, data.shape[1], data.shape[0], rt_format.value, refresh):
-            self._logger.error("Texture 2D %s not uploaded.", name)
+            msg = "Texture 2D %s not uploaded." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def get_background(self) -> (float, float, float):
         """Get background color.
@@ -785,7 +820,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if not isinstance(color, np.ndarray):
                 color = np.asarray(color, dtype=np.float32)
                 if (len(color.shape) != 1) or (color.shape[0] != 3):
-                    self._logger.error("Color should be a single value or 3-element array/list/tupe.")
+                    msg = "Color should be a single value or 3-element array/list/tupe."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
                     return
             x = color[0]
             y = color[1]
@@ -834,7 +871,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if not isinstance(color, np.ndarray):
                 color = np.asarray(color, dtype=np.float32)
                 if (len(color.shape) != 1) or (color.shape[0] != 3):
-                    self._logger.error("Color should be a single value or 3-element array/list/tupe.")
+                    msg = "Color should be a single value or 3-element array/list/tupe."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
                     return
             x = color[0]
             y = color[1]
@@ -864,17 +903,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         try:
             v = None
-
             self._padlock.acquire()
             if name == "min_accumulation_step":
                 v = self._optix.get_min_accumulation_step()
             elif name == "max_accumulation_frames":
                 v = self._optix.get_max_accumulation_frames()
             else:
-                self._logger.error("Unknown parameter " + name)
+                msg = "Unknown parameter " + name
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
 
         except Exception as e:
             self._logger.error(str(e))
+            if self._raise_on_error: raise
 
         finally:
             self._padlock.release()
@@ -907,10 +948,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 elif key == "max_accumulation_frames":
                     self._optix.set_max_accumulation_frames(int(value))
                 else:
-                    self._logger.error("Unknown parameter " + key)
+                    msg = "Unknown parameter " + key
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
 
         except Exception as e:
             self._logger.error(str(e))
+            if self._raise_on_error: raise
 
         finally:
             self._padlock.release()
@@ -950,7 +994,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: # try current camera
             cam_handle = self._optix.get_current_camera()
             if cam_handle == 0:
-                self._logger.error("Current camera is not set.")
+                msg = "Current camera is not set."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return None, None
 
             for n, h in self.camera_handles.items():
@@ -964,7 +1010,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
            if name in self.camera_handles:
                cam_handle = self.camera_handles[name]
            else:
-               self._logger.error("Camera %s does not exists.", name)
+               msg = "Camera %s does not exists." % name
+               self._logger.error(msg)
+               if self._raise_on_error: raise ValueError(msg)
                return None, None
 
         return name, cam_handle
@@ -989,7 +1037,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         s = self._optix.get_camera(cam_handle)
         if len(s) > 2: return json.loads(s)
         else:
-            self._logger.error("Failed on reading camera %s.", name)
+            msg = "Failed on reading camera %s." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None
 
     def get_camera_eye(self, name: Optional[str] = None) -> Optional[np.ndarray]:
@@ -1086,7 +1136,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(cam_type, str): cam_type = Camera[cam_type]
 
         if name in self.camera_handles:
-            self._logger.error("Camera %s already exists.", name)
+            msg = "Camera %s already exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         eye_ptr = 0
@@ -1099,7 +1151,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         up = self._make_contiguous_vector(up, 3)
         if up is None:
-            self._logger.error("Need 3D camera up vector.")
+            msg = "Need 3D camera up vector."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         h = self._optix.setup_camera(cam_type.value,
@@ -1111,7 +1165,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Camera %s handle: %d.", name, h)
             self.camera_handles[name] = h
         else:
-            self._logger.error("Camera setup failed.")
+            msg = "Camera setup failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def update_camera(self, name: Optional[str] = None,
                       eye: Optional[Any] = None,
@@ -1158,7 +1214,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                                      aperture_radius, focal_scale, fov):
             self._logger.info("Camera %s updated.", name)
         else:
-            self._logger.error("Camera %s update failed.", name)
+            msg = "Camera %s update failed." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def set_current_camera(self, name: str) -> None:
         """Switch to another camera.
@@ -1173,13 +1231,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name not in self.camera_handles:
-            self._logger.error("Camera %s does not exists.")
+            msg = "Camera %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         if self._optix.set_current_camera(self.camera_handles[name]):
             self._logger.info("Current camera: %s", name)
         else:
-            self._logger.error("Current camera not changed.")
+            msg = "Current camera not changed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def camera_fit(self,
                    camera: Optional[str] = None,
@@ -1221,7 +1283,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Current light shading is: %s", mode.name)
             return mode
         else:
-            self._logger.error("Failed on reading the light shading mode.")
+            msg = "Failed on reading the light shading mode."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
             return None
 
     def set_light_shading(self, mode: Union[LightShading, str]) -> None:
@@ -1240,13 +1304,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(mode, str): mode = LightShading[mode]
 
         if len(self.light_handles) > 0:
-            self._logger.error("Light shading has to be selected before adding lights.")
+            msg = "Light shading has to be selected before adding lights."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
             return
 
         if self._optix.set_light_shading(mode.value):
             self._logger.info("Light shading %s is selected.", mode.name)
         else:
-            self._logger.error("Light shading setup failed.")
+            msg = "Light shading setup failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def get_light_pos(self, name: Optional[str] = None) -> Optional[np.ndarray]:
         """Get light 3D position.
@@ -1268,7 +1336,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
-            self._logger.error("Light %s does not exists.")
+            msg = "Light %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None
 
         pos = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
@@ -1295,7 +1365,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
-            self._logger.error("Light %s does not exists.")
+            msg = "Light %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None
 
         col = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
@@ -1322,7 +1394,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
-            self._logger.error("Light %s does not exists.")
+            msg = "Light %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None
 
         u = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
@@ -1349,7 +1423,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
-            self._logger.error("Light %s does not exists.")
+            msg = "Light %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None
 
         v = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
@@ -1376,7 +1452,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
-            self._logger.error("Light %s does not exists.")
+            msg = "Light %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return None
 
         return self._optix.get_light_r(self.light_handles[name])
@@ -1409,7 +1487,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name in self.light_handles:
-            self._logger.error("Light %s already exists.", name)
+            msg = "Light %s already exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         autofit = False
@@ -1417,7 +1497,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if pos is None:
             cam_name, _ = self.get_camera_name_handle(autofit_camera)
             if cam_name is None:
-                self._logger.error("Need 3D coordinates for the new light.")
+                msg = "Need 3D coordinates for the new light."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return
 
             pos = np.ascontiguousarray([0, 0, 0])
@@ -1425,7 +1507,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         color = self._make_contiguous_vector(color, 3)
         if color is None:
-            self._logger.error("Need color (single value or 3-element array/list/tuple).")
+            msg = "Need color (single value or 3-element array/list/tuple)."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         h = self._optix.setup_spherical_light(pos.ctypes.data, color.ctypes.data,
@@ -1437,7 +1521,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if autofit:
                 self.light_fit(name, camera=cam_name)
         else:
-            self._logger.error("Light setup failed.")
+            msg = "Light setup failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
 
     def setup_parallelogram_light(self, name: str, pos: Optional[Any] = None,
                                   autofit_camera: Optional[str] = None,
@@ -1473,7 +1559,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name in self.light_handles:
-            self._logger.error("Light %s already exists.", name)
+            msg = "Light %s already exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         autofit = False
@@ -1481,7 +1569,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if pos is None:
             cam_name, _ = self.get_camera_name_handle(autofit_camera)
             if cam_name is None:
-                self._logger.error("Need 3D coordinates for the new light.")
+                msg = "Need 3D coordinates for the new light."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return
 
             pos = np.ascontiguousarray([0, 0, 0])
@@ -1489,17 +1579,23 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         color = self._make_contiguous_vector(color, 3)
         if color is None:
-            self._logger.error("Need color (single value or 3-element array/list/tuple).")
+            msg = "Need color (single value or 3-element array/list/tuple)."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         u = self._make_contiguous_vector(u, 3)
         if u is None:
-            self._logger.error("Need 3D vector U.")
+            msg = "Need 3D vector U."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         v = self._make_contiguous_vector(v, 3)
         if v is None:
-            self._logger.error("Need 3D vector V.")
+            msg = "Need 3D vector V."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         h = self._optix.setup_parallelogram_light(pos.ctypes.data, color.ctypes.data,
@@ -1511,7 +1607,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if autofit:
                 self.light_fit(name, camera=cam_name)
         else:
-            self._logger.error("Light setup failed.")
+            msg = "Light setup failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def setup_light(self, name: str,
                     light_type: Union[Light, str] = Light.Spherical,
@@ -1595,7 +1693,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name not in self.light_handles:
-            self._logger.error("Light %s does not exists.")
+            msg = "Light %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         pos = self._make_contiguous_vector(pos, 3)
@@ -1619,7 +1719,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                                     radius, u_ptr, v_ptr):
             self._logger.info("Light %s updated.", name)
         else:
-            self._logger.error("Light %s update failed.", name)
+            msg = "Light %s update failed." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def light_fit(self, light: str,
                   camera: Optional[str] = None,
@@ -1679,7 +1781,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         s = self._optix.get_material(name)
         if len(s) > 2: return json.loads(s)
         else:
-            self._logger.error("Failed on reading material %s.", name)
+            msg = "Failed on reading material %s." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
             return None
 
     def setup_material(self, name: str, data: dict) -> None:
@@ -1704,7 +1808,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if self._optix.setup_material(name, json.dumps(data)):
             self._logger.info("Added new material %s.", name)
         else:
-            self._logger.error("Material %s not created.", name)
+            msg = "Material %s not created." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
     
 
     def set_correction_curve(self, ctrl_points: Any,
@@ -1748,7 +1854,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(ctrl_points, np.ndarray): ctrl_points = np.ascontiguousarray(ctrl_points, dtype=np.float32)
 
         if len(ctrl_points.shape) != 2 or ctrl_points.shape[1] != 2:
-            self._logger.error("Control points shape should be (n,2).")
+            msg = "Control points shape should be (n,2)."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         if ctrl_points.dtype != np.float32: ctrl_points = np.ascontiguousarray(ctrl_points, dtype=np.float32)
@@ -1756,7 +1864,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._logger.info("Set correction curve in %s channel.", channel.name)
         if not self._optix.set_correction_curve(ctrl_points.ctypes.data, ctrl_points.shape[0], n_points, channel.value, range, refresh):
-            self._logger.error("Correction curve setup failed.")
+            msg = "Correction curve setup failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def add_postproc(self, stage: Union[Postprocessing, str], refresh: bool = False) -> None:
         """Add 2D postprocessing stage.
@@ -1782,7 +1892,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(stage, str): stage = Postprocessing[stage]
         self._logger.info("Add postprocessing stage: %s.", stage.name)
         if not self._optix.add_postproc(stage.value, refresh):
-            self._logger.error("Configuration of postprocessing stage %s failed.", stage.name)
+            msg = "Configuration of postprocessing stage %s failed." % stage.name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
 
     def _make_contiguous_3d(self, a: Optional[Any], n: int = -1, extend_scalars = False) -> Optional[np.ndarray]:
@@ -1797,13 +1909,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             elif a.shape[0] == n: a = np.reshape(a, (n, 1))
             elif a.shape[0] == 3: a = np.reshape(a, (1, 3))
             else:
-                self._logger.error("Input shape not matching single 3D vector nor desired array length.")
+                msg = "Input shape not matching single 3D vector nor desired array length."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return None
 
         if len(a.shape) > 2:
             m = functools.reduce(operator.mul, a.shape[:-1], 1)
             if (n >= 0) and (n != m):
-                self._logger.error("Input shape not matching desired array length.")
+                msg = "Input shape not matching desired array length."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return None
             a = np.reshape(a, (m, a.shape[-1]))
 
@@ -1813,7 +1929,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 _a[:] = a[0]
                 a = _a
             if n != a.shape[0]:
-                self._logger.error("Input shape not matching desired array length.")
+                msg = "Input shape not matching desired array length."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return None
 
         if a.shape[-1] != 3:
@@ -1883,7 +2001,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(geom, str): geom = Geometry[geom]
 
         if name in self.geometry_handles:
-            self._logger.error("Geometry %s already exists, use update_data() instead.", name)
+            msg = "Geometry %s already exists, use update_data() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         n_primitives = -1
@@ -1891,10 +2011,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         # Prepare positions data
         pos = self._make_contiguous_3d(pos)
         if pos is None:
-            self._logger.error("Positions (pos) are required for the new instances and cannot be left as None.")
+            msg = "Positions (pos) are required for the new instances and cannot be left as None."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
         if (len(pos.shape) != 2) or (pos.shape[0] < 1) or (pos.shape[1] != 3):
-            self._logger.error("Positions (pos) should be an array of shape (n, 3).")
+            msg = "Positions (pos) should be an array of shape (n, 3)."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
         n_primitives = pos.shape[0]
         pos_ptr = pos.ctypes.data
@@ -1914,11 +2038,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if r.shape[0] == 1:
                 if n_primitives > 0: r = np.full(n_primitives, r[0], dtype=np.float32)
                 else:
-                    self._logger.error("Cannot resolve proper radii (r) shape from preceding data arguments.")
+                    msg = "Cannot resolve proper radii (r) shape from preceding data arguments."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
                     return
                 if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
             if (n_primitives > 0) and (n_primitives != r.shape[0]):
-                self._logger.error("Radii (r) shape does not match shape of preceding data arguments.")
+                msg = "Radii (r) shape does not match shape of preceding data arguments."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return
             n_primitives = r.shape[0]
             radii_ptr = r.ctypes.data
@@ -1943,41 +2071,57 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             w_ptr = w.ctypes.data
 
         if n_primitives == -1:
-            self._logger.error("Could not figure out proper data shapes.")
+            msg = "Could not figure out proper data shapes."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         # Configure according to selected geometry
         is_ok = True
         if geom == Geometry.ParticleSet:
             if c is None:
-                self._logger.error("ParticleSet setup failed, colors data is missing.")
+                msg = "ParticleSet setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
             if r is None:
-                self._logger.error("ParticleSet setup failed, radii data is missing.")
+                msg = "ParticleSet setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
         elif (geom == Geometry.Parallelepipeds) or (geom == Geometry.Tetrahedrons):
             if c is None:
-                self._logger.error("Plot setup failed, colors data is missing.")
+                msg = "Plot setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
             if (u is None) or (v is None) or (w is None):
                 if r is None:
-                    self._logger.error("Plot setup failed, need U, V, W vectors or radii data.")
+                    msg = "Plot setup failed, need U, V, W vectors or radii data."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
                     is_ok = False
 
         elif geom == Geometry.BezierChain:
             if c is None:
-                self._logger.error("BezierChain setup failed, colors data is missing.")
+                msg = "BezierChain setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
             if r is None:
-                self._logger.error("BezierChain setup failed, radii data is missing.")
+                msg = "BezierChain setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
         else:
-            self._logger.error("Unknown geometry")
+            msg = "Unknown geometry"
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             is_ok = False
 
         if is_ok:
@@ -1994,10 +2138,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     self.geometry_handles[name] = g_handle
                     self.geometry_sizes[name] = n_primitives
                 else:
-                    self._logger.error("Geometry setup failed.")
+                    msg = "Geometry setup failed."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
                 
             except Exception as e:
                 self._logger.error(str(e))
+                if self._raise_on_error: raise
             finally:
                 self._padlock.release()
 
@@ -2039,7 +2186,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if not name in self.geometry_handles:
-            self._logger.error("Geometry %s does not exists yet, use set_data() instead.", name)
+            msg = "Geometry %s does not exists yet, use set_data() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         n_primitives = self.geometry_sizes[name]
@@ -2050,7 +2199,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         pos_ptr = 0
         if pos is not None:
             if (len(pos.shape) != 2) or (pos.shape[0] < 1) or (pos.shape[1] != 3):
-                self._logger.error("Positions (pos) should be an array of shape (n, 3).")
+                msg = "Positions (pos) should be an array of shape (n, 3)."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return
             n_primitives = pos.shape[0]
             size_changed = (n_primitives != self.geometry_sizes[name])
@@ -2078,7 +2229,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 r = np.full(n_primitives, r[0], dtype=np.float32)
                 if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
             if n_primitives != r.shape[0]:
-                self._logger.error("Radii (r) shape does not match shape of preceding data arguments.")
+                msg = "Radii (r) shape does not match shape of preceding data arguments."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return
             radii_ptr = r.ctypes.data
 
@@ -2108,10 +2261,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 self._logger.info("...done, handle: %d", g_handle)
                 self.geometry_sizes[name] = n_primitives
             else:
-                self._logger.error("Geometry update failed.")
+                msg = "Geometry update failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
                 
         except Exception as e:
             self._logger.error(str(e))
+            if self._raise_on_error: raise
         finally:
             self._padlock.release()
 
@@ -2168,7 +2324,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name in self.geometry_handles:
-            self._logger.error("Geometry %s already exists, use update_data_2d() instead.", name)
+            msg = "Geometry %s already exists, use update_data_2d() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
@@ -2234,10 +2392,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 self.geometry_handles[name] = g_handle
                 self.geometry_sizes[name] = pos.shape[0] * pos.shape[1]
             else:
-                self._logger.error("Surface setup failed.")
+                msg = "Surface setup failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
 
         except Exception as e:
             self._logger.error(str(e))
+            if self._raise_on_error: raise
         finally:
             self._padlock.release()
 
@@ -2279,13 +2440,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if not name in self.geometry_handles:
-            self._logger.error("Surface %s does not exists yet, use set_data_2d() instead.", name)
+            msg = "Surface %s does not exists yet, use set_data_2d() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         s_x = c_uint()
         s_z = c_uint()
         if not self._optix.get_surface_size(name, byref(s_x), byref(s_z)):
-            self._logger.error("Cannot get surface %s size.", name)
+            msg = "Cannot get surface %s size." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
         size_xz = (s_z.value, s_x.value)
         size_changed = False
@@ -2313,7 +2478,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 c = cm
             assert len(c.shape) == 3 and c.shape == size_xz + (3,), "Colors shape must be (m,n,3), where (m,n) id the vertex data shape."
             if c.shape[0] != size_xz[0] or c.shape[1] != size_xz[1]:
-                self._logger.error("Colors (c) shape does not match vertex data shape.")
+                msg = "Colors (c) shape does not match vertex data shape."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return
             if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
             if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
@@ -2324,7 +2491,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if not isinstance(normals, np.ndarray): normals = np.ascontiguousarray(normals, dtype=np.float32)
             assert len(normals.shape) == 3 and normals.shape == size_xz + (3,), "Normals shape must be (z,x,3), where (z,x) id the vertex data shape."
             if normals.shape[0] != size_xz[0] or normals.shape[1] != size_xz[1]:
-                self._logger.error("Normals shape does not match vertex data shape.")
+                msg = "Normals shape does not match vertex data shape."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 return
             if normals.dtype != np.float32: normals = np.ascontiguousarray(normals, dtype=np.float32)
             if not normals.flags['C_CONTIGUOUS']: normals = np.ascontiguousarray(normals, dtype=np.float32)
@@ -2358,10 +2527,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 self._logger.info("...done, handle: %d", g_handle)
                 self.geometry_sizes[name] = size_xz[0] * size_xz[1]
             else:
-                self._logger.error("Geometry update failed.")
+                msg = "Geometry update failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
                 
         except Exception as e:
             self._logger.error(str(e))
+            if self._raise_on_error: raise
         finally:
             self._padlock.release()
 
@@ -2416,7 +2588,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(mesh_name, str): mesh_name = str(mesh_name)
 
         if mesh_name in self.geometry_handles:
-            self._logger.error("Geometry %s already exists, use update_mesh() instead.", mesh_name)
+            msg = "Geometry %s already exists, use update_mesh() instead." % mesh_name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
             return
 
         c = self._make_contiguous_vector(c, n_dim=3)
@@ -2434,10 +2608,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 self.geometry_handles[mesh_name] = g_handle
                 self.geometry_sizes[mesh_name] = 1 # todo: read mesh size
             else:
-                self._logger.error("Mesh loading failed.")
+                msg = "Mesh loading failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
 
         except Exception as e:
             self._logger.error(str(e))
+            if self._raise_on_error: raise
         finally:
             self._padlock.release()
 
@@ -2462,7 +2639,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
 
         if not self._optix.move_geometry(name, v[0], v[1], v[2], update):
-            self._logger.error("Geometry move failed.")
+            msg = "Geometry move failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def move_primitive(self, name: str, idx: int, v: Tuple[float, float, float],
                        update: bool = True) -> None:
@@ -2486,7 +2665,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
 
         if not self._optix.move_primitive(name, idx, v[0], v[1], v[2], update):
-            self._logger.error("Primitive move failed.")
+            msg = "Primitive move failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def rotate_geometry(self, name: str, rot: Tuple[float, float, float],
                         center: Optional[Tuple[float, float, float]] = None,
@@ -2515,11 +2696,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if center is None:
             if not self._optix.rotate_geometry(name, rot[0], rot[1], rot[2], update):
-                self._logger.error("Geometry rotate failed.")
+                msg = "Geometry rotate failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
         else:
             if not isinstance(center, tuple): center = tuple(center)
             if not self._optix.rotate_geometry_about(name, rot[0], rot[1], rot[2], center[0], center[1], center[2], update):
-                self._logger.error("Geometry rotate failed.")
+                msg = "Geometry rotate failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
 
     def rotate_primitive(self, name: str, idx: int, rot: Tuple[float, float, float],
                          center: Optional[Tuple[float, float, float]] = None,
@@ -2550,11 +2735,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if center is None:
             if not self._optix.rotate_primitive(name, idx, rot[0], rot[1], rot[2], update):
-                self._logger.error("Primitive rotate failed.")
+                msg = "Primitive rotate failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
         else:
             if not isinstance(center, tuple): center = tuple(center)
             if not self._optix.rotate_primitive_about(name, idx, rot[0], rot[1], rot[2], center[0], center[1], center[2], update):
-                self._logger.error("Geometry rotate failed.")
+                msg = "Geometry rotate failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
 
     def scale_geometry(self, name: str, s: float,
                        update: bool = True) -> None:
@@ -2578,7 +2767,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
 
         if not self._optix.scale_geometry(name, s, update):
-            self._logger.error("Geometry scale failed.")
+            msg = "Geometry scale failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def scale_primitive(self, name: str, idx: int, s: float,
                         update: bool = True) -> None:
@@ -2604,7 +2795,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
 
         if not self._optix.scale_primitive(name, idx, s, update):
-            self._logger.error("Primitive scale failed.")
+            msg = "Primitive scale failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def update_geom_buffers(self, name: str,
                             mask: Union[GeomBuffer, str] = GeomBuffer.All) -> None:
@@ -2626,7 +2819,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(mask, str): mask = GeomBuffer[mask]
 
         if not self._optix.update_geom_buffers(name, mask.value):
-            self._logger.error("Geometry buffers update failed.")
+            msg = "Geometry buffers update failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def set_coordinates(self, mode: Union[Coordinates, str] = Coordinates.Box, thickness: float = 1.0) -> None:
         """Set style of the coordinate system geometry (or hide it).
@@ -2649,4 +2844,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if self._optix.set_coordinates_geom(mode.value, thickness):
             self._logger.info("Coordinate system mode set to: %s.", mode.name)
         else:
-            self._logger.error("Coordinate system mode not changed.")
+            msg = "Coordinate system mode not changed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
