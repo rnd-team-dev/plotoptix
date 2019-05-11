@@ -16,12 +16,20 @@ __all__ = ["enums", "materials", "utils", "npoptix", "tkoptix"]
 __author__  = "Robert Sulej, R&D Team <dev@rnd.team>"
 __status__  = "beta"
 __version__ = "0.2.0"
-__date__    = "08 May 2019"
+__date__    = "12 May 2019"
 
 
-import os, subprocess, logging
+import os, struct, subprocess, logging
 
 logging.basicConfig(level=logging.WARN, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
+
+# verify Python is 64-bit ###############################################
+
+if struct.calcsize("P") * 8 != 64:
+    logging.error(80 * "*"); logging.error(80 * "*")
+    logging.error("Python 64-bit is required.")
+    logging.error(80 * "*"); logging.error(80 * "*")
+    raise ImportError
 
 # verify CUDA_PATH is defined ############################################
 try:
