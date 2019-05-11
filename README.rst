@@ -71,7 +71,7 @@ System Requirements
 - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (but you should already have it)
 - a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest
 - `CUDA Toolkit v10.1 <https://developer.nvidia.com/cuda-downloads>`__
-- Python 3
+- Python 3 **64-bit**
 
 What's Included
 ---------------
