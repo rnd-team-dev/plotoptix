@@ -23,7 +23,7 @@ import os, struct, subprocess, logging
 
 logging.basicConfig(level=logging.WARN, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
-# verify Python is 64-bit ###############################################
+# verify Python is 64-bit ################################################
 
 if struct.calcsize("P") * 8 != 64:
     logging.error(80 * "*"); logging.error(80 * "*")
