@@ -47,7 +47,7 @@ A couple of images made with PlotOptiX, for decoration of this introduction:
    :alt: PlotOptiX screenshots
 
 PlotOptiX is based on `NVIDIA OptiX <https://developer.nvidia.com/optix>`_ framework wrapped in RnD.SharpOptiX C#/C++ libraries and CUDA
-shaders by R&D Team. PlotOptiX makes use of RTX-capable GPU's. In this early version we start with:
+shaders by R&D Team. PlotOptiX makes use of RTX-capable GPU's.
 
 Features
 --------
@@ -91,7 +91,7 @@ but today you are dealing with the very early version of the project.
 
 Most likely you already got the right version with your Windows installation. Just in case, here is the command verifying this::
 
-   C:\reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full" /v version
+   C:\>reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full" /v version
    
    HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full
        version    REG_SZ    4.7.03056
