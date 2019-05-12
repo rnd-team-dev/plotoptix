@@ -13,3 +13,4 @@ include plotoptix/bin/win/cuda/compute_52/*.ptx
 include plotoptix/bin/win/cuda/compute_60/*.ptx
 include plotoptix/bin/win/cuda/compute_61/*.ptx
 include plotoptix/bin/win/cuda/compute_70/*.ptx
+include plotoptix/bin/win/cuda/compute_75/*.ptx
