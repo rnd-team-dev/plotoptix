@@ -16,7 +16,7 @@ __all__ = ["enums", "materials", "utils", "npoptix", "tkoptix"]
 
 __author__  = "Robert Sulej, R&D Team <dev@rnd.team>"
 __status__  = "beta"
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __date__    = "12 May 2019"
 
 
