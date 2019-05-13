@@ -20,7 +20,7 @@ of large datasets (and small as well). Data features can be represented on plots
 of several basic shapes, finished with a photorealistic lighting and depth of field.
 
 No need to write shaders, intersection algorithms, handle 3D scene technicalities. Basic usage is even more simple than with
-`matplotlib <https://matplotlib.org>`__:
+`matplotlib <https://matplotlib.org/gallery/mplot3d/scatter3d.html>`__:
 
 .. code-block:: python
 

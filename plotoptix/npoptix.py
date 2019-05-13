@@ -6,13 +6,13 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
-import os, json, math, logging, operator, functools, threading, time
+import json, math, logging, operator, functools, threading, time
 import numpy as np
 
 from ctypes import byref, c_float, c_uint, c_int
 from typing import List, Tuple, Callable, Optional, Union, Any
 
-from plotoptix._load_lib import load_optix, BIN_PATH, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
+from plotoptix._load_lib import load_optix, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
 from plotoptix.singleton import Singleton
 from plotoptix.enums import *
 
@@ -78,18 +78,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._raise_on_error = False
         self._logger = logging.getLogger(__name__ + "-NpOptiX")
         self._logger.setLevel(log_level)
-        self._package_dir = os.path.dirname(__file__)
         self._started_event = threading.Event()
         self._padlock = threading.RLock()
         self._is_started = False
         self._is_closed = False
 
         # load SharpOptiX library, configure paths ####################
-        self._logger.info("RnD.SharpOptiX path: " + BIN_PATH)
+        self._logger.info("Configure RnD.SharpOptiX library...")
         self._optix = load_optix()
-        self._optix.set_library_dir(os.path.join(self._package_dir, BIN_PATH))
-        self._optix.set_include_dir(os.path.join(self._package_dir, BIN_PATH, "cuda"))
-        self._logger.info("RnD.SharpOptiX library configured.")
+        self._logger.info("...done.")
         ###############################################################
 
         # setup SharpOptiX interface ##################################

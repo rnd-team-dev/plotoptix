@@ -6,9 +6,9 @@ import numpy as np
 from typing import Any
 from matplotlib import cm
 
-
 def map_to_colors(x: Any, cm_name: str) -> np.ndarray:
-    """
+    """Map input variable to matplotlib color palette.
+
     Scale variable ``x`` to the range <0; 1> and map it to RGB colors from
     matplotlib's colormap with ``cm_name``.
 

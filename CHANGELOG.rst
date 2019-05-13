@@ -5,6 +5,11 @@ v0.2.1 - (unreleased)
 
 **Note:** this version is not yet released and active development is ongoing.
 
+Added
+~~~~~
+
+- OpenSimplex noise generator
+
 `v0.2.0`_ - 2019-05-12
 ----------------------
 

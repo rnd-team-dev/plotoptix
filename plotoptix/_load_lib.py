@@ -27,10 +27,15 @@ else:
     BIN_PATH = ""
     LIB_EXT == ""
 
+sharp_optix = None
+
 def load_optix():
     """
     Load RnD.SharpOptiX library, setup arguments and return types.
     """
+    global sharp_optix
+    if sharp_optix is not None: return sharp_optix
+
     optix = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX" + LIB_EXT))
 
     optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int]
@@ -290,10 +295,22 @@ def load_optix():
 
     optix.set_include_dir.argtypes = [c_wchar_p]
 
+    optix.open_simplex_2d.argtypes = [c_void_p, c_void_p, c_int]
+    optix.open_simplex_3d.argtypes = [c_void_p, c_void_p, c_int]
+    optix.open_simplex_4d.argtypes = [c_void_p, c_void_p, c_int]
+
     if PLATFORM == "Windows":
         optix.get_display_scaling.restype = c_float
 
     optix.test_library.argtypes = [c_int]
     optix.test_library.restype = c_bool
+
+
+    package_dir = os.path.dirname(__file__)
+    optix.set_library_dir(os.path.join(package_dir, BIN_PATH))
+    optix.set_include_dir(os.path.join(package_dir, BIN_PATH, "cuda"))
+
+
+    sharp_optix = optix
 
     return optix
