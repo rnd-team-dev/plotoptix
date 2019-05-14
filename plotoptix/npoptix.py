@@ -1958,6 +1958,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                  rnd: bool = True) -> None:
         """Create new geometry for the dataset.
 
+        Data is provided as an array of 3D positions of data points, with the shape ``(n, 3)``.
+        Additional features can be visualized as a color and size/thickness of the primitives.
+
         Parameters
         ----------
         name : string
@@ -2280,8 +2283,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     make_normals: bool = False) -> None:
         """Create new surface geometry for the 2D dataset.
 
-        Data is provided as 2D numpy array of :math:`z = f(x, y)` values, with the shape ``(n,m)``,
-        where ``n`` and ``m`` are at least 2.
+        Data is provided as 2D array of :math:`z = f(x, y)` values, with the shape ``(n, m)``,
+        where ``n`` and ``m`` are at least 2. Additional data features can be
+        visualized with color (array of RGB values, shape ``(n, m, 3)``).
         
         Currently, convention of vertical Y and horizontal XZ plane is adopted.
 
@@ -2294,11 +2298,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         c : Any, optional
             Colors of data points. Single value means a constant gray level.
             3-component array means a constant RGB color. Array of the shape
-            ``(n,m,3)`` will set individual color for each data point,
+            ``(n, m, 3)`` will set individual color for each data point,
             interpolated between points; ``n`` and ``m`` have to be the same
             as in data points shape.
         normals : array_like, optional
-            Surface normal vectors at data points. Array shape has to be ``(n,m,3)``,
+            Surface normal vectors at data points. Array shape has to be ``(n, m, 3)``,
             with ``n`` and ``m`` the same as in data points shape.
         range_x : tuple (float, float), optional
             Data range along X axis. Data array indexes are used if range is
