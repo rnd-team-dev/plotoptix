@@ -9,7 +9,6 @@
    enums
    materials
    utils
-   noise
    changelog
 
 .. toctree::
