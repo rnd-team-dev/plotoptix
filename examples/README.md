@@ -33,6 +33,6 @@ Callbacks in PlotOptiX are widely available throughout the raytracing process. Y
 GitHub can render notebooks content, so it is best to look at descriptions inlined in the code there.
 
 ![screenshots3](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/notebook_screens.jpg "PlotOptiX in notebook screenshots")
-![screenshots3](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/notebook_screens_2.jpg "PlotOptiX in notebook screenshots")
+![screenshots4](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/notebook_screens_2.jpg "PlotOptiX in notebook screenshots")
 
 *Progressing with more examples...*
