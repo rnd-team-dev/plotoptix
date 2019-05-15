@@ -39,6 +39,14 @@ Postprocessing 2D
 .. automethod:: plotoptix.NpOptiX.add_postproc
 .. automethod:: plotoptix.NpOptiX.set_correction_curve
 
+Encoder configuration
+---------------------
+.. automethod:: plotoptix.NpOptiX.encoder_create
+.. automethod:: plotoptix.NpOptiX.encoder_start
+.. automethod:: plotoptix.NpOptiX.encoder_stop
+.. automethod:: plotoptix.NpOptiX.encoded_frames
+.. automethod:: plotoptix.NpOptiX.encoding_frames
+
 .. toctree::
    :caption: API Reference
    :maxdepth: 2

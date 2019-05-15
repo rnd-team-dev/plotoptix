@@ -9,6 +9,7 @@ Added
 ~~~~~
 
 - OpenSimplex noise generator
+- basic interface to the video encoder
 
 `v0.2.0`_ - 2019-05-12
 ----------------------

@@ -957,6 +957,124 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
+    def encoder_create(self, fps: int, bitrate: float, idrrate: Optional[int] = None) -> None:
+        """Create video encoder.
+
+        Create and configure video encoder for this raytracer instance. Only one encoder
+        per raytracer instance is supported now.
+
+        Parameters
+        ----------
+        fps : int
+            Frames per second assumed in the output file.
+        bitrate : float
+            Constant bitrate of the encoded stream, in Mbits to save you typing 0's.
+        idrrate : int, optional
+            Instantaneous Decode Refresh frame interval. 2 seconds interval is used if
+            ``idrrate`` is not provided.
+        """
+        if idrrate is None: idrrate = 2 * fps
+
+        try:
+            self._padlock.acquire()
+
+            if not self._optix.encoder_create(fps, int(1000000 * bitrate), idrrate):
+                msg = "Encoder not created."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+
+        finally:
+            self._padlock.release()
+
+    def encoder_start(self, out_name: str, n_frames: int = 0) -> None:
+        """Start video encoding.
+
+        Start encoding to .mp4 file with provided name. Total number of frames
+        can be optionally limited. Output file is overwritten if it already exists.
+        New file is created and encoding is restarted if method is launched
+        during previously started encoding.
+
+        Parameters
+        ----------
+        out_name : str
+            Output file name.
+        n_frames : int, optional
+            Maximum number of frames to encode if ``n_frames`` or unlimited
+            encoding when default value is used.
+        """
+        try:
+            self._padlock.acquire()
+
+            if not self._optix.encoder_start(out_name, n_frames):
+                msg = "Encoder not started."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+
+        finally:
+            self._padlock.release()
+
+    def encoder_stop(self) -> None:
+        """Stop video encoding.
+
+        Stop encoding and close the output file (can happen before configured
+        total number of frames to encode).
+        """
+        try:
+            self._padlock.acquire()
+
+            if not self._optix.encoder_stop():
+                msg = "Encoder not stopped."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+
+        finally:
+            self._padlock.release()
+
+    def encoded_frames(self) -> int:
+        """Number of encoded video frames.
+
+        Returns
+        -------
+        out : int
+            Number of frames.
+        """
+        n = self._optix.encoded_frames()
+        if n < 0:
+            msg = "Number of encoded frames unavailable."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+
+        return n
+
+    def encoding_frames(self) -> int:
+        """Number of frames to encode.
+
+        Returns
+        -------
+        out : int
+            Number of frames.
+        """
+        n = self._optix.encoding_frames()
+        if n < 0:
+            msg = "Number of frames to encode unavailable."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+
+        return n
+
+
     @staticmethod
     def _make_contiguous_vector(a: Optional[Any], n_dim: int) -> Optional[np.ndarray]:
         if a is None: return None

@@ -62,6 +62,7 @@ Features
 - GPU acceleration using RT Cores, and everything else what comes with `OptiX 6.0 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - image output to `numpy <http://www.numpy.org>`__ array
+- hardware accelerated h264 video output to MP4 file format
 - Tkinter based UI or headless raytracer
 
 System Requirements
@@ -133,9 +134,9 @@ This is an early, beta version, with binaries released for Windows only. Everyth
 some important features not available yet, eg. AI denoiser or even ticks and labels on plot axes.
 
 PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers
-much more functionality than it is now available through PlotOptiX. Eg. live streaming of the raytraced video output. We'll progressively
-add more to PlotOptiX if there is interest in this project (download, star, and
-`donate <https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RG47ZEL5GKLNA&source=url>`__ if you like it!).
+much more functionality than it is now available through PlotOptiX. We'll progressively add more to PlotOptiX if there is interest in
+this project (download, star, and `support <https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RG47ZEL5GKLNA&source=url>`__
+if you like it!).
 
 The idea for development is:
 
