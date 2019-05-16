@@ -53,6 +53,9 @@ def load_optix():
     optix.save_scene_to_file.argtypes = [c_wchar_p]
     optix.save_scene_to_file.restype = c_bool
 
+    optix.save_image_to_file.argtypes = [c_wchar_p]
+    optix.save_image_to_file.restype = c_bool
+
     optix.start_rt.restype = c_bool
     optix.stop_rt.restype = c_bool
 
@@ -296,6 +299,8 @@ def load_optix():
     optix.encoder_start.restype = c_bool
 
     optix.encoder_stop.restype = c_bool
+
+    optix.encoder_is_open.restype = c_bool
 
     optix.encoded_frames.restype = c_int
     optix.encoding_frames.restype = c_int

@@ -61,8 +61,8 @@ Features
 - post-processing: tonal correction curves, levels adjustment, mask overlay
 - GPU acceleration using RT Cores, and everything else what comes with `OptiX 6.0 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
-- image output to `numpy <http://www.numpy.org>`__ array
-- hardware accelerated h264 video output to MP4 file format
+- image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
+- hardware accelerated H.264 video output to MP4 file format
 - Tkinter based UI or headless raytracer
 
 System Requirements

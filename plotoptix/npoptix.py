@@ -957,6 +957,34 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
+    def save_image(self, file_name: str) -> None:
+        """Save current image to file.
+
+        Save current content of the image buffer to file. Accepted formats,
+        recognized by the extension used in the ``file_name``, are bmp, gif,
+        png, jpg, and tif. Existing files are overwritten.
+
+        Parameters
+        ----------
+        file_name : str
+            Output file name.
+        """
+        try:
+            self._padlock.acquire()
+
+            if not self._optix.save_image_to_file(file_name):
+                msg = "Image not saveed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+
+        finally:
+            self._padlock.release()
+
+
     def encoder_create(self, fps: int, bitrate: float, idrrate: Optional[int] = None) -> None:
         """Create video encoder.
 
@@ -993,7 +1021,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def encoder_start(self, out_name: str, n_frames: int = 0) -> None:
         """Start video encoding.
 
-        Start encoding to .mp4 file with provided name. Total number of frames
+        Start encoding to MP4 file with provided name. Total number of frames
         can be optionally limited. Output file is overwritten if it already exists.
         New file is created and encoding is restarted if method is launched
         during previously started encoding.
@@ -1041,6 +1069,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         finally:
             self._padlock.release()
+
+    def encoder_is_open(self) -> bool:
+        """Encoder is encoding.
+
+        Returns
+        -------
+        out : bool
+            ``True`` if encoder is encoding.
+        """
+        return self._optix.encoder_is_open()
 
     def encoded_frames(self) -> int:
         """Number of encoded video frames.

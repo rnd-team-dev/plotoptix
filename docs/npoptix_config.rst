@@ -1,8 +1,9 @@
-Start, configure, read output
-=============================
+Start, configure, get output
+============================
 
 .. automethod:: plotoptix.NpOptiX.start
 .. automethod:: plotoptix.NpOptiX.close
+.. automethod:: plotoptix.NpOptiX.save_image
 .. automethod:: plotoptix.NpOptiX.get_rt_output
 .. automethod:: plotoptix.NpOptiX._run_event_loop
 .. automethod:: plotoptix.NpOptiX.run
@@ -44,6 +45,7 @@ Encoder configuration
 .. automethod:: plotoptix.NpOptiX.encoder_create
 .. automethod:: plotoptix.NpOptiX.encoder_start
 .. automethod:: plotoptix.NpOptiX.encoder_stop
+.. automethod:: plotoptix.NpOptiX.encoder_is_open
 .. automethod:: plotoptix.NpOptiX.encoded_frames
 .. automethod:: plotoptix.NpOptiX.encoding_frames
 

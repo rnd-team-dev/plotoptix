@@ -20,11 +20,12 @@ __version__ = "0.2.1"
 __date__    = "12 May 2019"
 
 
-import os, struct, subprocess, logging
+import logging
 
 logging.basicConfig(level=logging.WARN, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
 # verify Python is 64-bit ################################################
+import struct
 
 if struct.calcsize("P") * 8 != 64:
     logging.error(80 * "*"); logging.error(80 * "*")
@@ -33,6 +34,8 @@ if struct.calcsize("P") * 8 != 64:
     raise ImportError
 
 # verify CUDA_PATH is defined ############################################
+import os
+
 try:
     _cuda_path = os.environ["CUDA_PATH"]
 except KeyError:
@@ -42,6 +45,8 @@ except KeyError:
     raise ImportError
 
 # verify CUDA release ####################################################
+import subprocess
+
 _rel_required = "10.1"
 try:
     _outp = subprocess.check_output(["nvcc", "--version"]).decode("utf-8").split(" ")

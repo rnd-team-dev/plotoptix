@@ -10,6 +10,7 @@ Added
 
 - OpenSimplex noise generator
 - basic interface to the video encoder
+- save current image to file
 
 `v0.2.0`_ - 2019-05-12
 ----------------------
