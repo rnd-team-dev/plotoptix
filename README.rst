@@ -43,7 +43,7 @@ for practical code samples.
 
 A couple of images made with PlotOptiX, for decoration of this introduction:
 
-.. image:: https://github.com/rnd-team-dev/plotoptix/blob/master/images/screenshots.jpg?raw=true
+.. image:: https://plotoptix.rnd.team/images/screenshots.jpg
    :alt: PlotOptiX screenshots, scatter and line plots ray tracing
 
 PlotOptiX is based on `NVIDIA OptiX <https://developer.nvidia.com/optix>`_ framework wrapped in RnD.SharpOptiX C#/C++ libraries and CUDA
@@ -151,3 +151,6 @@ Examples
 
 Looking at examples is the best way to get started and explore PlotOptiX features. Have a look at the
 `readme and sample codes here <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__.
+
+.. image:: https://plotoptix.rnd.team/images/surface_plot.jpg
+   :alt: Surface plot ray tracing with PlotOptiX
