@@ -1,15 +1,13 @@
 Release history
 ===============
 
-v0.2.1 - (unreleased)
-
-**Note:** this version is not yet released and active development is ongoing.
+`v0.2.1`_ - 2019-05-19
 
 Added
 ~~~~~
 
 - OpenSimplex noise generator
-- basic interface to the video encoder
+- basic interface to the video encoder (save video output to mp4 files)
 - save current image to file
 
 `v0.2.0`_ - 2019-05-12
@@ -58,6 +56,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog w.r.t. this point.
 
+.. _`v0.2.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.2.1
 .. _`v0.2.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.2.0
 .. _`v0.1.4`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.1.4
 .. _`v0.1.3`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.1.3
