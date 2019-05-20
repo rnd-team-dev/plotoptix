@@ -10,6 +10,7 @@
    materials
    utils
    changelog
+   license
 
 .. toctree::
    :caption: Quick Links

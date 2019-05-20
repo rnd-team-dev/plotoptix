@@ -3,27 +3,28 @@ Short, non-binding summary: PlotOptiX is free for non-comercial use.
 Full legal terms:
 
 Section I: Introduction
+-----------------------
 
 Definition of the "Software": PlotOptiX source code and documentation together with included binaries and their associated source code.
 
 The Software includes binary libraries from the following sources. Before proceeding, users must read and agree to this license agreement and the license agreements of all software included in or distributed with the Software:
 
 1. NVIDIA OptiX™, Video Codec SDK and their dependencies:
-   licenses\DesignWorks_SDKSamplesAndTools_EULA.pdf
-   licenses\OptiX_ThirdParty_Licenses.txt
+   licenses/DesignWorks_SDKSamplesAndTools_EULA.pdf,
+   licenses/OptiX_ThirdParty_Licenses.txt,
    read also the notice attached in Section III
 
 2. LibTiff.Net:
-   licenses\LibTiff.Net_License.txt (https://bitmiracle.github.io/libtiff.net/help/articles/license.html)
+   licenses/LibTiff.Net_License.txt (https://bitmiracle.github.io/libtiff.net/help/articles/license.html)
 
 3. Newtonsoft.Json:
-   licenses\Newtonsoft.Json_License.txt (https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md)
+   licenses/Newtonsoft.Json_License.txt (https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md)
 
 4. .NET components:
    MIT License (https://github.com/dotnet)
 
-------------------------------------------------------------------------------------------------------------------
 Section II: The Software End User License Agreement
+---------------------------------------------------
 
 Copyright (c) 2019 Robert Sulej, R&D Team, <contact@rnd.team>
 
@@ -37,8 +38,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Contact R&D Team <contact@rnd.team> if you need license allowing commercial use of the Software.
 
-------------------------------------------------------------------------------------------------------------------
 Section III: OptiX™
+-------------------
 
 This distribution includes OptiX™ binary libraries under the terms of the Software License Agreement for the NVIDIA® OptiX™ ray tracing engine, included in this repository in licenses\DesignWorks_SDKSamplesAndTools_EULA.pdf. Users agree to the terms of that license, including the following restrictions:
 
