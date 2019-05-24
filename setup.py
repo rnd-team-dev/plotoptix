@@ -18,7 +18,7 @@ except ImportError:
     bdist_wheel = None
 
 setup(name='plotoptix',
-      version='0.2.1',
+      version='0.2.2',
       url='https://plotoptix.rnd.team',
       project_urls={
           'Documentation': 'https://plotoptix.rnd.team',

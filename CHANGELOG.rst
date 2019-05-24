@@ -1,6 +1,15 @@
 Release history
 ===============
 
+`v0.2.2`_ - (unreleased)
+------------------------
+
+Added
+~~~~~
+
+- major speed improvement in general, plus faser convergence in out of focus regions
+- refactoring for linux support
+
 `v0.2.1`_ - 2019-05-19
 ----------------------
 
