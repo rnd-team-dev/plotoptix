@@ -16,15 +16,15 @@ Many scripts are using Tkinter UI, so here is a summary of mouse and keys action
 
 You'll find here super-basic examples of displaying data, like scatter plots or line plots below:
 
-![screenshots1](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/basic_scripts_screens.jpg "PlotOptiX output screenshots")
+![screenshots1](https://plotoptix.rnd.team/images/basic_scripts_screens.jpg "PlotOptiX output screenshots")
 
 ...and a bit more on tuning the available options, like the material and light shading modes:
 
-![screenshots2](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/light_shading_modes.jpg "PlotOptiX light shading")
+![screenshots2](https://plotoptix.rnd.team/images/light_shading_modes.jpg "PlotOptiX light shading")
 
 ...or 2D postprocessing algorithms:
 
-![screenshots2](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/postprocessing.jpg "PlotOptiX 2D postprocessing")
+![screenshots2](https://plotoptix.rnd.team/images/postprocessing.jpg "PlotOptiX 2D postprocessing")
 
 ### 2. Animations and callbacks
 
@@ -32,7 +32,7 @@ Callbacks in PlotOptiX are widely available throughout the raytracing process. Y
 
 GitHub can render notebooks content, so it is best to look at descriptions inlined in the code there.
 
-![screenshots3](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/notebook_screens.jpg "PlotOptiX in notebook screenshots")
-![screenshots4](https://github.com/rnd-team-dev/plotoptix/blob/master/examples/notebook_screens_2.jpg "PlotOptiX in notebook screenshots")
+![screenshots3](https://plotoptix.rnd.team/images/notebook_screens.jpg "PlotOptiX in notebook screenshots")
+![screenshots4](https://plotoptix.rnd.team/images/notebook_screens_2.jpg "PlotOptiX in notebook screenshots")
 
 *Progressing with more examples...*
