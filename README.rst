@@ -46,8 +46,8 @@ A couple of images made with PlotOptiX, for decoration of this introduction:
 .. image:: https://plotoptix.rnd.team/images/screenshots.jpg
    :alt: PlotOptiX screenshots, scatter and line plots ray tracing
 
-PlotOptiX is based on `NVIDIA OptiX <https://developer.nvidia.com/optix>`_ framework wrapped in RnD.SharpOptiX C#/C++ libraries and CUDA
-shaders by R&D Team. PlotOptiX makes use of RTX-capable GPU's.
+PlotOptiX is based on `NVIDIA OptiX <https://developer.nvidia.com/optix>`_ framework wrapped in RnD.SharpOptiX C#/C++ libraries
+and completed with custom CUDA shaders by R&D Team. PlotOptiX makes use of RTX-capable GPU's.
 
 Features
 --------

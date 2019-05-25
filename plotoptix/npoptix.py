@@ -2247,6 +2247,20 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
+        elif geom == Geometry.Parallelograms:
+            if c is None:
+                msg = "Parallelograms setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if (u is None) or (v is None):
+                if r is None:
+                    msg = "Parallelograms setup failed, need U / V vectors or radii data."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    is_ok = False
+
         elif (geom == Geometry.Parallelepipeds) or (geom == Geometry.Tetrahedrons):
             if c is None:
                 msg = "Plot setup failed, colors data is missing."
