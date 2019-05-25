@@ -9,6 +9,7 @@ Added
 
 - major speed improvement in general, plus faser convergence in out of focus regions
 - refactoring for linux support
+- fix missing parallelogram support
 
 `v0.2.1`_ - 2019-05-19
 ----------------------
