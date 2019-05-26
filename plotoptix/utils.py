@@ -71,6 +71,15 @@ def _make_contiguous_3d(a: Optional[Any], n: int = -1, extend_scalars = False) -
     return a
 
 
+def make_color(c: Any,
+               exposure: float = 1.0,
+               gamma: float = 1.0,
+               range: float = 1.0,
+               extend_scalars: bool = True) -> np.ndarray:
+    """Prepare colors to account for the postprocessing corrections.
+    """
+    pass
+
 def map_to_colors(x: Any, cm_name: str) -> np.ndarray:
     """Map input variable to matplotlib color palette.
 

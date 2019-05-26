@@ -8,6 +8,7 @@ Added
 ~~~~~
 
 - color calculation convenience method: scaling, exposure and inverted gamma correction
+- h.264 encoder profile and preset selection
 
 Changes
 ~~~~~~~

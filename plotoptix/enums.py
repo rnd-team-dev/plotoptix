@@ -355,3 +355,81 @@ class RtFormat(Enum):
     Float4 = 0x104
     """32 bit single precision (x, y, z, w) vectors.
     """
+
+class NvEncProfile(Enum):
+    """H.264 encoding profile.
+
+    Beware that some combinations may not be supported by all players
+    (e.g. lossless encoding is not playable in Windows Media Player).
+
+    See Also
+    --------
+    :meth:`plotoptix.NpOptiX.encoder_create`
+    """
+
+    Default = 0
+    """
+    """
+
+    Baseline = 1
+    """
+    """
+
+    Main = 2
+    """
+    """
+
+    High = 3
+    """
+    """
+
+    High444 = 4
+    """
+    """
+
+class NvEncPreset(Enum):
+    """H.264 encoding preset.
+
+    Beware that some combinations may not be supported by all players
+    (e.g. lossless encoding is not playable in Windows Media Player).
+
+    See Also
+    --------
+    :meth:`plotoptix.NpOptiX.encoder_create`
+    """
+
+    Default = 0
+    """
+    """
+
+    HP = 1
+    """
+    """
+
+    HQ = 2
+    """
+    """
+
+    BD = 3
+    """
+    """
+
+    LL = 4
+    """
+    """
+
+    LL_HP = 5
+    """
+    """
+
+    LL_HQ = 6
+    """
+    """
+
+    Lossless = 7
+    """
+    """
+
+    Lossless_HP = 8
+    """
+    """

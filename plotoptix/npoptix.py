@@ -986,11 +986,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
-    def encoder_create(self, fps: int, bitrate: float, idrrate: Optional[int] = None) -> None:
+    def encoder_create(self, fps: int, bitrate: float,
+                       idrrate: Optional[int] = None,
+                       profile: Union[NvEncProfile, str] = NvEncProfile.Default,
+                       preset: Union[NvEncPreset, str] = NvEncPreset.Default) -> None:
         """Create video encoder.
 
         Create and configure video encoder for this raytracer instance. Only one encoder
-        per raytracer instance is supported now.
+        per raytracer instance is supported now. Specifying ``profile`` or ``preset`` overrides
+        ``bitrate`` settings. Beware that some combinations may not be supported by all players
+        (e.g. lossless encoding is not playable in Windows Media Player).
 
         Parameters
         ----------
@@ -1001,13 +1006,23 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         idrrate : int, optional
             Instantaneous Decode Refresh frame interval. 2 seconds interval is used if
             ``idrrate`` is not provided.
+        profile : NvEncProfile enum or string, optional
+            H.264 encoding profile, overrides ``bitrate`` settings.
+        preset : NvEncPreset enum or string, optional
+            H.264 encoding preset,  overrides ``bitrate`` settings.
+
+        See Also
+        --------
+        :class:`plotoptix.enums.NvEncProfile`, :class:`plotoptix.enums.NvEncPreset`
         """
         if idrrate is None: idrrate = 2 * fps
+        if isinstance(profile, str): profile = NvEncProfile[profile]
+        if isinstance(preset, str): preset = NvEncPreset[preset]
 
         try:
             self._padlock.acquire()
 
-            if not self._optix.encoder_create(fps, int(1000000 * bitrate), idrrate):
+            if not self._optix.encoder_create(fps, int(1000000 * bitrate), idrrate, profile.value, preset.value, chroma.value):
                 msg = "Encoder not created."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)

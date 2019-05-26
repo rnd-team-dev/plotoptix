@@ -292,7 +292,7 @@ def load_optix():
     optix.set_max_accumulation_frames.argtypes = [c_int]
     optix.set_max_accumulation_frames.restype = c_bool
 
-    optix.encoder_create.argtypes = [c_int, c_int, c_int]
+    optix.encoder_create.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int]
     optix.encoder_create.restype = c_bool
 
     optix.encoder_start.argtypes = [c_wchar_p, c_uint]
