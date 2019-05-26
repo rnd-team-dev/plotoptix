@@ -1,8 +1,8 @@
 Release history
 ===============
 
-v0.2.2 - (unreleased)
----------------------
+`v0.2.2`_ - 2019-05-26
+----------------------
 
 Added
 ~~~~~
@@ -77,6 +77,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog w.r.t. this point.
 
+.. _`v0.2.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.2.2
 .. _`v0.2.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.2.1
 .. _`v0.2.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.2.0
 .. _`v0.1.4`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.1.4
