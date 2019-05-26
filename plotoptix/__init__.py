@@ -47,7 +47,7 @@ except KeyError:
 # verify CUDA release ####################################################
 import subprocess
 
-_rel_required = "10.1"
+_rel_required = "10." # accept any minor number
 try:
     _outp = subprocess.check_output(["nvcc", "--version"]).decode("utf-8").split(" ")
     try:

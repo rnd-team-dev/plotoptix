@@ -71,7 +71,7 @@ System Requirements
 - operating system, *currently*: Windows
 - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (but you should already have it)
 - a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Turing)
-- `CUDA Toolkit v10.1 <https://developer.nvidia.com/cuda-downloads>`__
+- `CUDA Toolkit v10.x <https://developer.nvidia.com/cuda-downloads>`__ (tested with v10.1)
 - Python 3 **64-bit**
 
 What's Included
@@ -103,8 +103,8 @@ install the most recent release.
 **CUDA Toolkit**
 
 CUDA libraries are not included in the package. They are rather huge, and the installation is quite straight-forward. Simply visit
-`CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.1** (we
-keep binaries compatible with the latest CUDA release). Download and run the installer.
+`CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.x** (v10.0
+is accepted, but code is tested on v10.1; we keep binaries compatible with the latest CUDA release). Download and run the installer.
 
 Make sure the CUDA_PATH environment variable is configured::
 
