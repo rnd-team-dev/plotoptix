@@ -1022,7 +1022,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
 
-            if not self._optix.encoder_create(fps, int(1000000 * bitrate), idrrate, profile.value, preset.value, chroma.value):
+            if not self._optix.encoder_create(fps, int(1000000 * bitrate), idrrate, profile.value, preset.value):
                 msg = "Encoder not created."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
