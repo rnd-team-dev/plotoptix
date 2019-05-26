@@ -34,8 +34,8 @@ def _make_contiguous_3d(a: Optional[Any], n: int = -1, extend_scalars = False) -
 
     if len(a.shape) == 1:
         if a.shape[0] == 1: a = np.full((1, 3), a[0], dtype=np.float32)
-        elif a.shape[0] == n: a = np.reshape(a, (n, 1))
         elif a.shape[0] == 3: a = np.reshape(a, (1, 3))
+        elif a.shape[0] == n or n < 0: a = np.reshape(a, (a.shape[0], 1))
         else:
             raise ValueError("Input shape not matching single 3D vector nor desired array length.")
 
@@ -74,11 +74,45 @@ def _make_contiguous_3d(a: Optional[Any], n: int = -1, extend_scalars = False) -
 def make_color(c: Any,
                exposure: float = 1.0,
                gamma: float = 1.0,
-               range: float = 1.0,
+               input_range: float = 1.0,
                extend_scalars: bool = True) -> np.ndarray:
     """Prepare colors to account for the postprocessing corrections.
+
+    Colors of geometry objects or background in the ray traced image may
+    look very different than expected from raw color values assigned at
+    the scene initialization, if post-processing corrections are applied.
+    This method applies inverse gamma and exposure corrections and returns
+    RGB values resulting with desired colors in the image.
+
+    Input values range may be specified, so RGB can be provided as 0-255
+    values, for convenience.
+
+    The output array shape is ``(n, 3)``, where n is deduced from the input
+    array. Single scalar value and values in 1D arrays are treated as a gray
+    levels if ``extend_scalars=True``.
+
+    Parameters
+    ----------
+    c : Any
+        Input variable, array_like of any shape or single scaler value.
+    exposure : float, optional
+        Exposure value applied in post-processing.
+    gamma : float, optional
+        Gamma value applied in post-processing.
+    input_range : float, optional
+        Range of the input color values.
+    extend_scalars : bool, optional
+        Convert single scalar and 1D arrays to gray value encoded as RGB.
+
+    Returns
+    -------
+    out : np.ndarray
+        C-contiguous, float32 numpy array with RGB color values pre-calculated
+        to account for post-processing corrections.
     """
-    pass
+    c = _make_contiguous_3d(c, extend_scalars=extend_scalars)
+    return np.power((1 / (exposure * input_range)) * c, gamma)
+
 
 def map_to_colors(x: Any, cm_name: str) -> np.ndarray:
     """Map input variable to matplotlib color palette.
