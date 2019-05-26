@@ -12,8 +12,9 @@ import numpy as np
 from ctypes import byref, c_float, c_uint, c_int
 from typing import List, Tuple, Callable, Optional, Union, Any
 
-from plotoptix._load_lib import load_optix, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
 from plotoptix.singleton import Singleton
+from plotoptix._load_lib import load_optix, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
+from plotoptix.utils import _make_contiguous_vector, _make_contiguous_3d
 from plotoptix.enums import *
 
 
@@ -1113,21 +1114,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         return n
 
 
-    @staticmethod
-    def _make_contiguous_vector(a: Optional[Any], n_dim: int) -> Optional[np.ndarray]:
-        if a is None: return None
-
-        if not isinstance(a, np.ndarray) or (a.dtype != np.float32):
-            a = np.ascontiguousarray(a, dtype=np.float32)
-        if len(a.shape) > 1: a = a.flatten()
-        if a.shape[0] > n_dim: a = a[:n_dim]
-        if a.shape[0] == 1: a = np.full(n_dim, a[0], dtype=np.float32)
-        if a.shape[0] < n_dim: return None
-
-        if not a.flags['C_CONTIGUOUS']: a = np.ascontiguousarray(a, dtype=np.float32)
-
-        return a
-
     def get_camera_name_handle(self, name: Optional[str] = None) -> (Optional[str], Optional[int]):
         """Get camera name and handle.
 
@@ -1295,14 +1281,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return
 
         eye_ptr = 0
-        eye = self._make_contiguous_vector(eye, 3)
+        eye = _make_contiguous_vector(eye, 3)
         if eye is not None: eye_ptr = eye.ctypes.data
 
         target_ptr = 0
-        target = self._make_contiguous_vector(target, 3)
+        target = _make_contiguous_vector(target, 3)
         if target is not None: target_ptr = target.ctypes.data
 
-        up = self._make_contiguous_vector(up, 3)
+        up = _make_contiguous_vector(up, 3)
         if up is None:
             msg = "Need 3D camera up vector."
             self._logger.error(msg)
@@ -1351,15 +1337,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         name, cam_handle = self.get_camera_name_handle(name)
         if (name is None) or (cam_handle == 0): return
 
-        eye = self._make_contiguous_vector(eye, 3)
+        eye = _make_contiguous_vector(eye, 3)
         if eye is not None: eye_ptr = eye.ctypes.data
         else:               eye_ptr = 0
 
-        target = self._make_contiguous_vector(target, 3)
+        target = _make_contiguous_vector(target, 3)
         if target is not None: target_ptr = target.ctypes.data
         else:                  target_ptr = 0
 
-        up = self._make_contiguous_vector(up, 3)
+        up = _make_contiguous_vector(up, 3)
         if up is not None: up_ptr = up.ctypes.data
         else:              up_ptr = 0
 
@@ -1646,7 +1632,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return
 
         autofit = False
-        pos = self._make_contiguous_vector(pos, 3)
+        pos = _make_contiguous_vector(pos, 3)
         if pos is None:
             cam_name, _ = self.get_camera_name_handle(autofit_camera)
             if cam_name is None:
@@ -1658,7 +1644,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             pos = np.ascontiguousarray([0, 0, 0])
             autofit = True
 
-        color = self._make_contiguous_vector(color, 3)
+        color = _make_contiguous_vector(color, 3)
         if color is None:
             msg = "Need color (single value or 3-element array/list/tuple)."
             self._logger.error(msg)
@@ -1718,7 +1704,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return
 
         autofit = False
-        pos = self._make_contiguous_vector(pos, 3)
+        pos = _make_contiguous_vector(pos, 3)
         if pos is None:
             cam_name, _ = self.get_camera_name_handle(autofit_camera)
             if cam_name is None:
@@ -1730,21 +1716,21 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             pos = np.ascontiguousarray([0, 0, 0])
             autofit = True
 
-        color = self._make_contiguous_vector(color, 3)
+        color = _make_contiguous_vector(color, 3)
         if color is None:
             msg = "Need color (single value or 3-element array/list/tuple)."
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        u = self._make_contiguous_vector(u, 3)
+        u = _make_contiguous_vector(u, 3)
         if u is None:
             msg = "Need 3D vector U."
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        v = self._make_contiguous_vector(v, 3)
+        v = _make_contiguous_vector(v, 3)
         if v is None:
             msg = "Need 3D vector V."
             self._logger.error(msg)
@@ -1851,19 +1837,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        pos = self._make_contiguous_vector(pos, 3)
+        pos = _make_contiguous_vector(pos, 3)
         if pos is not None: pos_ptr = pos.ctypes.data
         else:               pos_ptr = 0
 
-        color = self._make_contiguous_vector(color, 3)
+        color = _make_contiguous_vector(color, 3)
         if color is not None: color_ptr = color.ctypes.data
         else:                 color_ptr = 0
 
-        u = self._make_contiguous_vector(u, 3)
+        u = _make_contiguous_vector(u, 3)
         if u is not None: u_ptr = u.ctypes.data
         else:             u_ptr = 0
 
-        v = self._make_contiguous_vector(v, 3)
+        v = _make_contiguous_vector(v, 3)
         if v is not None: v_ptr = v.ctypes.data
         else:             v_ptr = 0
 
@@ -2050,61 +2036,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise RuntimeError(msg)
 
 
-    def _make_contiguous_3d(self, a: Optional[Any], n: int = -1, extend_scalars = False) -> Optional[np.ndarray]:
-        if a is None: return None
-
-        if not isinstance(a, np.ndarray): a = np.ascontiguousarray(a, dtype=np.float32)
-
-        if a.dtype != np.float32: a = np.ascontiguousarray(a, dtype=np.float32)
-
-        if len(a.shape) == 1:
-            if a.shape[0] == 1: a = np.full((1, 3), a[0], dtype=np.float32)
-            elif a.shape[0] == n: a = np.reshape(a, (n, 1))
-            elif a.shape[0] == 3: a = np.reshape(a, (1, 3))
-            else:
-                msg = "Input shape not matching single 3D vector nor desired array length."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return None
-
-        if len(a.shape) > 2:
-            m = functools.reduce(operator.mul, a.shape[:-1], 1)
-            if (n >= 0) and (n != m):
-                msg = "Input shape not matching desired array length."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return None
-            a = np.reshape(a, (m, a.shape[-1]))
-
-        if n >= 0:
-            if (a.shape[0] == 1) and (n != a.shape[0]):
-                _a = np.zeros((n, a.shape[-1]), dtype=np.float32)
-                _a[:] = a[0]
-                a = _a
-            if n != a.shape[0]:
-                msg = "Input shape not matching desired array length."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return None
-
-        if a.shape[-1] != 3:
-            _a = np.zeros((a.shape[0], 3), dtype=np.float32)
-            if a.shape[-1] == 1:
-                if extend_scalars:
-                    _a[:,0] = a[:,0]
-                    _a[:,1] = a[:,0]
-                    _a[:,2] = a[:,0]
-                else:
-                    _a[:,0] = a[:,0]
-            elif a.shape[-1] == 2: _a[:,[0,1]] = a[:,[0,1]]
-            else: _a[:,[0,1,2]] = a[:,[0,1,2]]
-            a = _a
-
-        if not a.flags['C_CONTIGUOUS']: a = np.ascontiguousarray(a, dtype=np.float32)
-
-        return a
-
-
     def set_data(self, name: str, pos: Any,
                  c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                  r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
@@ -2165,7 +2096,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         n_primitives = -1
 
         # Prepare positions data
-        pos = self._make_contiguous_3d(pos)
+        pos = _make_contiguous_3d(pos)
         if pos is None:
             msg = "Positions (pos) are required for the new instances and cannot be left as None."
             self._logger.error(msg)
@@ -2180,7 +2111,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         pos_ptr = pos.ctypes.data
 
         # Prepare colors data
-        c = self._make_contiguous_3d(c, n=n_primitives, extend_scalars=True)
+        c = _make_contiguous_3d(c, n=n_primitives, extend_scalars=True)
         if c is not None: col_ptr = c.ctypes.data
         else: col_ptr = 0
 
@@ -2209,19 +2140,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         else: radii_ptr = 0
 
         # Prepare U vectors
-        u = self._make_contiguous_3d(u, n=n_primitives)
+        u = _make_contiguous_3d(u, n=n_primitives)
         u_ptr = 0
         if u is not None:
             u_ptr = u.ctypes.data
 
         # Prepare V vectors
-        v = self._make_contiguous_3d(v, n=n_primitives)
+        v = _make_contiguous_3d(v, n=n_primitives)
         v_ptr = 0
         if v is not None:
             v_ptr = v.ctypes.data
 
         # Prepare W vectors
-        w = self._make_contiguous_3d(w, n=n_primitives)
+        w = _make_contiguous_3d(w, n=n_primitives)
         w_ptr = 0
         if w is not None:
             w_ptr = w.ctypes.data
@@ -2365,7 +2296,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         size_changed = False
 
         # Prepare positions data
-        pos = self._make_contiguous_3d(pos)
+        pos = _make_contiguous_3d(pos)
         pos_ptr = 0
         if pos is not None:
             if (len(pos.shape) != 2) or (pos.shape[0] < 1) or (pos.shape[1] != 3):
@@ -2380,7 +2311,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         # Prepare colors data
         if size_changed and c is None:
             c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
-        c = self._make_contiguous_3d(c, n=n_primitives, extend_scalars=True)
+        c = _make_contiguous_3d(c, n=n_primitives, extend_scalars=True)
         col_ptr = 0
         if c is not None:
             col_ptr = c.ctypes.data
@@ -2406,17 +2337,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             radii_ptr = r.ctypes.data
 
         # Prepare U vectors
-        u = self._make_contiguous_3d(u, n=n_primitives)
+        u = _make_contiguous_3d(u, n=n_primitives)
         u_ptr = 0
         if u is not None: u_ptr = u.ctypes.data
 
         # Prepare V vectors
-        v = self._make_contiguous_3d(v, n=n_primitives)
+        v = _make_contiguous_3d(v, n=n_primitives)
         v_ptr = 0
         if v is not None: v_ptr = v.ctypes.data
 
         # Prepare W vectors
-        w = self._make_contiguous_3d(w, n=n_primitives)
+        w = _make_contiguous_3d(w, n=n_primitives)
         w_ptr = 0
         if w is not None: w_ptr = w.ctypes.data
 
@@ -2724,7 +2655,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             assert (len(pidx.shape) == 2 and pidx.shape[0] > 0 and pos.shape[1] == 3) or (len(pidx.shape) == 1 and pidx.shape[0] > 3 and (pidx.shape[0] % 3) == 0), "Required index shape is (n,3) or (m), where m % 3 == 0."
             pidx_ptr = pidx.ctypes.data
 
-        c = self._make_contiguous_3d(c, n=pos.shape[0], extend_scalars=True)
+        c = _make_contiguous_3d(c, n=pos.shape[0], extend_scalars=True)
         col_ptr = 0
         if c is not None:
             col_ptr = c.ctypes.data
@@ -2764,7 +2695,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        c = self._make_contiguous_vector(c, n_dim=3)
+        c = _make_contiguous_vector(c, n_dim=3)
         if c is not None: col_ptr = c.ctypes.data
         else: col_ptr = 0
 

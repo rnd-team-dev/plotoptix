@@ -7,9 +7,18 @@ v0.2.2 - (unreleased)
 Added
 ~~~~~
 
+- color calculation convenience method: scaling, exposure and inverted gamma correction
+
+Changes
+~~~~~~~
+
 - major speed improvement in general, plus faser convergence in out of focus regions
 - refactoring for linux support
-- fix missing parallelogram support
+
+Fixed
+~~~~~
+
+- missing parallelogram support
 
 `v0.2.1`_ - 2019-05-19
 ----------------------
