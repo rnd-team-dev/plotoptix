@@ -111,7 +111,7 @@ def make_color(c: Any,
         to account for post-processing corrections.
     """
     c = _make_contiguous_3d(c, extend_scalars=extend_scalars)
-    return np.power((1 / (exposure * input_range)) * c, gamma)
+    return (1 / exposure) * np.power((1 / input_range) * c, gamma)
 
 
 def map_to_colors(x: Any, cm_name: str) -> np.ndarray:
