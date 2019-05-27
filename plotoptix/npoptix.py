@@ -2096,6 +2096,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Randomize not provided U / V / W vectors so regular but randomly rotated
             primitives are generated using available vectors (default). If set to
             ``False`` all primitives are aligned in the same direction.
+
+        See Also
+        --------
+        :class:`plotoptix.enums.Geometry`
         """
         if name is None: raise ValueError()
 

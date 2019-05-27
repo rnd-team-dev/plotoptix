@@ -94,7 +94,7 @@ def make_color(c: Any,
     Parameters
     ----------
     c : Any
-        Input variable, array_like of any shape or single scaler value.
+        Target color values, array_like of any shape or single scalar value.
     exposure : float, optional
         Exposure value applied in post-processing.
     gamma : float, optional
@@ -102,7 +102,7 @@ def make_color(c: Any,
     input_range : float, optional
         Range of the input color values.
     extend_scalars : bool, optional
-        Convert single scalar and 1D arrays to gray value encoded as RGB.
+        Convert single scalar and 1D arrays to gray values encoded as RGB.
 
     Returns
     -------
