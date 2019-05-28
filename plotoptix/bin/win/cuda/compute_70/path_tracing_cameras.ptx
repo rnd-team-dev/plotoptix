@@ -222,7 +222,7 @@ BB0_1:
 	ld.global.v2.u32 	{%r9, %r10}, [launch_index];
 	cvt.u64.u32	%rd10, %r9;
 	cvt.u64.u32	%rd11, %r10;
-	mov.u64 	%rd14, output_buffer;
+	mov.u64 	%rd14, accum_buffer_l2;
 	cvta.global.u64 	%rd9, %rd14;
 	// inline asm
 	call (%rd8), _rt_buffer_get_64, (%rd9, %r1, %r2, %rd10, %rd11, %rd6, %rd6);
