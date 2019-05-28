@@ -986,7 +986,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
-    def encoder_create(self, fps: int, bitrate: float,
+    def encoder_create(self, fps: int, bitrate: float = 2,
                        idrrate: Optional[int] = None,
                        profile: Union[NvEncProfile, str] = NvEncProfile.Default,
                        preset: Union[NvEncPreset, str] = NvEncPreset.Default) -> None:
@@ -1001,7 +1001,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         fps : int
             Frames per second assumed in the output file.
-        bitrate : float
+        bitrate : float, optional
             Constant bitrate of the encoded stream, in Mbits to save you typing 0's.
         idrrate : int, optional
             Instantaneous Decode Refresh frame interval. 2 seconds interval is used if
