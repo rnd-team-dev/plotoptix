@@ -1,5 +1,7 @@
 ## PlotOptiX examples
 
+Note, some fresh examples may use features available in the repository head, but not yet in the release submitted to PyPI.
+
 ### 1. Basic plot making
 
 Collection of short and simple scripts to get started.
