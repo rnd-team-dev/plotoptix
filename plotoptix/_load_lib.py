@@ -13,29 +13,23 @@ from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_lo
 PARAM_NONE_CALLBACK = CFUNCTYPE(None)
 PARAM_INT_CALLBACK = CFUNCTYPE(None, c_int)
 
+BIN_PATH = "bin"
 PLATFORM = platform.system()
 if PLATFORM == "Windows":
-    BIN_PATH = "bin\\win"
     LIB_EXT = ".dll"
 elif PLATFORM == "Linux":
-    BIN_PATH = "bin\\linux"
     LIB_EXT = ".so"
 elif PLATFORM == "Darwin":
-    BIN_PATH = "bin\\mac"
-    LIB_EXT = ".so"
+    raise NotImplementedError
 else:
-    BIN_PATH = ""
-    LIB_EXT == ""
+    raise NotImplementedError
 
 sharp_optix = None
 
-def load_optix():
+def _load_optix_win():
     """
     Load RnD.SharpOptiX library, setup arguments and return types.
     """
-    global sharp_optix
-    if sharp_optix is not None: return sharp_optix
-
     optix = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX" + LIB_EXT))
 
     optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int]
@@ -315,18 +309,42 @@ def load_optix():
     optix.open_simplex_3d.argtypes = [c_void_p, c_void_p, c_int]
     optix.open_simplex_4d.argtypes = [c_void_p, c_void_p, c_int]
 
-    if PLATFORM == "Windows":
-        optix.get_display_scaling.restype = c_float
+    optix.get_display_scaling.restype = c_float
 
     optix.test_library.argtypes = [c_int]
     optix.test_library.restype = c_bool
 
+    return optix
+
+
+def _load_optix_linux():
+    """
+    Load clr, load RnD.SharpOptiX library.
+    """
+
+    optix = None
+
+    return optix
+
+
+def load_optix():
+    """
+    Load RnD.SharpOptiX library, setup CUDA lib and include folders.
+    """
+    global sharp_optix
+    if sharp_optix is not None: return sharp_optix
+
+    if PLATFORM == "Windows":
+        optix = _load_optix_win()
+    elif PLATFORM == "Linux":
+        optix = _load_optix_linux()
+    else:
+        raise NotImplementedError
 
     package_dir = os.path.dirname(__file__)
     optix.set_library_dir(os.path.join(package_dir, BIN_PATH))
     optix.set_include_dir(os.path.join(package_dir, BIN_PATH, "cuda"))
 
-
     sharp_optix = optix
 
-    return optix
+    return sharp_optix

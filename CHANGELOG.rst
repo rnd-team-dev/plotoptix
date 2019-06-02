@@ -1,6 +1,14 @@
 Release history
 ===============
 
+v0.2.9 - unreleased
+-------------------
+
+Changes
+~~~~~~~
+
+- reorganize code and folders for linux support
+
 `v0.2.2`_ - 2019-05-26
 ----------------------
 
