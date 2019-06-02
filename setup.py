@@ -49,7 +49,8 @@ setup(name='plotoptix',
           'enum34;python_version<"3.4"',
           'packaging>=18.0',
           'numpy>=1.0',
-          'Pillow>=5.3'
+          'Pillow>=5.3',
+          'matplotlib>=2.0'
       ],
       long_description=open('README.rst').read(),
       include_package_data=True,

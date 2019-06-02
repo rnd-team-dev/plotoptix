@@ -17,6 +17,7 @@
 
    R&D Team Design Studio <http://rnd.team>
    GitHub Sources <https://github.com/rnd-team-dev/plotoptix>
+   GitHub Examples <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>
    PyPI Releases <https://pypi.org/project/plotoptix>
 
 Indices

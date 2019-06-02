@@ -79,7 +79,7 @@ What's Included
 
 - OptiX 6.0.0 libraries
 - RnD.SharpOptiX and RnD.SharpEncoder libraries
-- all other required 3'rd party libraries: FFmpeg, LibTiff, Newtonsoft.Json
+- all other supporting 3'rd party libraries: FFmpeg, LibTiff, Newtonsoft.Json
 - Python examples
 
 Installation
