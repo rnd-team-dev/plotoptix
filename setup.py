@@ -50,6 +50,7 @@ setup(name='plotoptix',
           'packaging>=18.0',
           'numpy>=1.0',
           'Pillow>=5.3',
+          'python-dateutil>=2.7',
           'matplotlib>=2.0'
       ],
       long_description=open('README.rst').read(),

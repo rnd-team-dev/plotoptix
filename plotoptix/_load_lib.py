@@ -26,11 +26,11 @@ else:
 
 sharp_optix = None
 
-def _load_optix_win():
+def _load_optix_win(dll_name):
     """
     Load RnD.SharpOptiX library, setup arguments and return types.
     """
-    optix = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX" + LIB_EXT))
+    optix = cdll.LoadLibrary(dll_name)
 
     optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int]
     optix.create_empty_scene.restype = c_bool
@@ -317,12 +317,27 @@ def _load_optix_win():
     return optix
 
 
-def _load_optix_linux():
+def _load_optix_linux(dll_name):
     """
     Load clr, load RnD.SharpOptiX library.
     """
+    import clr, sys
 
-    optix = None
+    head, tail = os.path.split(dll_name)
+    sys.path.append(head)
+
+    ld_lib_path = os.environ["LD_LIBRARY_PATH"]
+    if not head in ld_lib_path.split(":"):
+        print("add to ld path")
+        os.environ["LD_LIBRARY_PATH"] = ld_lib_path + ":" + head
+    else:
+        print("path in ld")
+
+    assembly = clr.System.Reflection.Assembly.LoadFrom(dll_name)
+
+    clr.AddReference(os.path.splitext(tail)[0])
+
+    optix = assembly.CreateInstance("RnD.SharpOptiX.Py.PyOptiX")
 
     return optix
 
@@ -334,10 +349,12 @@ def load_optix():
     global sharp_optix
     if sharp_optix is not None: return sharp_optix
 
+    dll_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX" + LIB_EXT)
+
     if PLATFORM == "Windows":
-        optix = _load_optix_win()
+        optix = _load_optix_win(dll_name)
     elif PLATFORM == "Linux":
-        optix = _load_optix_linux()
+        optix = _load_optix_linux(dll_name)
     else:
         raise NotImplementedError
 
@@ -348,3 +365,4 @@ def load_optix():
     sharp_optix = optix
 
     return sharp_optix
+
