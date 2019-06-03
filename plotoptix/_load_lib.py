@@ -20,7 +20,7 @@ PARAM_INT_CALLBACK = CFUNCTYPE(None, c_int)
 sharp_optix = None
 
 
-def _load_optix_win(dll_name):
+def _load_optix_win():
     """
     Load RnD.SharpOptiX library, setup arguments and return types.
     """
