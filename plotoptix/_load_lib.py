@@ -6,30 +6,26 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
-import os, platform
+import os, platform, sys
 
 from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_long, c_bool, c_char_p, c_wchar_p, c_void_p
+
+BIN_PATH = "bin"
+
+PLATFORM = platform.system()
 
 PARAM_NONE_CALLBACK = CFUNCTYPE(None)
 PARAM_INT_CALLBACK = CFUNCTYPE(None, c_int)
 
-BIN_PATH = "bin"
-PLATFORM = platform.system()
-if PLATFORM == "Windows":
-    LIB_EXT = ".dll"
-elif PLATFORM == "Linux":
-    LIB_EXT = ".so"
-elif PLATFORM == "Darwin":
-    raise NotImplementedError
-else:
-    raise NotImplementedError
-
 sharp_optix = None
+
 
 def _load_optix_win(dll_name):
     """
     Load RnD.SharpOptiX library, setup arguments and return types.
     """
+    dll_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX.dll")
+
     optix = cdll.LoadLibrary(dll_name)
 
     optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int]
@@ -317,27 +313,31 @@ def _load_optix_win(dll_name):
     return optix
 
 
-def _load_optix_linux(dll_name):
+def _load_optix_linux():
     """
     Load clr, load RnD.SharpOptiX library.
     """
-    import clr, sys
+    import clr
 
-    head, tail = os.path.split(dll_name)
+    #c_encoder = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpEncoder.so"))
+    c_optix = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptix.so.6.0.0"))
+    c_optixu = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptixu.so.6.0.0"))
+    c_rnd = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpOptiX.so"))
+
+    json_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "Newtonsoft.Json.dll")
+    tiff_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "BitMiracle.LibTiff.NET.dll")
+    rnd_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX.dll")
+
+    head, tail = os.path.split(rnd_name)
     sys.path.append(head)
 
-    ld_lib_path = os.environ["LD_LIBRARY_PATH"]
-    if not head in ld_lib_path.split(":"):
-        print("add to ld path")
-        os.environ["LD_LIBRARY_PATH"] = ld_lib_path + ":" + head
-    else:
-        print("path in ld")
-
-    assembly = clr.System.Reflection.Assembly.LoadFrom(dll_name)
+    json_assembly = clr.System.Reflection.Assembly.LoadFile(json_name)
+    tiff_assembly = clr.System.Reflection.Assembly.LoadFile(tiff_name)
+    rnd_assembly = clr.System.Reflection.Assembly.LoadFile(rnd_name)
 
     clr.AddReference(os.path.splitext(tail)[0])
 
-    optix = assembly.CreateInstance("RnD.SharpOptiX.Py.PyOptiX")
+    optix = rnd_assembly.CreateInstance("RnD.SharpOptiX.Py.PyOptiX")
 
     return optix
 
@@ -349,12 +349,10 @@ def load_optix():
     global sharp_optix
     if sharp_optix is not None: return sharp_optix
 
-    dll_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX" + LIB_EXT)
-
     if PLATFORM == "Windows":
-        optix = _load_optix_win(dll_name)
+        optix = _load_optix_win()
     elif PLATFORM == "Linux":
-        optix = _load_optix_linux(dll_name)
+        optix = _load_optix_linux()
     else:
         raise NotImplementedError
 
