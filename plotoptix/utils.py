@@ -1,6 +1,7 @@
 """Utility and convenience functions.
 """
 
+import functools, operator
 import numpy as np
 
 from typing import Any, Optional
