@@ -41,13 +41,11 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
 see `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__
 for practical code samples.
 
-A couple of images made with PlotOptiX, for decoration of this introduction:
+PlotOptiX is based on `NVIDIA OptiX <https://developer.nvidia.com/optix>`_ framework wrapped in RnD.SharpOptiX C#/C++ libraries
+and completed with custom CUDA shaders by R&D Team. PlotOptiX makes use of RTX-capable GPU's.
 
 .. image:: https://plotoptix.rnd.team/images/screenshots.jpg
    :alt: PlotOptiX screenshots, scatter and line plots ray tracing
-
-PlotOptiX is based on `NVIDIA OptiX <https://developer.nvidia.com/optix>`_ framework wrapped in RnD.SharpOptiX C#/C++ libraries
-and completed with custom CUDA shaders by R&D Team. PlotOptiX makes use of RTX-capable GPU's.
 
 Features
 --------
