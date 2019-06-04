@@ -13,6 +13,9 @@ from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_lo
 BIN_PATH = "bin"
 
 PLATFORM = platform.system()
+if PLATFORM == "Linux":
+    import clr
+    from System import IntPtr
 
 PARAM_NONE_CALLBACK = CFUNCTYPE(None)
 PARAM_INT_CALLBACK = CFUNCTYPE(None, c_int)
@@ -22,7 +25,7 @@ sharp_optix = None
 
 def _load_optix_win():
     """
-    Load RnD.SharpOptiX library, setup arguments and return types.
+    Load RnD.SharpOptiX library with ctypes, setup arguments and return types.
     """
     dll_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX.dll")
 
@@ -295,15 +298,15 @@ def _load_optix_win():
     optix.encoded_frames.restype = c_int
     optix.encoding_frames.restype = c_int
 
+    optix.open_simplex_2d.argtypes = [c_void_p, c_void_p, c_int]
+    optix.open_simplex_3d.argtypes = [c_void_p, c_void_p, c_int]
+    optix.open_simplex_4d.argtypes = [c_void_p, c_void_p, c_int]
+
     optix.set_gpu_architecture.argtypes = [c_int]
 
     optix.set_library_dir.argtypes = [c_wchar_p]
 
     optix.set_include_dir.argtypes = [c_wchar_p]
-
-    optix.open_simplex_2d.argtypes = [c_void_p, c_void_p, c_int]
-    optix.open_simplex_3d.argtypes = [c_void_p, c_void_p, c_int]
-    optix.open_simplex_4d.argtypes = [c_void_p, c_void_p, c_int]
 
     optix.get_display_scaling.restype = c_float
 
@@ -312,34 +315,57 @@ def _load_optix_win():
 
     return optix
 
-
-def _load_optix_linux():
+class _ClrOptiX:
     """
-    Load clr, load RnD.SharpOptiX library.
+    Pythonnet wrapper for RnD.SharpOptiX library.
     """
-    import clr
 
-    #c_encoder = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpEncoder.so"))
-    c_optix = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptix.so.6.0.0"))
-    c_optixu = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptixu.so.6.0.0"))
-    c_rnd = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpOptiX.so"))
+    def __init__(self):
 
-    json_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "Newtonsoft.Json.dll")
-    tiff_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "BitMiracle.LibTiff.NET.dll")
-    rnd_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX.dll")
+        #c_encoder = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpEncoder.so"))
+        c_optix = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptix.so.6.0.0"))
+        c_optixu = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptixu.so.6.0.0"))
+        c_rnd = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpOptiX.so"))
 
-    head, tail = os.path.split(rnd_name)
-    sys.path.append(head)
+        json_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "Newtonsoft.Json.dll")
+        tiff_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "BitMiracle.LibTiff.NET.dll")
+        rnd_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX.dll")
 
-    json_assembly = clr.System.Reflection.Assembly.LoadFile(json_name)
-    tiff_assembly = clr.System.Reflection.Assembly.LoadFile(tiff_name)
-    rnd_assembly = clr.System.Reflection.Assembly.LoadFile(rnd_name)
+        head, tail = os.path.split(rnd_name)
+        sys.path.append(head)
 
-    clr.AddReference(os.path.splitext(tail)[0])
+        json_assembly = clr.System.Reflection.Assembly.LoadFile(json_name)
+        tiff_assembly = clr.System.Reflection.Assembly.LoadFile(tiff_name)
+        rnd_assembly = clr.System.Reflection.Assembly.LoadFile(rnd_name)
 
-    optix = rnd_assembly.CreateInstance("RnD.SharpOptiX.Py.PyOptiX")
+        clr.AddReference(os.path.splitext(tail)[0])
 
-    return optix
+        self._optix = rnd_assembly.CreateInstance("RnD.SharpOptiX.Py.PyOptiX")
+
+    def create_empty_scene(self, width, height, buf_ptr, buf_size):
+        return self._optix.create_empty_scene_ptr(width, height, IntPtr.__overloads__[int](buf_ptr), buf_size)
+
+    def resize_scene(self, width, height, buf_ptr, buf_size):
+        return self._optix.resize_scene_ptr(width, height, IntPtr.__overloads__[int](buf_ptr), buf_size)
+
+    def open_simplex_2d(self, noise_ptr, inputs_ptr, length):
+        return self._optix.open_simplex_2d_ptr(IntPtr.__overloads__[int](noise_ptr), IntPtr.__overloads__[int](inputs_ptr), length)
+
+    def open_simplex_3d(self, noise_ptr, inputs_ptr, length):
+        return self._optix.open_simplex_3d_ptr(IntPtr.__overloads__[int](noise_ptr), IntPtr.__overloads__[int](inputs_ptr), length)
+
+    def open_simplex_4d(self, noise_ptr, inputs_ptr, length):
+        return self._optix.open_simplex_4d_ptr(IntPtr.__overloads__[int](noise_ptr), IntPtr.__overloads__[int](inputs_ptr), length)
+
+    def set_gpu_architecture(self, arch): self._optix.set_gpu_architecture(arch)
+
+    def set_library_dir(self, path): self._optix.set_library_dir(path)
+
+    def set_include_dir(self, path): self._optix.set_include_dir(path)
+
+    def get_display_scaling(self): return self._optix.get_display_scaling()
+
+    def test_library(self, x): return self._optix.test_library(x)
 
 
 def load_optix():
@@ -352,7 +378,7 @@ def load_optix():
     if PLATFORM == "Windows":
         optix = _load_optix_win()
     elif PLATFORM == "Linux":
-        optix = _load_optix_linux()
+        optix = _ClrOptiX()
     else:
         raise NotImplementedError
 
