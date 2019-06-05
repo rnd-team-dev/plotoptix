@@ -2598,11 +2598,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 cm[:,:] = c
                 c = cm
             assert len(c.shape) == 3 and c.shape == size_xz + (3,), "Colors shape must be (m,n,3), where (m,n) id the vertex data shape."
-            if c.shape[0] != size_xz[0] or c.shape[1] != size_xz[1]:
-                msg = "Colors (c) shape does not match vertex data shape."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return
             if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
             if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
             c_ptr = c.ctypes.data
@@ -2611,11 +2606,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if normals is not None:
             if not isinstance(normals, np.ndarray): normals = np.ascontiguousarray(normals, dtype=np.float32)
             assert len(normals.shape) == 3 and normals.shape == size_xz + (3,), "Normals shape must be (z,x,3), where (z,x) id the vertex data shape."
-            if normals.shape[0] != size_xz[0] or normals.shape[1] != size_xz[1]:
-                msg = "Normals shape does not match vertex data shape."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return
             if normals.dtype != np.float32: normals = np.ascontiguousarray(normals, dtype=np.float32)
             if not normals.flags['C_CONTIGUOUS']: normals = np.ascontiguousarray(normals, dtype=np.float32)
             n_ptr = normals.ctypes.data
@@ -2647,6 +2637,193 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if (g_handle > 0) and (g_handle == self.geometry_handles[name]):
                 self._logger.info("...done, handle: %d", g_handle)
                 self.geometry_sizes[name] = size_xz[0] * size_xz[1]
+            else:
+                msg = "Geometry update failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+        finally:
+            self._padlock.release()
+
+
+    def set_surface(self, name: str, pos: Any,
+                    c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
+                    normals: Optional[Any] = None,
+                    mat: str = "diffuse",
+                    make_normals: bool = False) -> None:
+        """Create new (parametric) surface geometry.
+
+        Data is provided as 2D array of :math:`[x, y, z] = f(u, v)` values, with the shape
+        ``(n, m, 3)``, where ``n`` and ``m`` are at least 2. Additional data features can be
+        visualized with color (array of RGB values, shape ``(n, m, 3)``).
+        
+        Parameters
+        ----------
+        name : string
+            Name of the new surface geometry.
+        pos : array_like
+            XYZ values of surface points.
+        c : Any, optional
+            Colors of surface points. Single value means a constant gray level.
+            3-component array means a constant RGB color. Array of the shape
+            ``(n, m, 3)`` will set individual color for each surface point,
+            interpolated between points; ``n`` and ``m`` have to be the same
+            as in the surface points shape.
+        normals : array_like, optional
+            Normal vectors at provided surface points. Array shape has to be ``(n, m, 3)``,
+            with ``n`` and ``m`` the same as in the surface points shape.
+        mat : string, optional
+            Material name.
+        make_normals : bool, optional
+            Calculate normals for surface points, if not provided with ``normals``
+            argument. Normals of all triangles attached to the point are averaged.
+        """
+        if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if name in self.geometry_handles:
+            msg = "Geometry %s already exists, use update_surface() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
+        assert len(pos.shape) == 3 and pos.shape[0] > 1 and pos.shape[1] > 1 and pos.shape[2] == 3, "Required surface points shape is (v,u,3), where u >= 2 and v >= 2."
+        if pos.dtype != np.float32: pos = np.ascontiguousarray(pos, dtype=np.float32)
+        if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
+        pos_ptr = pos.ctypes.data
+
+        n_ptr = 0
+        if normals is not None:
+            if not isinstance(normals, np.ndarray): normals = np.ascontiguousarray(normals, dtype=np.float32)
+            assert normals.shape == pos.shape, "Normals shape must be (v,u,3), with u and v matching the surface points shape."
+            if normals.dtype != np.float32: normals = np.ascontiguousarray(normals, dtype=np.float32)
+            if not normals.flags['C_CONTIGUOUS']: normals = np.ascontiguousarray(normals, dtype=np.float32)
+            n_ptr = normals.ctypes.data
+            make_normals = False
+
+        c_ptr = 0
+        c_const = None
+        if c is not None:
+            if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
+            if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
+            if len(c.shape) == 1 and c.shape[0] == 3:
+                c_const = c
+                cm = np.zeros(pos.shape, dtype=np.float32)
+                cm[:,:] = c
+                c = cm
+            assert c.shape == pos.shape, "Colors shape must be (v,u,3), with u and v matching the surface points shape."
+            if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
+            if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+            c_ptr = c.ctypes.data
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Setup surface %s...", name)
+            g_handle = self._optix.setup_psurface(name, mat, pos.shape[1], pos.shape[0], pos_ptr, n_ptr, c_ptr, make_normals)
+
+            if g_handle > 0:
+                self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_names[g_handle] = name
+                self.geometry_handles[name] = g_handle
+                self.geometry_sizes[name] = pos.shape[0] * pos.shape[1]
+            else:
+                msg = "Surface setup failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+        finally:
+            self._padlock.release()
+
+    def update_surface(self, name: str,
+                       pos: Optional[Any] = None,
+                       c: Optional[Any] = None,
+                       normals: Optional[Any] = None) -> None:
+        """Update surface geometry data or properties.
+
+        Parameters
+        ----------
+        name : string
+            Name of the surface geometry.
+        pos : array_like, optional
+            XYZ values of surface points.
+        c : Any, optional
+            Colors of surface points. Single value means a constant gray level.
+            3-component array means a constant RGB color. Array of the shape
+            ``(n, m, 3)`` will set individual color for each surface point,
+            interpolated between points; ``n`` and ``m`` have to be the same
+            as in the surface points shape.
+        normals : array_like, optional
+            Normal vectors at provided surface points. Array shape has to be ``(n, m, 3)``,
+            with ``n`` and ``m`` the same as in the surface points shape.
+        """
+        if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if not name in self.geometry_handles:
+            msg = "Surface %s does not exists yet, use set_surface() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        s_u = c_uint()
+        s_v = c_uint()
+        if not self._optix.get_surface_size(name, byref(s_u), byref(s_v)):
+            msg = "Cannot get surface %s size." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+        size_uv = (s_v.value, s_u.value, 3)
+        size_changed = False
+
+        pos_ptr = 0
+        if pos is not None:
+            if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
+            assert len(pos.shape) == 3 and pos.shape[0] > 1 and pos.shape[1] > 1 and pos.shape[3] == 3, "Required vertex data shape is (v,u,3), where u >= 2 and v >= 2."
+            if pos.dtype != np.float32: pos = np.ascontiguousarray(pos, dtype=np.float32)
+            if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
+            if pos.shape != size_uv: size_changed = True
+            size_uv = pos.shape
+            pos_ptr = pos.ctypes.data
+
+        c_ptr = 0
+        c_const = None
+        if size_changed and c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
+        if c is not None:
+            if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
+            if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
+            if len(c.shape) == 1 and c.shape[0] == 3:
+                c_const = c
+                cm = np.zeros(size_uv, dtype=np.float32)
+                cm[:,:] = c
+                c = cm
+            assert c.shape == size_uv, "Colors shape must be (m,n,3), with m and n matching the surface points shape."
+            if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
+            if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+            c_ptr = c.ctypes.data
+
+        n_ptr = 0
+        if normals is not None:
+            if not isinstance(normals, np.ndarray): normals = np.ascontiguousarray(normals, dtype=np.float32)
+            assert normals.shape == size_uv, "Normals shape must be (v,u,3), with u and v matching the surface points shape."
+            if normals.dtype != np.float32: normals = np.ascontiguousarray(normals, dtype=np.float32)
+            if not normals.flags['C_CONTIGUOUS']: normals = np.ascontiguousarray(normals, dtype=np.float32)
+            n_ptr = normals.ctypes.data
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Update surface %s, size (%d, %d)...", name, size_uv[1], size_uv[0])
+            g_handle = self._optix.update_psurface(name, size_uv[1], size_uv[0], pos_ptr, n_ptr, c_ptr)
+
+            if (g_handle > 0) and (g_handle == self.geometry_handles[name]):
+                self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_sizes[name] = size_uv[0] * size_uv[1]
             else:
                 msg = "Geometry update failed."
                 self._logger.error(msg)
