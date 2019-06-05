@@ -154,9 +154,9 @@ class TestScene(TestCase):
     def test070_camera(self):
         self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
 
-        cam, handle = TestScene.scene.get_camera_name_handle()
-        self.assertFalse((cam is None) or (handle is None), msg="Could not get default camera.")
-        self.assertTrue((cam == "default") and (handle == 1), msg="Wrong name/handle of the default camera: %s / %d." % (cam, handle))
+        cam, handle1 = TestScene.scene.get_camera_name_handle()
+        self.assertFalse((cam is None) or (handle1 is None), msg="Could not get default camera.")
+        self.assertTrue((cam == "default") and (handle1 > 0), msg="Wrong name / handle of the default camera: %s / %d." % (cam, handle1))
 
         eye=[10, 10, 10]
         target=[1, 1, 1]
@@ -176,9 +176,9 @@ class TestScene(TestCase):
                                      focal_scale=focal_scale,
                                      fov=fov, blur=blur,
                                      make_current=make_current)
-        cam, handle = TestScene.scene.get_camera_name_handle()
-        self.assertFalse((cam is None) or (handle is None), msg="Could not get back the new camera.")
-        self.assertTrue((cam == "test_cam1") and (handle > 1), msg="Wrong name/handle of the new camera: %s / %d." % (cam, handle))
+        cam, handle2 = TestScene.scene.get_camera_name_handle()
+        self.assertFalse((cam is None) or (handle2 is None), msg="Could not get back the new camera.")
+        self.assertTrue((cam == "test_cam1") and (handle2 > handle1), msg="Wrong name/handle of the new camera: %s / %d." % (cam, handle2))
         self.assertTrue(np.array_equal(TestScene.scene.get_camera_eye(cam), eye), msg="Camera eye did not match.")
         self.assertTrue(np.array_equal(TestScene.scene.get_camera_target(cam), target), msg="Camera target did not match.")
 

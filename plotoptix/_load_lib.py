@@ -8,14 +8,14 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 
 import os, platform, sys
 
-from ctypes import cdll, CFUNCTYPE, POINTER, byref, c_float, c_uint, c_int, c_long, c_bool, c_char_p, c_wchar_p, c_void_p
+from ctypes import cdll, CFUNCTYPE, POINTER, byref, cast, c_float, c_uint, c_int, c_long, c_bool, c_char_p, c_wchar_p, c_void_p
 
 BIN_PATH = "bin"
 
 PLATFORM = platform.system()
 if PLATFORM == "Linux":
     import clr
-    from System import IntPtr
+    from System import IntPtr, Int64
 
 PARAM_NONE_CALLBACK = CFUNCTYPE(None)
 PARAM_INT_CALLBACK = CFUNCTYPE(None, c_int)
@@ -317,7 +317,8 @@ def _load_optix_win():
 
 class _ClrOptiX:
     """
-    Pythonnet wrapper for RnD.SharpOptiX library.
+    Pythonnet wrapper for RnD.SharpOptiX library; provides identical interface
+    as RnD.SharpOptiX library loaded in Windows with ctypes.
     """
 
     def __init__(self):
@@ -342,20 +343,324 @@ class _ClrOptiX:
 
         self._optix = rnd_assembly.CreateInstance("RnD.SharpOptiX.Py.PyOptiX")
 
+    def refresh_scene(self): self._optix.refresh_scene()
+
+    def destroy_scene(self): self._optix.destroy_scene()
+
     def create_empty_scene(self, width, height, buf_ptr, buf_size):
-        return self._optix.create_empty_scene_ptr(width, height, IntPtr.__overloads__[int](buf_ptr), buf_size)
+        return self._optix.create_empty_scene_ptr(width, height,
+                                                  IntPtr.__overloads__[Int64](buf_ptr), buf_size)
+
+    def create_scene_from_json(self, jstr, width, height, buf_ptr, buf_size):
+        return self._optix.create_scene_from_json_ptr(jstr, width, height,
+                                                      IntPtr.__overloads__[Int64](buf_ptr), buf_size)
+
+    def load_scene_from_json(self, jstr): return self._optix.load_scene_from_json(jstr)
+
+    def load_scene_from_file(self, fname): return self._optix.load_scene_from_file(fname)
+
+    def save_scene_to_file(self, fname): return self._optix.save_scene_to_file(fname)
+
+    def save_image_to_file(self, fname): return self._optix.save_image_to_file(fname)
+
+    def start_rt(self): return self._optix.start_rt()
+    def stop_rt(self): return self._optix.stop_rt()
+
+    def set_compute_paused(self, state): self._optix.set_compute_paused()
+
+    def get_int(self, name, x_ref):
+        return self._optix.get_int_ptr(name,
+                                       IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value))
+
+    def set_int(self, name, x, refresh): return self._optix.set_int(name, x, refresh)
+
+    def get_uint(self, name, x_ref):
+        return self._optix.get_uint_ptr(name,
+                                        IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value))
+
+    def set_uint(self, name, x, refresh): return self._optix.set_uint(name, x, refresh)
+
+    def get_uint2(self, name, x_ref, y_ref):
+        return self._optix.get_uint2_ptr(name,
+                                         IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value),
+                                         IntPtr.__overloads__[Int64](cast(y_ref, c_void_p).value))
+
+    def set_uint2(self, name, x, y, refresh): return self._optix.set_uint2(name, x, y, refresh)
+
+    def get_float(self, name, x_ref):
+        return self._optix.get_float_ptr(name,
+                                         IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value))
+
+    def set_float(self, name, x, refresh): return self._optix.set_float(name, x, refresh)
+
+    def get_float2(self, name, x_ref, y_ref):
+        return self._optix.get_float2_ptr(name,
+                                          IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value),
+                                          IntPtr.__overloads__[Int64](cast(y_ref, c_void_p).value))
+
+    def set_float2(self, name, x, y, refresh): return self._optix.set_float2(name, x, y, refresh)
+
+    def get_float3(self, name, x_ref, y_ref, z_ref):
+        return self._optix.get_float3_ptr(name,
+                                          IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value),
+                                          IntPtr.__overloads__[Int64](cast(y_ref, c_void_p).value),
+                                          IntPtr.__overloads__[Int64](cast(z_ref, c_void_p).value))
+
+    def set_float3(self, name, x, y, z, refresh): return self._optix.set_float3(name, x, y, z, refresh)
+
+    def set_texture_1d(self, name, data_ptr, length, tformat, refresh):
+        return self._optix.set_texture_1d_ptr(name, IntPtr.__overloads__[Int64](data_ptr), length, tformat, refresh)
+
+    def set_texture_2d(self, name, data_ptr, width, height, tformat, refresh):
+        return self._optix.set_texture_2d_ptr(name, IntPtr.__overloads__[Int64](data_ptr), width, height, tformat, refresh)
 
     def resize_scene(self, width, height, buf_ptr, buf_size):
-        return self._optix.resize_scene_ptr(width, height, IntPtr.__overloads__[int](buf_ptr), buf_size)
+        return self._optix.resize_scene_ptr(width, height, IntPtr.__overloads__[Int64](buf_ptr), buf_size)
+
+    def get_material(self, name): return self._optix.get_material(name)
+
+    def setup_material(self, name, jstr): return self._optix.setup_material(name, jstr)
+
+    def set_correction_curve(self, data_ptr, n_ctrl_points, n_curve_points, channel, vrange, refresh):
+        return self._optix.set_correction_curve_ptr(IntPtr.__overloads__[Int64](data_ptr),
+                                                    n_ctrl_points, n_curve_points, channel, vrange, refresh)
+
+    def add_postproc(self, algorithm, refresh): return self._optix.add_postproc(algorithm, refresh)
+
+    def setup_geometry(self, geomType, name, material, rnd_missing, n_primitives, pos, c, r, u, v, w):
+        return self._optix.setup_geometry_ptr(geomType, name, material, rnd_missing, n_primitives,
+                                              IntPtr.__overloads__[Int64](pos),
+                                              IntPtr.__overloads__[Int64](c),
+                                              IntPtr.__overloads__[Int64](r),
+                                              IntPtr.__overloads__[Int64](u),
+                                              IntPtr.__overloads__[Int64](v),
+                                              IntPtr.__overloads__[Int64](w))
+
+    def update_geometry(self, name, n_primitives, pos, c, r, u, v, w):
+        return self._optix.update_geometry_ptr(name, n_primitives,
+                                               IntPtr.__overloads__[Int64](pos),
+                                              IntPtr.__overloads__[Int64](c),
+                                              IntPtr.__overloads__[Int64](r),
+                                              IntPtr.__overloads__[Int64](u),
+                                              IntPtr.__overloads__[Int64](v),
+                                              IntPtr.__overloads__[Int64](w))
+
+    def get_surface_size(self, name, x_ref, z_ref):
+        return self._optix.get_surface_size_ptr(name,
+                                                IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value),
+                                                IntPtr.__overloads__[Int64](cast(z_ref, c_void_p).value))
+
+    def update_surface(self, name, x_size, z_size, pos, norm, csurf, cfloor, x_min, x_max, z_min, z_max, floor_level):
+        return self._optix.update_surface_ptr(name, x_size, z_size,
+                                              IntPtr.__overloads__[Int64](pos),
+                                              IntPtr.__overloads__[Int64](norm),
+                                              IntPtr.__overloads__[Int64](csurf),
+                                              IntPtr.__overloads__[Int64](cfloor),
+                                              x_min, x_max, z_min, z_max, floor_level)
+
+    def setup_surface(self, name, material, x_size, z_size, pos, norm, csurf, cfloor, x_min, x_max, z_min, z_max, floor_level, make_normals):
+        return self._optix.setup_surface_ptr(name, material, x_size, z_size,
+                                             IntPtr.__overloads__[Int64](pos),
+                                             IntPtr.__overloads__[Int64](norm),
+                                             IntPtr.__overloads__[Int64](csurf),
+                                             IntPtr.__overloads__[Int64](cfloor),
+                                             x_min, x_max, z_min, z_max, floor_level, make_normals)
+
+    #psurface
+
+
+    def setup_mesh(self, name, material, n_vtx, n_tri, n_norm, pos, c, vidx, norm, nidx):
+        return self._optix.setup_mesh_ptr(name, material, n_vtx, n_tri, n_norm,
+                                          IntPtr.__overloads__[Int64](pos),
+                                          IntPtr.__overloads__[Int64](c),
+                                          IntPtr.__overloads__[Int64](vidx),
+                                          IntPtr.__overloads__[Int64](norm),
+                                          IntPtr.__overloads__[Int64](nidx))
+
+    def update_mesh(self, name, n_vtx, n_tri, n_norm, pos, c, vidx, norm, nidx):
+        return self._optix.update_mesh_ptr(name, n_vtx, n_tri, n_norm,
+                                           IntPtr.__overloads__[Int64](pos),
+                                           IntPtr.__overloads__[Int64](c),
+                                           IntPtr.__overloads__[Int64](vidx),
+                                           IntPtr.__overloads__[Int64](norm),
+                                           IntPtr.__overloads__[Int64](nidx))
+
+    def load_mesh_obj(self, file_name, mesh_name, material, color, make_normals):
+        return self._optix.load_mesh_obj_ptr(file_name, mesh_name, material,
+                                             IntPtr.__overloads__[Int64](color),
+                                             make_normals)
+
+    def move_geometry(self, name, x, y, z, update): return self._optix.move_geometry(name, x, y, z, update)
+
+    def move_primitive(self, name, idx, x, y, z, update): return self._optix.move_primitive(name, idx, x, y, z, update)
+
+    def rotate_geometry(self, name, x, y, z, update): return self._optix.rotate_geometry(name, x, y, z, update)
+
+    def rotate_primitive(self, name, idx, x, y, z, update): return self._optix.rotate_primitive(name, idx, x, y, z, update)
+
+    def rotate_geometry_about(self, name, x, y, z, cx, cy, cz, update):
+        return self._optix.rotate_geometry_about(name, x, y, z, cx, cy, cz, update)
+
+    def rotate_primitive_about(self, name, idx, x, y, z, cx, cy, cz, update):
+        return self._optix.rotate_primitive_about(name, idx, x, y, z, cx, cy, cz, update)
+
+    def scale_geometry(self, name, s, update): return self._optix.scale_geometry(name, s, update)
+
+    def scale_primitive(self, name, idx, s, update): return self._optix.scale_primitive(name, idx, s, update)
+
+    def update_geom_buffers(self, name, mask): return self._optix.update_geom_buffers(name, mask)
+
+    def set_coordinates_geom(self, mode, thickness): return self._optix.set_coordinates_geom(mode, thickness)
+
+    def setup_camera(self, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, fov, blur, make_current):
+        return self._optix.setup_camera_ptr(camera_type,
+                                            IntPtr.__overloads__[Int64](eye),
+                                            IntPtr.__overloads__[Int64](target),
+                                            IntPtr.__overloads__[Int64](up),
+                                            aperture_r, aperture_fract, focal_scale, fov, blur, make_current)
+
+    def update_camera(self, handle, eye, target, up, aperture_r, focal_scale, fov):
+        return self._optix.update_camera_ptr(handle,
+                                             IntPtr.__overloads__[Int64](eye),
+                                             IntPtr.__overloads__[Int64](target),
+                                             IntPtr.__overloads__[Int64](up),
+                                             aperture_r, focal_scale, fov)
+
+    def fit_camera(self, handle, geo_name, scale): return self._optix.fit_camera(handle, geo_name, scale)
+
+    def get_current_camera(self): return self._optix.get_current_camera()
+
+    def set_current_camera(self, handle): return self._optix.set_current_camera(handle)
+
+    def rotate_camera_eye(self, from_x, from_y, to_x, to_y): return self._optix.rotate_camera_eye(from_x, from_y, to_x, to_y)
+
+    def rotate_camera_tgt(self, from_x, from_y, to_x, to_y): return self._optix.rotate_camera_tgt(from_x, from_y, to_x, to_y)
+
+    def get_camera_focal_scale(self, handle): return self._optix.get_camera_focal_scale(handle)
+
+    def set_camera_focal_scale(self, dist): return self._optix.set_camera_focal_scale(dist)
+
+    def set_camera_focal_length(self, dist): return self._optix.set_camera_focal_length(dist)
+
+    def get_camera_fov(self, handle): return self._optix.get_camera_fov(handle)
+
+    def set_camera_fov(self, fov): return self._optix.set_camera_fov(fov)
+
+    def get_camera_aperture(self, handle): return self._optix.get_camera_aperture(handle)
+
+    def set_camera_aperture(self, radius): return self._optix.set_camera_aperture(radius)
+
+    def get_camera_eye(self, handle, eye):
+        return self._optix.get_camera_eye_ptr(handle, IntPtr.__overloads__[Int64](eye))
+
+    def set_camera_eye(self, eye):
+        return self._optix.set_camera_eye_ptr(IntPtr.__overloads__[Int64](eye))
+
+    def get_camera_target(self, handle, target):
+        return self._optix.get_camera_target_ptr(handle, IntPtr.__overloads__[Int64](target))
+
+    def set_camera_target(self, target):
+        return self._optix.set_camera_target_ptr(IntPtr.__overloads__[Int64](target))
+
+    def get_camera(self, handle): return self._optix.get_camera(handle)
+
+    def get_light_shading(self): return self._optix.get_light_shading()
+
+    def set_light_shading(self, mode): return self._optix.set_light_shading(mode)
+
+    def get_light_pos(self, handle, pos):
+        return self._optix.get_light_pos_ptr(handle, IntPtr.__overloads__[Int64](pos))
+
+    def get_light_color(self, handle, color):
+        return self._optix.get_light_color_ptr(handle, IntPtr.__overloads__[Int64](color))
+
+    def get_light_u(self, handle, u):
+        return self._optix.get_light_u_ptr(handle, IntPtr.__overloads__[Int64](u))
+
+    def get_light_v(self, handle, v):
+        return self._optix.get_light_v_ptr(handle, IntPtr.__overloads__[Int64](v))
+
+    def get_light_r(self, handle): return self._optix.get_light_r(handle)
+
+    def setup_spherical_light(self, pos, color, r, in_geometry):
+        return self._optix.setup_spherical_light_ptr(IntPtr.__overloads__[Int64](pos),
+                                                     IntPtr.__overloads__[Int64](color),
+                                                     r, in_geometry)
+
+    def setup_parallelogram_light(self, pos, color, u, v, in_geometry):
+        return self._optix.setup_parallelogram_light_ptr(IntPtr.__overloads__[Int64](pos),
+                                                         IntPtr.__overloads__[Int64](color),
+                                                         IntPtr.__overloads__[Int64](u),
+                                                         IntPtr.__overloads__[Int64](v),
+                                                         in_geometry)
+
+    def update_light(self, handle, pos, color, r, u, v):
+        return self._optix.update_light_ptr(handle,
+                                            IntPtr.__overloads__[Int64](pos),
+                                            IntPtr.__overloads__[Int64](color),
+                                            r,
+                                            IntPtr.__overloads__[Int64](u),
+                                            IntPtr.__overloads__[Int64](v))
+
+    def fit_light(self, handle, cam_handle, horizontal_rot, vertical_rot, dist_scale):
+        return self._optix.fit_light(handle, cam_handle, horizontal_rot, vertical_rot, dist_scale)
+
+    def get_object_at(self, x, y, h_ref, idx_ref):
+        return self._optix.get_object_at_ptr(x, y,
+                                             IntPtr.__overloads__[Int64](cast(h_ref, c_void_p).value),
+                                             IntPtr.__overloads__[Int64](cast(idx_ref, c_void_p).value))
+
+    def get_hit_at(self, x, y, px_ref, py_ref, pz_ref, d_ref):
+        return self._optix.get_hit_at_ptr(x, y,
+                                          IntPtr.__overloads__[Int64](cast(px_ref, c_void_p).value),
+                                          IntPtr.__overloads__[Int64](cast(py_ref, c_void_p).value),
+                                          IntPtr.__overloads__[Int64](cast(pz_ref, c_void_p).value),
+                                          IntPtr.__overloads__[Int64](cast(d_ref, c_void_p).value))
+
+    def register_launch_finished_callback(self, ptr):
+        return self._optix.register_launch_finished_callback_ptr(IntPtr.__overloads__[Int64](cast(ptr, c_void_p).value))
+
+    def register_accum_done_callback(self, ptr):
+        return self._optix.register_accum_done_callback_ptr(IntPtr.__overloads__[Int64](cast(ptr, c_void_p).value))
+
+    def register_scene_rt_starting_callback(self, ptr):
+        return self._optix.register_scene_rt_starting_callback_ptr(IntPtr.__overloads__[Int64](cast(ptr, c_void_p).value))
+
+    def register_start_scene_compute_callback(self, ptr):
+        return self._optix.register_start_scene_compute_callback_ptr(IntPtr.__overloads__[Int64](cast(ptr, c_void_p).value))
+
+    def register_scene_rt_completed_callback(self, ptr):
+        return self._optix.register_scene_rt_completed_callback_ptr(IntPtr.__overloads__[Int64](cast(ptr, c_void_p).value))
+
+    def get_min_accumulation_step(self): return self._optix.get_min_accumulation_step()
+
+    def set_min_accumulation_step(self, n): return self._optix.set_min_accumulation_step(n)
+
+    def get_max_accumulation_frames(self): return self._optix.get_max_accumulation_frames()
+
+    def set_max_accumulation_frames(self, n): return self._optix.set_max_accumulation_frames(n)
+
+    def encoder_create(self, fps, bit_rate, idr_rate, profile, preset):
+        return self._optix.encoder_create(fps, bit_rate, idr_rate, profile, preset)
+
+    def encoder_start(self, output_name, n_frames): return self._optix.encoder_start(output_name, n_frames)
+
+    def encoder_stop(self): return self._optix.encoder_stop()
+
+    def encoder_is_open(self): return self_optix.encoder_is_open()
+
+    def encoded_frames(self): return self._optix.encoded_frames()
+
+    def encoding_frames(self): return self._optix.encoding_frames()
 
     def open_simplex_2d(self, noise_ptr, inputs_ptr, length):
-        return self._optix.open_simplex_2d_ptr(IntPtr.__overloads__[int](noise_ptr), IntPtr.__overloads__[int](inputs_ptr), length)
+        return self._optix.open_simplex_2d_ptr(IntPtr.__overloads__[Int64](noise_ptr), IntPtr.__overloads__[Int64](inputs_ptr), length)
 
     def open_simplex_3d(self, noise_ptr, inputs_ptr, length):
-        return self._optix.open_simplex_3d_ptr(IntPtr.__overloads__[int](noise_ptr), IntPtr.__overloads__[int](inputs_ptr), length)
+        return self._optix.open_simplex_3d_ptr(IntPtr.__overloads__[Int64](noise_ptr), IntPtr.__overloads__[Int64](inputs_ptr), length)
 
     def open_simplex_4d(self, noise_ptr, inputs_ptr, length):
-        return self._optix.open_simplex_4d_ptr(IntPtr.__overloads__[int](noise_ptr), IntPtr.__overloads__[int](inputs_ptr), length)
+        return self._optix.open_simplex_4d_ptr(IntPtr.__overloads__[Int64](noise_ptr), IntPtr.__overloads__[Int64](inputs_ptr), length)
 
     def set_gpu_architecture(self, arch): self._optix.set_gpu_architecture(arch)
 
