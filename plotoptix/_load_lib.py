@@ -127,6 +127,12 @@ def _load_optix_win():
     optix.setup_surface.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_bool]
     optix.setup_surface.restype = c_uint
 
+    optix.update_psurface.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p]
+    optix.update_psurface.restype = c_uint
+
+    optix.setup_psurface.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_bool]
+    optix.setup_psurface.restype = c_uint
+
     optix.setup_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.setup_mesh.restype = c_uint
 
