@@ -472,8 +472,18 @@ class _ClrOptiX:
                                              IntPtr.__overloads__[Int64](cfloor),
                                              x_min, x_max, z_min, z_max, floor_level, make_normals)
 
-    #psurface
+    def update_psurface(self, name, u_size, v_size, pos, norm, c):
+        return self._optix.update_psurface_ptr(name, u_size, v_size,
+                                               IntPtr.__overloads__[Int64](pos),
+                                               IntPtr.__overloads__[Int64](norm),
+                                               IntPtr.__overloads__[Int64](c))
 
+    def setup_psurface(self, name, material, u_size, v_size, pos, norm, c, make_normals):
+        return self._optix.setup_psurface_ptr(name, material, u_size, v_size,
+                                              IntPtr.__overloads__[Int64](pos),
+                                              IntPtr.__overloads__[Int64](norm),
+                                              IntPtr.__overloads__[Int64](c),
+                                              make_normals)
 
     def setup_mesh(self, name, material, n_vtx, n_tri, n_norm, pos, c, vidx, norm, nidx):
         return self._optix.setup_mesh_ptr(name, material, n_vtx, n_tri, n_norm,

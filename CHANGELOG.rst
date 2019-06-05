@@ -4,10 +4,13 @@ Release history
 v0.2.9 - unreleased
 -------------------
 
-Changes
-~~~~~~~
+**Note:** this version is under development. Linux support is not yet functional.
 
-- reorganize code and folders for linux support
+Added
+~~~~~
+
+- linux support
+- parametric surface
 
 `v0.2.2`_ - 2019-05-26
 ----------------------
