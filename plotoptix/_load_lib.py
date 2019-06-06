@@ -329,14 +329,34 @@ class _ClrOptiX:
 
     def __init__(self):
 
-        #c_encoder = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpEncoder.so"))
-        c_optix = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptix.so.6.0.0"))
-        c_optixu = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptixu.so.6.0.0"))
-        c_rnd = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpOptiX.so"))
+        try:
+            c_encoder = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpEncoder.so"))
+            self._encoder_available = True
+        except:
+            print(82 * "*"); print(82 * "*")
+            print("Video encoding library initialization failed, encoding features are not available.")
+            print(82 * "*"); print(82 * "*")
+            self._encoder_available = False
 
-        json_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "Newtonsoft.Json.dll")
-        tiff_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "BitMiracle.LibTiff.NET.dll")
-        rnd_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX.dll")
+        try:
+            c_optix = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptix.so.6.0.0"))
+            c_optixu = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptixu.so.6.0.0"))
+            c_rnd = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpOptiX.so"))
+        except:
+            print(80 * "*"); print(80 * "*")
+            print("Low level ray tracing libraries initialization failed, cannot continue.")
+            print(80 * "*"); print(80 * "*")
+            raise ImportError
+
+        try:
+            json_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "Newtonsoft.Json.dll")
+            tiff_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "BitMiracle.LibTiff.NET.dll")
+            rnd_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX.dll")
+        except:
+            print(80 * "*"); print(80 * "*")
+            print(".NET ray tracing libraries initialization failed, cannot continue.")
+            print(80 * "*"); print(80 * "*")
+            raise ImportError
 
         head, tail = os.path.split(rnd_name)
         sys.path.append(head)
@@ -657,7 +677,9 @@ class _ClrOptiX:
     def set_max_accumulation_frames(self, n): return self._optix.set_max_accumulation_frames(n)
 
     def encoder_create(self, fps, bit_rate, idr_rate, profile, preset):
-        return self._optix.encoder_create(fps, bit_rate, idr_rate, profile, preset)
+        if self._encoder_available:
+            return self._optix.encoder_create(fps, bit_rate, idr_rate, profile, preset)
+        else: return False
 
     def encoder_start(self, output_name, n_frames): return self._optix.encoder_start(output_name, n_frames)
 
