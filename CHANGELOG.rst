@@ -4,7 +4,7 @@ Release history
 v0.2.9 - unreleased
 -------------------
 
-**Note:** this version is under development. Linux support is not yet functional.
+**Note:** this version is under development.
 
 Added
 ~~~~~
