@@ -66,8 +66,12 @@ Features
 System Requirements
 -------------------
 
-- operating system, *currently*: Windows
-- `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (but you should already have it)
+- Windows:
+   - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (but you should already have it)
+- Linux:
+   - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2
+   - `pythonnet <http://pythonnet.github.io>`__ >= 2.4
+   - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
 - a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Turing)
 - `CUDA Toolkit v10.x <https://developer.nvidia.com/cuda-downloads>`__ (tested with v10.1)
 - Python 3 **64-bit**
@@ -77,16 +81,17 @@ What's Included
 
 - OptiX 6.0.0 libraries
 - RnD.SharpOptiX and RnD.SharpEncoder libraries
-- all other supporting 3'rd party libraries: FFmpeg, LibTiff, Newtonsoft.Json
+- all other supporting 3'rd party libraries: FFmpeg (Windows), LibTiff, Newtonsoft.Json
 - Python examples
 
 Installation
 ============
 
-**Note**, at this point, PlotOptiX binaries are prepared for Windows only. We should be able to extend also to Linux soon,
-but today you are dealing with an early version of the project.
+**Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04.
 
-**.NET Framework**
+**Windows prerequisites**
+
+*.NET Framework:*
 
 Most likely you already got the right version with your Windows installation. Just in case, here is the command verifying this::
 
@@ -98,11 +103,23 @@ Most likely you already got the right version with your Windows installation. Ju
 If the number in your output is < 4.6.1, visit `download page <https://dotnet.microsoft.com/download/dotnet-framework>`__ and
 install the most recent release.
 
+**Linux prerequisites**
+
+(writing instuctions right now)
+
+*Mono runtime:*
+
+*pythonnet:*
+
+*FFmpeg:*
+
 **CUDA Toolkit**
 
-CUDA libraries are not included in the package. They are rather huge, and the installation is quite straight-forward. Simply visit
+CUDA libraries are not included in the package. They are rather huge, and the installation is relatively straight-forward. Visit
 `CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.x** (v10.0
 is accepted, but code is tested on v10.1; we keep binaries compatible with the latest CUDA release). Download and run the installer.
+
+*Linux note:* Install the most recent GPU driver before installing CUDA toolkit, it makes things easier.
 
 Make sure the CUDA_PATH environment variable is configured::
 
@@ -128,8 +145,7 @@ Then, try running code from the top of this readme, or one of the examples.
 Development path
 ----------------
 
-This is an early version, with binaries released for Windows only. Everything what is implemented should work, but there are
-some important features not available yet, eg. AI denoiser or even ticks and labels on plot axes.
+This is an early version. There are some important features not available yet, eg. AI denoiser or even ticks and labels on plot axes.
 
 PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers
 much more functionality than it is now available through PlotOptiX. We'll progressively add more to PlotOptiX if there is interest in
@@ -138,7 +154,7 @@ if you like it!).
 
 The idea for development is:
 
-1. Binaries for Linux.
+1. Binaries for Linux (ready, last tests ongoing).
 2. Complete the plot layout / cover more raytracing features.
 3. Convenience functions for various plot styles. Other GUI's.
 
