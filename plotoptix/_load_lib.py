@@ -348,22 +348,22 @@ class _ClrOptiX:
             print(80 * "*"); print(80 * "*")
             raise ImportError
 
+        json_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "Newtonsoft.Json.dll")
+        tiff_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "BitMiracle.LibTiff.NET.dll")
+        rnd_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX.dll")
+
+        head, tail = os.path.split(rnd_name)
+        sys.path.append(head)
+
         try:
-            json_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "Newtonsoft.Json.dll")
-            tiff_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "BitMiracle.LibTiff.NET.dll")
-            rnd_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX.dll")
+            json_assembly = clr.System.Reflection.Assembly.LoadFile(json_name)
+            tiff_assembly = clr.System.Reflection.Assembly.LoadFile(tiff_name)
+            rnd_assembly = clr.System.Reflection.Assembly.LoadFile(rnd_name)
         except:
             print(80 * "*"); print(80 * "*")
             print(".NET ray tracing libraries initialization failed, cannot continue.")
             print(80 * "*"); print(80 * "*")
             raise ImportError
-
-        head, tail = os.path.split(rnd_name)
-        sys.path.append(head)
-
-        json_assembly = clr.System.Reflection.Assembly.LoadFile(json_name)
-        tiff_assembly = clr.System.Reflection.Assembly.LoadFile(tiff_name)
-        rnd_assembly = clr.System.Reflection.Assembly.LoadFile(rnd_name)
 
         clr.AddReference(os.path.splitext(tail)[0])
 

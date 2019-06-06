@@ -81,6 +81,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.setLevel(log_level)
         self._started_event = threading.Event()
         self._padlock = threading.RLock()
+        self._is_scene_created = False
         self._is_started = False
         self._is_closed = False
 
@@ -134,6 +135,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
         ###############################################################
+
+    def __del__(self):
+        """Release resources if destructed before starting the ray tracing thread.
+        """
+        if self._is_scene_created and not self._is_closed:
+            self._optix.destroy_scene()
 
     def _make_list_of_callable(self, items) -> List[Callable[["NpOptiX"], None]]:
         if callable(items): return [items]
