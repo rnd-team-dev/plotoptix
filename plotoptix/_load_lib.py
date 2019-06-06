@@ -392,7 +392,7 @@ class _ClrOptiX:
     def start_rt(self): return self._optix.start_rt()
     def stop_rt(self): return self._optix.stop_rt()
 
-    def set_compute_paused(self, state): self._optix.set_compute_paused()
+    def set_compute_paused(self, state): return self._optix.set_compute_paused(state)
 
     def get_int(self, name, x_ref):
         return self._optix.get_int_ptr(name,
