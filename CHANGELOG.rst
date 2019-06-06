@@ -1,7 +1,7 @@
 Release history
 ===============
 
-v0.2.9 - unreleased
+v0.3.0 - unreleased
 -------------------
 
 **Note:** this version is under development.
