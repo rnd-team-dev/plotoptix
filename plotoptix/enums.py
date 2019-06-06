@@ -359,7 +359,7 @@ class RtFormat(Enum):
 class NvEncProfile(Enum):
     """H.264 encoding profile.
 
-    Beware that some combinations may not be supported by all players
+    Beware that some combinations are not supported by all players
     (e.g. lossless encoding is not playable in Windows Media Player).
 
     See Also

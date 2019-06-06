@@ -993,8 +993,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Create video encoder.
 
         Create and configure video encoder for this raytracer instance. Only one encoder
-        per raytracer instance is supported now. Specifying ``profile`` or ``preset`` overrides
-        ``bitrate`` settings. Beware that some combinations may not be supported by all players
+        per raytracer instance is supported now. Specifying ``preset`` overrides ``bitrate``
+        settings. Beware that some combinations are not supported by all players
         (e.g. lossless encoding is not playable in Windows Media Player).
 
         Parameters
@@ -1007,7 +1007,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Instantaneous Decode Refresh frame interval. 2 seconds interval is used if
             ``idrrate`` is not provided.
         profile : NvEncProfile enum or string, optional
-            H.264 encoding profile, overrides ``bitrate`` settings.
+            H.264 encoding profile.
         preset : NvEncPreset enum or string, optional
             H.264 encoding preset,  overrides ``bitrate`` settings.
 

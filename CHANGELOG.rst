@@ -12,6 +12,11 @@ Added
 - linux support
 - parametric surface
 
+Changes
+~~~~~~~
+
+- update to NVIDIA Video Codec SDK 9.0 and FFmpeg 4.1
+
 `v0.2.2`_ - 2019-05-26
 ----------------------
 
