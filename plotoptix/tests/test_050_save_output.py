@@ -63,8 +63,8 @@ class TestOutput(TestCase):
 
         frames_to_encode = 20 * 2
 
-        mp4_fname = "test_encode.mp4"
-        TestOutput.scene.encoder_start(mp4_fname, frames_to_encode)
+        fname = "test_encode.mp4"
+        TestOutput.scene.encoder_start(fname, frames_to_encode)
 
         self.assertTrue(TestOutput.scene.encoder_is_open(), msg="Encoder is_open is True on startup.")
 
@@ -78,14 +78,24 @@ class TestOutput(TestCase):
         self.assertTrue(encoded_frames == frames_to_encode,
                         msg="Encoded frames: %d, expected: %d." % (encoded_frames, frames_to_encode))
 
-        self.assertTrue(os.path.isfile(mp4_fname), msg="Video file %s not created." % (mp4_fname,))
-        os.remove(mp4_fname)
+        self.assertTrue(os.path.isfile(fname), msg="Video file %s not created." % (fname,))
+        os.remove(fname)
 
-        img_fname = "test_img.png"
-        TestOutput.scene.save_image(img_fname)
+    def test030_image(self):
+        fname = "test_img.png"
+        TestOutput.scene.save_image(fname)
+        self.assertTrue(os.path.isfile(fname), msg="Image file %s not created." % (fname,))
+        os.remove(fname)
 
-        self.assertTrue(os.path.isfile(img_fname), msg="Image file %s not created." % (img_fname,))
-        os.remove(img_fname)
+        fname = "test_img.jpg"
+        TestOutput.scene.save_image(fname)
+        self.assertTrue(os.path.isfile(fname), msg="Image file %s not created." % (fname,))
+        os.remove(fname)
+
+        fname = "test_img.tif"
+        TestOutput.scene.save_image(fname)
+        self.assertTrue(os.path.isfile(fname), msg="Image file %s not created." % (fname,))
+        os.remove(fname)
 
     def test999_close(self):
         self.assertTrue(TestOutput.scene is not None and TestOutput.is_alive, msg="Wrong state of the test class.")
