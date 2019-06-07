@@ -2792,7 +2792,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         pos_ptr = 0
         if pos is not None:
             if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
-            assert len(pos.shape) == 3 and pos.shape[0] > 1 and pos.shape[1] > 1 and pos.shape[3] == 3, "Required vertex data shape is (v,u,3), where u >= 2 and v >= 2."
+            assert len(pos.shape) == 3 and pos.shape[0] > 1 and pos.shape[1] > 1 and pos.shape[2] == 3, "Required vertex data shape is (v,u,3), where u >= 2 and v >= 2."
             if pos.dtype != np.float32: pos = np.ascontiguousarray(pos, dtype=np.float32)
             if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
             if pos.shape != size_uv: size_changed = True
