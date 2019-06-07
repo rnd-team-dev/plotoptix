@@ -685,7 +685,7 @@ class _ClrOptiX:
 
     def encoder_stop(self): return self._optix.encoder_stop()
 
-    def encoder_is_open(self): return self_optix.encoder_is_open()
+    def encoder_is_open(self): return self._optix.encoder_is_open()
 
     def encoded_frames(self): return self._optix.encoded_frames()
 
