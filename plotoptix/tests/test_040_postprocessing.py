@@ -13,7 +13,7 @@ class TestScene(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        print("################    Test 030: 2D postprocessing configuration.    ################")
+        print("################    Test 040: 2D postprocessing configuration.    ################")
         cls.scene = NpOptiX(width=128, height=64, start_now=False, log_level='INFO')
 
     def test010_default_init_values(self):
@@ -102,4 +102,4 @@ class TestScene(TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.assertFalse(cls, cls.is_alive, msg="Wrong state of the test class.")
-        print("Test 030: completed.")
+        print("Test 040: completed.")

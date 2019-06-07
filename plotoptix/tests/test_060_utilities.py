@@ -9,7 +9,7 @@ class TestScene(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        print("################   Test 040: Utility and convenience functions.   ################")
+        print("################   Test 060: Utility and convenience functions.   ################")
 
     def test010_make_contiguous(self):
         
@@ -154,4 +154,4 @@ class TestScene(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        print("Test 040: completed.")
+        print("Test 060: completed.")
