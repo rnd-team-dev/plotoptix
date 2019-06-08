@@ -73,15 +73,15 @@ System Requirements
    - `pythonnet <http://pythonnet.github.io>`__ >= 2.4
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
 - a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Turing)
-- `CUDA Toolkit v10.x <https://developer.nvidia.com/cuda-downloads>`__ (tested with v10.1)
-- Python 3 **64-bit**
+- `CUDA Toolkit v10.x <https://developer.nvidia.com/cuda-downloads>`__ (tested with v10.0 and v10.1)
+- **Python 3 64-bit**
 
 What's Included
 ---------------
 
 - OptiX 6.0.0 libraries
 - RnD.SharpOptiX and RnD.SharpEncoder libraries
-- all other supporting 3'rd party libraries: FFmpeg (Windows), LibTiff, Newtonsoft.Json
+- all other supporting 3'rd party libraries: FFmpeg (Windows only), LibTiff, Newtonsoft.Json
 - Python examples
 
 Installation
@@ -105,26 +105,71 @@ install the most recent release.
 
 **Linux prerequisites**
 
-(writing instuctions right now)
-
 *Mono runtime:*
+
+Check if / which Mono release is present in your system::
+
+   mono -V
+   
+   Mono JIT compiler **version 5.18.1.3** (tarball Tue Apr  9 16:16:30 UTC 2019)
+      Copyright (C) 2002-2014 Novell, Inc, Xamarin Inc and Contributors. www.mono-project.com
+	   TLS:           __thread
+      ... (output cropped for clarity) ...
+
+If ``mono`` command is not available, or the reported version is < 5.2, visit `Mono download page <https://www.mono-project.com/download/stable/#download-lin>`__ and follow instructions related to your Linux distribution. You want to install **mono-complete** package.
 
 *pythonnet:*
 
+The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however some prerequisities are needed. Instuctions below are based on APT::
+
+   sudo apt update
+   sudo apt install clang
+
+   sudo apt-get install libglib2.0-dev python-dev
+   
+Then, update required packages and install pythonnet::
+
+   sudo pip install -U setuptools wheel pycparser
+   sudo pip install pythonnet --egg -U
+   
+After successful installation you should be able to do python's import:
+
+.. code-block:: python
+
+   import clr
+   print(clr.__version__)
+
 *FFmpeg:*
+
+FFmpeg shared libraries >= 4.1 are required to enable video encoding features in PlotOptiX. Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and download the most recent release sources. Unpack it to a new folder, cd to it. Configure, compile and install as below::
+
+   ./configure --enable-shared
+   make
+   sudo make install
+
+Add FFmpeg's shared library path to your config::
+
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+   sudo ldconfig
 
 **CUDA Toolkit**
 
 CUDA libraries are not included in the package. They are rather huge, and the installation is relatively straight-forward. Visit
-`CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.x** (v10.0
-is accepted, but code is tested on v10.1; we keep binaries compatible with the latest CUDA release). Download and run the installer.
+`CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.x**. Download and run the installer.
 
 *Linux note:* Install the most recent GPU driver before installing CUDA toolkit, it makes things easier.
 
-Make sure the CUDA_PATH environment variable is configured::
+Make sure the CUDA_PATH environment variable is configured.
+
+*Windows*::
 
    C:\>echo %CUDA_PATH%
    C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1
+
+*Linux*::
+
+   echo $CUDA_PATH
+   /usr/local/cuda
 
 It is also a good idea to keep your GPU driver up to date.
 
