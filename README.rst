@@ -73,8 +73,8 @@ System Requirements
    - `pythonnet <http://pythonnet.github.io>`__ >= 2.4
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
 - a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Turing)
-- `CUDA Toolkit v10.x <https://developer.nvidia.com/cuda-downloads>`__ (tested with v10.1)
-- Python 3 **64-bit**
+- `CUDA Toolkit v10.x <https://developer.nvidia.com/cuda-downloads>`__ (tested with v10.0 and v10.1)
+- **Python 3 64-bit**
 
 What's Included
 ---------------
@@ -155,8 +155,7 @@ Add FFmpeg's shared library path to your config::
 **CUDA Toolkit**
 
 CUDA libraries are not included in the package. They are rather huge, and the installation is relatively straight-forward. Visit
-`CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.x** (v10.0
-is accepted, but code is tested on v10.1; we keep binaries compatible with the latest CUDA release). Download and run the installer.
+`CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.x**. Download and run the installer.
 
 *Linux note:* Install the most recent GPU driver before installing CUDA toolkit, it makes things easier.
 
