@@ -89,7 +89,7 @@ Installation
 
 **Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04.
 
-You need to install CUDA toolkit in Linux/Windows, and do some more typing in Linux. A ready-to-go Linux docker image is coming to make the first step easier.
+You need to install CUDA toolkit in Linux/Windows, and do some more typing in Linux.
 
 Windows prerequisites
 ---------------------
