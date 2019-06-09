@@ -2687,9 +2687,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         mat : string, optional
             Material name.
         wrap_u : bool, optional
-            Stitch surface edges making U axis cnotinuous.
+            Stitch surface edges making U axis continuous.
         wrap_v : bool, optional
-            Stitch surface edges making V axis cnotinuous.
+            Stitch surface edges making V axis continuous.
         make_normals : bool, optional
             Calculate normals for surface points, if not provided with ``normals``
             argument. Normals of all triangles attached to the point are averaged.
