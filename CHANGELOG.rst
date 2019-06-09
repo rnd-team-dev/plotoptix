@@ -1,21 +1,20 @@
 Release history
 ===============
 
-v0.3.0 - unreleased
--------------------
-
-**Note:** this version is under development.
+`v0.3.0` - 2019-06-09
+---------------------
 
 Added
 ~~~~~
 
-- linux support
+- **linux support**
 - parametric surface
 
 Changes
 ~~~~~~~
 
 - update to NVIDIA Video Codec SDK 9.0 and FFmpeg 4.1
+- no need for CUDA_PATH environment variable
 
 `v0.2.2`_ - 2019-05-26
 ----------------------
@@ -93,8 +92,10 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog w.r.t. this point.
 
+.. _`v0.3.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.3.0
 .. _`v0.2.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.2.2
 .. _`v0.2.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.2.1
 .. _`v0.2.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.2.0
 .. _`v0.1.4`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.1.4
 .. _`v0.1.3`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.1.3
+

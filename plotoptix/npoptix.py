@@ -2660,6 +2660,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                     normals: Optional[Any] = None,
                     mat: str = "diffuse",
+                    wrap_u: bool = False,
+                    wrap_v: bool = False,
                     make_normals: bool = False) -> None:
         """Create new (parametric) surface geometry.
 
@@ -2684,6 +2686,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             with ``n`` and ``m`` the same as in the surface points shape.
         mat : string, optional
             Material name.
+        wrap_u : bool, optional
+            Stitch surface edges making U axis cnotinuous.
+        wrap_v : bool, optional
+            Stitch surface edges making V axis cnotinuous.
         make_normals : bool, optional
             Calculate normals for surface points, if not provided with ``normals``
             argument. Normals of all triangles attached to the point are averaged.
@@ -2730,7 +2736,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Setup surface %s...", name)
-            g_handle = self._optix.setup_psurface(name, mat, pos.shape[1], pos.shape[0], pos_ptr, n_ptr, c_ptr, make_normals)
+            g_handle = self._optix.setup_psurface(name, mat, pos.shape[1], pos.shape[0], pos_ptr, n_ptr, c_ptr, wrap_u, wrap_v, make_normals)
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)

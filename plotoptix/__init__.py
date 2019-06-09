@@ -17,7 +17,7 @@ __all__ = ["enums", "materials", "utils", "npoptix", "tkoptix"]
 __author__  = "Robert Sulej, R&D Team <dev@rnd.team>"
 __status__  = "beta"
 __version__ = "0.3.0"
-__date__    = "6 June 2019"
+__date__    = "9 June 2019"
 
 
 import logging
@@ -30,17 +30,6 @@ import struct
 if struct.calcsize("P") * 8 != 64:
     logging.error(80 * "*"); logging.error(80 * "*")
     logging.error("Python 64-bit is required.")
-    logging.error(80 * "*"); logging.error(80 * "*")
-    raise ImportError
-
-# verify CUDA_PATH is defined ############################################
-import os
-
-try:
-    _cuda_path = os.environ["CUDA_PATH"]
-except KeyError:
-    logging.error(80 * "*"); logging.error(80 * "*")
-    logging.error("CUDA_PATH environment variable not defined. Please check your CUDA installation.")
     logging.error(80 * "*"); logging.error(80 * "*")
     raise ImportError
 

@@ -13,7 +13,7 @@ PlotOptiX
 
 **Data visualisation in Python based on NVIDIA OptiX ray tracing framework.**
 
-**Note:** active development is continuing, expect changes. Linux support is added in the recent days and not yet available in PyPI release.
+**Note:** active development is continuing, expect changes.
 
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
@@ -120,7 +120,7 @@ If ``mono`` command is not available, or the reported version is < 5.2, visit `M
 
 *pythonnet:*
 
-The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however some prerequisities are needed. Instuctions below are based on APT::
+The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however, some prerequisities are needed. Instuctions below are based on APT::
 
    sudo apt update
    sudo apt install clang
@@ -159,19 +159,7 @@ CUDA libraries are not included in the package. They are rather huge, and the in
 
 *Linux note:* Install the most recent GPU driver before installing CUDA toolkit, it makes things easier.
 
-Make sure the CUDA_PATH environment variable is configured.
-
-*Windows*::
-
-   C:\>echo %CUDA_PATH%
-   C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1
-
-*Linux*::
-
-   echo $CUDA_PATH
-   /usr/local/cuda
-
-It is also a good idea to keep your GPU driver up to date.
+In general, it is a good idea to keep your GPU driver up to date.
 
 **PlotOptiX**
 
@@ -199,7 +187,7 @@ if you like it!).
 
 The idea for development is:
 
-1. Binaries for Linux (ready, last tests ongoing).
+1. Binaries for Linux (done in v0.3.0).
 2. Complete the plot layout / cover more raytracing features.
 3. Convenience functions for various plot styles. Other GUI's.
 
