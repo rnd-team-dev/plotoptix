@@ -89,6 +89,8 @@ Installation
 
 **Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04.
 
+You need to install CUDA toolkit in Linux/Windows, and do some more typing in Linux. A ready-to-go Linux docker image is coming to make the first step easier.
+
 Windows prerequisites
 ---------------------
 
@@ -188,7 +190,7 @@ Then, try running code from the top of this readme, or one of the examples.
 You may also need to install ``tkinter`` and/or ``PyQt`` packages, if not shipped with your python environment.
 
 Development path
-----------------
+================
 
 This is an early version. There are some important features not available yet, eg. AI denoiser or even ticks and labels on plot axes.
 
@@ -206,7 +208,7 @@ The idea for development is:
    *Here, the community input is possible and warmly welcome!*
 
 Examples
---------
+========
 
 Looking at examples is the best way to get started and explore PlotOptiX features. Have a look at the
 `readme and sample codes here <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__.
