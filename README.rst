@@ -89,7 +89,8 @@ Installation
 
 **Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04.
 
-**Windows prerequisites**
+Windows prerequisites
+---------------------
 
 *.NET Framework:*
 
@@ -103,7 +104,8 @@ Most likely you already got the right version with your Windows installation. Ju
 If the number in your output is < 4.6.1, visit `download page <https://dotnet.microsoft.com/download/dotnet-framework>`__ and
 install the most recent release.
 
-**Linux prerequisites**
+Linux prerequisites
+-------------------
 
 *Mono runtime:*
 
@@ -158,7 +160,8 @@ Add FFmpeg's shared library path to your config::
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
    sudo ldconfig
 
-**CUDA Toolkit**
+CUDA Toolkit
+------------
 
 CUDA libraries are not included in the package. They are rather huge, and the installation is relatively straight-forward. Visit
 `CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.x**. Download and run the installer.
@@ -167,7 +170,8 @@ CUDA libraries are not included in the package. They are rather huge, and the in
 
 In general, it is a good idea to keep your GPU driver up to date.
 
-**PlotOptiX**
+PlotOptiX
+---------
 
 Using pip::
 
@@ -180,6 +184,8 @@ From GitHub sources::
    python setup.py install
 
 Then, try running code from the top of this readme, or one of the examples.
+
+You may also need to install ``tkinter`` and/or ``PyQt`` packages, if not shipped with your python environment.
 
 Development path
 ----------------
