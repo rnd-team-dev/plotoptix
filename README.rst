@@ -177,7 +177,7 @@ PlotOptiX
 
 Using pip::
 
-   pip install plotoptix
+   pip install -U plotoptix
 
 From GitHub sources::
 
