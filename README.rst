@@ -140,7 +140,7 @@ or in CentOS::
 Then, update required packages and install ``pythonnet``::
 
    pip install -U setuptools wheel pycparser
-   pip install pythonnet --egg -U
+   pip install -U pythonnet
    
 After successful installation you should be able to do python's import:
 
