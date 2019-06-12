@@ -67,7 +67,7 @@ System Requirements
 -------------------
 
 - Windows:
-   - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (should be present in normally updated Windows)
+   - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
 - Linux:
    - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2
    - `pythonnet <http://pythonnet.github.io>`__ >= 2.4
