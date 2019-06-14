@@ -1274,7 +1274,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         up : array_like, optional
             Up (vertical) direction. Y axis if argument not provided.
         cam_type : Camera enum or string, optional
-            Type (pinhole, depth of field, ...). Cannot be changed after construction.
+            Type (pinhole, depth of field, ...), see :class:`plotoptix.enums.Camera`.
+            Cannot be changed after construction.
         aperture_radius : float, optional
             Aperture radius (increases focus blur for depth of field cameras).
         aperture_fract : float, optional
@@ -1789,7 +1790,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         name : string
             Name of the new light.
         light_type : Light enum or string
-            Light type (parallelogram, spherical, ...), see Light enum.
+            Light type (parallelogram, spherical, ...), see :class:`plotoptix.enums.Light` enum.
         pos : array_like, optional
             3D position.
         autofit_camera : string, optional

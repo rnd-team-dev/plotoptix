@@ -1,8 +1,8 @@
 Lights
 ======
 
-Light hading mode
------------------
+Light shading mode
+------------------
 
 .. automethod:: plotoptix.NpOptiX.set_light_shading
 .. automethod:: plotoptix.NpOptiX.get_light_shading
