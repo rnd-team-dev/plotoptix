@@ -151,7 +151,7 @@ After successful installation you should be able to do python's import:
 
 *FFmpeg:*
 
-FFmpeg shared libraries >= 4.1 are required to enable video encoding features in PlotOptiX. Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and download the most recent release sources. Unpack it to a new folder, cd to it. Configure, compile and install as below::
+FFmpeg shared libraries >= 4.1 are required to enable video encoding features in PlotOptiX. Uninstall older version first. Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and download the most recent release sources. Unpack it to a new folder, cd to it. Configure, compile and install as below::
 
    ./configure --enable-shared
    make
