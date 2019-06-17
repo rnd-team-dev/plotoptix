@@ -928,6 +928,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 bg = b
 
             if bg.shape[-1] == 4:
+                if bg.dtype != np.float32: bg = np.ascontiguousarray(bg, dtype=np.float32)
+                if not bg.flags['C_CONTIGUOUS']: bg = np.ascontiguousarray(bg, dtype=np.float32)
                 if gamma != 1: bg = np.power(bg, gamma)
                 if e != 1: bg = e * bg
                 self.set_texture_2d("bg_texture", bg, refresh)
