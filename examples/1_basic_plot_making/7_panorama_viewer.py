@@ -13,7 +13,7 @@ def main():
 
     if len(sys.argv) < 2:
         print("Usage: python 7_panorama_viewer.py image_file.ext")
-        print("ext: jpg, pnb, tif and bmp files are accepted.")
+        print("ext: jpg, png, tif and bmp files are accepted.")
         exit(0)
     
     fname = str(sys.argv[1])
