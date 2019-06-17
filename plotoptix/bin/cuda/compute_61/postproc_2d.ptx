@@ -147,6 +147,60 @@
 	ret;
 }
 
+	// .globl	_Z28denoiser_ldr_tone_mapping_lfv
+.visible .entry _Z28denoiser_ldr_tone_mapping_lfv(
+
+)
+{
+	.reg .f32 	%f<31>;
+	.reg .b32 	%r<13>;
+	.reg .b64 	%rd<14>;
+
+
+	ld.global.v2.u32 	{%r5, %r6}, [launch_index];
+	cvt.u64.u32	%rd3, %r5;
+	cvt.u64.u32	%rd4, %r6;
+	mov.u64 	%rd13, output_buffer;
+	cvta.global.u64 	%rd2, %rd13;
+	mov.u32 	%r3, 2;
+	mov.u32 	%r4, 16;
+	mov.u64 	%rd12, 0;
+	// inline asm
+	call (%rd1), _rt_buffer_get_64, (%rd2, %r3, %r4, %rd3, %rd4, %rd12, %rd12);
+	// inline asm
+	ld.v4.f32 	{%f1, %f2, %f3, %f4}, [%rd1];
+	ld.global.f32 	%f8, [denoiser_tonemap_exposure];
+	mul.ftz.f32 	%f9, %f8, %f1;
+	mul.ftz.f32 	%f10, %f8, %f2;
+	mul.ftz.f32 	%f11, %f8, %f3;
+	ld.global.f32 	%f12, [denoiser_tonemap_igamma];
+	lg2.approx.ftz.f32 	%f13, %f9;
+	mul.ftz.f32 	%f14, %f12, %f13;
+	ex2.approx.ftz.f32 	%f15, %f14;
+	lg2.approx.ftz.f32 	%f16, %f10;
+	mul.ftz.f32 	%f17, %f12, %f16;
+	ex2.approx.ftz.f32 	%f18, %f17;
+	lg2.approx.ftz.f32 	%f19, %f11;
+	mul.ftz.f32 	%f20, %f12, %f19;
+	ex2.approx.ftz.f32 	%f21, %f20;
+	mov.f32 	%f22, 0f3F800000;
+	min.ftz.f32 	%f23, %f15, %f22;
+	min.ftz.f32 	%f24, %f18, %f22;
+	min.ftz.f32 	%f25, %f21, %f22;
+	ld.global.v2.u32 	{%r9, %r10}, [launch_index];
+	cvt.u64.u32	%rd9, %r9;
+	cvt.u64.u32	%rd10, %r10;
+	// inline asm
+	call (%rd7), _rt_buffer_get_64, (%rd2, %r3, %r4, %rd9, %rd10, %rd12, %rd12);
+	// inline asm
+	mov.f32 	%f26, 0f00000000;
+	max.ftz.f32 	%f27, %f26, %f25;
+	max.ftz.f32 	%f28, %f26, %f24;
+	max.ftz.f32 	%f29, %f26, %f23;
+	st.v4.f32 	[%rd7], {%f29, %f28, %f27, %f4};
+	ret;
+}
+
 	// .globl	_Z13adjust_levelsv
 .visible .entry _Z13adjust_levelsv(
 

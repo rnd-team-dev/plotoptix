@@ -19,6 +19,7 @@ class TestScene(TestCase):
     def test010_default_init_values(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
+        state = TestScene.scene._raise_on_error
         TestScene.scene._raise_on_error = True
 
         # levels adjustment
@@ -78,7 +79,7 @@ class TestScene(TestCase):
         TestScene.scene.set_texture_2d("frame_mask", np.full((10, 10), 0.5))
         TestScene.scene.add_postproc("Mask")
 
-        TestScene.scene._raise_on_error = False
+        TestScene.scene._raise_on_error = state
 
 
     def test998_start_rt(self):

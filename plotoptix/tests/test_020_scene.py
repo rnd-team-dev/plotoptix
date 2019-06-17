@@ -41,6 +41,9 @@ class TestScene(TestCase):
 
         # test for required values
 
+        self.assertFalse(TestScene.scene._optix.is_defined("non_existing_var"), msg="Non-existing variable should not be reported as defined.")
+        self.assertTrue(TestScene.scene._optix.is_defined("scene_epsilon"), msg="Not defined variable scene_epsilon.")
+
         eps = TestScene.scene.get_float("scene_epsilon")
         self.assertTrue(eps is not None and eps > 0 and eps < 0.05, msg="Unreasonable scene epsilon value: %f." % eps)
 
@@ -107,14 +110,56 @@ class TestScene(TestCase):
             mat = TestScene.scene.get_material(m)
             self.assertFalse(mat is None, msg="Could not read back %s material." % m)
 
-    def test040_light_shading(self):
+    def test040_background_modes(self):
+        self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
+
+        self.assertTrue(TestScene.scene._optix.is_defined("ambient_color"), msg="Not defined float3 ambient_color.")
+        self.assertTrue(TestScene.scene._optix.is_defined("bg_color"), msg="Not defined float3 bg_color.")
+        self.assertTrue(TestScene.scene._optix.is_defined("bg_texture"), msg="Not defined texture sampler bg_texture.")
+        self.assertTrue(TestScene.scene.get_background_mode() == MissProgram.AmbientLight, msg="Initial miss program should be AmbientLight.")
+
+        state = TestScene.scene._raise_on_error
+        TestScene.scene._raise_on_error = True
+
+        gray = 0.5
+        TestScene.scene.set_background(gray)
+        cx, cy, cz = TestScene.scene.get_background()
+        self.assertTrue(cx == gray and cy == gray and cz == gray, msg="Background gray level readback does not match set value %f." % gray)
+
+        color = [0.5, 0.4, 0.3]
+        TestScene.scene.set_background(color)
+        cx, cy, cz = TestScene.scene.get_background()
+        self.assertTrue(np.allclose(color, [cx, cy, cz]), msg="Background color readback does not match set value [%f, %f, %f]." % (color[0], color[1], color[2]))
+
+        h = 10; w = 4
+        a = np.linspace(0.05, 0.95, h)
+        rgb = np.zeros((h, w, 3))
+        for i in range(h):
+            rgb[i,0::2]=np.full(3, a[i])
+            rgb[i,1::2]=np.full(3, 0)
+
+        rgba = np.zeros((h, w, 4))
+        rgba[:,:,:-1] = rgb
+
+        TestScene.scene.set_background(rgb)   # TODO: test readback of background textures
+        TestScene.scene.set_background(rgba)  #
+
+        TestScene.scene._raise_on_error = state
+
+        bg_list = ["Default", "TextureFixed", "TextureEnvironment"]
+
+        for m in bg_list:
+            TestScene.scene.set_background_mode(m)
+            self.assertTrue(TestScene.scene.get_background_mode() == MissProgram[m], msg="Miss program not updated (%s)." % m)
+
+    def test050_light_shading(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         TestScene.scene.set_light_shading(LightShading.Hard)
         m = TestScene.scene.get_light_shading()
         self.assertTrue(m is not None and m == LightShading.Hard, msg="Returned light shading mode different than value set.")
 
-    def test050_light(self):
+    def test060_light(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         pos1=[20, 10, 10]
@@ -143,7 +188,7 @@ class TestScene(TestCase):
 
     #todo test new geometry
 
-    def test060_start_rt(self):
+    def test070_start_rt(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
         TestScene.scene.start()
@@ -151,7 +196,7 @@ class TestScene(TestCase):
         self.assertTrue(TestScene.scene.isAlive(), msg="Raytracing thread is not alive.")
         TestScene.is_alive = True
 
-    def test070_camera(self):
+    def test080_camera(self):
         self.assertTrue(TestScene.scene is not None and TestScene.is_alive, msg="Wrong state of the test class.")
 
         cam, handle1 = TestScene.scene.get_camera_name_handle()

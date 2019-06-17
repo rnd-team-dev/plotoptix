@@ -39,11 +39,7 @@ m_mirror = {
       "AnyHitPrograms": ["1::path_tracing_materials.ptx::any_hit"],
       "VarInt": { "material_flags": 6 },
       "VarFloat3": {
-        "surface_albedo": {
-          "X": 1.0,
-          "Y": 1.0,
-          "Z": 1.0
-        }
+        "surface_albedo": [ 1.0, 1.0, 1.0 ]
       }
 }
 """
@@ -61,11 +57,7 @@ m_metalic = {
         "refraction_index": 2.5
       },
       "VarFloat3": {
-        "surface_albedo": {
-          "X": 1.0,
-          "Y": 1.0,
-          "Z": 1.0
-        }
+        "surface_albedo": [ 1.0, 1.0, 1.0 ]
       }
 }
 """
@@ -89,11 +81,7 @@ m_plastic = {
         "refraction_index": 2.0
       },
       "VarFloat3": {
-        "surface_albedo": {
-          "X": 1.0,
-          "Y": 1.0,
-          "Z": 1.0
-        }
+        "surface_albedo": [ 1.0, 1.0, 1.0 ]
       }
 }
 """
@@ -113,11 +101,7 @@ m_clear_glass = {
         "light_emission": 0.0
       },
       "VarFloat3": {
-        "surface_albedo": {
-          "X": 1.0,
-          "Y": 1.0,
-          "Z": 1.0
-        }
+        "surface_albedo": [ 1.0, 1.0, 1.0 ]
       }
     }
 """

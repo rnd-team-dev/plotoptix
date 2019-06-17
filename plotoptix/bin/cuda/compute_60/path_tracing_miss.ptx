@@ -13,10 +13,10 @@
 	// .globl	_Z4missv
 .visible .global .align 4 .b8 bg_color[12] = {10, 215, 35, 60, 10, 215, 35, 60, 10, 215, 35, 60};
 .visible .global .align 4 .b8 ambient_color[12] = {164, 112, 125, 63, 164, 112, 125, 63, 164, 112, 125, 63};
+.visible .global .texref bg_texture;
 .visible .global .align 8 .b8 launch_index[8];
 .visible .global .align 8 .b8 launch_dim[8];
 .visible .global .align 16 .b8 prd[160];
-.visible .global .texref texturecart_bg;
 .visible .global .align 4 .b8 _ZN21rti_internal_typeinfo8bg_colorE[8] = {82, 97, 121, 0, 12, 0, 0, 0};
 .visible .global .align 4 .b8 _ZN21rti_internal_typeinfo13ambient_colorE[8] = {82, 97, 121, 0, 12, 0, 0, 0};
 .visible .global .align 4 .b8 _ZN21rti_internal_typeinfo12launch_indexE[8] = {82, 97, 121, 0, 8, 0, 0, 0};
@@ -269,11 +269,135 @@ BB3_2:
 	cvt.rn.f32.u32	%f13, %r10;
 	div.approx.ftz.f32 	%f14, %f10, %f12;
 	div.approx.ftz.f32 	%f15, %f11, %f13;
-	tex.2d.v4.f32.f32	{%f17, %f18, %f19, %f16}, [texturecart_bg, {%f14, %f15}];
+	tex.2d.v4.f32.f32	{%f17, %f18, %f19, %f16}, [bg_texture, {%f14, %f15}];
 
 BB3_3:
 	st.global.v2.f32 	[prd], {%f17, %f18};
 	st.global.f32 	[prd+8], %f19;
+	ret;
+}
+
+	// .globl	_Z15envtexture_missv
+.visible .entry _Z15envtexture_missv(
+
+)
+{
+	.reg .pred 	%p<12>;
+	.reg .f32 	%f<71>;
+	.reg .b32 	%r<20>;
+	.reg .b64 	%rd<2>;
+
+
+	ld.global.u32 	%r3, [prd+12];
+	or.b32  	%r4, %r3, -2147483648;
+	ld.global.v4.f32 	{%f7, %f8, %f9, %f10}, [prd+128];
+	st.global.u32 	[prd+12], %r4;
+	mov.u32 	%r5, -1;
+	st.global.v2.u32 	[prd+144], {%r5, %r5};
+	abs.ftz.f32 	%f1, %f7;
+	abs.ftz.f32 	%f2, %f9;
+	setp.eq.ftz.f32	%p1, %f1, 0f00000000;
+	setp.eq.ftz.f32	%p2, %f2, 0f00000000;
+	and.pred  	%p3, %p1, %p2;
+	mov.b32 	 %r1, %f7;
+	mov.b32 	 %r6, %f9;
+	and.b32  	%r2, %r6, -2147483648;
+	@%p3 bra 	BB4_4;
+	bra.uni 	BB4_1;
+
+BB4_4:
+	shr.s32 	%r13, %r1, 31;
+	and.b32  	%r14, %r13, 1078530011;
+	or.b32  	%r15, %r14, %r2;
+	mov.b32 	 %f70, %r15;
+	bra.uni 	BB4_5;
+
+BB4_1:
+	setp.eq.ftz.f32	%p4, %f1, 0f7F800000;
+	setp.eq.ftz.f32	%p5, %f2, 0f7F800000;
+	and.pred  	%p6, %p4, %p5;
+	@%p6 bra 	BB4_3;
+	bra.uni 	BB4_2;
+
+BB4_3:
+	shr.s32 	%r9, %r1, 31;
+	and.b32  	%r10, %r9, 13483017;
+	add.s32 	%r11, %r10, 1061752795;
+	or.b32  	%r12, %r11, %r2;
+	mov.b32 	 %f70, %r12;
+	bra.uni 	BB4_5;
+
+BB4_2:
+	max.ftz.f32 	%f13, %f2, %f1;
+	min.ftz.f32 	%f14, %f2, %f1;
+	div.full.ftz.f32 	%f15, %f14, %f13;
+	mul.rn.ftz.f32 	%f16, %f15, %f15;
+	mov.f32 	%f17, 0fC0B59883;
+	mov.f32 	%f18, 0fBF52C7EA;
+	fma.rn.ftz.f32 	%f19, %f16, %f18, %f17;
+	mov.f32 	%f20, 0fC0D21907;
+	fma.rn.ftz.f32 	%f21, %f19, %f16, %f20;
+	mul.ftz.f32 	%f22, %f16, %f21;
+	mul.ftz.f32 	%f23, %f15, %f22;
+	add.ftz.f32 	%f24, %f16, 0f41355DC0;
+	mov.f32 	%f25, 0f41E6BD60;
+	fma.rn.ftz.f32 	%f26, %f24, %f16, %f25;
+	mov.f32 	%f27, 0f419D92C8;
+	fma.rn.ftz.f32 	%f28, %f26, %f16, %f27;
+	rcp.approx.ftz.f32 	%f29, %f28;
+	fma.rn.ftz.f32 	%f30, %f23, %f29, %f15;
+	mov.f32 	%f31, 0f3FC90FDB;
+	sub.ftz.f32 	%f32, %f31, %f30;
+	setp.gt.ftz.f32	%p7, %f2, %f1;
+	selp.f32	%f33, %f32, %f30, %p7;
+	mov.f32 	%f34, 0f40490FDB;
+	sub.ftz.f32 	%f35, %f34, %f33;
+	setp.lt.s32	%p8, %r1, 0;
+	selp.f32	%f36, %f35, %f33, %p8;
+	mov.b32 	 %r7, %f36;
+	or.b32  	%r8, %r7, %r2;
+	mov.b32 	 %f37, %r8;
+	add.ftz.f32 	%f38, %f1, %f2;
+	setp.gtu.ftz.f32	%p9, %f38, 0f7F800000;
+	selp.f32	%f70, %f38, %f37, %p9;
+
+BB4_5:
+	fma.rn.ftz.f32 	%f39, %f70, 0f3E22F983, 0f3F000000;
+	ld.global.f32 	%f40, [prd+132];
+	abs.ftz.f32 	%f41, %f40;
+	mov.f32 	%f42, 0f3F800000;
+	sub.ftz.f32 	%f43, %f42, %f41;
+	mul.ftz.f32 	%f44, %f43, 0f3F000000;
+	sqrt.approx.ftz.f32 	%f45, %f44;
+	setp.gt.ftz.f32	%p10, %f41, 0f3F11EB85;
+	selp.f32	%f46, %f45, %f41, %p10;
+	mul.ftz.f32 	%f47, %f46, %f46;
+	mov.f32 	%f48, 0f3C94D2E9;
+	mov.f32 	%f49, 0f3D53F941;
+	fma.rn.ftz.f32 	%f50, %f49, %f47, %f48;
+	mov.f32 	%f51, 0f3D3F841F;
+	fma.rn.ftz.f32 	%f52, %f50, %f47, %f51;
+	mov.f32 	%f53, 0f3D994929;
+	fma.rn.ftz.f32 	%f54, %f52, %f47, %f53;
+	mov.f32 	%f55, 0f3E2AAB94;
+	fma.rn.ftz.f32 	%f56, %f54, %f47, %f55;
+	mul.ftz.f32 	%f57, %f47, %f56;
+	fma.rn.ftz.f32 	%f58, %f57, %f46, %f46;
+	mov.f32 	%f59, 0f3FC90FDB;
+	mov.f32 	%f60, 0fC0000000;
+	fma.rn.ftz.f32 	%f61, %f60, %f58, %f59;
+	selp.f32	%f62, %f61, %f58, %p10;
+	setp.gtu.ftz.f32	%p11, %f62, 0f7F800000;
+	mov.b32 	 %r16, %f62;
+	mov.b32 	 %r17, %f40;
+	and.b32  	%r18, %r17, -2147483648;
+	or.b32  	%r19, %r16, %r18;
+	mov.b32 	 %f63, %r19;
+	selp.f32	%f64, %f62, %f63, %p11;
+	fma.rn.ftz.f32 	%f65, %f64, 0fBEA2F983, 0f3F000000;
+	tex.2d.v4.f32.f32	{%f66, %f67, %f68, %f69}, [bg_texture, {%f39, %f65}];
+	st.global.v2.f32 	[prd], {%f66, %f67};
+	st.global.f32 	[prd+8], %f68;
 	ret;
 }
 

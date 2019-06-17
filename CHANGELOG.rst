@@ -1,6 +1,15 @@
 Release history
 ===============
 
+v0.3.1 - unreleased
+-------------------
+
+Added
+~~~~~
+
+- textured background (fixed texture or environment map, from numpy array or image file)
+- json converters for vector types (more compact scene description)
+
 `v0.3.0`_ - 2019-06-09
 ----------------------
 

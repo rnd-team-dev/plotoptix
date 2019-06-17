@@ -34,6 +34,11 @@ def _load_optix_win():
     optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int]
     optix.create_empty_scene.restype = c_bool
 
+    optix.get_miss_program.restype = c_int
+
+    optix.set_miss_program.argtypes = [c_int, c_bool]
+    optix.set_miss_program.restype = c_bool
+
     optix.create_scene_from_json.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int]
     optix.create_scene_from_json.restype = c_bool
 
@@ -54,6 +59,9 @@ def _load_optix_win():
 
     optix.set_compute_paused.argtypes = [c_bool]
     optix.set_compute_paused.restype = c_bool
+
+    optix.is_defined.argtypes = [c_wchar_p]
+    optix.is_defined.restype = c_bool
 
     optix.get_int.argtypes = [c_wchar_p, POINTER(c_int)]
     optix.get_int.restype = c_bool
@@ -96,6 +104,9 @@ def _load_optix_win():
 
     optix.set_texture_2d.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_uint, c_bool]
     optix.set_texture_2d.restype = c_bool
+
+    optix.load_texture_2d.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_uint, c_bool]
+    optix.load_texture_2d.restype = c_bool
 
     optix.resize_scene.argtypes = [c_int, c_int, c_void_p, c_int]
     optix.resize_scene.restype = c_bool
@@ -377,6 +388,9 @@ class _ClrOptiX:
         return self._optix.create_empty_scene_ptr(width, height,
                                                   IntPtr.__overloads__[Int64](buf_ptr), buf_size)
 
+    def get_miss_program(self): return self._optix.get_miss_program()
+    def set_miss_program(self, algorithm, refresh): return self._optix.set_miss_program(algorithm, refresh)
+
     def create_scene_from_json(self, jstr, width, height, buf_ptr, buf_size):
         return self._optix.create_scene_from_json_ptr(jstr, width, height,
                                                       IntPtr.__overloads__[Int64](buf_ptr), buf_size)
@@ -393,6 +407,8 @@ class _ClrOptiX:
     def stop_rt(self): return self._optix.stop_rt()
 
     def set_compute_paused(self, state): return self._optix.set_compute_paused(state)
+
+    def is_defined(self, name): return self._optix.is_defined(name)
 
     def get_int(self, name, x_ref):
         return self._optix.get_int_ptr(name,
@@ -439,6 +455,9 @@ class _ClrOptiX:
 
     def set_texture_2d(self, name, data_ptr, width, height, tformat, refresh):
         return self._optix.set_texture_2d_ptr(name, IntPtr.__overloads__[Int64](data_ptr), width, height, tformat, refresh)
+
+    def load_texture_2d(self, tex_name, file_name, exposure, gamma, tformat, refresh):
+        return self._optix.load_texture_2d(name, file_name, exposure, gamma, tformat, refresh)
 
     def resize_scene(self, width, height, buf_ptr, buf_size):
         return self._optix.resize_scene_ptr(width, height, IntPtr.__overloads__[Int64](buf_ptr), buf_size)

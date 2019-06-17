@@ -785,8 +785,58 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
+    def get_background_mode(self) -> Optional[MissProgram]:
+        """Get currently configured miss program.
+
+        Returns
+        -------
+        out : MissProgram or None
+            Miss program, see :py:mod:`plotoptix.enums.MissProgram`, or
+            `None` if reading the mode failed.
+
+        See Also
+        --------
+        :py:mod:`plotoptix.enums.MissProgram`
+        """
+        miss = self._optix.get_miss_program()
+        if miss >= 0:
+            mode = MissProgram(miss)
+            self._logger.info("Current miss program is: %s", mode.name)
+            return mode
+        else:
+            msg = "Failed on reading the miss program."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+            return None
+
+    def set_background_mode(self, mode: Union[MissProgram, str], refresh: bool = False) -> None:
+        """Set miss program.
+
+        Parameters
+        ----------
+        mode : MissProgram enum or string
+            Miss program, see :py:mod:`plotoptix.enums.MissProgram`.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+
+        See Also
+        --------
+        :py:mod:`plotoptix.enums.MissProgram`
+        """
+        if isinstance(mode, str): mode = MissProgram[mode]
+
+        if self._optix.set_miss_program(mode.value, refresh):
+            self._logger.info("Miss program %s is selected.", mode.name)
+        else:
+            msg = "Miss program setup failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
     def get_background(self) -> (float, float, float):
         """Get background color.
+
+        **Note**, currently returns constant background color also in texture
+        based background modes.
 
         Returns
         -------
@@ -795,19 +845,35 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         return self.get_float3("bg_color")
 
-    def set_background(self, color: Any, refresh: bool = False) -> None:
+    def set_background(self, bg: Any,
+                       exposure: float = 1.0,
+                       gamma: float = 1.0,
+                       refresh: bool = False) -> None:
         """Set background color.
 
-        Set background color of the scene (shader variable ``bg_color``,
-        default value is [0.01, 0.01, 0.01]). Raytrace the whole scene
-        if refresh is set to ``True``.
+        Set background color or texture (shader variable ``bg_color`` or
+        texture ``bg_texture``). Raytrace the whole scene if refresh is set
+        to ``True``. Texture should be provided as an array of shape ``(height, width, n)``,
+        where ``n`` is 3 or 4. 3-component RGB arrays are extended to 4-component
+        RGBA mode (alpha channel is reserved for future implementation).
+        Function attempts to load texture from file if ``bg`` is a string.
+
+        Color values are corrected to account for the postprocessing tone
+        mapping if ``exposure`` and ``gamma`` values are provided.
+
         Note, color components range is <0; 1>.
 
         Parameters
         ----------
-        color : Any
-            New backgroud color value; single value is a grayscale level,
-            RGB color components can be provided as array-like values.
+        bg : Any
+            New backgroud color or texture data; single value is a grayscale level,
+            RGB color components can be provided as an array-like values, texture
+            is provided as an array of shape ``(height, width, n)`` or string
+            with the source image file path.
+        exposure : float, optional
+            Exposure value used in the postprocessing.
+        gamma : float, optional
+            Gamma value used in the postprocessing.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
 
@@ -817,24 +883,59 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         >>> optix.set_background(0.5) # set gray background
         >>> optix.set_background([0.5, 0.7, 0.9]) # set light bluish background
         """
-        if isinstance(color, float) or isinstance(color, int):
-            x = float(color)
-            y = float(color)
-            z = float(color)
-        else:
-            if not isinstance(color, np.ndarray):
-                color = np.asarray(color, dtype=np.float32)
-                if (len(color.shape) != 1) or (color.shape[0] != 3):
-                    msg = "Color should be a single value or 3-element array/list/tupe."
-                    self._logger.error(msg)
-                    if self._raise_on_error: raise ValueError(msg)
-                    return
-            x = color[0]
-            y = color[1]
-            z = color[2]
+        if isinstance(bg, str):
+            if self._optix.load_texture_2d("bg_texture", bg, exposure, gamma, RtFormat.Float4.value, refresh):
+                self._logger.info("Background texture loaded from file.")
+            else:
+                msg = "Failed on reading background texture."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+            return
 
-        self._optix.set_float3("bg_color", x, y, z, refresh)
-        self._logger.info("Background color updated.")
+        e = 1 / exposure
+
+        if isinstance(bg, float) or isinstance(bg, int):
+            x = float(bg); x = e * np.power(x, gamma)
+            y = float(bg); y = e * np.power(y, gamma)
+            z = float(bg); z = e * np.power(z, gamma)
+            if self._optix.set_float3("bg_color", x, y, z, refresh):
+                self._logger.info("Background constant gray level updated.")
+            else:
+                msg = "Failed on updating background color."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if not isinstance(bg, np.ndarray):
+            bg = np.ascontiguousarray(bg, dtype=np.float32)
+
+        if (len(bg.shape) == 1) and (bg.shape[0] == 3):
+            x = e * np.power(bg[0], gamma)
+            y = e * np.power(bg[1], gamma)
+            z = e * np.power(bg[2], gamma)
+            if self._optix.set_float3("bg_color", x, y, z, refresh):
+                self._logger.info("Background constant color updated.")
+            else:
+                msg = "Failed on updating background color."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if len(bg.shape) == 3:
+            if bg.shape[-1] == 3:
+                b = np.zeros((bg.shape[0], bg.shape[1], 4), dtype=np.float32)
+                b[:,:,:-1] = bg
+                bg = b
+
+            if bg.shape[-1] == 4:
+                if gamma != 1: bg = np.power(bg, gamma)
+                if e != 1: bg = e * bg
+                self.set_texture_2d("bg_texture", bg, refresh)
+                return
+
+        msg = "Background should be a single gray level or [r,g,b] array_like or 2D array_like of [r,g,b]/[r,g,b,a] values."
+        self._logger.error(msg)
+        if self._raise_on_error: raise ValueError(msg)
 
     def get_ambient(self) -> (float, float, float):
         """Get ambient color.

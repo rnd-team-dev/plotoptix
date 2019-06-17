@@ -15,6 +15,8 @@ Scene configuration
 .. automethod:: plotoptix.NpOptiX.get_ambient
 .. automethod:: plotoptix.NpOptiX.set_background
 .. automethod:: plotoptix.NpOptiX.get_background
+.. automethod:: plotoptix.NpOptiX.get_background_mode
+.. automethod:: plotoptix.NpOptiX.set_background_mode
 .. automethod:: plotoptix.NpOptiX.refresh_scene
 .. automethod:: plotoptix.NpOptiX.resize
 

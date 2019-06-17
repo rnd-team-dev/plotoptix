@@ -20,6 +20,62 @@ class Coordinates(Enum):
 
     #Axes = 2
 
+class MissProgram(Enum):
+    """Miss program.
+
+    Miss program is executed when ray segment is not intersecting any object
+    at a defined maximum distance. Radiance assigned to the ray by the miss
+    program appears as a color of the background (e.g. on primary segments)
+    or environmental light color (segments scattered off a diffuse surfaces).
+
+    See Also
+    --------
+    :meth:`plotoptix.NpOptiX.set_background_mode`
+    """
+
+    Default = 0
+    """Constant background color is used.
+
+    See Also
+    --------
+    :meth:`plotoptix.NpOptiX.set_background`
+    """
+
+    AmbientLight = 1
+    """Background color is used if the ray is not scattering of any surface;
+    ambient light color is used otherwise (e.g. background can be black while
+    the scene is illuminated with any color of light).
+
+    See Also
+    --------
+    :meth:`plotoptix.NpOptiX.set_ambient`, :meth:`plotoptix.NpOptiX.set_background`
+    """
+
+    #AmbientAndVolume = 2
+    #"""***Not yet used.*** Same as AmbientLight but supports volumetric
+    #scattering.
+    #"""
+
+    TextureFixed = 3
+    """Texture color is used if the ray is not scattering of any surface;
+    ambient light color is used otherwise. Texture in the background is not
+    reacting to the camera changes and is not affacting the scene illumination.
+
+    See Also
+    --------
+    :meth:`plotoptix.NpOptiX.set_ambient`, :meth:`plotoptix.NpOptiX.set_background`
+    """
+
+    TextureEnvironment = 4
+    """Texture color is used for both, the background and the scene illumination.
+    Texture pixel is selected by the ray direction, so effectively the texture
+    is mapped on the sphere with infinite radius: use 360 deg environment maps.
+
+    See Also
+    --------
+    :meth:`plotoptix.NpOptiX.set_background`
+    """
+
 class Geometry(Enum):
     """Geometry shapes.
     """
@@ -210,12 +266,20 @@ class Channel(Enum):
     """Blue channel.
     """
 
+    A = 4
+    """Alpha channel.
+    """
+
 class Postprocessing(Enum):
     """2D postprocessing stages.
 
     Postprocessing stages can be added with :meth:`plotoptix.NpOptiX.add_postproc`
     to correct ray traced 2D image. Each algorithm has its own variables that should
     be configured before adding the postprocessing stage.
+
+    See Also
+    --------
+    :meth:`plotoptix.NpOptiX.add_postproc`
     """
 
     Levels = 1
