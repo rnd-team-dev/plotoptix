@@ -457,7 +457,7 @@ class _ClrOptiX:
         return self._optix.set_texture_2d_ptr(name, IntPtr.__overloads__[Int64](data_ptr), width, height, tformat, refresh)
 
     def load_texture_2d(self, tex_name, file_name, exposure, gamma, tformat, refresh):
-        return self._optix.load_texture_2d(name, file_name, exposure, gamma, tformat, refresh)
+        return self._optix.load_texture_2d(tex_name, file_name, exposure, gamma, tformat, refresh)
 
     def resize_scene(self, width, height, buf_ptr, buf_size):
         return self._optix.resize_scene_ptr(width, height, IntPtr.__overloads__[Int64](buf_ptr), buf_size)
