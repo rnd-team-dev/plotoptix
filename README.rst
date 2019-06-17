@@ -53,7 +53,7 @@ Features
 - progressive path tracing with explicit light sampling
 - pinhole cameras and cameras with depth of field simulation
 - geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, surface mesh
-- flat, diffuse, specular and glass shading
+- parameterized materials: flat, diffuse, reflective, refractive shading
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
 - post-processing: tonal correction curves, levels adjustment, mask overlay
@@ -67,7 +67,7 @@ System Requirements
 -------------------
 
 - Windows:
-   - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (but you should already have it)
+   - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
 - Linux:
    - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2
    - `pythonnet <http://pythonnet.github.io>`__ >= 2.4
@@ -140,7 +140,7 @@ or in CentOS::
 Then, update required packages and install ``pythonnet``::
 
    pip install -U setuptools wheel pycparser
-   pip install pythonnet --egg -U
+   pip install -U pythonnet
    
 After successful installation you should be able to do python's import:
 
@@ -151,7 +151,7 @@ After successful installation you should be able to do python's import:
 
 *FFmpeg:*
 
-FFmpeg shared libraries >= 4.1 are required to enable video encoding features in PlotOptiX. Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and download the most recent release sources. Unpack it to a new folder, cd to it. Configure, compile and install as below::
+FFmpeg shared libraries >= 4.1 are required to enable video encoding features in PlotOptiX. Uninstall older version first. Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and download the most recent release sources. Unpack it to a new folder, cd to it. Configure, compile and install as below::
 
    ./configure --enable-shared
    make
@@ -177,7 +177,7 @@ PlotOptiX
 
 Using pip::
 
-   pip install plotoptix
+   pip install -U plotoptix
 
 From GitHub sources::
 
