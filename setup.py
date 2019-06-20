@@ -48,7 +48,7 @@ setup(name='plotoptix',
       ],
       packages=find_packages(exclude=['tests']),
       install_requires=[
-          'enum34;python_version<"3.4"',
+          'enum34;python_version<="3.4"',
           'packaging>=18.0',
           'numpy>=1.0',
           'Pillow>=5.3',
