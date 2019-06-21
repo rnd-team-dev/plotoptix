@@ -12,6 +12,16 @@ from plotoptix._load_lib import load_optix
 _optix = load_optix()
 
 
+def set_gpu_architecture(arch: Union[GpuArchitecture, str]) -> None:
+    """Set SM architecture.
+
+    May be used to force pre-compiled PTX selection and -arch option
+    of the shader compilation. Default value is ``Auto``.
+    """
+    if isinstance(arch, str): arch = GpuArchitecture[arch]
+    _optix.set_gpu_architecture(arch.value)
+
+
 def _make_contiguous_vector(a: Optional[Any], n_dim: int) -> Optional[np.ndarray]:
     if a is None: return None
 

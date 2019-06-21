@@ -10,6 +10,11 @@ Added
 - textured background (fixed texture or environment map, from numpy array or image file)
 - json converters for vector types (more compact scene description)
 
+Fixed
+~~~~~
+
+- dedicated binaries for CUDA 10.0 and 10.1 runtime
+
 `v0.3.0`_ - 2019-06-09
 ----------------------
 

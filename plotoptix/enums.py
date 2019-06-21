@@ -497,3 +497,47 @@ class NvEncPreset(Enum):
     Lossless_HP = 8
     """
     """
+
+class GpuArchitecture(Enum):
+    """SM architecture.
+    """
+
+    Auto = 0
+    """
+    """
+
+    Compute_50 = 500
+    """
+    """
+
+    Compute_52 = 520
+    """
+    """
+
+    #Compute_53 = 530
+    #"""
+    #"""
+
+    Compute_60 = 600
+    """
+    """
+
+    Compute_61 = 610
+    """
+    """
+
+    #Compute_62 = 620
+    #"""
+    #"""
+
+    Compute_70 = 700
+    """
+    """
+
+    #Compute_72 = 720
+    #"""
+    #"""
+
+    Compute_75 = 750
+    """
+    """

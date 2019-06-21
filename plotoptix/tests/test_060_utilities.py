@@ -152,6 +152,11 @@ class TestScene(TestCase):
         self.assertTrue(np.min(w) >= -1 and np.max(w) <= 1, msg="Noise value out of <-1, 1> range.")
         self.assertFalse(np.isnan(w).any() or np.isinf(w).any(), msg="Noise contains NaNs or Infs.")
 
+    def test040_simplex(self):
+
+        set_gpu_architecture("Compute_50")
+        set_gpu_architecture("Auto")
+
     @classmethod
     def tearDownClass(cls):
         print("Test 060: completed.")

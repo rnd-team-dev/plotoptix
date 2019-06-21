@@ -48,6 +48,8 @@ Ray tracer
     :members:
 .. autoclass:: plotoptix.enums.RtFormat
     :members:
+.. autoclass:: plotoptix.enums.GpuArchitecture
+    :members:
 
 Other
 -----
