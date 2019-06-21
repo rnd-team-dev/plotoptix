@@ -4,10 +4,11 @@
 import functools, operator
 import numpy as np
 
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from matplotlib import cm
 
 from plotoptix._load_lib import load_optix
+from plotoptix.enums import GpuArchitecture
 
 _optix = load_optix()
 
