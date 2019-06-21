@@ -8,10 +8,6 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix
 Documentation: https://plotoptix.rnd.team
 """
 
-from plotoptix.enums import *
-from plotoptix.npoptix import NpOptiX
-from plotoptix.tkoptix import TkOptiX
-
 __all__ = ["enums", "materials", "utils", "npoptix", "tkoptix"]
 
 __author__  = "Robert Sulej, R&D Team <dev@rnd.team>"
@@ -19,45 +15,28 @@ __status__  = "beta"
 __version__ = "0.3.1"
 __date__    = "17 June 2019"
 
-
 import logging
 
 logging.basicConfig(level=logging.WARN, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
-# verify Python is 64-bit ################################################
-import struct
-
-if struct.calcsize("P") * 8 != 64:
-    logging.error(80 * "*"); logging.error(80 * "*")
-    logging.error("Python 64-bit is required.")
-    logging.error(80 * "*"); logging.error(80 * "*")
-    raise ImportError
-
 # verify CUDA release ####################################################
-import subprocess
+import os, subprocess
 
 _rel_required = "10." # accept any minor number
 try:
     _outp = subprocess.check_output(["nvcc", "--version"]).decode("utf-8").split(" ")
-    try:
-        _idx = _outp.index("release")
-        if _idx + 1 < len(_outp):
-            _rel = _outp[_idx + 1].strip(" ,")
-            if _rel.startswith(_rel_required):
-                logging.info("OK: found CUDA %s", _rel)
-            else:
-                logging.error(80 * "*"); logging.error(80 * "*")
-                logging.error("Found CUDA release %s. This PlotOptiX release requires CUDA %s,", _rel, _rel_required)
-                logging.error("available at: https://developer.nvidia.com/cuda-downloads")
-                logging.error(80 * "*"); logging.error(80 * "*")
-                raise ImportError
-        else: raise ValueError
-    except:
-        logging.error(80 * "*"); logging.error(80 * "*")
-        logging.error("CUDA release not recognized. This PlotOptiX release requires CUDA %s,", _rel_required)
-        logging.error("available at: https://developer.nvidia.com/cuda-downloads")
-        logging.error(80 * "*"); logging.error(80 * "*")
-        raise ImportError
+    _idx = _outp.index("release")
+    if _idx + 1 < len(_outp):
+        _rel = _outp[_idx + 1].strip(" ,")
+        if _rel.startswith(_rel_required):
+            logging.info("OK: found CUDA %s", _rel)
+        else:
+            logging.error(80 * "*"); logging.error(80 * "*")
+            logging.error("Found CUDA release %s. This PlotOptiX release requires CUDA %s,", _rel, _rel_required)
+            logging.error("available at: https://developer.nvidia.com/cuda-downloads")
+            logging.error(80 * "*"); logging.error(80 * "*")
+            raise ImportError
+    else: raise ValueError
 
 except FileNotFoundError:
     logging.error(80 * "*"); logging.error(80 * "*")
@@ -67,11 +46,24 @@ except FileNotFoundError:
     logging.error(80 * "*"); logging.error(80 * "*")
     raise ImportError
 
-except ImportError: raise ImportError
+except ValueError:
+    logging.error(80 * "*"); logging.error(80 * "*")
+    logging.error("CUDA release not recognized. This PlotOptiX release requires CUDA %s,", _rel_required)
+    logging.error("available at: https://developer.nvidia.com/cuda-downloads")
+    logging.error(80 * "*"); logging.error(80 * "*")
+    raise ImportError
+
+except ImportError: raise
 
 except Exception as e:
     logging.error("Cannot verify CUDA installation: " + str(e))
     raise ImportError
+
+# import PlotOptiX modules ###############################################
+
+from plotoptix.enums import *
+from plotoptix.npoptix import NpOptiX
+from plotoptix.tkoptix import TkOptiX
 
 # check PlotOptiX updates ################################################
 import json
