@@ -15,12 +15,17 @@ def HandlePrerequisites(command_subclass):
             print(80 * "*"); print(80 * "*")
             raise ValueError
 
-    def findCudaLinux(self, quiet):
+    def findCuda(self, p, quiet):
         rel_required = "10." # accept any minor number
         cuda_major = -1
         cuda_minor = -1
         try:
-            outp = subprocess.check_output(["/usr/local/cuda/bin/nvcc", "--version"]).decode("utf-8").split(" ")
+            try:
+                outp = subprocess.check_output(["nvcc", "--version"]).decode("utf-8").split(" ")
+            except FileNotFoundError:
+                if p == "Linux": outp = subprocess.check_output(["/usr/local/cuda/bin/nvcc", "--version"]).decode("utf-8").split(" ")
+                else: raise
+
             idx = outp.index("release")
             if idx + 1 < len(outp):
                 rel = outp[idx + 1].strip(" ,")
@@ -41,8 +46,7 @@ def HandlePrerequisites(command_subclass):
         except FileNotFoundError:
             if not quiet:
                 print(80 * "*"); print(80 * "*")
-                print("Cannot access nvcc. Please check your CUDA installation")
-                print("(expected nvcc at /usr/local/cuda/bin symlink).")
+                print("Cannot access nvcc. Please check your CUDA installation and/or PATH variable.")
                 print("This PlotOptiX release requires CUDA %s, available at:" % rel_required)
                 print("     https://developer.nvidia.com/cuda-downloads")
                 print(80 * "*"); print(80 * "*")
@@ -80,13 +84,28 @@ def HandlePrerequisites(command_subclass):
         testPython64b(self)
 
         p = platform.system()
+
+        cuda_major, cuda_minor = findCuda(self, p, removing)
+
         if p == "Windows":
-            base_run(self)
+            if removing or (cuda_major == 10 and cuda_minor == 1):
+                base_run(self)
+            else:
+                print(80 * "*"); print(80 * "*")
+                print("CUDA release 10.1 is required in Windows platform. Please, install:")
+                print("https://developer.nvidia.com/cuda-downloads")
+                print(80 * "*"); print(80 * "*")
+                raise NotImplementedError
         elif p == "Linux":
-            cuda_major, cuda_minor = findCudaLinux(self, removing)
-            base_run(self)
-            if cuda_major == 10 and cuda_minor >= 0:
+            if removing or (cuda_major == 10 and cuda_minor >= 0):
+                base_run(self)
                 prepareCudaLinux(self, cuda_major, cuda_minor, removing)
+            else:
+                print(80 * "*"); print(80 * "*")
+                print("CUDA release 10.x is required in Linux platforms. Please, install:")
+                print("https://developer.nvidia.com/cuda-downloads")
+                print(80 * "*"); print(80 * "*")
+                raise NotImplementedError
         else:
             raise NotImplementedError
 
