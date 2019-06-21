@@ -1,9 +1,12 @@
 from setuptools import setup, find_packages
+from setuptools.command.develop import develop
 from setuptools.command.install import install
 
 import struct, os, platform, subprocess
 
-class HandlePrerequisites(install):
+def HandlePrerequisites(command_subclass):
+
+    base_run = command_subclass.run
 
     def testPython64b(self):
         if struct.calcsize("P") * 8 != 64:
@@ -12,61 +15,93 @@ class HandlePrerequisites(install):
             print(80 * "*"); print(80 * "*")
             raise ValueError
 
-    def findCudaLinux(self):
+    def findCudaLinux(self, quiet):
         rel_required = "10." # accept any minor number
+        cuda_major = -1
+        cuda_minor = -1
         try:
             outp = subprocess.check_output(["/usr/local/cuda/bin/nvcc", "--version"]).decode("utf-8").split(" ")
             idx = outp.index("release")
             if idx + 1 < len(outp):
                 rel = outp[idx + 1].strip(" ,")
                 if rel.startswith(rel_required):
-                    self.cuda_major = int(rel.split(".")[0])
-                    self.cuda_minor = int(rel.split(".")[1])
+                    cuda_major = int(rel.split(".")[0])
+                    cuda_minor = int(rel.split(".")[1])
                     print("OK: found CUDA %s" % rel)
                 else:
-                    print(80 * "*"); print(80 * "*")
-                    print("Found CUDA release %s. This PlotOptiX release requires CUDA %s," % (rel, rel_required))
-                    print("available at: https://developer.nvidia.com/cuda-downloads")
-                    print(80 * "*"); print(80 * "*")
-                    raise RuntimeError
+                    if not quiet:
+                        print(80 * "*"); print(80 * "*")
+                        print("Found CUDA release %s. This PlotOptiX release requires CUDA %s," % (rel, rel_required))
+                        print("available at: https://developer.nvidia.com/cuda-downloads")
+                        print(80 * "*"); print(80 * "*")
+                        raise RuntimeError
             else:
-                raise ValueError
+                if not quiet: raise ValueError
 
         except FileNotFoundError:
-            print(80 * "*"); print(80 * "*")
-            print("Cannot access nvcc. Please check your CUDA installation")
-            print("(expected nvcc at /usr/local/cuda/bin symlink).")
-            print("This PlotOptiX release requires CUDA %s, available at:" % rel_required)
-            print("     https://developer.nvidia.com/cuda-downloads")
-            print(80 * "*"); print(80 * "*")
-            raise
+            if not quiet:
+                print(80 * "*"); print(80 * "*")
+                print("Cannot access nvcc. Please check your CUDA installation")
+                print("(expected nvcc at /usr/local/cuda/bin symlink).")
+                print("This PlotOptiX release requires CUDA %s, available at:" % rel_required)
+                print("     https://developer.nvidia.com/cuda-downloads")
+                print(80 * "*"); print(80 * "*")
+                raise
 
         except ValueError:
-            print(80 * "*"); print(80 * "*")
-            print("CUDA release not recognized. This PlotOptiX release requires CUDA %s," % rel_required)
-            print("available at: https://developer.nvidia.com/cuda-downloads")
-            print(80 * "*"); print(80 * "*")
-            raise
+            if not quiet:
+                print(80 * "*"); print(80 * "*")
+                print("CUDA release not recognized. This PlotOptiX release requires CUDA %s," % rel_required)
+                print("available at: https://developer.nvidia.com/cuda-downloads")
+                print(80 * "*"); print(80 * "*")
+                raise
 
-    def prepareCudaLinux(self):
-        src = os.path.join(self.install_lib, "plotoptix", "bin", "librndSharpOptiX_%s_%s.so" % (self.cuda_major, self.cuda_minor))
-        dst = os.path.join(self.install_lib, "plotoptix", "bin", "librndSharpOptiX.so")
+        except Exception as e:
+            if not quiet:
+                print("Cannot verify CUDA installation: " + str(e))
+                raise
+
+        return cuda_major, cuda_minor
+
+    def prepareCudaLinux(self, cuda_major, cuda_minor, removing):
+        if hasattr(self, 'install_lib') and self.install_lib is not None: lib_path = self.install_lib
+        else: lib_path = os.getcwd()
+        src = os.path.join(lib_path, "plotoptix", "bin", "librndSharpOptiX_%s_%s.so" % (cuda_major, cuda_minor))
+        dst = os.path.join(lib_path, "plotoptix", "bin", "librndSharpOptiX.so")
         if os.path.isfile(dst): os.remove(dst)
-        os.symlink(src, dst)
+        if not removing and os.path.isfile(src): os.symlink(src, dst)
 
-    def run(self):
+    def subclass_run(self):
 
-        self.testPython64b()
+        #print(self.user_options)
+        if hasattr(self, 'uninstall') and self.uninstall == 1: removing = True
+        else: removing = False
 
-        if platform == "Windows":
-            install.run(self)
-        if platform.system() == "Linux":
-            self.findCudaLinux()
-            install.run(self)
-            if self.cuda_major is not None and self.cuda_minor is not None:
-                self.prepareCudaLinux()
+        testPython64b(self)
+
+        p = platform.system()
+        if p == "Windows":
+            base_run(self)
+        elif p == "Linux":
+            cuda_major, cuda_minor = findCudaLinux(self, removing)
+            base_run(self)
+            if cuda_major == 10 and cuda_minor >= 0:
+                prepareCudaLinux(self, cuda_major, cuda_minor, removing)
         else:
             raise NotImplementedError
+
+    command_subclass.run = subclass_run
+    return command_subclass
+
+
+@HandlePrerequisites
+class HandlePrerequisitesDevelop(develop):
+    pass
+
+@HandlePrerequisites
+class HandlePrerequisitesInstall(install):
+    pass
+
 
 try:
     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
@@ -85,6 +120,7 @@ try:
 except ImportError:
     bdist_wheel = None
 
+
 setup(name='plotoptix',
       version='0.3.1',
       url='https://plotoptix.rnd.team',
@@ -99,7 +135,8 @@ setup(name='plotoptix',
       keywords="gpu nvidia optix ray-tracing path-tracing visualisation generative plot animation real-time",
       cmdclass={
           'bdist_wheel': bdist_wheel,
-          'install': HandlePrerequisites,
+          'install': HandlePrerequisitesInstall,
+          'develop': HandlePrerequisitesDevelop
       },
       classifiers=[
           'Development Status :: 4 - Beta',
