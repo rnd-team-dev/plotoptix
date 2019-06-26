@@ -15,7 +15,7 @@ PlotOptiX
 
 **Note:** active development is continuing, expect changes.
 
-**GPU drivers note:** *NVIDIA drivers 419 (Windows) and 418 (Ubuntu) are recommended currently. You may experience problems with the most recent drivers release 430 (see this `issue <https://devtalk.nvidia.com/default/topic/1056174/optix/windows-10-update-broke-optix-6-0-on-my-machine/>`__).*
+**GPU drivers note:** *NVIDIA drivers 419 (Windows) and 418 (Ubuntu) are recommended currently. You may experience problems with the most recent drivers release 430* (see this `issue <https://devtalk.nvidia.com/default/topic/1056174/optix/windows-10-update-broke-optix-6-0-on-my-machine/>`__).
 
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
