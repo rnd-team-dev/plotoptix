@@ -15,6 +15,8 @@ PlotOptiX
 
 **Note:** active development is continuing, expect changes.
 
+**GPU drivers note:** NVIDIA drivers 419 (Windows) and 418 (Ubuntu) are recommended currently. You may experience problems with the most recent drivers release 430 (see this `issue <https://devtalk.nvidia.com/default/topic/1056174/optix/windows-10-update-broke-optix-6-0-on-my-machine/>`__).
+
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
 of several basic shapes, finished with a photorealistic lighting and depth of field.
@@ -66,15 +68,15 @@ Features
 System Requirements
 -------------------
 
+- a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Turing)
+- **Python 3 64-bit**
 - Windows:
    - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
 - Linux:
    - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2
    - `pythonnet <http://pythonnet.github.io>`__ >= 2.4
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
-- a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Turing)
-- `CUDA Toolkit v10.x <https://developer.nvidia.com/cuda-downloads>`__ (tested with v10.0 and v10.1)
-- **Python 3 64-bit**
+- for video encoding: `CUDA Toolkit v10.x <https://developer.nvidia.com/cuda-downloads>`__ (tested with v10.0 and v10.1)
 
 What's Included
 ---------------
@@ -89,7 +91,7 @@ Installation
 
 **Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04.
 
-You need to install CUDA toolkit in Linux/Windows, and do some more typing in Linux.
+Windows should be ready to go in most cases. You need to do some more typing in Linux. For video encoding you need to install CUDA toolkit in both Linux and Windows.
 
 Windows prerequisites
 ---------------------
@@ -165,10 +167,11 @@ Add FFmpeg's shared library path to your config::
 CUDA Toolkit
 ------------
 
-CUDA libraries are not included in the package. They are rather huge, and the installation is relatively straight-forward. Visit
-`CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.x**. Download and run the installer.
+CUDA libraries are not included in the package and required only for the video encoding features of PlotOptiX. Visit
+`CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.x**.
+Download and run the installer.
 
-*Linux note:* Install the most recent GPU driver before installing CUDA toolkit, it makes things easier.
+*Linux note:* Install the GPU driver before installing CUDA toolkit, it makes things easier.
 
 In general, it is a good idea to keep your GPU driver up to date.
 
