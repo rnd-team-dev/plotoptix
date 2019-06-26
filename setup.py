@@ -81,15 +81,7 @@ def HandlePrerequisites(command_subclass):
         if p == "Windows":
             base_run(self)
         elif p == "Linux":
-            if removing or (cuda_major == 10 and cuda_minor >= 0):
-                base_run(self)
-                prepareCudaLinux(self, cuda_major, cuda_minor, removing)
-            else:
-                print(80 * "*"); print(80 * "*")
-                print("CUDA release 10.x is required in Linux platforms. Please, install:")
-                print("https://developer.nvidia.com/cuda-downloads")
-                print(80 * "*"); print(80 * "*")
-                raise NotImplementedError
+            base_run(self)
         else:
             raise NotImplementedError
 
