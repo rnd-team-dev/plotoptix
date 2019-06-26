@@ -13,54 +13,13 @@ __all__ = ["enums", "materials", "utils", "npoptix", "tkoptix"]
 __author__  = "Robert Sulej, R&D Team <dev@rnd.team>"
 __status__  = "beta"
 __version__ = "0.3.1"
-__date__    = "17 June 2019"
+__date__    = "26 June 2019"
 
 import logging
 
 logging.basicConfig(level=logging.WARN, format='[%(levelname)s] (%(threadName)-10s) %(message)s')
 
-# verify CUDA release ####################################################
-import os, subprocess
-
-_rel_required = "10." # accept any minor number
-try:
-    _outp = subprocess.check_output(["nvcc", "--version"]).decode("utf-8").split(" ")
-    _idx = _outp.index("release")
-    if _idx + 1 < len(_outp):
-        _rel = _outp[_idx + 1].strip(" ,")
-        if _rel.startswith(_rel_required):
-            logging.info("OK: found CUDA %s", _rel)
-        else:
-            logging.error(80 * "*"); logging.error(80 * "*")
-            logging.error("Found CUDA release %s. This PlotOptiX release requires CUDA %s,", _rel, _rel_required)
-            logging.error("available at: https://developer.nvidia.com/cuda-downloads")
-            logging.error(80 * "*"); logging.error(80 * "*")
-            raise ImportError
-    else: raise ValueError
-
-except FileNotFoundError:
-    logging.error(80 * "*"); logging.error(80 * "*")
-    logging.error("Cannot access nvcc. Please check your CUDA installation.")
-    logging.error("This PlotOptiX release requires CUDA %s, available at:", _rel_required)
-    logging.error("     https://developer.nvidia.com/cuda-downloads")
-    logging.error(80 * "*"); logging.error(80 * "*")
-    raise ImportError
-
-except ValueError:
-    logging.error(80 * "*"); logging.error(80 * "*")
-    logging.error("CUDA release not recognized. This PlotOptiX release requires CUDA %s,", _rel_required)
-    logging.error("available at: https://developer.nvidia.com/cuda-downloads")
-    logging.error(80 * "*"); logging.error(80 * "*")
-    raise ImportError
-
-except ImportError: raise
-
-except Exception as e:
-    logging.error("Cannot verify CUDA installation: " + str(e))
-    raise ImportError
-
 # import PlotOptiX modules ###############################################
-
 from plotoptix.enums import *
 from plotoptix.npoptix import NpOptiX
 from plotoptix.tkoptix import TkOptiX
@@ -72,7 +31,7 @@ from packaging import version
 
 try:
     url = "https://pypi.python.org/pypi/plotoptix/json"
-    webURL = urllib.request.urlopen(url)
+    webURL = urllib.request.urlopen(url, timeout=3)
     data = webURL.read()
     encoding = webURL.info().get_content_charset('utf-8')
     data_dict = json.loads(data.decode(encoding))

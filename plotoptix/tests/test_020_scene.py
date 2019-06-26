@@ -44,30 +44,19 @@ class TestScene(TestCase):
         self.assertFalse(TestScene.scene._optix.is_defined("non_existing_var"), msg="Non-existing variable should not be reported as defined.")
         self.assertTrue(TestScene.scene._optix.is_defined("scene_epsilon"), msg="Not defined variable scene_epsilon.")
 
-        eps = TestScene.scene.get_float("scene_epsilon")
-        self.assertTrue(eps is not None and eps > 0 and eps < 0.05, msg="Unreasonable scene epsilon value: %f." % eps)
+        self.assertTrue(TestScene.scene._optix.is_defined("radiance_ray_type"), msg="Not defined variable radiance_ray_type.")
+        self.assertTrue(TestScene.scene._optix.is_defined("shadow_ray_type"), msg="Not defined variable shadow_ray_type.")
 
-        ray_type_0 = TestScene.scene.get_uint("radiance_ray_type")
-        self.assertTrue(ray_type_0 is not None and ray_type_0 == 0, msg="Radiance ray type not 0: %d." % ray_type_0)
-        ray_type_1 = TestScene.scene.get_uint("shadow_ray_type")
-        self.assertTrue(ray_type_1 is not None and ray_type_1 == 1, msg="Shadow ray type not 1: %d." % ray_type_1)
-
-        n_lights = TestScene.scene.get_int("num_lights")
-        self.assertTrue(n_lights is not None and n_lights == 0, msg="Lights count not 0: %d." % n_lights)
+        self.assertTrue(TestScene.scene._optix.is_defined("num_lights"), msg="Not defined variable num_lights.")
 
         seg_min, seg_max = TestScene.scene.get_uint2("path_seg_range")
         self.assertTrue(seg_min is not None and seg_min > 0, msg="Unreasonable min traced segments: %d." % seg_min)
         self.assertTrue(seg_max is not None and seg_max >= seg_min, msg="Unreasonable max traced segments: %d." % seg_max)
 
-        cx, cy, cz = TestScene.scene.get_float3("bad_color")
-        self.assertTrue(cx is not None and cx >= 0, msg="Unreasonable bad color r: %f." % cx)
-        self.assertTrue(cy is not None and cy >= 0, msg="Unreasonable bad color g: %f." % cy)
-        self.assertTrue(cz is not None and cz >= 0, msg="Unreasonable bad color b: %f." % cz)
+        self.assertTrue(TestScene.scene._optix.is_defined("bad_color"), msg="Not defined variable bad_color.")
 
-        exposure = TestScene.scene.get_float("tonemap_exposure")
-        self.assertTrue(exposure is not None and exposure > 0, msg="Unreasonable exposure value: %f." % exposure)
-        igamma = TestScene.scene.get_float("tonemap_igamma")
-        self.assertTrue(igamma is not None and igamma > 0, msg="Unreasonable igamma value: %f." % igamma)
+        self.assertTrue(TestScene.scene._optix.is_defined("tonemap_exposure"), msg="Not defined variable tonemap_exposure.")
+        self.assertTrue(TestScene.scene._optix.is_defined("tonemap_igamma"), msg="Not defined variable tonemap_igamma.")
 
         cx, cy, cz = TestScene.scene.get_background()
         self.assertTrue(cx is not None and cx >= 0, msg="Unreasonable background color r: %f." % cx)

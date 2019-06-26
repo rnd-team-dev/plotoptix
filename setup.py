@@ -16,7 +16,6 @@ def HandlePrerequisites(command_subclass):
             raise ValueError
 
     def findCuda(self, p, quiet):
-        rel_required = "10." # accept any minor number
         cuda_major = -1
         cuda_minor = -1
         try:
@@ -29,17 +28,9 @@ def HandlePrerequisites(command_subclass):
             idx = outp.index("release")
             if idx + 1 < len(outp):
                 rel = outp[idx + 1].strip(" ,")
-                if rel.startswith(rel_required):
-                    cuda_major = int(rel.split(".")[0])
-                    cuda_minor = int(rel.split(".")[1])
-                    print("OK: found CUDA %s" % rel)
-                else:
-                    if not quiet:
-                        print(80 * "*"); print(80 * "*")
-                        print("Found CUDA release %s. This PlotOptiX release requires CUDA %s," % (rel, rel_required))
-                        print("available at: https://developer.nvidia.com/cuda-downloads")
-                        print(80 * "*"); print(80 * "*")
-                        raise RuntimeError
+                cuda_major = int(rel.split(".")[0])
+                cuda_minor = int(rel.split(".")[1])
+                print("OK: found CUDA %s" % rel)
             else:
                 if not quiet: raise ValueError
 
@@ -47,16 +38,13 @@ def HandlePrerequisites(command_subclass):
             if not quiet:
                 print(80 * "*"); print(80 * "*")
                 print("Cannot access nvcc. Please check your CUDA installation and/or PATH variable.")
-                print("This PlotOptiX release requires CUDA %s, available at:" % rel_required)
-                print("     https://developer.nvidia.com/cuda-downloads")
                 print(80 * "*"); print(80 * "*")
                 raise
 
         except ValueError:
             if not quiet:
                 print(80 * "*"); print(80 * "*")
-                print("CUDA release not recognized. This PlotOptiX release requires CUDA %s," % rel_required)
-                print("available at: https://developer.nvidia.com/cuda-downloads")
+                print("CUDA release not recognized.")
                 print(80 * "*"); print(80 * "*")
                 raise
 
@@ -81,21 +69,17 @@ def HandlePrerequisites(command_subclass):
         if hasattr(self, 'uninstall') and self.uninstall == 1: removing = True
         else: removing = False
 
+        if hasattr(self, 'install_lib') and self.install_lib is not None: lib_path = self.install_lib
+        else: lib_path = os.getcwd()
+
         testPython64b(self)
 
         p = platform.system()
 
-        cuda_major, cuda_minor = findCuda(self, p, removing)
+        #cuda_major, cuda_minor = findCuda(self, p, removing)
 
         if p == "Windows":
-            if removing or (cuda_major == 10 and cuda_minor == 1):
-                base_run(self)
-            else:
-                print(80 * "*"); print(80 * "*")
-                print("CUDA release 10.1 is required in Windows platform. Please, install:")
-                print("https://developer.nvidia.com/cuda-downloads")
-                print(80 * "*"); print(80 * "*")
-                raise NotImplementedError
+            base_run(self)
         elif p == "Linux":
             if removing or (cuda_major == 10 and cuda_minor >= 0):
                 base_run(self)
@@ -108,6 +92,8 @@ def HandlePrerequisites(command_subclass):
                 raise NotImplementedError
         else:
             raise NotImplementedError
+
+        print("All correct.")
 
     command_subclass.run = subclass_run
     return command_subclass

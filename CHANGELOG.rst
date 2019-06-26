@@ -13,7 +13,7 @@ Added
 Fixed
 ~~~~~
 
-- dedicated binaries for CUDA 10.0 and 10.1 runtime
+- removed dependency on CUDA release, CUDA required for video encoding features only
 
 `v0.3.0`_ - 2019-06-09
 ----------------------
