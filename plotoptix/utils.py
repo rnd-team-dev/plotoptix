@@ -4,7 +4,8 @@
 import functools, operator
 import numpy as np
 
-from typing import Any, Optional, Union
+from ctypes import byref, c_int
+from typing import Any, Optional, Tuple, Union
 from matplotlib import cm
 
 from plotoptix._load_lib import load_optix
@@ -154,6 +155,67 @@ def map_to_colors(x: Any, cm_name: str) -> np.ndarray:
 
     c = cm.get_cmap(cm_name)(x)
     return np.delete(c, np.s_[-1], len(c.shape) - 1) # skip alpha
+
+def get_image_meta(file_name: str) -> Tuple[Optional[int], Optional[int], Optional[int], Optional[int]]:
+    """Get image metadata from file.
+
+    Read image file header and return width, height, samples per pixel
+    and bits per sample values.
+
+    Parameters
+    ----------
+    file_name : string
+        Image file name.
+
+    Returns
+    -------
+    out : tuple (int, int, int, int)
+        Image width, height, samples per pixel, bits per sample.
+    """
+    c_width = c_int()
+    c_height = c_int()
+    c_spp = c_int()
+    c_bps = c_int()
+    if _optix.get_image_meta(file_name, byref(c_width), byref(c_height), byref(c_spp), byref(c_bps)):
+        return c_width.value, c_height.value, c_spp.value, c_bps.value
+    else:
+        return None, None, None, None
+
+def read_image(file_name: str) -> Optional[np.ndarray]:
+    """Read image from file.
+
+    Read image file into numpy array.
+
+    Parameters
+    ----------
+    file_name : string
+        Image file name.
+
+    Returns
+    -------
+    out : np.ndarray
+        Image data.
+    """
+    c_width = c_int()
+    c_height = c_int()
+    c_spp = c_int()
+    c_bps = c_int()
+    if not _optix.get_image_meta(file_name, byref(c_width), byref(c_height), byref(c_spp), byref(c_bps)):
+        return None
+
+    if c_bps.value == 8: t = np.uint8
+    elif c_bps.value == 16: t = np.uint16
+    else: raise ValueError("Image bits per sample value not supported.")
+
+    if c_spp.value == 1: data = np.zeros((c_height.value, c_width.value), dtype=t)
+    else: data = np.zeros((c_height.value, c_width.value, c_spp.value), dtype=t)
+
+    if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=t)
+
+    if _optix.read_image(file_name, data.ctypes.data, c_width, c_height, c_spp, c_bps):
+        return data
+    else:
+        return None
 
 def simplex(pos: Any, noise: Optional[np.ndarray] = None) -> np.ndarray:
     """Generate simplex noise.

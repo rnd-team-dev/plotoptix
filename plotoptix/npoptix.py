@@ -697,12 +697,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.set_int(name, x, refresh)
 
 
-    def set_texture_1d(self, name: str, data: Any, refresh: bool = False) -> None:
+    def set_texture_1d(self, name: str, data: Any, keep_on_host: bool = False, refresh: bool = False) -> None:
         """Set texture data.
 
         Set data of the shader texture with given ``name``. Texture format
         (float, float2 or float4) and lenght are deduced from the ``data`` array
-        shape.
+        shape. Use ``keep_on_host=True`` to make a copy of data in the host memory
+        (in addition to GPU memory), this option is required when (small) textures
+        are saved to JSON description of the scene.
 
         Parameters
         ----------
@@ -710,6 +712,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Varable name.
         data : array_like
             Texture data.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
         """
@@ -736,17 +740,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
 
         self._logger.info("Set texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
-        if not self._optix.set_texture_1d(name, data.ctypes.data, data.shape[0], rt_format.value, refresh):
+        if not self._optix.set_texture_1d(name, data.ctypes.data, data.shape[0], rt_format.value, keep_on_host, refresh):
             msg = "Texture 1D %s not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
-    def set_texture_2d(self, name: str, data: Any, refresh: bool = False) -> None:
+    def set_texture_2d(self, name: str, data: Any, keep_on_host: bool = False, refresh: bool = False) -> None:
         """Set texture data.
 
         Set data of the shader texture with given ``name``. Texture format
         (float, float2 or float4) and width/height are deduced from the ``data``
-        array shape.
+        array shape. Use ``keep_on_host=True`` to make a copy of data in the
+        host memory (in addition to GPU memory), this option is required when
+        (small) textures are saved to JSON description of the scene.
 
         Parameters
         ----------
@@ -754,6 +760,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Varable name.
         data : array_like
             Texture data.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
         """
@@ -780,7 +788,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
 
         self._logger.info("Set texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
-        if not self._optix.set_texture_2d(name, data.ctypes.data, data.shape[1], data.shape[0], rt_format.value, refresh):
+        if not self._optix.set_texture_2d(name, data.ctypes.data, data.shape[1], data.shape[0], rt_format.value, keep_on_host, refresh):
             msg = "Texture 2D %s not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -930,7 +938,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if bg.shape[-1] == 4:
                 if gamma != 1: bg = np.power(bg, gamma)
                 if e != 1: bg = e * bg
-                self.set_texture_2d("bg_texture", bg, refresh)
+                self.set_texture_2d("bg_texture", bg, keep_on_host=False, refresh=refresh)
                 return
 
         msg = "Background should be a single gray level or [r,g,b] array_like or 2D array_like of [r,g,b]/[r,g,b,a] values."
@@ -1880,7 +1888,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     autofit_camera: Optional[str] = None,
                     color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),
                     u: Any = np.ascontiguousarray([0, 1, 0], dtype=np.float32),
-                    v: Any = np.ascontiguousarray([1, 0, 0], dtype=np.float32),
+                    v: Any = np.ascontiguousarray([-1, 0, 0], dtype=np.float32),
                     radius: float = 1.0, in_geometry: bool = True) -> None:
         """Setup new light.
 

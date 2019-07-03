@@ -54,9 +54,9 @@ m_metalic = {
       "VarFloat": {
         "reflectivity_index": 0.95,
         "reflectivity_range": 1.0,
-        "refraction_index": 2.5
       },
       "VarFloat3": {
+        "refraction_index": [ 2.5, 2.5, 2.5 ],
         "surface_albedo": [ 1.0, 1.0, 1.0 ]
       }
 }
@@ -78,9 +78,9 @@ m_plastic = {
       "VarFloat": {
         "reflectivity_index": 0.0,
         "reflectivity_range": 0.5,
-        "refraction_index": 2.0
       },
       "VarFloat3": {
+        "refraction_index": [ 2.0, 2.0, 2.0 ],
         "surface_albedo": [ 1.0, 1.0, 1.0 ]
       }
 }
@@ -95,16 +95,36 @@ m_clear_glass = {
       "AnyHitPrograms": [ "1::path_tracing_materials.ptx::any_hit" ],
       "VarInt": { "material_flags": 12 },
       "VarFloat": {
-        "refraction_index": 1.4,
         "radiation_length": 0.0,
         "vol_scattering": 1.0,
         "light_emission": 0.0
       },
       "VarFloat3": {
+        "refraction_index": [ 1.4, 1.4, 1.4 ],
         "surface_albedo": [ 1.0, 1.0, 1.0 ]
       }
     }
 """
-Glass, with reflection and refraction. Color components meaning is "attenuation length"
+Glass, with reflection and refraction simulated. Color components meaning is "attenuation length"
+and the range is <0; inf>.
+"""
+
+m_dispersive_glass = {
+      "ClosestHitPrograms": [ "0::path_tracing_materials.ptx::glass_closest_hit" ],
+      "AnyHitPrograms": [ "1::path_tracing_materials.ptx::any_hit" ],
+      "VarInt": { "material_flags": 12 },
+      "VarFloat": {
+        "radiation_length": 0.0,
+        "vol_scattering": 1.0,
+        "light_emission": 0.0
+      },
+      "VarFloat3": {
+        "refraction_index": [ 1.4, 1.42, 1.45 ],
+        "surface_albedo": [ 1.0, 1.0, 1.0 ]
+      }
+    }
+"""
+Glass, with reflection and refraction simulated. Refraction index is varying with the wavelength,
+resulting with the light dispersion. Color components meaning is "attenuation length"
 and the range is <0; inf>.
 """

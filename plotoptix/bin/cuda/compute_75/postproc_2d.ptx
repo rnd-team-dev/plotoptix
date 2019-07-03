@@ -14,7 +14,6 @@
 .visible .global .align 1 .b8 readback_buffer[1];
 .visible .global .align 1 .b8 output_buffer[1];
 .visible .global .align 1 .b8 denoiser_inp_buffer[1];
-.visible .global .align 1 .b8 albedo_buffer[1];
 .visible .global .align 8 .b8 launch_index[8];
 .visible .global .align 8 .b8 launch_dim[8];
 .visible .global .align 4 .f32 tonemap_exposure = 0f3F800000;

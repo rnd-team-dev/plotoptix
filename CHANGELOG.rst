@@ -1,6 +1,22 @@
 Release history
 ===============
 
+v0.4.0 - unreleased
+-------------------
+
+This version will introduce interface to the AI denoiser.
+
+Added
+~~~~~
+
+- light dispersion in refractions
+- utilities for reading image files to numpy array, support for huge tiff images (>>GB)
+
+Fixed
+~~~~~
+
+- update of parallelogram light properties
+
 `v0.3.1`_ - 2019-06-26
 ----------------------
 

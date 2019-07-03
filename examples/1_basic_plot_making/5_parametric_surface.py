@@ -23,14 +23,18 @@ def torus(u, v, r, R):
 
 def main():
 
-    r = (-np.pi, 3*np.pi) # use with trefoil()
-    #r = (0, 2*np.pi)     # use with sphere() and torus()
+    ru = rv = (-np.pi, 3*np.pi) # use with trefoil()
+    #ru = rv = (0, 2*np.pi)     # use with torus()
+
+    #ru = (0, np.pi)          # use with sphere()
+    #rv = (0, 2*np.pi)
 
     n = 500
 
-    i = np.linspace(r[0], r[1], n)
+    i = np.linspace(ru[0], ru[1], n)
+    j = np.linspace(rv[0], rv[1], n)
 
-    U, V = np.meshgrid(i, i)
+    U, V = np.meshgrid(i, j)
     S = trefoil(U, V, 5)
     #S = sphere(U, V, 7)
     #S = torus(U, V, 3, 5)

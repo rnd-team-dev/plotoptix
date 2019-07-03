@@ -99,10 +99,10 @@ def _load_optix_win():
     optix.set_float3.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
     optix.set_float3.restype = c_bool
 
-    optix.set_texture_1d.argtypes = [c_wchar_p, c_void_p, c_int, c_uint, c_bool]
+    optix.set_texture_1d.argtypes = [c_wchar_p, c_void_p, c_int, c_uint, c_bool, c_bool]
     optix.set_texture_1d.restype = c_bool
 
-    optix.set_texture_2d.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_uint, c_bool]
+    optix.set_texture_2d.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_uint, c_bool, c_bool]
     optix.set_texture_2d.restype = c_bool
 
     optix.load_texture_2d.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_uint, c_bool]
@@ -319,6 +319,12 @@ def _load_optix_win():
     optix.open_simplex_3d.argtypes = [c_void_p, c_void_p, c_int]
     optix.open_simplex_4d.argtypes = [c_void_p, c_void_p, c_int]
 
+    optix.get_image_meta.argtypes = [c_wchar_p, POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_int)]
+    optix.get_image_meta.restype = c_bool
+
+    optix.read_image.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_int, c_int]
+    optix.read_image.restype = c_bool
+
     optix.set_gpu_architecture.argtypes = [c_int]
 
     optix.set_library_dir.argtypes = [c_wchar_p]
@@ -450,11 +456,11 @@ class _ClrOptiX:
 
     def set_float3(self, name, x, y, z, refresh): return self._optix.set_float3(name, x, y, z, refresh)
 
-    def set_texture_1d(self, name, data_ptr, length, tformat, refresh):
-        return self._optix.set_texture_1d_ptr(name, IntPtr.__overloads__[Int64](data_ptr), length, tformat, refresh)
+    def set_texture_1d(self, name, data_ptr, length, tformat, keep_on_host, refresh):
+        return self._optix.set_texture_1d_ptr(name, IntPtr.__overloads__[Int64](data_ptr), length, tformat, keep_on_host, refresh)
 
-    def set_texture_2d(self, name, data_ptr, width, height, tformat, refresh):
-        return self._optix.set_texture_2d_ptr(name, IntPtr.__overloads__[Int64](data_ptr), width, height, tformat, refresh)
+    def set_texture_2d(self, name, data_ptr, width, height, tformat, keep_on_host, refresh):
+        return self._optix.set_texture_2d_ptr(name, IntPtr.__overloads__[Int64](data_ptr), width, height, tformat, keep_on_host, refresh)
 
     def load_texture_2d(self, tex_name, file_name, exposure, gamma, tformat, refresh):
         return self._optix.load_texture_2d(tex_name, file_name, exposure, gamma, tformat, refresh)
@@ -718,6 +724,18 @@ class _ClrOptiX:
 
     def open_simplex_4d(self, noise_ptr, inputs_ptr, length):
         return self._optix.open_simplex_4d_ptr(IntPtr.__overloads__[Int64](noise_ptr), IntPtr.__overloads__[Int64](inputs_ptr), length)
+
+    def get_image_meta(self, name, width_ref, height_ref, spp_ref, bps_ref):
+        return self._optix.get_image_meta(name,
+                                          IntPtr.__overloads__[Int64](cast(width_ref, c_void_p).value),
+                                          IntPtr.__overloads__[Int64](cast(height_ref, c_void_p).value),
+                                          IntPtr.__overloads__[Int64](cast(spp_ref, c_void_p).value),
+                                          IntPtr.__overloads__[Int64](cast(bps_ref, c_void_p).value))
+
+    def read_image(self, name, data_ptr, width, height, spp, bps):
+        return self._optix.read_image(name,
+                                      IntPtr.__overloads__[Int64](cast(data_ptr, c_void_p).value),
+                                      width, height, spp, bps)
 
     def set_gpu_architecture(self, arch): self._optix.set_gpu_architecture(arch)
 
