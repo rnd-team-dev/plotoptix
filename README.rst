@@ -15,7 +15,7 @@ PlotOptiX
 
 **Note:** active development is continuing, expect changes.
 
-**GPU drivers note:** *NVIDIA drivers 419 (Windows) and 418 (Ubuntu) are recommended if you experience problems with the most recent drivers release 430*.
+**GPU drivers note:** *NVIDIA drivers 419 (Windows) and 418 (Ubuntu, CentOS) are recommended if you experience problems with the most recent drivers release 430*.
 
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
@@ -89,7 +89,7 @@ What's Included
 Installation
 ============
 
-**Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04.
+**Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04, CentOS 7.
 
 Windows should be ready to go in most cases. You need to do some more typing in Linux. For video encoding you need to install CUDA toolkit in both Linux and Windows.
 
