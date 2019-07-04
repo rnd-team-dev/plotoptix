@@ -142,6 +142,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if self._is_scene_created and not self._is_closed:
             self._optix.destroy_scene()
 
+    def get_gpu_architecture(self, ordinal: int) -> Optional[GpuArchitecture]:
+        """Get SM architecture of selected GPU.
+
+        Returns architecture of selected GPU.
+
+        Parameters
+        ----------
+        ordinal : int
+            CUDA ordinal of the GPU.
+
+        Returns
+        -------
+        out : GpuArchitecture or None
+            SM architecture or ``None`` if not recognized.
+        """
+        cfg = self._optix.get_n_gpu_architecture(ordinal)
+        if cfg >= 0: return GpuArchitecture(cfg)
+        else: return None
+
+
     def _make_list_of_callable(self, items) -> List[Callable[["NpOptiX"], None]]:
         if callable(items): return [items]
         else:
@@ -2077,12 +2097,32 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None or data is None: raise ValueError()
 
         if self._optix.setup_material(name, json.dumps(data)):
-            self._logger.info("Added new material %s.", name)
+            self._logger.info("Configured material %s.", name)
         else:
-            msg = "Material %s not created." % name
+            msg = "Material %s not configured." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
-    
+
+    def update_material(self, name: str, data: dict, refresh: bool = False) -> None:
+        """Update material properties.
+
+        Update material properties and optionally refresh the scene.
+
+        Parameters
+        ----------
+        name : string
+            Name of the material.
+        data : dict
+            Parameters of the material.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+
+        See Also
+        --------
+        :py:mod:`plotoptix.materials`
+        """
+        self.setup_material(name, data)
+        if refresh: self._optix.refresh_scene()
 
     def set_correction_curve(self, ctrl_points: Any,
                              channel: Union[Channel, str] = Channel.Gray,

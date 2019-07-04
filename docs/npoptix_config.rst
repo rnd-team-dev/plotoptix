@@ -7,6 +7,7 @@ Start, configure, get output
 .. automethod:: plotoptix.NpOptiX.get_rt_output
 .. automethod:: plotoptix.NpOptiX._run_event_loop
 .. automethod:: plotoptix.NpOptiX.run
+.. automethod:: plotoptix.NpOptiX.get_gpu_architecture
 
 Scene configuration
 -------------------

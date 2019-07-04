@@ -14,6 +14,21 @@ from plotoptix.enums import GpuArchitecture
 _optix = load_optix()
 
 
+def get_gpu_architecture() -> Optional[GpuArchitecture]:
+    """Get configured SM architecture.
+
+    Returns effective configuration of PTX selection and -arch option
+    of the shader compilation.
+
+    Returns
+    -------
+    out : GpuArchitecture or None
+        SM architecture or ``None`` if not recognized.
+    """
+    cfg = _optix.get_gpu_architecture()
+    if cfg >= 0: return GpuArchitecture(10 * cfg)
+    else: return None
+
 def set_gpu_architecture(arch: Union[GpuArchitecture, str]) -> None:
     """Set SM architecture.
 
@@ -184,7 +199,9 @@ def get_image_meta(file_name: str) -> Tuple[Optional[int], Optional[int], Option
 def read_image(file_name: str) -> Optional[np.ndarray]:
     """Read image from file.
 
-    Read image file into numpy array.
+    Read image file into numpy array. Array shape is ``(height, width, 3(4))`` for RGB(A) images
+    and ``(height, width)`` for grayscale images. Image data type is preserved (``numpy.uint8``
+    or ``numpy.uint16``).
 
     Parameters
     ----------

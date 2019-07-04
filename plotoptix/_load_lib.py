@@ -325,7 +325,11 @@ def _load_optix_win():
     optix.read_image.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_int, c_int]
     optix.read_image.restype = c_bool
 
+    optix.get_gpu_architecture.restype = c_int
     optix.set_gpu_architecture.argtypes = [c_int]
+
+    optix.get_n_gpu_architecture.argtypes = [c_uint]
+    optix.get_n_gpu_architecture.restype = c_int
 
     optix.set_library_dir.argtypes = [c_wchar_p]
 
@@ -737,7 +741,10 @@ class _ClrOptiX:
                                       IntPtr.__overloads__[Int64](cast(data_ptr, c_void_p).value),
                                       width, height, spp, bps)
 
+    def get_gpu_architecture(self): return self._optix.get_gpu_architecture()
     def set_gpu_architecture(self, arch): self._optix.set_gpu_architecture(arch)
+
+    def get_n_gpu_architecture(self, ordinal): return self._optix.get_n_gpu_architecture(ordinal)
 
     def set_library_dir(self, path): self._optix.set_library_dir(path)
 

@@ -11,6 +11,7 @@ Added
 
 - light dispersion in refractions
 - utilities for reading image files to numpy array, support for huge tiff images (>>GB)
+- method to update material properties
 
 Fixed
 ~~~~~
