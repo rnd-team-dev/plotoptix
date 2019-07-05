@@ -13,7 +13,7 @@ from ctypes import byref, c_float, c_uint, c_int
 from typing import List, Tuple, Callable, Optional, Union, Any
 
 from plotoptix.singleton import Singleton
-from plotoptix._load_lib import load_optix, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
+from plotoptix._load_lib import load_optix, load_denoiser, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
 from plotoptix.utils import _make_contiguous_vector, _make_contiguous_3d
 from plotoptix.enums import *
 
@@ -156,6 +156,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         -------
         out : GpuArchitecture or None
             SM architecture or ``None`` if not recognized.
+
+        See Also
+        --------
+        :py:mod:`plotoptix.enums.GpuArchitecture`
         """
         cfg = self._optix.get_n_gpu_architecture(ordinal)
         if cfg >= 0: return GpuArchitecture(cfg)
@@ -2204,6 +2208,62 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.info("Add postprocessing stage: %s.", stage.name)
         if not self._optix.add_postproc(stage.value, refresh):
             msg = "Configuration of postprocessing stage %s failed." % stage.name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+    def setup_denoiser(self, blend: float = 0.5,
+                       exposure: Optional[float] = None,
+                       gamma: Optional[float] = None,
+                       refresh: bool = False) -> None:
+        """Add AI denoiser to 2D postprocessing stages.
+
+        Configure AI denoiser as the first stage in 2D postprocessing.
+        Denoiser is applied after min. 4 accumulation frames and uses
+        a partially converged image, albedo, and normals of objects in
+        the scene to predict the final ray tracing result. Output of the
+        denoiser can be mixed with the raw image to improve quality in
+        the early accumulation stages using ``blend`` parameter.
+
+        Denoiser is trained on images prepared with gamma correction.
+        In order to match the training data characteristics, tone mapping
+        is applied before denoising, using ``exposure`` and ``gamma`` values
+        configured as for the :py:attr:`plotoptix.enums.Postprocessing.Gamma`
+        algorithm. For convenience, these values can be also provided as
+        parameters of this method.
+        
+        *Note:* additional binaries are required to dowload, please run
+        ``install_denoser.py`` script to enable denoiser features.
+
+        Parameters
+        ----------
+        blend : float, optional
+            Blend with the raw input, ``0`` means only denoiser output is
+            passing, ``1`` means only raw input is passing. Default value
+            of ``0.5`` is averaging raw image and denoiser output with
+            equal weights.
+        exposure : float or ``None``, optional
+            Set ``tonemap_exposure`` value if not ``None``.
+        gamma : float or ``None``, optional
+            Set ``tonemap_igamma`` value to ``1/gamma`` if not ``None``.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+
+        See Also
+        --------
+        :py:mod:`plotoptix.enums.Postprocessing`
+        """
+        if exposure is not None:
+            self._logger.info("Set tonemap_exposure to %f.", exposure)
+            self._optix.set_float("tonemap_exposure", exposure)
+
+        if gamma is not None:
+            self._logger.info("Set tonemap_igamma to 1/%f.", gamma)
+            self._optix.set_float("tonemap_igamma", 1/gamma)
+
+        self._logger.info("Configure AI denoiser.")
+
+        if not load_denoiser() or not self._optix.setup_denoiser(blend, refresh):
+            msg = "AI denoiser setup failed."
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 

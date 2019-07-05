@@ -4,19 +4,20 @@ Release history
 v0.4.0 - unreleased
 -------------------
 
-This version will introduce interface to the AI denoiser.
-
 Added
 ~~~~~
 
+- AI denoiser
 - light dispersion in refractions
+- method to update material properties after construction
+- enable textured materials
 - utilities for reading image files to numpy array, support for huge tiff images (>>GB)
-- method to update material properties
 
 Fixed
 ~~~~~
 
 - update of parallelogram light properties
+- selection of SM architecture
 
 `v0.3.1`_ - 2019-06-26
 ----------------------

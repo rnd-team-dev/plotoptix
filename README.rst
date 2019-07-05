@@ -58,7 +58,7 @@ Features
 - parameterized materials shading: flat, diffuse, reflective, refractive (including light dispersion)
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
-- post-processing: tonal correction curves, levels adjustment, mask overlay
+- post-processing: tonal correction curves, levels adjustment, mask overlay, AI denoiser
 - GPU acceleration using RT Cores, multi-GPU support, and everything else what comes with `OptiX 6.0 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
@@ -193,7 +193,7 @@ You may also need to install ``tkinter`` and/or ``PyQt`` packages, if not shippe
 Development path
 ================
 
-This is an early version. There are some important features not available yet, eg. AI denoiser or even ticks and labels on plot axes.
+This is an early version. There are some important features not available yet, eg. ticks and labels on plot axes.
 
 PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers
 much more functionality than it is now available through PlotOptiX. We'll progressively add more to PlotOptiX if there is interest in

@@ -18,12 +18,17 @@ def get_gpu_architecture() -> Optional[GpuArchitecture]:
     """Get configured SM architecture.
 
     Returns effective configuration of PTX selection and -arch option
-    of the shader compilation.
+    of the shader compilation. Can verify matched SM architecture after
+    constructing objects of :py:mod:`plotoptix.NpOptiX` and derived classes.
 
     Returns
     -------
     out : GpuArchitecture or None
         SM architecture or ``None`` if not recognized.
+
+    See Also
+    --------
+    :py:mod:`plotoptix.enums.GpuArchitecture`
     """
     cfg = _optix.get_gpu_architecture()
     if cfg >= 0: return GpuArchitecture(10 * cfg)
@@ -33,7 +38,15 @@ def set_gpu_architecture(arch: Union[GpuArchitecture, str]) -> None:
     """Set SM architecture.
 
     May be used to force pre-compiled PTX selection and -arch option
-    of the shader compilation. Default value is ``Auto``.
+    of the shader compilation. Default value is
+    :py:mod:`plotoptix.enums.GpuArchitecture.Auto`. Use before
+    constructing objects of :py:mod:`plotoptix.NpOptiX` and derived
+    classes. :py:mod:`plotoptix.NpOptiX` constructor  will fail if SM
+    architecture higher than available is set.
+
+    See Also
+    --------
+    :py:mod:`plotoptix.enums.GpuArchitecture`
     """
     if isinstance(arch, str): arch = GpuArchitecture[arch]
     _optix.set_gpu_architecture(arch.value)

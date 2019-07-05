@@ -375,8 +375,6 @@ class Postprocessing(Enum):
     >>> optix.add_postproc("Mask")
     """
 
-    #Denoiser = 6 # interface not yet implemented
-
 class RtResult(Enum):
     """Raytracing result codes.
     """
@@ -500,44 +498,49 @@ class NvEncPreset(Enum):
 
 class GpuArchitecture(Enum):
     """SM architecture.
+
+    See Also
+    --------
+    :meth:`plotoptix.utils.get_gpu_architecture`, :meth:`plotoptix.utils.set_gpu_architecture`,
+    :meth:`plotoptix.NpOptiX.get_gpu_architecture`
     """
 
     Auto = 0
-    """
+    """Select highest SM architecture matching available GPU's.
     """
 
     Compute_50 = 500
-    """
+    """Maxwell.
     """
 
     Compute_52 = 520
-    """
+    """Maxwell.
     """
 
     #Compute_53 = 530
-    #"""
+    #"""Maxwell.
     #"""
 
     Compute_60 = 600
-    """
+    """Pascal.
     """
 
     Compute_61 = 610
-    """
+    """Pascal.
     """
 
     #Compute_62 = 620
-    #"""
+    #"""Pascal.
     #"""
 
     Compute_70 = 700
-    """
+    """Volta.
     """
 
     #Compute_72 = 720
-    #"""
+    #"""Volta.
     #"""
 
     Compute_75 = 750
-    """
+    """Turing.
     """

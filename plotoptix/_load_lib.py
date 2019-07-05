@@ -20,9 +20,36 @@ if PLATFORM == "Linux":
 PARAM_NONE_CALLBACK = CFUNCTYPE(None)
 PARAM_INT_CALLBACK = CFUNCTYPE(None, c_int)
 
+
+denoiser_loaded = False
+def load_denoiser():
+    
+    global denoiser_loaded
+    if denoiser_loaded: return True
+
+    if PLATFORM == "Windows":
+        cudnn_lib = os.path.join(os.path.dirname(__file__), BIN_PATH, "cudnn64_7.dll")
+        denoiser_lib = os.path.join(os.path.dirname(__file__), BIN_PATH, "optix_denoiser.6.0.0.dll")
+    elif PLATFORM == "Linux":
+        cudnn_lib = os.path.join(os.path.dirname(__file__), BIN_PATH, "libcudnn.so.7.3.1")
+        denoiser_lib = os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptix_denoiser.so.6.0.0")
+    else:
+        raise NotImplementedError
+
+    if os.path.isfile(cudnn_lib) and os.path.isfile(denoiser_lib):
+        c_denoiser = cdll.LoadLibrary(cudnn_lib)
+        c_denoiser = cdll.LoadLibrary(denoiser_lib)
+        denoiser_loaded = True
+        return True
+    else:
+        print(80 * "*"); print(80 * "*")
+        print("AI denoiser binaries not available. Run with administrator access rights:")
+        print("python -m plotoptix.install denoiser")
+        print(80 * "*"); print(80 * "*")
+        return False
+
+
 sharp_optix = None
-
-
 def _load_optix_win():
     """
     Load RnD.SharpOptiX library with ctypes, setup arguments and return types.
@@ -122,6 +149,9 @@ def _load_optix_win():
 
     optix.add_postproc.argtypes = [c_int, c_bool]
     optix.add_postproc.restype = c_bool
+
+    optix.setup_denoiser.argtypes = [c_float, c_bool]
+    optix.setup_denoiser.restype = c_bool
 
     optix.setup_geometry.argtypes = [c_int, c_wchar_p, c_wchar_p, c_bool, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.setup_geometry.restype = c_uint
@@ -481,6 +511,8 @@ class _ClrOptiX:
                                                     n_ctrl_points, n_curve_points, channel, vrange, refresh)
 
     def add_postproc(self, algorithm, refresh): return self._optix.add_postproc(algorithm, refresh)
+
+    def setup_denoiser(self, blend, refresh): return self._optix.setup_denoiser(blend, refresh)
 
     def setup_geometry(self, geomType, name, material, rnd_missing, n_primitives, pos, c, r, u, v, w):
         return self._optix.setup_geometry_ptr(geomType, name, material, rnd_missing, n_primitives,
