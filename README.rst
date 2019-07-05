@@ -188,7 +188,7 @@ From GitHub sources::
 
 Then, try running code from the top of this readme, or one of the examples. You may also need to install ``tkinter`` and/or ``PyQt`` packages, if not shipped with your Python environment.
 
-Denoiser binaries are optional and can be downloaded after PlotOptiX installation (the package size is ~370 MB)::
+Denoiser binaries are optional and can be downloaded after PlotOptiX installation (the package size is ~370 MB, administrator rights are required for the installation)::
 
    python -m plotoptix.install denoiser
 
