@@ -55,7 +55,7 @@ Features
 - progressive path tracing with explicit light sampling
 - pinhole cameras and cameras with depth of field simulation
 - geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, surface mesh
-- parameterized materials shading: flat, diffuse, reflective, refractive (including light dispersion)
+- parameterized materials shading: flat, diffuse, reflective, refractive (including light dispersion and nested volumes)
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
 - post-processing: tonal correction curves, levels adjustment, mask overlay, AI denoiser
