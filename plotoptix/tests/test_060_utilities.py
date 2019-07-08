@@ -102,6 +102,27 @@ class TestScene(TestCase):
         self.assertTrue(c.flags['C_CONTIGUOUS'], msg="Output array is not c-contiguous.")
         self.assertTrue(np.allclose(x, t), msg="Output content is wrong.")
 
+        x = np.random.rand(3, 4)
+        c = make_color_2d(x, exposure=e, gamma=g)
+        t = np.power(e * c, 1 / g)
+
+        self.assertTrue(c.dtype == np.float32, msg="Data type is not np.float32.")
+        self.assertTrue(c.flags['C_CONTIGUOUS'], msg="Output array is not c-contiguous.")
+        self.assertTrue(c.shape == x.shape + (3,), msg="Output shape is not 2D RGB, (width,height,3).")
+        self.assertTrue(np.allclose(x, t[:,:,[0]].reshape(x.shape)), msg="Output content is wrong (R).")
+        self.assertTrue(np.allclose(x, t[:,:,[1]].reshape(x.shape)), msg="Output content is wrong (G).")
+        self.assertTrue(np.allclose(x, t[:,:,[2]].reshape(x.shape)), msg="Output content is wrong (B).")
+
+        x = np.random.rand(3, 4, 3)
+        c = make_color_2d(x, exposure=e, gamma=g)
+        t = np.power(e * c, 1 / g)
+
+        self.assertTrue(c.dtype == np.float32, msg="Data type is not np.float32.")
+        self.assertTrue(c.flags['C_CONTIGUOUS'], msg="Output array is not c-contiguous.")
+        self.assertTrue(c.shape == x.shape, msg="Output shape is not preserving 2D RGB of the input shape.")
+        self.assertTrue(np.allclose(x, t), msg="Output content is wrong.")
+
+
     def test030_map_to_colors(self):
 
         x = np.linspace(-1, 2, 10)

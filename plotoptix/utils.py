@@ -66,7 +66,7 @@ def _make_contiguous_vector(a: Optional[Any], n_dim: int) -> Optional[np.ndarray
 
     return a
 
-def _make_contiguous_3d(a: Optional[Any], n: int = -1, extend_scalars = False) -> Optional[np.ndarray]:
+def _make_contiguous_3d(a: Optional[Any], n: int = -1, extend_scalars: bool = False) -> Optional[np.ndarray]:
     if a is None: return None
 
     if not isinstance(a, np.ndarray): a = np.ascontiguousarray(a, dtype=np.float32)
@@ -111,13 +111,49 @@ def _make_contiguous_3d(a: Optional[Any], n: int = -1, extend_scalars = False) -
 
     return a
 
+def _make_contiguous_2x3d(a: Optional[Any], extend_scalars: bool = False) -> Optional[np.ndarray]:
+    if a is None: return None
+
+    if not isinstance(a, np.ndarray): a = np.ascontiguousarray(a, dtype=np.float32)
+
+    if a.dtype != np.float32: a = np.ascontiguousarray(a, dtype=np.float32)
+
+    if len(a.shape) > 3:
+        raise ValueError("Input shape should be (n,m) or (n,m,3).")
+
+    if len(a.shape) == 2:
+        _a = np.zeros(a.shape + (3,), dtype=np.float32)
+        if extend_scalars:
+            _a[:,:,0] = a[:]
+            _a[:,:,1] = a[:]
+            _a[:,:,2] = a[:]
+        else:
+            _a[:,:,0] = a[:]
+        a = _a
+
+    elif len(a.shape) == 3 and a.shape[-1] != 3:
+        _a = np.zeros(a.shape[:2] + (3,), dtype=np.float32)
+        if a.shape[-1] == 1:
+            if extend_scalars:
+                _a[:,:,0] = a[:,0]
+                _a[:,:,1] = a[:,0]
+                _a[:,:,2] = a[:,0]
+            else:
+                _a[:,:,0] = a[:,0]
+        elif a.shape[-1] == 2: _a[:,:,[0,1]] = a[:,:,[0,1]]
+        else: _a[:,:,[0,1,2]] = a[:,:,[0,1,2]]
+        a = _a
+
+    if not a.flags['C_CONTIGUOUS']: a = np.ascontiguousarray(a, dtype=np.float32)
+
+    return a
 
 def make_color(c: Any,
                exposure: float = 1.0,
                gamma: float = 1.0,
                input_range: float = 1.0,
                extend_scalars: bool = True) -> np.ndarray:
-    """Prepare colors to account for the postprocessing corrections.
+    """Prepare 1D array of colors to account for the postprocessing corrections.
 
     Colors of geometry objects or background in the ray traced image may
     look very different than expected from raw color values assigned at
@@ -152,6 +188,49 @@ def make_color(c: Any,
         to account for post-processing corrections.
     """
     c = _make_contiguous_3d(c, extend_scalars=extend_scalars)
+    return (1 / exposure) * np.power((1 / input_range) * c, gamma)
+
+def make_color_2d(c: Any,
+                  exposure: float = 1.0,
+                  gamma: float = 1.0,
+                  input_range: float = 1.0,
+                  extend_scalars: bool = True) -> np.ndarray:
+    """Prepare 2D array of colors to account for the postprocessing corrections.
+
+    Colors of geometry objects in the ray traced image may look very different
+    than expected from raw color values assigned at objects initialization, if
+    post-processing corrections are applied. This method applies inverse gamma
+    and exposure corrections and returns RGB values resulting with desired colors
+    in the image.
+
+    Input values range may be specified, so RGB can be provided as e.g. 0-255
+    values, for convenience.
+
+    Input array shape should be ``(n, m)``, ``(n, m, 1)``, or  ``(n, m, 3)``.
+    The output array shape is ``(n, m, 3)``. Single scalar values are treated as
+    a gray levels if ``extend_scalars=True``.
+
+    Parameters
+    ----------
+    c : Any
+        Target color values, array_like of shape ``(n, m)``, ``(n, m, 1)``,
+        or  ``(n, m, 3)``.
+    exposure : float, optional
+        Exposure value applied in post-processing.
+    gamma : float, optional
+        Gamma value applied in post-processing.
+    input_range : float, optional
+        Range of the input color values.
+    extend_scalars : bool, optional
+        Convert single scalar values to gray levels encoded as RGB.
+
+    Returns
+    -------
+    out : np.ndarray
+        C-contiguous, float32 numpy array with RGB color values pre-calculated
+        to account for post-processing corrections.
+    """
+    c = _make_contiguous_2x3d(c, extend_scalars=extend_scalars)
     return (1 / exposure) * np.power((1 / input_range) * c, gamma)
 
 

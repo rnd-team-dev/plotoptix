@@ -1,6 +1,14 @@
 Release history
 ===============
 
+v0.4.1 - unreleased
+-------------------
+
+Added
+~~~~~
+
+- 2D color preprocessing utility
+
 `v0.4.0`_ - 2019-07-06
 ----------------------
 

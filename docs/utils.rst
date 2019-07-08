@@ -5,6 +5,7 @@ Colors
 ------
 
 .. automethod:: plotoptix.utils.make_color
+.. automethod:: plotoptix.utils.make_color_2d
 .. automethod:: plotoptix.utils.map_to_colors
 
 Image I/O
