@@ -24,7 +24,7 @@ You'll find here super-basic examples of displaying data, like scatter plots or 
 
 ![screenshots2](https://plotoptix.rnd.team/images/light_shading_modes.jpg "PlotOptiX light shading")
 
-...or usage of refraction index and textures:
+...or usage of material properties such as refraction index and textures:
 
 ![screenshots3](https://plotoptix.rnd.team/images/refractions_dispersion_textures.jpg "PlotOptiX light dispersion and textures")
 
