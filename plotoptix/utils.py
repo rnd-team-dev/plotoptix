@@ -337,10 +337,10 @@ def read_image(file_name: str, normalized: bool = False) -> Optional[np.ndarray]
 
     img = None
     if normalized:
-        if _optix.read_image_normalized(file_name, data.ctypes.data, c_width, c_height, c_spp):
+        if _optix.read_image_normalized(file_name, data.ctypes.data, c_width.value, c_height.value, c_spp.value):
             img = data
     else:
-        if _optix.read_image(file_name, data.ctypes.data, c_width, c_height, c_spp, c_bps):
+        if _optix.read_image(file_name, data.ctypes.data, c_width.value, c_height.value, c_spp.value, c_bps.value):
             img = data
     return img
 
