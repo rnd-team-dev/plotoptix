@@ -24,9 +24,13 @@ You'll find here super-basic examples of displaying data, like scatter plots or 
 
 ![screenshots2](https://plotoptix.rnd.team/images/light_shading_modes.jpg "PlotOptiX light shading")
 
+...or usage of refraction index and textures:
+
+![screenshots3](https://plotoptix.rnd.team/images/refractions_dispersion_textures.jpg "PlotOptiX light dispersion and textures")
+
 ...or 2D postprocessing algorithms:
 
-![screenshots2](https://plotoptix.rnd.team/images/postprocessing.jpg "PlotOptiX 2D postprocessing")
+![screenshots4](https://plotoptix.rnd.team/images/postprocessing.jpg "PlotOptiX 2D postprocessing")
 
 ### 2. Animations and callbacks
 
@@ -34,7 +38,7 @@ Callbacks in PlotOptiX are widely available throughout the raytracing process. Y
 
 GitHub can render notebooks content, so it is best to look at descriptions inlined in the code there.
 
-![screenshots3](https://plotoptix.rnd.team/images/notebook_screens.jpg "PlotOptiX in notebook screenshots")
-![screenshots4](https://plotoptix.rnd.team/images/notebook_screens_2.jpg "PlotOptiX in notebook screenshots")
+![screenshots5](https://plotoptix.rnd.team/images/notebook_screens.jpg "PlotOptiX in notebook screenshots")
+![screenshots6](https://plotoptix.rnd.team/images/notebook_screens_2.jpg "PlotOptiX in notebook screenshots")
 
 *Progressing with more examples...*
