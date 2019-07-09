@@ -98,9 +98,7 @@ def _make_contiguous_3d(a: Optional[Any], n: int = -1, extend_scalars: bool = Fa
         _a = np.zeros((a.shape[0], 3), dtype=np.float32)
         if a.shape[-1] == 1:
             if extend_scalars:
-                _a[:,0] = a[:,0]
-                _a[:,1] = a[:,0]
-                _a[:,2] = a[:,0]
+                _a = np.repeat(a, 3).reshape((a.shape[0], 3))
             else:
                 _a[:,0] = a[:,0]
         elif a.shape[-1] == 2: _a[:,[0,1]] = a[:,[0,1]]
@@ -124,22 +122,18 @@ def _make_contiguous_2x3d(a: Optional[Any], extend_scalars: bool = False) -> Opt
     if len(a.shape) == 2:
         _a = np.zeros(a.shape + (3,), dtype=np.float32)
         if extend_scalars:
-            _a[:,:,0] = a[:]
-            _a[:,:,1] = a[:]
-            _a[:,:,2] = a[:]
+            _a = np.repeat(a, 3).reshape(a.shape + (3,))
         else:
-            _a[:,:,0] = a[:]
+            _a[...,0] = a[:]
         a = _a
 
     elif len(a.shape) == 3 and a.shape[-1] != 3:
         _a = np.zeros(a.shape[:2] + (3,), dtype=np.float32)
         if a.shape[-1] == 1:
             if extend_scalars:
-                _a[:,:,0] = a[:,0]
-                _a[:,:,1] = a[:,0]
-                _a[:,:,2] = a[:,0]
+                _a = np.repeat(a, 3).reshape(a.shape[:2] + (3,))
             else:
-                _a[:,:,0] = a[:,0]
+                _a[...,0] = a[:,0]
         elif a.shape[-1] == 2: _a[:,:,[0,1]] = a[:,:,[0,1]]
         else: _a[:,:,[0,1,2]] = a[:,:,[0,1,2]]
         a = _a
@@ -187,8 +181,15 @@ def make_color(c: Any,
         C-contiguous, float32 numpy array with RGB color values pre-calculated
         to account for post-processing corrections.
     """
-    c = _make_contiguous_3d(c, extend_scalars=extend_scalars)
-    return (1 / exposure) * np.power((1 / input_range) * c, gamma)
+    if isinstance(c, np.ndarray):
+        c = c.astype(np.float32)
+    else:
+        c = np.ascontiguousarray(c, dtype=np.float32)
+
+    if input_range != 1.0: c *= (1 / input_range)
+    if gamma != 1.0: c = np.power(c, gamma, dtype=np.float32)
+    if exposure != 1.0: c *= (1 / exposure)
+    return _make_contiguous_3d(c, extend_scalars=extend_scalars)
 
 def make_color_2d(c: Any,
                   exposure: float = 1.0,
@@ -230,8 +231,15 @@ def make_color_2d(c: Any,
         C-contiguous, float32 numpy array with RGB color values pre-calculated
         to account for post-processing corrections.
     """
-    c = _make_contiguous_2x3d(c, extend_scalars=extend_scalars)
-    return (1 / exposure) * np.power((1 / input_range) * c, gamma)
+    if isinstance(c, np.ndarray):
+        c = c.astype(np.float32)
+    else:
+        c = np.ascontiguousarray(c, dtype=np.float32)
+
+    if input_range != 1.0: c *= (1 / input_range)
+    if gamma != 1.0: c = np.power(c, gamma, dtype=np.float32)
+    if exposure != 1.0: c *= (1 / exposure)
+    return _make_contiguous_2x3d(c, extend_scalars=extend_scalars)
 
 
 def map_to_colors(x: Any, cm_name: str) -> np.ndarray:
@@ -288,17 +296,20 @@ def get_image_meta(file_name: str) -> Tuple[Optional[int], Optional[int], Option
     else:
         return None, None, None, None
 
-def read_image(file_name: str) -> Optional[np.ndarray]:
+def read_image(file_name: str, normalized: bool = False) -> Optional[np.ndarray]:
     """Read image from file.
 
     Read image file into numpy array. Array shape is ``(height, width, 3(4))`` for RGB(A) images
     and ``(height, width)`` for grayscale images. Image data type is preserved (``numpy.uint8``
-    or ``numpy.uint16``).
+    or ``numpy.uint16``) by default, or values are scaled to ``[0; 1]`` range and ``numpy.float32``
+    type is returned, if ``normalized`` is set to ``True``. Color channel order is preserved.
 
     Parameters
     ----------
     file_name : string
         Image file name.
+    normalized : bool, optional
+        Normalize values to ``[0; 1]`` range.
 
     Returns
     -------
@@ -312,19 +323,26 @@ def read_image(file_name: str) -> Optional[np.ndarray]:
     if not _optix.get_image_meta(file_name, byref(c_width), byref(c_height), byref(c_spp), byref(c_bps)):
         return None
 
-    if c_bps.value == 8: t = np.uint8
-    elif c_bps.value == 16: t = np.uint16
-    else: raise ValueError("Image bits per sample value not supported.")
+    if normalized:
+        t = np.float32
+    else:
+        if c_bps.value == 8: t = np.uint8
+        elif c_bps.value == 16: t = np.uint16
+        else: raise ValueError("Image bits per sample value not supported.")
 
     if c_spp.value == 1: data = np.zeros((c_height.value, c_width.value), dtype=t)
     else: data = np.zeros((c_height.value, c_width.value, c_spp.value), dtype=t)
 
     if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=t)
 
-    if _optix.read_image(file_name, data.ctypes.data, c_width, c_height, c_spp, c_bps):
-        return data
+    img = None
+    if normalized:
+        if _optix.read_image_normalized(file_name, data.ctypes.data, c_width, c_height, c_spp):
+            img = data
     else:
-        return None
+        if _optix.read_image(file_name, data.ctypes.data, c_width, c_height, c_spp, c_bps):
+            img = data
+    return img
 
 def simplex(pos: Any, noise: Optional[np.ndarray] = None) -> np.ndarray:
     """Generate simplex noise.

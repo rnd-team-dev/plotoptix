@@ -8,6 +8,12 @@ Added
 ~~~~~
 
 - 2D color preprocessing utility
+- reading normalized images
+
+Fixed
+~~~~~
+
+- read_image method name in linux library loader
 
 `v0.4.0`_ - 2019-07-06
 ----------------------
