@@ -137,10 +137,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ###############################################################
 
     def __del__(self):
-        """Release resources if destructed before starting the ray tracing thread.
+        """Release resources.
         """
         if self._is_scene_created and not self._is_closed:
-            self._optix.destroy_scene()
+            if self._is_started: self.close()
+            else: self._optix.destroy_scene()
 
     def get_gpu_architecture(self, ordinal: int) -> Optional[GpuArchitecture]:
         """Get SM architecture of selected GPU.
