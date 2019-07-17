@@ -1,6 +1,14 @@
 Release history
 ===============
 
+v0.4.2 - unreleased
+-------------------
+
+Fixed
+~~~~~
+
+- OptiX-CUDA interop: readback buffer pointer is now obtained for a single GPU in multi-GPU systems, this solves issue on multi-GPU systems
+
 `v0.4.1`_ - 2019-07-14
 ----------------------
 
