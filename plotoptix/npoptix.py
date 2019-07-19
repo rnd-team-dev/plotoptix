@@ -1755,6 +1755,38 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         return self._optix.get_light_r(self.light_handles[name])
 
+    def get_light(self, name: str) -> Optional[dict]:
+        """Get light source parameters.
+
+        Parameters
+        ----------
+        name : string
+            Name of the light source.
+
+        Returns
+        -------
+        out : dict, optional
+            Dictionary of the light source parameters or ``None`` if
+            failed on accessing the data.
+        """
+        if name is None: raise ValueError()
+
+        if not isinstance(name, str): name = str(name)
+
+        if name not in self.light_handles:
+            msg = "Light %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return None
+
+        s = self._optix.get_light(self.light_handles[name])
+        if len(s) > 2: return json.loads(s)
+        else:
+            msg = "Failed on reading light %s." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+            return None
+
     def setup_spherical_light(self, name: str, pos: Optional[Any] = None,
                               autofit_camera: Optional[str] = None,
                               color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),

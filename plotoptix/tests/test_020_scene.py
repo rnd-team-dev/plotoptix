@@ -175,6 +175,12 @@ class TestScene(TestCase):
         self.assertTrue(np.array_equal(TestScene.scene.get_light_u("test_light2"), u), msg="Light 2 U did not match.")
         self.assertTrue(np.array_equal(TestScene.scene.get_light_v("test_light2"), v), msg="Light 2 V did not match.")
 
+        l1 = TestScene.scene.get_light("test_light1")
+        self.assertTrue(l1["Type"] == Light.Spherical.value, msg="Light 1 type did not match.")
+
+        l2 = TestScene.scene.get_light("test_light2")
+        self.assertTrue(l2["Type"] == Light.Parallelogram.value, msg="Light 1 type did not match.")
+
     #todo test new geometry
 
     def test070_start_rt(self):

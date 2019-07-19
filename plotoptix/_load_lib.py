@@ -286,6 +286,9 @@ def _load_optix_win():
     optix.get_light_r.argtypes = [c_int]
     optix.get_light_r.restype = c_float
 
+    optix.get_light.argtypes = [c_int]
+    optix.get_light.restype = c_wchar_p
+
     optix.set_light_shading.argtypes = [c_int]
     optix.set_light_shading.restype = c_bool
 
@@ -681,6 +684,8 @@ class _ClrOptiX:
         return self._optix.get_light_v_ptr(handle, IntPtr.__overloads__[Int64](v))
 
     def get_light_r(self, handle): return self._optix.get_light_r(handle)
+
+    def get_light(self, handle): return self._optix.get_light(handle)
 
     def setup_spherical_light(self, pos, color, r, in_geometry):
         return self._optix.setup_spherical_light_ptr(IntPtr.__overloads__[Int64](pos),
