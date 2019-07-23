@@ -1,8 +1,13 @@
 Release history
 ===============
 
-v0.4.2 - unreleased
--------------------
+`v0.4.2`_ - 2019-07-23
+----------------------
+
+Added
+~~~~~
+
+- method to get light source parameters in a dictionary
 
 Fixed
 ~~~~~
@@ -146,6 +151,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog w.r.t. this point.
 
+.. _`v0.4.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.2
 .. _`v0.4.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.1
 .. _`v0.4.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.0
 .. _`v0.3.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.3.1

@@ -19,6 +19,7 @@ Setup and update lighting
 Read back light properties
 --------------------------
 
+.. automethod:: plotoptix.NpOptiX.get_light
 .. automethod:: plotoptix.NpOptiX.get_light_color
 .. automethod:: plotoptix.NpOptiX.get_light_pos
 .. automethod:: plotoptix.NpOptiX.get_light_r

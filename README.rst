@@ -89,7 +89,8 @@ What's Included
 Installation
 ============
 
-**Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04, CentOS 7.
+**Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04, CentOS 7. PlotOptiX was also successfully tested on a Google Cloud Platform,
+using Compute Engine instance with 2x V100 GPU's and Ubuntu 18.04 image. Here is a script with the installation steps so you can save some precious time.
 
 Windows should be ready to go in most cases. You need to do some more typing in Linux. For video encoding you need to install CUDA toolkit in both Linux and Windows.
 
