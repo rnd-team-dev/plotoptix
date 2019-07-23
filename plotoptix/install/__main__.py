@@ -11,6 +11,9 @@ def main():
         if sys.argv[1] == "denoiser":
             from plotoptix.install.denoiser import install_denoiser
             result = install_denoiser()
+        elif sys.argv[1] == "examples":
+            from plotoptix.install.examples import install_examples
+            result = install_examples()
         else:
             print("Unknown package name %s." % sys.argv[1])
 
