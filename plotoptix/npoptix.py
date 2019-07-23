@@ -1099,6 +1099,34 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
+    def save_scene(self, file_name: str) -> None:
+        """Save scene JSON description to file.
+
+        Save description of the scene to file. Geometry objects, materials, lights,
+        cameras, postprocessing and scene parameters are included. Callback functions
+        and vieport dimensions are not saved. Existing files are overwritten.
+
+        Parameters
+        ----------
+        file_name : str
+            Output file name.
+        """
+        try:
+            self._padlock.acquire()
+
+            if not self._optix.save_scene_to_file(file_name):
+                msg = "Scene not saveed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+
+        finally:
+            self._padlock.release()
+
+
     def save_image(self, file_name: str) -> None:
         """Save current image to file.
 

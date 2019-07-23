@@ -8,6 +8,7 @@ Added
 ~~~~~
 
 - method to get light source parameters in a dictionary
+- examples installer - so examples compatible with the recent PyPI release can be downloaded locally without cloning the repository
 
 Fixed
 ~~~~~
