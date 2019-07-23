@@ -1,30 +1,30 @@
 curl -O http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.1.105-1_amd64.deb
 
-sudo dpkg -i cuda-repo-ubuntu1804_10.1.105-1_amd64.deb
-sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/7fa2af80.pub
+dpkg -i cuda-repo-ubuntu1804_10.1.105-1_amd64.deb
+apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/7fa2af80.pub
 
-sudo apt-get update
-sudo apt-get -y install cuda-10-1
+apt-get update
+apt-get -y install cuda-10-1
 
-sudo nvidia-smi -pm 1
+nvidia-smi -pm 1
 
-sudo apt -y install gnupg ca-certificates
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+apt -y install gnupg ca-certificates
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
-sudo apt update
+apt update
 
-sudo apt -y install mono-complete
+apt -y install mono-complete
 
-sudo apt -y install clang libglib2.0-dev python-dev
+apt -y install clang libglib2.0-dev python-dev
 
-sudo apt -y install python3-pip
-sudo pip3 install -U setuptools wheel pycparser
-sudo pip3 install -U pythonnet --egg
+apt -y install python3-pip
+pip3 install -U setuptools wheel pycparser
+pip3 install -U pythonnet --egg
 
-sudo apt-get -y install python3-tk
+apt-get -y install python3-tk
 
-sudo pip3 install -U packaging numpy Pillow python-dateutil matplotlib
-sudo pip3 install --index-url https://test.pypi.org/simple/ --no-deps plotoptix==0.4.1a0
+pip3 install -U packaging numpy Pillow python-dateutil matplotlib
+pip3 install --index-url https://test.pypi.org/simple/ --no-deps plotoptix==0.4.1a0
 
 
-sudo pip3 install -U plotoptix
+pip3 install -U plotoptix
