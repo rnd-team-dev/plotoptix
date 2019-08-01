@@ -76,6 +76,53 @@ class MissProgram(Enum):
     :meth:`plotoptix.NpOptiX.set_background`
     """
 
+    #Custom = 5
+    #"""Reserved for the future use.
+    #"""
+
+class GeomAttributeProgram(Enum):
+    """Geometry attributes program.
+    
+    Executed when the closest ray-object intersection is found. Calculates the
+    geometry and shading normals, texture coordinates and object.
+    """
+
+    Default = 0
+    """
+    """
+
+    ModulatedNormal = 1
+    """Modulated shading normal.
+    
+    Modifies shading normal according to the provided texture. Available with:
+    parallelograms, tetrahedrons, parallelepipeds, textured particles.
+    """
+
+    DisplacedSurface = 2
+    """Displaced surface position.
+    
+    Modifies surface position according to the provided texture. Available with
+    textured particles.
+    """
+
+    #Custom = 5
+    #"""Reserved for the future use.
+    #"""
+
+
+class TextureMapping(Enum):
+    """Texture projection mode.
+    """
+
+    Flat = 1
+    """Orthogonal projection on a flat surface.
+    """
+
+    Spherical = 2
+    """Projection on a spherical surface.
+    """
+
+
 class Geometry(Enum):
     """Geometry shapes.
     """
@@ -89,11 +136,21 @@ class Geometry(Enum):
     Each point can have individual radius and color.
     """
 
+    ParticleSetTextured = 4
+    """Spherical particle, 3D oriented, for each data point.
+
+    Each point can have individual radius and color. U and V vectors
+    allow for 3D orientation of each point so it can works best with
+    textures. Texture overrides individual flat colors of particles.
+
+    U vector points to the **north** of the particle, V vector sets
+    the zero **longitude** direction. V vector is orthogonalized to U.
+    """
+
     #ParticleNetConstL = 2
     #ParticleSetVarL = 3
-    #ParticleSetTextured = 4
     #BezierCurves = 5
-    
+
     BezierChain = 6
     """Bezier line interpolating data points.
 
@@ -268,6 +325,26 @@ class Channel(Enum):
 
     A = 4
     """Alpha channel.
+    """
+
+class ChannelOrder(Enum):
+    """Color channel ordering.
+    """
+
+    RGB = 1
+    """
+    """
+
+    BGR = 2
+    """
+    """
+
+    RGBA = 3
+    """
+    """
+
+    BGRA = 4
+    """
     """
 
 class Postprocessing(Enum):

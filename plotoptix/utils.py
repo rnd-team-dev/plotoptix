@@ -9,7 +9,7 @@ from typing import Any, Optional, Tuple, Union
 from matplotlib import cm
 
 from plotoptix._load_lib import load_optix
-from plotoptix.enums import GpuArchitecture
+from plotoptix.enums import GpuArchitecture, ChannelOrder
 
 _optix = load_optix()
 
@@ -17,7 +17,7 @@ _optix = load_optix()
 def get_gpu_architecture() -> Optional[GpuArchitecture]:
     """Get configured SM architecture.
 
-    Returns effective configuration of PTX selection and -arch option
+    Returns effective configuration of the PTX selection and ``-arch`` option
     of the shader compilation. Can verify matched SM architecture after
     constructing objects of :py:mod:`plotoptix.NpOptiX` and derived classes.
 
@@ -37,7 +37,7 @@ def get_gpu_architecture() -> Optional[GpuArchitecture]:
 def set_gpu_architecture(arch: Union[GpuArchitecture, str]) -> None:
     """Set SM architecture.
 
-    May be used to force pre-compiled PTX selection and -arch option
+    May be used to force pre-compiled PTX selection and ``-arch`` option
     of the shader compilation. Default value is
     :py:mod:`plotoptix.enums.GpuArchitecture.Auto`. Use before
     constructing objects of :py:mod:`plotoptix.NpOptiX` and derived
@@ -146,7 +146,8 @@ def make_color(c: Any,
                exposure: float = 1.0,
                gamma: float = 1.0,
                input_range: float = 1.0,
-               extend_scalars: bool = True) -> np.ndarray:
+               extend_scalars: bool = True,
+               channel_order: Union[ChannelOrder, str] = ChannelOrder.RGB) -> np.ndarray:
     """Prepare 1D array of colors to account for the postprocessing corrections.
 
     Colors of geometry objects or background in the ray traced image may
@@ -174,6 +175,8 @@ def make_color(c: Any,
         Range of the input color values.
     extend_scalars : bool, optional
         Convert single scalar and 1D arrays to gray values encoded as RGB.
+    channel_order : ChannelOrder, optional
+        Swap RGB to BGR and add aplha channel if necessary.
 
     Returns
     -------
@@ -181,6 +184,8 @@ def make_color(c: Any,
         C-contiguous, float32 numpy array with RGB color values pre-calculated
         to account for post-processing corrections.
     """
+    if isinstance(channel_order, str): channel_order = ChannelOrder[channel_order]
+
     if isinstance(c, np.ndarray):
         c = c.astype(np.float32)
     else:
@@ -189,13 +194,33 @@ def make_color(c: Any,
     if input_range != 1.0: c *= (1 / input_range)
     if gamma != 1.0: c = np.power(c, gamma, dtype=np.float32)
     if exposure != 1.0: c *= (1 / exposure)
-    return _make_contiguous_3d(c, extend_scalars=extend_scalars)
+    c = _make_contiguous_3d(c, extend_scalars=extend_scalars)
+
+    print("test")
+    if channel_order == ChannelOrder.RGBA:
+        _c = np.zeros((c.shape[0], 4))
+        print(_c.shape)
+        _c[:,:-1] = c
+        c = _c
+        if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+    elif channel_order == ChannelOrder.BGRA:
+        c[:,[0, 2]] = c[:,[2, 0]]
+        _c = np.zeros((c.shape[0], 4))
+        _c[:,:-1] = c
+        c = _c
+        if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+    elif channel_order == ChannelOrder.BGR:
+        c[:,[0, 2]] = c[:,[2, 0]]
+        if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+
+    return c
 
 def make_color_2d(c: Any,
                   exposure: float = 1.0,
                   gamma: float = 1.0,
                   input_range: float = 1.0,
-                  extend_scalars: bool = True) -> np.ndarray:
+                  extend_scalars: bool = True,
+                  channel_order: Union[ChannelOrder, str] = ChannelOrder.RGB) -> np.ndarray:
     """Prepare 2D array of colors to account for the postprocessing corrections.
 
     Colors of geometry objects in the ray traced image may look very different
@@ -224,6 +249,8 @@ def make_color_2d(c: Any,
         Range of the input color values.
     extend_scalars : bool, optional
         Convert single scalar values to gray levels encoded as RGB.
+    channel_order : ChannelOrder, optional
+        Swap RGB to BGR and add aplha channel if necessary.
 
     Returns
     -------
@@ -231,15 +258,34 @@ def make_color_2d(c: Any,
         C-contiguous, float32 numpy array with RGB color values pre-calculated
         to account for post-processing corrections.
     """
-    if isinstance(c, np.ndarray):
-        c = c.astype(np.float32)
-    else:
-        c = np.ascontiguousarray(c, dtype=np.float32)
+    if isinstance(channel_order, str): channel_order = ChannelOrder[channel_order]
+
+    if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
+
+    if isinstance(c, np.ndarray) and c.dtype != np.float32: c = c.astype(np.float32)
 
     if input_range != 1.0: c *= (1 / input_range)
     if gamma != 1.0: c = np.power(c, gamma, dtype=np.float32)
     if exposure != 1.0: c *= (1 / exposure)
-    return _make_contiguous_2x3d(c, extend_scalars=extend_scalars)
+
+    c = _make_contiguous_2x3d(c, extend_scalars=extend_scalars)
+
+    if channel_order == ChannelOrder.RGBA:
+        _c = np.zeros(c.shape[:2] + (4,))
+        _c[...,:-1] = c
+        c = _c
+        if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+    elif channel_order == ChannelOrder.BGRA:
+        c[...,[0, 2]] = c[...,[2, 0]]
+        _c = np.zeros(c.shape[:2] + (4,))
+        _c[...,:-1] = c
+        c = _c
+        if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+    elif channel_order == ChannelOrder.BGR:
+        c[...,[0, 2]] = c[...,[2, 0]]
+        if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+
+    return c
 
 
 def map_to_colors(x: Any, cm_name: str) -> np.ndarray:
@@ -303,6 +349,9 @@ def read_image(file_name: str, normalized: bool = False) -> Optional[np.ndarray]
     and ``(height, width)`` for grayscale images. Image data type is preserved (``numpy.uint8``
     or ``numpy.uint16``) by default, or values are scaled to ``[0; 1]`` range and ``numpy.float32``
     type is returned, if ``normalized`` is set to ``True``. Color channel order is preserved.
+
+    Tiff images are supported with size up to your memory limit (files >> GB are OK). Bmp, gif,
+    jpg, and png formats are supported as well.
 
     Parameters
     ----------

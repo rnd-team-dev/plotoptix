@@ -1,6 +1,15 @@
 Release history
 ===============
 
+0.4.3 - unreleased
+------------------
+
+Added
+~~~~~
+
+- particles geometry with 3D orientation (so textures can be applied), textured glass color
+- shading normal tilt with textures
+
 `v0.4.2`_ - 2019-07-23
 ----------------------
 

@@ -18,7 +18,6 @@
 .visible .global .align 1 .b8 mesh_tidx_buffer[1];
 .visible .global .align 1 .b8 mesh_normal_buffer[1];
 .visible .global .align 1 .b8 mesh_nidx_buffer[1];
-.visible .global .texref mesh_normaltilt_tex;
 .visible .global .align 4 .b8 tex_coord[12];
 .visible .global .align 4 .b8 geo_normal[12];
 .visible .global .align 4 .b8 shading_normal[12];

@@ -16,7 +16,7 @@
 .visible .global .align 1 .b8 particle_v_buffer[1];
 .visible .global .align 1 .b8 colors_buffer[1];
 .visible .global .align 1 .b8 radii_buffer[1];
-.visible .global .texref particle_normaltilt_tex;
+.visible .global .texref normaltilt_tex;
 .visible .global .texref particle_displacement_tex;
 .visible .global .align 4 .b8 tex_coord[12];
 .visible .global .align 4 .b8 geo_normal[12];
@@ -1147,7 +1147,7 @@ BB4_8:
 	st.global.f32 	[tex_coord+4], %f150;
 	mov.u32 	%r28, 0;
 	st.global.u32 	[tex_coord+8], %r28;
-	tex.2d.v4.f32.f32	{%f151, %f152, %f153, %f154}, [particle_normaltilt_tex, {%f122, %f150}];
+	tex.2d.v4.f32.f32	{%f151, %f152, %f153, %f154}, [normaltilt_tex, {%f122, %f150}];
 	mul.ftz.f32 	%f155, %f10, %f14;
 	mul.ftz.f32 	%f156, %f11, %f13;
 	sub.ftz.f32 	%f157, %f156, %f155;
@@ -1374,7 +1374,7 @@ BB4_15:
 	st.global.f32 	[tex_coord+4], %f282;
 	mov.u32 	%r52, 0;
 	st.global.u32 	[tex_coord+8], %r52;
-	tex.2d.v4.f32.f32	{%f283, %f284, %f285, %f286}, [particle_normaltilt_tex, {%f254, %f282}];
+	tex.2d.v4.f32.f32	{%f283, %f284, %f285, %f286}, [normaltilt_tex, {%f254, %f282}];
 	mul.ftz.f32 	%f287, %f24, %f28;
 	mul.ftz.f32 	%f288, %f25, %f27;
 	sub.ftz.f32 	%f289, %f288, %f287;
@@ -1800,7 +1800,7 @@ BB5_14:
 	st.global.f32 	[tex_coord+4], %f41;
 	mov.u32 	%r46, 0;
 	st.global.u32 	[tex_coord+8], %r46;
-	tex.2d.v4.f32.f32	{%f249, %f250, %f251, %f252}, [particle_normaltilt_tex, {%f40, %f41}];
+	tex.2d.v4.f32.f32	{%f249, %f250, %f251, %f252}, [normaltilt_tex, {%f40, %f41}];
 	mul.ftz.f32 	%f253, %f11, %f31;
 	mul.ftz.f32 	%f254, %f10, %f32;
 	sub.ftz.f32 	%f255, %f254, %f253;
