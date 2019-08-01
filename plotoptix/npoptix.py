@@ -2238,7 +2238,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self.setup_material(name, data)
         if refresh: self._optix.refresh_scene()
 
-    def update_material_texture(self, name: str, idx: int, data: Any, keep_on_host: bool = False, refresh: bool = False) -> None:
+    def update_material_texture(self, name: str, data: Any, idx: int = 0, keep_on_host: bool = False, refresh: bool = False) -> None:
         """Update material texture data.
 
         Update texture content/size for material ``name`` data. Texture format has to be RGBA,
@@ -2251,10 +2251,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         name : string
             Material name.
-        idx : int
-            Texture index.
         data : array_like
             Texture data.
+        idx : int, optional
+            Texture index, the first texture if the default is left.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
