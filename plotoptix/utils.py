@@ -196,16 +196,14 @@ def make_color(c: Any,
     if exposure != 1.0: c *= (1 / exposure)
     c = _make_contiguous_3d(c, extend_scalars=extend_scalars)
 
-    print("test")
     if channel_order == ChannelOrder.RGBA:
-        _c = np.zeros((c.shape[0], 4))
-        print(_c.shape)
+        _c = np.zeros((c.shape[0], 4), dtype=np.float32)
         _c[:,:-1] = c
         c = _c
         if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
     elif channel_order == ChannelOrder.BGRA:
         c[:,[0, 2]] = c[:,[2, 0]]
-        _c = np.zeros((c.shape[0], 4))
+        _c = np.zeros((c.shape[0], 4), dtype=np.float32)
         _c[:,:-1] = c
         c = _c
         if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
@@ -271,13 +269,13 @@ def make_color_2d(c: Any,
     c = _make_contiguous_2x3d(c, extend_scalars=extend_scalars)
 
     if channel_order == ChannelOrder.RGBA:
-        _c = np.zeros(c.shape[:2] + (4,))
+        _c = np.zeros(c.shape[:2] + (4,), dtype=np.float32)
         _c[...,:-1] = c
         c = _c
         if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
     elif channel_order == ChannelOrder.BGRA:
         c[...,[0, 2]] = c[...,[2, 0]]
-        _c = np.zeros(c.shape[:2] + (4,))
+        _c = np.zeros(c.shape[:2] + (4,), dtype=np.float32)
         _c[...,:-1] = c
         c = _c
         if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
