@@ -147,11 +147,11 @@ def _load_optix_win():
     optix.load_geom_inst_texture.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_float, c_float, c_uint, c_bool]
     optix.load_geom_inst_texture.restype = c_bool
 
-    optix.set_normal_tilt.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_int, c_bool, c_bool]
-    optix.set_normal_tilt.restype = c_bool
+    optix.set_displacement.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_int, c_int, c_bool, c_bool]
+    optix.set_displacement.restype = c_bool
 
-    optix.load_normal_tilt.argtypes = [c_wchar_p, c_wchar_p, c_int, c_float, c_bool]
-    optix.load_normal_tilt.restype = c_bool
+    optix.load_displacement.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_float, c_bool]
+    optix.load_displacement.restype = c_bool
 
     optix.resize_scene.argtypes = [c_int, c_int, c_void_p, c_int]
     optix.resize_scene.restype = c_bool
@@ -546,13 +546,13 @@ class _ClrOptiX:
     def load_geom_inst_texture(self, obj_name, tex_name, file_name, exposure, gamma, tformat, refresh):
         return self._optix.load_geom_texture(obj_name, tex_name, file_name, exposure, gamma, tformat, refresh)
 
-    def set_normal_tilt(self, obj_name, data_ptr, width, height, mapping, keep_on_host, refresh):
-        return self._optix.set_normal_tilt_ptr(obj_name,
-                                               IntPtr.__overloads__[Int64](data_ptr),
-                                               width, height, mapping, keep_on_host, refresh)
+    def set_displacement(self, obj_name, data_ptr, width, height, mapping, displacement, keep_on_host, refresh):
+        return self._optix.set_displacement_ptr(obj_name,
+                                                IntPtr.__overloads__[Int64](data_ptr),
+                                                width, height, mapping, displacement, keep_on_host, refresh)
 
-    def load_normal_tilt(self, obj_name, file_name, mapping, prescale, refresh):
-        return self._optix.load_normal_tilt(obj_name, file_name, mapping, prescale, refresh)
+    def load_displacement(self, obj_name, file_name, mapping, displacement, prescale, refresh):
+        return self._optix.load_displacement(obj_name, file_name, mapping, displacement, prescale, refresh)
 
 
     def resize_scene(self, width, height, buf_ptr, buf_size):

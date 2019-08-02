@@ -122,6 +122,18 @@ class TextureMapping(Enum):
     """Projection on a spherical surface.
     """
 
+class DisplacementMapping(Enum):
+    """Surface displacement mapping mode.
+    """
+
+    NormalTilt = 1
+    """Only the shading normal is affected.
+    """
+
+    DisplacedSurface = 2
+    """Surface is actually displaced, shading normal is tilted accordingly.
+    """
+
 
 class Geometry(Enum):
     """Geometry shapes.

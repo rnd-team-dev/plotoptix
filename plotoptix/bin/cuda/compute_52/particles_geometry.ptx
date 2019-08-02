@@ -16,8 +16,8 @@
 .visible .global .align 1 .b8 particle_v_buffer[1];
 .visible .global .align 1 .b8 colors_buffer[1];
 .visible .global .align 1 .b8 radii_buffer[1];
+.visible .global .texref displacement_tex;
 .visible .global .texref normaltilt_tex;
-.visible .global .texref particle_displacement_tex;
 .visible .global .align 4 .b8 tex_coord[12];
 .visible .global .align 4 .b8 geo_normal[12];
 .visible .global .align 4 .b8 shading_normal[12];
@@ -1641,7 +1641,7 @@ BB5_8:
 	div.approx.ftz.f32 	%f150, %f148, %f149;
 	mov.f32 	%f151, 0f3F000000;
 	sub.ftz.f32 	%f152, %f151, %f150;
-	tex.2d.v4.f32.f32	{%f153, %f154, %f155, %f156}, [particle_displacement_tex, {%f124, %f152}];
+	tex.2d.v4.f32.f32	{%f153, %f154, %f155, %f156}, [displacement_tex, {%f124, %f152}];
 	mul.ftz.f32 	%f157, %f1, %f153;
 	mul.ftz.f32 	%f158, %f157, %f157;
 	setp.ltu.ftz.f32	%p16, %f18, %f158;
@@ -1768,7 +1768,7 @@ BB5_14:
 	selp.f32	%f233, %f231, %f232, %p27;
 	div.approx.ftz.f32 	%f235, %f233, %f149;
 	sub.ftz.f32 	%f41, %f151, %f235;
-	tex.2d.v4.f32.f32	{%f237, %f238, %f239, %f240}, [particle_displacement_tex, {%f40, %f41}];
+	tex.2d.v4.f32.f32	{%f237, %f238, %f239, %f240}, [displacement_tex, {%f40, %f41}];
 	mul.ftz.f32 	%f241, %f1, %f237;
 	mul.ftz.f32 	%f242, %f289, %f241;
 	mul.ftz.f32 	%f243, %f241, %f242;
@@ -1850,7 +1850,7 @@ BB5_14:
 
 BB5_18:
 	ld.global.f32 	%f284, [scene_epsilon];
-	add.ftz.f32 	%f287, %f287, %f284;
+	fma.rn.ftz.f32 	%f287, %f284, 0f3F000000, %f287;
 	setp.le.ftz.f32	%p31, %f287, %f8;
 	@%p31 bra 	BB5_9;
 

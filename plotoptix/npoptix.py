@@ -818,13 +818,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
-    def set_normal_tilt(self, name: str, data: Any,
-                        mapping: Union[TextureMapping, str] = TextureMapping.Flat,
-                        keep_on_host: bool = False,
-                        refresh: bool = False) -> None:
-        """Set normal modulation data.
+    def set_displacement(self, name: str, data: Any,
+                         mapping: Union[TextureMapping, str] = TextureMapping.Flat,
+                         displacement: Union[DisplacementMapping, str] = DisplacementMapping.NormalTilt,
+                         keep_on_host: bool = False,
+                         refresh: bool = False) -> None:
+        """Set surface displacement data.
 
-        Set normal tilt data for the object ``name``. Geometry attribute program of the object
+        Set displacement data for the object ``name``. Geometry attribute program of the object
         has to be set to :attr:`plotoptix.enums.GeomAttributeProgram.ModulatedNormal` or
         :attr:`plotoptix.enums.GeomAttributeProgram.DisplacedSurface`. The ``data`` has to be
         a 2D array containing displacement mapping. Mapping defines how the normal tilt is
@@ -842,6 +843,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Displacement map data.
         mapping : TextureMapping or string, optional
             Mapping mode (see :class:`plotoptix.enums.TextureMapping`).
+        displacement : DisplacementMapping or string, optional
+            Displacement mode (see :class:`plotoptix.enums.DisplacementMapping`).
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -851,6 +854,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
 
         if isinstance(mapping, str): mapping = TextureMapping[mapping]
+        if isinstance(displacement, str): displacement = DisplacementMapping[displacement]
 
         if len(data.shape) != 2:
             msg = "Data shape should be (height,width)."
@@ -862,7 +866,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
 
         self._logger.info("Set normal modulation for %s: %d x %d.", name, data.shape[1], data.shape[0])
-        if not self._optix.set_normal_tilt(name, data.ctypes.data, data.shape[1], data.shape[0], mapping.value, keep_on_host, refresh):
+        if not self._optix.set_displacement(name, data.ctypes.data, data.shape[1], data.shape[0],
+                                            mapping.value, displacement.value, keep_on_host, refresh):
             msg = "%s normal modulation not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)

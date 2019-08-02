@@ -8,7 +8,7 @@ Added
 ~~~~~
 
 - particles geometry with 3D orientation (so textures can be applied), textured glass color
-- shading normal tilt with textures
+- shading normal tilt and surface displacement with textures
 
 `v0.4.2`_ - 2019-07-23
 ----------------------

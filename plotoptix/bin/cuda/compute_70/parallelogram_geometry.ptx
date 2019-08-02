@@ -20,9 +20,9 @@
 .visible .global .align 1 .b8 parallelepiped_v_buffer[1];
 .visible .global .align 1 .b8 parallelepiped_w_buffer[1];
 .visible .global .align 1 .b8 parallelepiped_col_buffer[1];
-.visible .global .align 4 .f32 normaltilt_iar = 0f3F800000;
+.visible .global .texref displacement_tex;
 .visible .global .texref normaltilt_tex;
-.visible .global .texref parallelogram_displacement_tex;
+.visible .global .align 4 .f32 normaltilt_iar = 0f3F800000;
 .visible .global .align 4 .b8 tex_coord[12];
 .visible .global .align 4 .b8 geo_normal[12];
 .visible .global .align 4 .b8 shading_normal[12];

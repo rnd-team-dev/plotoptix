@@ -22,6 +22,8 @@ Geometry
     :members:
 .. autoclass:: plotoptix.enums.TextureMapping
     :members:
+.. autoclass:: plotoptix.enums.DisplacementMapping
+    :members:
 
 Camera
 ------
