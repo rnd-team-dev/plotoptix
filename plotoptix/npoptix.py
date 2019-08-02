@@ -2268,7 +2268,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
 
-        if len(data.shape) != 3:
+        if len(data.shape) != 3 or data.shape[-1] != 4:
             msg = "Material texture shape should be (height,width,4)."
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
