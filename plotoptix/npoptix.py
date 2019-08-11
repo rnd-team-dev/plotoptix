@@ -826,7 +826,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Set surface displacement data.
 
         Set displacement data for the object ``name``. Geometry attribute program of the object
-        has to be set to :attr:`plotoptix.enums.GeomAttributeProgram.ModulatedNormal` or
+        has to be set to :attr:`plotoptix.enums.GeomAttributeProgram.NormalTilt` or
         :attr:`plotoptix.enums.GeomAttributeProgram.DisplacedSurface`. The ``data`` has to be
         a 2D array containing displacement mapping. Mapping defines how the normal tilt is
         calculated from the displacement map (see :class:`plotoptix.enums.TextureMapping`).

@@ -91,7 +91,7 @@ class GeomAttributeProgram(Enum):
     """
     """
 
-    ModulatedNormal = 1
+    NormalTilt = 1
     """Modulated shading normal.
     
     Modifies shading normal according to the provided texture. Available with:
@@ -109,6 +109,17 @@ class GeomAttributeProgram(Enum):
     #"""Reserved for the future use.
     #"""
 
+class DisplacementMapping(Enum):
+    """Surface displacement mapping mode.
+    """
+
+    NormalTilt = 1
+    """Only the shading normal is affected.
+    """
+
+    DisplacedSurface = 2
+    """Surface is actually displaced, shading normal is tilted accordingly.
+    """
 
 class TextureMapping(Enum):
     """Texture projection mode.
@@ -120,18 +131,6 @@ class TextureMapping(Enum):
 
     Spherical = 2
     """Projection on a spherical surface.
-    """
-
-class DisplacementMapping(Enum):
-    """Surface displacement mapping mode.
-    """
-
-    NormalTilt = 1
-    """Only the shading normal is affected.
-    """
-
-    DisplacedSurface = 2
-    """Surface is actually displaced, shading normal is tilted accordingly.
     """
 
 
@@ -448,7 +447,7 @@ class Postprocessing(Enum):
 
     Variables to configure:
     
-    - frame_mask, texture 2D, mask to apply
+    - frame_mask, grayscale texture 2D, mask to apply
 
     Examples
     --------
@@ -462,6 +461,14 @@ class Postprocessing(Enum):
     >>>
     >>> optix.set_texture_2d("frame_mask", M)
     >>> optix.add_postproc("Mask")
+    """
+
+    Overlay = 7
+    """2D overlay, applied to the image according to alpha channel.
+
+    Variables to configure:
+    
+    - frame_overlay, RGBA texture 2D, overlay to apply
     """
 
 class RtResult(Enum):
