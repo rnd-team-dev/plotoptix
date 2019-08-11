@@ -76,6 +76,64 @@ class MissProgram(Enum):
     :meth:`plotoptix.NpOptiX.set_background`
     """
 
+    #Custom = 5
+    #"""Reserved for the future use.
+    #"""
+
+class GeomAttributeProgram(Enum):
+    """Geometry attributes program.
+    
+    Executed when the closest ray-object intersection is found. Calculates the
+    geometry and shading normals, texture coordinates and object.
+    """
+
+    Default = 0
+    """
+    """
+
+    NormalTilt = 1
+    """Modulated shading normal.
+    
+    Modifies shading normal according to the provided texture. Available with:
+    parallelograms, tetrahedrons, parallelepipeds, textured particles.
+    """
+
+    DisplacedSurface = 2
+    """Displaced surface position.
+    
+    Modifies surface position according to the provided texture. Available with
+    textured particles.
+    """
+
+    #Custom = 5
+    #"""Reserved for the future use.
+    #"""
+
+class DisplacementMapping(Enum):
+    """Surface displacement mapping mode.
+    """
+
+    NormalTilt = 1
+    """Only the shading normal is affected.
+    """
+
+    DisplacedSurface = 2
+    """Surface is actually displaced, shading normal is tilted accordingly.
+    """
+
+class TextureMapping(Enum):
+    """Texture projection mode.
+    """
+
+    Flat = 1
+    """Orthogonal projection on a flat surface.
+    """
+
+    Spherical = 2
+    """Projection on a spherical surface.
+    """
+
+
 class Geometry(Enum):
     """Geometry shapes.
     """
@@ -89,11 +147,21 @@ class Geometry(Enum):
     Each point can have individual radius and color.
     """
 
+    ParticleSetTextured = 4
+    """Spherical particle, 3D oriented, for each data point.
+
+    Each point can have individual radius and color. U and V vectors
+    allow for 3D orientation of each point so it can works best with
+    textures. Texture overrides individual flat colors of particles.
+
+    U vector points to the **north** of the particle, V vector sets
+    the zero **longitude** direction. V vector is orthogonalized to U.
+    """
+
     #ParticleNetConstL = 2
     #ParticleSetVarL = 3
-    #ParticleSetTextured = 4
     #BezierCurves = 5
-    
+
     BezierChain = 6
     """Bezier line interpolating data points.
 
@@ -270,6 +338,26 @@ class Channel(Enum):
     """Alpha channel.
     """
 
+class ChannelOrder(Enum):
+    """Color channel ordering.
+    """
+
+    RGB = 1
+    """
+    """
+
+    BGR = 2
+    """
+    """
+
+    RGBA = 3
+    """
+    """
+
+    BGRA = 4
+    """
+    """
+
 class Postprocessing(Enum):
     """2D postprocessing stages.
 
@@ -359,7 +447,7 @@ class Postprocessing(Enum):
 
     Variables to configure:
     
-    - frame_mask, texture 2D, mask to apply
+    - frame_mask, grayscale texture 2D, mask to apply
 
     Examples
     --------
@@ -373,6 +461,14 @@ class Postprocessing(Enum):
     >>>
     >>> optix.set_texture_2d("frame_mask", M)
     >>> optix.add_postproc("Mask")
+    """
+
+    Overlay = 7
+    """2D overlay, applied to the image according to alpha channel.
+
+    Variables to configure:
+    
+    - frame_overlay, RGBA texture 2D, overlay to apply
     """
 
 class RtResult(Enum):

@@ -19,7 +19,8 @@ PlotOptiX
 
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
-of several basic shapes, finished with a photorealistic lighting and depth of field.
+of several basic shapes, or projected onto the surfaces of objects in form of a color textures and displacement maps. All finished with
+a photorealistic lighting and depth of field.
 
 No need to write shaders, intersection algorithms, handle 3D scene technicalities. Basic usage is even more simple than with
 `matplotlib <https://matplotlib.org/gallery/mplot3d/scatter3d.html>`__:
@@ -58,7 +59,7 @@ Features
 - parameterized materials shading: flat, diffuse, reflective, refractive (including light dispersion and nested volumes)
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
-- post-processing: tonal correction curves, levels adjustment, mask overlay, AI denoiser
+- post-processing: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
 - GPU acceleration using RT Cores, multi-GPU support, and everything else what comes with `OptiX 6.0 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats

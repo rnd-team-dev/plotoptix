@@ -1,6 +1,16 @@
 Release history
 ===============
 
+0.4.5 - unreleased
+------------------
+
+Added
+~~~~~
+
+- particles geometry with 3D orientation (so textures can be applied), textured glass color
+- shading normal tilt (particles, parallelograms, parellelepipeds, tetrahedrons) and surface displacement (particles) using texture data
+- overlay a texture in 2D postprocessing
+
 `v0.4.2`_ - 2019-07-23
 ----------------------
 

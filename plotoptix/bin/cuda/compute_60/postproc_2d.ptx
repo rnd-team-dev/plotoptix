@@ -25,6 +25,7 @@
 .visible .global .align 4 .b8 levels_low_range[12] = {111, 18, 131, 58, 111, 18, 131, 58, 111, 18, 131, 58};
 .visible .global .align 4 .b8 levels_high_range[12] = {119, 190, 127, 63, 119, 190, 127, 63, 119, 190, 127, 63};
 .visible .global .texref frame_mask;
+.visible .global .texref frame_overlay;
 .visible .global .align 4 .b8 _ZN21rti_internal_typeinfo12launch_indexE[8] = {82, 97, 121, 0, 8, 0, 0, 0};
 .visible .global .align 4 .b8 _ZN21rti_internal_typeinfo10launch_dimE[8] = {82, 97, 121, 0, 8, 0, 0, 0};
 .visible .global .align 4 .b8 _ZN21rti_internal_typeinfo16tonemap_exposureE[8] = {82, 97, 121, 0, 4, 0, 0, 0};
@@ -365,19 +366,16 @@
 
 )
 {
-	.reg .f32 	%f<22>;
+	.reg .f32 	%f<24>;
 	.reg .b32 	%r<17>;
 	.reg .b64 	%rd<15>;
 
 
 	ld.global.v2.u32 	{%r5, %r6}, [launch_index];
 	cvt.rn.f32.u32	%f1, %r5;
-	cvt.rn.f32.u32	%f2, %r6;
 	ld.global.v2.u32 	{%r9, %r10}, [launch_dim];
-	cvt.rn.f32.u32	%f3, %r9;
-	cvt.rn.f32.u32	%f4, %r10;
-	div.approx.ftz.f32 	%f5, %f1, %f3;
-	div.approx.ftz.f32 	%f6, %f2, %f4;
+	cvt.rn.f32.u32	%f2, %r9;
+	div.approx.ftz.f32 	%f3, %f1, %f2;
 	cvt.u64.u32	%rd3, %r5;
 	cvt.u64.u32	%rd4, %r6;
 	mov.u64 	%rd13, output_buffer;
@@ -388,18 +386,72 @@
 	// inline asm
 	call (%rd1), _rt_buffer_get_64, (%rd2, %r3, %r4, %rd3, %rd4, %rd12, %rd12);
 	// inline asm
-	tex.2d.v4.f32.f32	{%f7, %f8, %f9, %f10}, [frame_mask, {%f5, %f6}];
-	ld.v4.f32 	{%f11, %f12, %f13, %f14}, [%rd1];
+	cvt.rn.f32.u32	%f4, %r10;
+	cvt.rn.f32.u32	%f5, %r6;
+	div.approx.ftz.f32 	%f6, %f5, %f4;
+	mov.f32 	%f7, 0f3F800000;
+	sub.ftz.f32 	%f8, %f7, %f6;
+	tex.2d.v4.f32.f32	{%f9, %f10, %f11, %f12}, [frame_mask, {%f3, %f8}];
+	ld.v4.f32 	{%f13, %f14, %f15, %f16}, [%rd1];
 	ld.global.v2.u32 	{%r13, %r14}, [launch_index];
 	cvt.u64.u32	%rd9, %r13;
 	cvt.u64.u32	%rd10, %r14;
 	// inline asm
 	call (%rd7), _rt_buffer_get_64, (%rd2, %r3, %r4, %rd9, %rd10, %rd12, %rd12);
 	// inline asm
-	mul.ftz.f32 	%f18, %f7, %f13;
-	mul.ftz.f32 	%f19, %f7, %f12;
-	mul.ftz.f32 	%f20, %f7, %f11;
-	st.v4.f32 	[%rd7], {%f20, %f19, %f18, %f14};
+	mul.ftz.f32 	%f20, %f9, %f15;
+	mul.ftz.f32 	%f21, %f9, %f14;
+	mul.ftz.f32 	%f22, %f9, %f13;
+	st.v4.f32 	[%rd7], {%f22, %f21, %f20, %f16};
+	ret;
+}
+
+	// .globl	_Z19apply_frame_overlayv
+.visible .entry _Z19apply_frame_overlayv(
+
+)
+{
+	.reg .f32 	%f<27>;
+	.reg .b32 	%r<21>;
+	.reg .b64 	%rd<15>;
+
+
+	ld.global.v2.u32 	{%r5, %r6}, [launch_index];
+	cvt.rn.f32.u32	%f1, %r5;
+	ld.global.v2.u32 	{%r8, %r9}, [launch_dim];
+	cvt.rn.f32.u32	%f2, %r8;
+	div.approx.ftz.f32 	%f3, %f1, %f2;
+	cvt.rn.f32.u32	%f4, %r9;
+	cvt.rn.f32.u32	%f5, %r6;
+	div.approx.ftz.f32 	%f6, %f5, %f4;
+	mov.f32 	%f7, 0f3F800000;
+	sub.ftz.f32 	%f8, %f7, %f6;
+	tex.2d.v4.f32.f32	{%f9, %f10, %f11, %f12}, [frame_overlay, {%f3, %f8}];
+	ld.global.v2.u32 	{%r13, %r14}, [launch_index];
+	cvt.u64.u32	%rd3, %r13;
+	cvt.u64.u32	%rd4, %r14;
+	mov.u64 	%rd14, output_buffer;
+	cvta.global.u64 	%rd2, %rd14;
+	mov.u32 	%r3, 2;
+	mov.u32 	%r4, 16;
+	mov.u64 	%rd12, 0;
+	// inline asm
+	call (%rd1), _rt_buffer_get_64, (%rd2, %r3, %r4, %rd3, %rd4, %rd12, %rd12);
+	// inline asm
+	ld.v4.f32 	{%f13, %f14, %f15, %f16}, [%rd1];
+	sub.ftz.f32 	%f20, %f9, %f13;
+	sub.ftz.f32 	%f21, %f10, %f14;
+	sub.ftz.f32 	%f22, %f11, %f15;
+	ld.global.v2.u32 	{%r17, %r18}, [launch_index];
+	cvt.u64.u32	%rd9, %r17;
+	cvt.u64.u32	%rd10, %r18;
+	// inline asm
+	call (%rd7), _rt_buffer_get_64, (%rd2, %r3, %r4, %rd9, %rd10, %rd12, %rd12);
+	// inline asm
+	fma.rn.ftz.f32 	%f23, %f12, %f22, %f15;
+	fma.rn.ftz.f32 	%f24, %f12, %f21, %f14;
+	fma.rn.ftz.f32 	%f25, %f12, %f20, %f13;
+	st.v4.f32 	[%rd7], {%f25, %f24, %f23, %f16};
 	ret;
 }
 

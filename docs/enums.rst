@@ -18,6 +18,12 @@ Geometry
     :members:
 .. autoclass:: plotoptix.enums.GeomBuffer
     :members:
+.. autoclass:: plotoptix.enums.GeomAttributeProgram
+    :members:
+.. autoclass:: plotoptix.enums.TextureMapping
+    :members:
+.. autoclass:: plotoptix.enums.DisplacementMapping
+    :members:
 
 Camera
 ------
@@ -57,6 +63,8 @@ Other
 .. autoclass:: plotoptix.enums.Coordinates
     :members:
 .. autoclass:: plotoptix.enums.Channel
+    :members:
+.. autoclass:: plotoptix.enums.ChannelOrder
     :members:
 
 .. toctree::

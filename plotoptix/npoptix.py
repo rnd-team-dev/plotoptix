@@ -725,11 +725,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_texture_1d(self, name: str, data: Any, keep_on_host: bool = False, refresh: bool = False) -> None:
         """Set texture data.
 
-        Set data of the shader texture with given ``name``. Texture format
-        (float, float2 or float4) and lenght are deduced from the ``data`` array
-        shape. Use ``keep_on_host=True`` to make a copy of data in the host memory
-        (in addition to GPU memory), this option is required when (small) textures
-        are saved to JSON description of the scene.
+        Set texture ``name`` data. Texture format (float, float2 or float4) and
+        length are deduced from the ``data`` array shape. Use ``keep_on_host=True``
+        to make a copy of data in the host memory (in addition to GPU memory), this
+        option is required when (small) textures are going to be saved to JSON description
+        of the scene.
 
         Parameters
         ----------
@@ -773,11 +773,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_texture_2d(self, name: str, data: Any, keep_on_host: bool = False, refresh: bool = False) -> None:
         """Set texture data.
 
-        Set data of the shader texture with given ``name``. Texture format
-        (float, float2 or float4) and width/height are deduced from the ``data``
-        array shape. Use ``keep_on_host=True`` to make a copy of data in the
-        host memory (in addition to GPU memory), this option is required when
-        (small) textures are saved to JSON description of the scene.
+        Set texture ``name`` data. Texture format (float, float2 or float4) and
+        width/height are deduced from the ``data`` array shape. Use ``keep_on_host=True``
+        to make a copy of data in the host memory (in addition to GPU memory), this
+        option is required when (small) textures are going to be saved to JSON description
+        of the scene.
 
         Parameters
         ----------
@@ -815,6 +815,60 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.info("Set texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
         if not self._optix.set_texture_2d(name, data.ctypes.data, data.shape[1], data.shape[0], rt_format.value, keep_on_host, refresh):
             msg = "Texture 2D %s not uploaded." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+    def set_displacement(self, name: str, data: Any,
+                         mapping: Union[TextureMapping, str] = TextureMapping.Flat,
+                         displacement: Union[DisplacementMapping, str] = DisplacementMapping.NormalTilt,
+                         keep_on_host: bool = False,
+                         refresh: bool = False) -> None:
+        """Set surface displacement data.
+
+        Set displacement data for the object ``name``. Geometry attribute program of the object
+        has to be set to :attr:`plotoptix.enums.GeomAttributeProgram.NormalTilt` or
+        :attr:`plotoptix.enums.GeomAttributeProgram.DisplacedSurface`. The ``data`` has to be
+        a 2D array containing displacement mapping. Mapping defines how the normal tilt is
+        calculated from the displacement map (see :class:`plotoptix.enums.TextureMapping`).
+        
+        Use ``keep_on_host=True`` to make a copy of data in the host memory (in addition to GPU
+        memory), this option is required when (small) arrays are going to be saved to JSON
+        description of the scene.
+
+        Parameters
+        ----------
+        name : string
+            Varable name.
+        data : array_like
+            Displacement map data.
+        mapping : TextureMapping or string, optional
+            Mapping mode (see :class:`plotoptix.enums.TextureMapping`).
+        displacement : DisplacementMapping or string, optional
+            Displacement mode (see :class:`plotoptix.enums.DisplacementMapping`).
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+        if not isinstance(name, str): name = str(name)
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if isinstance(mapping, str): mapping = TextureMapping[mapping]
+        if isinstance(displacement, str): displacement = DisplacementMapping[displacement]
+
+        if len(data.shape) != 2:
+            msg = "Data shape should be (height,width)."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
+        if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        self._logger.info("Set normal modulation for %s: %d x %d.", name, data.shape[1], data.shape[0])
+        if not self._optix.set_displacement(name, data.ctypes.data, data.shape[1], data.shape[0],
+                                            mapping.value, displacement.value, keep_on_host, refresh):
+            msg = "%s normal modulation not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
@@ -2189,6 +2243,47 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self.setup_material(name, data)
         if refresh: self._optix.refresh_scene()
 
+    def update_material_texture(self, name: str, data: Any, idx: int = 0, keep_on_host: bool = False, refresh: bool = False) -> None:
+        """Update material texture data.
+
+        Update texture content/size for material ``name`` data. Texture format has to be RGBA,
+        width/height are deduced from the ``data`` array shape. Use ``keep_on_host=True``
+        to make a copy of data in the host memory (in addition to GPU memory), this
+        option is required when (small) textures are going to be saved to JSON description
+        of the scene.
+
+        Parameters
+        ----------
+        name : string
+            Material name.
+        data : array_like
+            Texture data.
+        idx : int, optional
+            Texture index, the first texture if the default is left.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+        if not isinstance(name, str): name = str(name)
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if len(data.shape) != 3 or data.shape[-1] != 4:
+            msg = "Material texture shape should be (height,width,4)."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
+        if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        self._logger.info("Set material %s texture %d: %d x %d.", name, idx, data.shape[1], data.shape[0])
+        if not self._optix.set_material_texture(name, idx, data.ctypes.data, data.shape[1], data.shape[0], RtFormat.Float4.value, keep_on_host, refresh):
+            msg = "Material %s texture not uploaded." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+
     def set_correction_curve(self, ctrl_points: Any,
                              channel: Union[Channel, str] = Channel.Gray,
                              n_points: int = 256,
@@ -2334,6 +2429,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                  r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
                  u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None,
                  geom: Union[Geometry, str] = Geometry.ParticleSet,
+                 geom_attr: Union[GeomAttributeProgram, str] = GeomAttributeProgram.Default,
                  mat: str = "diffuse",
                  rnd: bool = True) -> None:
         """Create new geometry for the dataset.
@@ -2357,17 +2453,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             parallelograms / parallelepipeds / tetrahedrons (if u / v / w not provided).
             Single value sets const. size for all primitives.
         u : array_like, optional
-            U vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
-            vector sets const. value for all primitives.
+            U vector(s) of parallelograms / parallelepipeds / tetrahedrons / textured particles.
+            Single vector sets const. value for all primitives.
         v : array_like, optional
-            V vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
-            vector sets const. value for all primitives.
+            V vector(s) of parallelograms / parallelepipeds / tetrahedrons / textured particles.
+            Single vector sets const. value for all primitives.
         w : array_like, optional
             W vector(s) of parallelepipeds / tetrahedrons. Single vector sets const.
             value for all primitives.
         geom : Geometry enum or string, optional
-            Geometry of primitives (ParticleSet, Tetrahedrons, ...). See Geometry
+            Geometry of primitives (ParticleSet, Tetrahedrons, ...). See :class:`plotoptix.enums.Geometry`
             enum.
+        geom_attr : GeomAttributeProgram enum or string, optional
+            Geometry attributes program. See :class:`plotoptix.enums.GeomAttributeProgram` enum.
         mat : string, optional
             Material name.
         rnd : bool, optional
@@ -2383,6 +2481,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if not isinstance(name, str): name = str(name)
         if isinstance(geom, str): geom = Geometry[geom]
+        if isinstance(geom_attr, str): geom_attr = GeomAttributeProgram[geom_attr]
 
         if name in self.geometry_handles:
             msg = "Geometry %s already exists, use update_data() instead." % name
@@ -2475,6 +2574,20 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
+        elif geom == Geometry.ParticleSetTextured:
+            if r is None:
+                msg = "ParticleSetTextured setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if (u is None) or (v is None):
+                if r is None:
+                    msg = "ParticleSetTextured setup failed, need U / V vectors or radii data."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    is_ok = False
+
         elif geom == Geometry.Parallelograms:
             if c is None:
                 msg = "Parallelograms setup failed, colors data is missing."
@@ -2527,7 +2640,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 self._padlock.acquire()
 
                 self._logger.info("Create %s %s, %d primitives...", geom.name, name, n_primitives)
-                g_handle = self._optix.setup_geometry(geom.value, name, mat, rnd, n_primitives,
+                g_handle = self._optix.setup_geometry(geom.value, geom_attr.value, name, mat, rnd, n_primitives,
                                                       pos_ptr, col_ptr, radii_ptr, u_ptr, v_ptr, w_ptr)
 
                 if g_handle > 0:
@@ -2552,7 +2665,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None) -> None:
         """Update data of an existing geometry.
 
-        Note that on data size changes (``pos`` array size different than provided on :meth:`plotoptix.NpOptiX.set_data`)
+        Note that on data size changes (``pos`` array size different than provided with :meth:`plotoptix.NpOptiX.set_data`)
         also other properties must be provided matching the new size, otherwise default values are used.
 
         Parameters
@@ -2570,11 +2683,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Radii of particles / bezier primitives. Single value sets constant
             radius for all primitives.
         u : array_like, optional
-            U vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
-            vector sets const. value for all primitives.
+            U vector(s) of parallelograms / parallelepipeds / tetrahedrons / textured particles.
+            Single vector sets const. value for all primitives.
         v : array_like, optional
-            V vector(s) of parallelograms / parallelepipeds / tetrahedrons. Single
-            vector sets const. value for all primitives.
+            V vector(s) of parallelograms / parallelepipeds / tetrahedrons / textured particles.
+            Single vector sets const. value for all primitives.
         w : array_like, optional
             W vector(s) of parallelepipeds / tetrahedrons. Single vector sets const.
             value for all primitives.
