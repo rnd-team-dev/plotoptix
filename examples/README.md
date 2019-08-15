@@ -1,6 +1,8 @@
 ## PlotOptiX examples
 
-Note, some fresh examples may use features available in the repository head, but not yet in the release submitted to PyPI.
+Note, some fresh examples may use features available in the repository head, but not yet in the release submitted to PyPI. Examples compatible with the PyPI release can be downloaded with::
+
+	python -m plotoptix.install examples
 
 ### 1. Basic plot making
 
