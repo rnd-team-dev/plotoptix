@@ -470,7 +470,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Variable name.
 
         Returns
         -------
@@ -495,7 +495,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Variable name.
 
         Returns
         -------
@@ -521,7 +521,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Variable name.
 
         Returns
         -------
@@ -552,7 +552,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Vairable name.
         x : float
             Variable value (x component in case of ``float2`` and ``float3``).
         y : float, optional
@@ -592,7 +592,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Variable name.
 
         Returns
         -------
@@ -617,7 +617,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Variable name.
 
         Returns
         -------
@@ -649,7 +649,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Variable name.
         x : int
             Variable value (x component in case of ``uint2``).
         y : int, optional
@@ -680,7 +680,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Variable name.
 
         Returns
         -------
@@ -710,7 +710,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Variable name.
         x : int
             Variable value.
         refresh : bool, optional
@@ -734,7 +734,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Texture name.
         data : array_like
             Texture data.
         keep_on_host : bool, optional
@@ -782,7 +782,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Texture name.
         data : array_like
             Texture data.
         keep_on_host : bool, optional
@@ -838,7 +838,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Varable name.
+            Object name.
         data : array_like
             Displacement map data.
         mapping : TextureMapping or string, optional
