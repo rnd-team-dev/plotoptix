@@ -1,8 +1,24 @@
 Release history
 ===============
 
-0.4.5 - unreleased
+0.4.6 - unreleased
 ------------------
+
+Added
+~~~~~
+
+Changes
+~~~~~~~
+
+- calculate normal tilt on the fly in surface displacement mode, speed not affected, much lower gpu memory footprint
+
+Fixed
+~~~~~
+
+- normal tilt mode in textured parallelepipeds bug resulting with transparent walls in some configs
+
+`0.4.5`_ - 2019-08-11
+---------------------
 
 Added
 ~~~~~
@@ -162,6 +178,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog w.r.t. this point.
 
+.. _`v0.4.5`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.5
 .. _`v0.4.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.2
 .. _`v0.4.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.1
 .. _`v0.4.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.0

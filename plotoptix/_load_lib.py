@@ -150,7 +150,7 @@ def _load_optix_win():
     optix.set_displacement.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_int, c_int, c_bool, c_bool]
     optix.set_displacement.restype = c_bool
 
-    optix.load_displacement.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_float, c_bool]
+    optix.load_displacement.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_float, c_float, c_bool]
     optix.load_displacement.restype = c_bool
 
     optix.resize_scene.argtypes = [c_int, c_int, c_void_p, c_int]
@@ -345,6 +345,11 @@ def _load_optix_win():
 
     optix.register_scene_rt_completed_callback.argtypes = [PARAM_INT_CALLBACK]
     optix.register_scene_rt_completed_callback.restype = c_bool
+
+    optix.get_compute_timeout.restype = c_int
+
+    optix.set_compute_timeout.argtypes = [c_int]
+    optix.set_compute_timeout.restype = c_bool
 
     optix.get_min_accumulation_step.restype = c_int
 
@@ -551,8 +556,8 @@ class _ClrOptiX:
                                                 IntPtr.__overloads__[Int64](data_ptr),
                                                 width, height, mapping, displacement, keep_on_host, refresh)
 
-    def load_displacement(self, obj_name, file_name, mapping, displacement, prescale, refresh):
-        return self._optix.load_displacement(obj_name, file_name, mapping, displacement, prescale, refresh)
+    def load_displacement(self, obj_name, file_name, mapping, displacement, prescale, baseline, refresh):
+        return self._optix.load_displacement(obj_name, file_name, mapping, displacement, prescale, baseline, refresh)
 
 
     def resize_scene(self, width, height, buf_ptr, buf_size):
@@ -791,6 +796,10 @@ class _ClrOptiX:
 
     def register_scene_rt_completed_callback(self, ptr):
         return self._optix.register_scene_rt_completed_callback_ptr(IntPtr.__overloads__[Int64](cast(ptr, c_void_p).value))
+
+    def get_compute_timeout(self): return self._optix.get_compute_timeout()
+
+    def set_compute_timeout(self, n): return self._optix.set_compute_timeout(n)
 
     def get_min_accumulation_step(self): return self._optix.get_min_accumulation_step()
 

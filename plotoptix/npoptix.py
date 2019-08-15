@@ -1077,7 +1077,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def get_param(self, name: str) -> None:
-        """Get raytracing parameter.
+        """Get raytracer parameter.
+
+        Available parameters:
+
+        - ``min_accumulation_step``
+        - ``set_max_accumulation_frames``
+        - ``compute_timeout``
 
         Parameters
         ----------
@@ -1101,6 +1107,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 v = self._optix.get_min_accumulation_step()
             elif name == "max_accumulation_frames":
                 v = self._optix.get_max_accumulation_frames()
+            elif key == "compute_timeout":
+                v = self._optix.get_compute_timeout()
             else:
                 msg = "Unknown parameter " + name
                 self._logger.error(msg)
@@ -1117,9 +1125,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         return v
 
     def set_param(self, **kwargs) -> None:
-        """Set raytracing parameter(s).
+        """Set raytracer parameter(s).
 
-        Set raytracing parameters (one or more) and start raytracing of the scene.
+        Set raytracer parameters (one or more).
+
+        Available parameters:
+
+        - ``min_accumulation_step``
+        - ``set_max_accumulation_frames``
+        - ``compute_timeout``
 
         Parameters
         ----------
@@ -1140,6 +1154,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     self._optix.set_min_accumulation_step(int(value))
                 elif key == "max_accumulation_frames":
                     self._optix.set_max_accumulation_frames(int(value))
+                elif key == "compute_timeout":
+                    self._optix.set_compute_timeout(int(value))
                 else:
                     msg = "Unknown parameter " + key
                     self._logger.error(msg)
