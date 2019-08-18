@@ -19,8 +19,8 @@ Fixed
 
 - normal tilt mode in textured parallelepipeds bug resulting with transparent walls in some configs
 
-`0.4.5`_ - 2019-08-11
----------------------
+`v0.4.5`_ - 2019-08-11
+----------------------
 
 Added
 ~~~~~

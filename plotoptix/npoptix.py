@@ -1661,6 +1661,34 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.fit_camera(cam_handle, geometry, scale)
 
+    def camera_move_by(self, shift: Tuple[float, float, float]) -> None:
+        """Move current camera in the world coordinates.
+
+        Parameters
+        ----------
+        shift : tuple (float, float, float)
+            (X, Y, Z) shift vector.
+        """
+        if not self._optix.move_camera_by(shift[0], shift[1], shift[2]):
+            msg = "Camera move failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+    def camera_move_by_local(self, shift: Tuple[float, float, float]) -> None:
+        """Move current camera in the camera coordinates.
+
+        Camera coordinates are: X to the right, Y up, Z towards camera.
+
+        Parameters
+        ----------
+        shift : tuple (float, float, float)
+            (X, Y, Z) shift vector.
+        """
+        if not self._optix.move_camera_by_local(shift[0], shift[1], shift[2]):
+            msg = "Camera move failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
     def camera_rotate_by(self,
                          rot: Tuple[float, float, float],
                          center: Tuple[float, float, float]) -> None:
@@ -1675,6 +1703,32 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         if not self._optix.rotate_camera_by(rot[0], rot[1], rot[2], center[0], center[1], center[2]):
             msg = "Camera rotate failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+    def camera_rotate_eye(self, rot: Tuple[float, float, float]) -> None:
+        """Rotate current camera eye about the target point in the world coordinates.
+
+        Parameters
+        ----------
+        rot : tuple (float, float, float)
+            Rotation around (X, Y, Z) axis.
+        """
+        if not self._optix.rotate_camera_eye(rot[0], rot[1], rot[2]):
+            msg = "Camera rotate eye failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+    def camera_rotate_target(self, rot: Tuple[float, float, float]) -> None:
+        """Rotate current camera target about the eye point in the world coordinates.
+
+        Parameters
+        ----------
+        rot : tuple (float, float, float)
+            Rotation around (X, Y, Z) axis.
+        """
+        if not self._optix.rotate_camera_tgt(rot[0], rot[1], rot[2]):
+            msg = "Camera rotate target failed."
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
