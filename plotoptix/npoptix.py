@@ -828,7 +828,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Set displacement data for the object ``name``. Geometry attribute program of the object
         has to be set to :attr:`plotoptix.enums.GeomAttributeProgram.NormalTilt` or
         :attr:`plotoptix.enums.GeomAttributeProgram.DisplacedSurface`. The ``data`` has to be
-        a 2D array containing displacement mapping. Mapping defines how the normal tilt is
+        a 2D array containing displacement mapping. ``mapping`` determines how the normal tilt is
         calculated from the displacement map (see :class:`plotoptix.enums.TextureMapping`).
         
         Use ``keep_on_host=True`` to make a copy of data in the host memory (in addition to GPU
@@ -865,10 +865,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
         if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
 
-        self._logger.info("Set normal modulation for %s: %d x %d.", name, data.shape[1], data.shape[0])
+        self._logger.info("Set displacement map for %s: %d x %d.", name, data.shape[1], data.shape[0])
         if not self._optix.set_displacement(name, data.ctypes.data, data.shape[1], data.shape[0],
                                             mapping.value, displacement.value, keep_on_host, refresh):
-            msg = "%s normal modulation not uploaded." % name
+            msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
@@ -1011,7 +1011,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if len(bg.shape) == 3:
             if bg.shape[-1] == 3:
                 b = np.zeros((bg.shape[0], bg.shape[1], 4), dtype=np.float32)
-                b[:,:,:-1] = bg
+                b[...,:-1] = bg
                 bg = b
 
             if bg.shape[-1] == 4:
@@ -1661,6 +1661,22 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.fit_camera(cam_handle, geometry, scale)
 
+    def camera_rotate_by(self,
+                         rot: Tuple[float, float, float],
+                         center: Tuple[float, float, float]) -> None:
+        """Rotate current camera.
+
+        Parameters
+        ----------
+        rot : tuple (float, float, float)
+            Rotation around (X, Y, Z) axis.
+        center : tuple (float, float, float)
+            Rotation center.
+        """
+        if not self._optix.rotate_camera_by(rot[0], rot[1], rot[2], center[0], center[1], center[2]):
+            msg = "Camera rotate failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
     def get_light_shading(self) -> Optional[LightShading]:
         """Get light shading mode.

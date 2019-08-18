@@ -248,6 +248,9 @@ def _load_optix_win():
     optix.set_current_camera.argtypes = [c_uint]
     optix.set_current_camera.restype = c_bool
 
+    optix.rotate_camera_by.argtypes = [c_float, c_float, c_float, c_float, c_float, c_float]
+    optix.rotate_camera_by.restype = c_bool
+
     optix.rotate_camera_eye.argtypes = [c_int, c_int, c_int, c_int]
     optix.rotate_camera_eye.restype = c_bool
 
@@ -694,6 +697,8 @@ class _ClrOptiX:
     def get_current_camera(self): return self._optix.get_current_camera()
 
     def set_current_camera(self, handle): return self._optix.set_current_camera(handle)
+
+    def rotate_camera_by(self, rx, ry, rz, cx, cy, cz): return self._optix.rotate_camera_by(rx, ry, rz, cx, cy, cz)
 
     def rotate_camera_eye(self, from_x, from_y, to_x, to_y): return self._optix.rotate_camera_eye(from_x, from_y, to_x, to_y)
 

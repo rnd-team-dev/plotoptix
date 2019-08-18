@@ -7,6 +7,8 @@ Release history
 Added
 ~~~~~
 
+- method to rotate camera about given point
+
 Changes
 ~~~~~~~
 
