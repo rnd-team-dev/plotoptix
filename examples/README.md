@@ -47,4 +47,8 @@ GitHub can render notebooks content, so it is best to look at descriptions inlin
 ![screenshots5](https://plotoptix.rnd.team/images/notebook_screens.jpg "PlotOptiX in notebook screenshots")
 ![screenshots6](https://plotoptix.rnd.team/images/notebook_screens_2.jpg "PlotOptiX in notebook screenshots")
 
-*Progressing with more examples...*
+### 3. Projects
+
+Collection of tutorials and artistic projects. Expect this section to grow slowly, as the projects are large and need lots of work to prepare. Let's start with the *"Making of the Moon"*.
+
+![moon ray_traced](https://plotoptix.rnd.team/images/moon_2res_banner.jpg "The Moon ray-traced")
