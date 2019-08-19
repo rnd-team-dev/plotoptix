@@ -719,9 +719,9 @@ class _ClrOptiX:
 
     def set_current_camera(self, handle): return self._optix.set_current_camera(handle)
 
-    def move_camera_by(self, dx, dy, dz): return self._optix.rotate_camera_by(dx, dy, dz)
+    def move_camera_by(self, dx, dy, dz): return self._optix.move_camera_by(dx, dy, dz)
 
-    def move_camera_by_local(self, dx, dy, dz): return self._optix.rotate_camera_by_local(dx, dy, dz)
+    def move_camera_by_local(self, dx, dy, dz): return self._optix.move_camera_by_local(dx, dy, dz)
 
     def rotate_camera_by(self, rx, ry, rz, cx, cy, cz): return self._optix.rotate_camera_by(rx, ry, rz, cx, cy, cz)
 
