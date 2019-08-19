@@ -1,8 +1,8 @@
 Release history
 ===============
 
-0.4.6 - unreleased
-------------------
+`0.4.6`_ - 2019-08-19
+---------------------
 
 Added
 ~~~~~
@@ -12,7 +12,7 @@ Added
 Changes
 ~~~~~~~
 
-- calculate normal tilt on the fly in surface displacement mode, speed not affected, much lower gpu memory footprint
+- calculate normal tilt on the fly in the surface displacement mode, speed not affected, much lower gpu memory footprint
 
 Fixed
 ~~~~~
@@ -180,6 +180,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog w.r.t. this point.
 
+.. _`v0.4.6`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.6
 .. _`v0.4.5`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.5
 .. _`v0.4.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.2
 .. _`v0.4.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.1

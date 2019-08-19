@@ -198,9 +198,9 @@ class TestScene(TestCase):
         self.assertFalse((cam is None) or (handle1 is None), msg="Could not get default camera.")
         self.assertTrue((cam == "default") and (handle1 > 0), msg="Wrong name / handle of the default camera: %s / %d." % (cam, handle1))
 
-        eye=[10, 10, 10]
-        target=[1, 1, 1]
-        up=[0, 0, 1]
+        eye=[10, 10, 0]
+        target=[1, 1, 0]
+        up=[-1, 1, 0]
         cam_type=Camera.DoF
         aperture_radius=0.2
         aperture_fract=0.3
@@ -222,8 +222,27 @@ class TestScene(TestCase):
         self.assertTrue(np.array_equal(TestScene.scene.get_camera_eye(cam), eye), msg="Camera eye did not match.")
         self.assertTrue(np.array_equal(TestScene.scene.get_camera_target(cam), target), msg="Camera target did not match.")
 
+        eye_array = np.array(eye)
+        tgt_array = np.array(target)
+        TestScene.scene.camera_move_by(tuple(-tgt_array))
+        TestScene.scene.camera_move_by_local((0, 0, -np.linalg.norm(eye_array - tgt_array)))
+        TestScene.scene.camera_rotate_target((0, 0, -np.pi/4))
+        TestScene.scene.camera_rotate_target_local((0, -np.pi/2, 0))
+        TestScene.scene.camera_rotate_eye((-np.pi/2, 0, 0))
+        TestScene.scene.camera_rotate_eye_local((0, 0, -np.pi/2))
+        TestScene.scene.camera_rotate_by((0, -np.pi/2, 0), (0, 0, 0))
+        print(TestScene.scene.get_camera())
+
+        atol = 0.0001
+        rtol = 0.0001
         cam_params = TestScene.scene.get_camera("test_cam1")
+        eye_dst = cam_params["Eye"]
+        tgt_dst = cam_params["Target"]
+        up_dst = cam_params["Up"]
         self.assertFalse(cam_params is None, msg="Could not get back parameters dictionary of the new camera.")
+        self.assertTrue(np.allclose(eye_dst, np.array([12.72792, 12.72792, 0]), rtol=rtol, atol=atol), msg="Move/rotate result wrong (eye).")
+        self.assertTrue(np.allclose(tgt_dst, np.array([12.72792, 0, 0]), rtol=rtol, atol=atol), msg="Move/rotate result wrong (target).")
+        self.assertTrue(np.allclose(up_dst, np.array([0.0, 0.0, 1.414214]), rtol=rtol, atol=atol), msg="Move/rotate result wrong (up).")
 
         #todo test camera with default values
 

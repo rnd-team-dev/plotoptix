@@ -469,6 +469,15 @@ class Postprocessing(Enum):
     Variables to configure:
     
     - frame_overlay, RGBA texture 2D, overlay to apply
+
+    Examples
+    --------
+    >>> optix = TkOptiX()
+    >>>
+    >>> # ...read or create overlay image
+    >>>
+    >>> optix.set_texture_2d("frame_overlay", M)
+    >>> optix.add_postproc("Overlay")
     """
 
 class RtResult(Enum):
