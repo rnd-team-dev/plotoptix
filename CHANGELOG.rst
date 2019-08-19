@@ -7,7 +7,7 @@ Release history
 Added
 ~~~~~
 
-- method to rotate camera about given point
+- methods to rotate camera about given point, eye about target, target about eye, in local and global coordinates
 
 Changes
 ~~~~~~~
