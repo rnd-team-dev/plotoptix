@@ -1714,7 +1714,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         rot : tuple (float, float, float)
             Rotation around (X, Y, Z) axis.
         """
-        if not self._optix.rotate_camera_eye(rot[0], rot[1], rot[2]):
+        if not self._optix.rotate_camera_eye_by(rot[0], rot[1], rot[2]):
             msg = "Camera rotate eye failed."
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1727,7 +1727,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         rot : tuple (float, float, float)
             Rotation around (X, Y, Z) axis.
         """
-        if not self._optix.rotate_camera_tgt(rot[0], rot[1], rot[2]):
+        if not self._optix.rotate_camera_tgt_by(rot[0], rot[1], rot[2]):
             msg = "Camera rotate target failed."
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
