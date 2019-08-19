@@ -257,17 +257,26 @@ def _load_optix_win():
     optix.rotate_camera_by.argtypes = [c_float, c_float, c_float, c_float, c_float, c_float]
     optix.rotate_camera_by.restype = c_bool
 
+    optix.rotate_camera_by_local.argtypes = [c_float, c_float, c_float, c_float, c_float, c_float]
+    optix.rotate_camera_by_local.restype = c_bool
+
     optix.rotate_camera_eye.argtypes = [c_int, c_int, c_int, c_int]
     optix.rotate_camera_eye.restype = c_bool
 
     optix.rotate_camera_eye_by.argtypes = [c_float, c_float, c_float]
     optix.rotate_camera_eye_by.restype = c_bool
 
+    optix.rotate_camera_eye_by_local.argtypes = [c_float, c_float, c_float]
+    optix.rotate_camera_eye_by_local.restype = c_bool
+
     optix.rotate_camera_tgt.argtypes = [c_int, c_int, c_int, c_int]
     optix.rotate_camera_tgt.restype = c_bool
 
     optix.rotate_camera_tgt_by.argtypes = [c_float, c_float, c_float]
     optix.rotate_camera_tgt_by.restype = c_bool
+
+    optix.rotate_camera_tgt_by_local.argtypes = [c_float, c_float, c_float]
+    optix.rotate_camera_tgt_by_local.restype = c_bool
 
     optix.get_camera_focal_scale.argtypes = [c_uint]
     optix.get_camera_focal_scale.restype = c_float
@@ -716,13 +725,19 @@ class _ClrOptiX:
 
     def rotate_camera_by(self, rx, ry, rz, cx, cy, cz): return self._optix.rotate_camera_by(rx, ry, rz, cx, cy, cz)
 
+    def rotate_camera_by_local(self, rx, ry, rz, cx, cy, cz): return self._optix.rotate_camera_by_local(rx, ry, rz, cx, cy, cz)
+
     def rotate_camera_eye(self, from_x, from_y, to_x, to_y): return self._optix.rotate_camera_eye(from_x, from_y, to_x, to_y)
 
     def rotate_camera_eye_by(self, rx, ry, rz): return self._optix.rotate_camera_eye_by(rx, ry, rz)
 
+    def rotate_camera_eye_by_local(self, rx, ry, rz): return self._optix.rotate_camera_eye_by_local(rx, ry, rz)
+
     def rotate_camera_tgt(self, from_x, from_y, to_x, to_y): return self._optix.rotate_camera_tgt(from_x, from_y, to_x, to_y)
 
     def rotate_camera_tgt_by(self, rx, ry, rz): return self._optix.rotate_camera_tgt_by(rx, ry, rz)
+
+    def rotate_camera_tgt_by_local(self, rx, ry, rz): return self._optix.rotate_camera_tgt_by_local(rx, ry, rz)
 
     def get_camera_focal_scale(self, handle): return self._optix.get_camera_focal_scale(handle)
 

@@ -15,8 +15,11 @@ Shifts and rotations
 .. automethod:: plotoptix.NpOptiX.camera_move_by
 .. automethod:: plotoptix.NpOptiX.camera_move_by_local
 .. automethod:: plotoptix.NpOptiX.camera_rotate_by
+.. automethod:: plotoptix.NpOptiX.camera_rotate_by_local
 .. automethod:: plotoptix.NpOptiX.camera_rotate_eye
+.. automethod:: plotoptix.NpOptiX.camera_rotate_eye_local
 .. automethod:: plotoptix.NpOptiX.camera_rotate_target
+.. automethod:: plotoptix.NpOptiX.camera_rotate_target_local
 
 Read back camera properties
 ---------------------------

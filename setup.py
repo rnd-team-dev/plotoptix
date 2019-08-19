@@ -119,7 +119,7 @@ except ImportError:
 
 
 setup(name='plotoptix',
-      version='0.4.5',
+      version='0.4.6',
       url='https://plotoptix.rnd.team',
       project_urls={
           'Documentation': 'https://plotoptix.rnd.team',
