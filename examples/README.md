@@ -49,6 +49,6 @@ GitHub can render notebooks content, so it is best to look at descriptions inlin
 
 ### 3. Projects
 
-Collection of tutorials and artistic projects. Expect this section to grow slowly. Projects are large and need lots of work to prepare. Let's start with the `Making of the Moon <https://github.com/rnd-team-dev/plotoptix/tree/master/examples/3_projects/moon>`__ , code and graphics are ready, now working on the tutorial text.
+Collection of tutorials and artistic projects. Expect this section to grow slowly. Projects are large and need lots of work to prepare. Let's start with the *"Making of the Moon"*, code and graphics are ready, now working on the tutorial text.
 
 ![moon ray_traced](https://plotoptix.rnd.team/images/moon_2res_banner.jpg "The Moon ray-traced with PlotOptiX")
