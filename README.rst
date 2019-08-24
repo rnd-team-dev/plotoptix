@@ -15,8 +15,6 @@ PlotOptiX
 
 **Note:** active development is continuing, expect changes.
 
-**GPU drivers note:** *seem that problems are gone with the recent NVIDIA driver updates but if you experience problems with drivers release 430/431 then drivers 419 (Windows) and 418 (Ubuntu, CentOS) are recommended*.
-
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
 of several basic shapes, or projected onto the surfaces of objects in form of a color textures and displacement maps. All finished with
@@ -74,7 +72,7 @@ System Requirements
 - Windows:
    - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
 - Linux:
-   - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2
+   - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2, recommended: 5.20.1
    - `pythonnet <http://pythonnet.github.io>`__ >= 2.4
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
 - for video encoding: `CUDA Toolkit v10.x <https://developer.nvidia.com/cuda-downloads>`__ (tested with v10.0 and v10.1)
@@ -89,6 +87,8 @@ What's Included
 
 Installation
 ============
+
+**GPU drivers note:** *seems that problems are gone with the recent NVIDIA driver updates but if you experience problems with drivers release 430/431 then drivers 419 (Windows) and 418 (Ubuntu, CentOS) are recommended*.
 
 **Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04, CentOS 7.
 
@@ -121,12 +121,22 @@ Check if / which Mono release is present in your system::
 
    mono -V
    
-   Mono JIT compiler **version 5.18.1.3** (tarball Tue Apr  9 16:16:30 UTC 2019)
+   Mono JIT compiler version 5.18.1.3 (tarball Tue Apr  9 16:16:30 UTC 2019)
       Copyright (C) 2002-2014 Novell, Inc, Xamarin Inc and Contributors. www.mono-project.com
 	   TLS:           __thread
       ... (output cropped for clarity) ...
 
 If ``mono`` command is not available, or the reported version is < 5.2, visit `Mono download page <https://www.mono-project.com/download/stable/#download-lin>`__ and follow instructions related to your Linux distribution. You want to install **mono-complete** package.
+
+**Note:** pythonnet 2.4.0 is not compatible with Mono 6.0; install Mono 5.20.1 instead::
+
+   sudo apt -y install gnupg ca-certificates
+   sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+
+   echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic/snapshots/5.20.1 main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+
+   sudo apt update
+   sudo apt -y install mono-complete
 
 *pythonnet:*
 
