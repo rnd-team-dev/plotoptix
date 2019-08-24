@@ -1,31 +1,39 @@
+# Prerequisites to run PlotOptiX on Google Cloud Platfom, Ubuntu 18.04 LTS Minimal instance.
+
 # install CUDA and GPU driver
 curl -O http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.1.105-1_amd64.deb
 
-dpkg -i cuda-repo-ubuntu1804_10.1.105-1_amd64.deb
-apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/7fa2af80.pub
+sudo dpkg -i cuda-repo-ubuntu1804_10.1.105-1_amd64.deb
+sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/7fa2af80.pub
 
-apt-get update
-apt-get -y install cuda-10-1
+sudo apt-get update
+sudo apt-get -y install cuda-10-1
 
-nvidia-smi -pm 1
+sudo nvidia-smi -pm 1
 
 # install Mono
-apt -y install gnupg ca-certificates
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
-apt update
+# note: due to incompatibiliby of Mono 6.0 and pythonnet 2.4.0, install Mono 5.20.1 
+sudo apt -y install gnupg ca-certificates
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 
-apt -y install mono-complete
+# this would install the most recent release:
+# echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+
+# use this to install Mono 5.20.1:
+echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic/snapshots/5.20.1 main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+
+sudo apt update
+sudo apt -y install mono-complete
 
 # install pythonnet
-apt -y install clang libglib2.0-dev python-dev
+sudo apt -y install clang libglib2.0-dev python-dev
 
-apt -y install python3-pip
-pip3 install -U setuptools wheel pycparser
-pip3 install -U pythonnet --egg
+sudo apt -y install python3-pip
+sudo pip3 install -U setuptools wheel pycparser
+sudo pip3 install -U pythonnet --egg
 
 # install Tk
-apt-get -y install python3-tk
+sudo apt-get -y install python3-tk
 
 # install PlotOptiX
-pip3 install -U plotoptix
+sudo pip3 install -U plotoptix
