@@ -1,0 +1,57 @@
+# Prerequisites to run the "Making of the Moon" example on Google Cloud Platfom.
+# Instructions assume Ubuntu 18.04 LTS Minimal instance.
+#
+# Configure at least:
+# - 6 CPU / 32 GB RAM
+# - 1 GPU
+# - 30 GB hard drive
+#
+# Allow HTTP traffic and open in the firewall a port for notebooks (or use the port
+# that is already open).
+#
+# Add your SSH key to enable SCP communication, you'll need to copy the notebook
+# file to the instance.
+#
+
+# install CUDA and GPU driver
+curl -O http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.1.105-1_amd64.deb
+
+sudo dpkg -i cuda-repo-ubuntu1804_10.1.105-1_amd64.deb
+sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/7fa2af80.pub
+
+sudo apt-get update
+sudo apt-get -y install cuda-10-1
+
+sudo nvidia-smi -pm 1
+
+# install Mono
+sudo apt -y install gnupg ca-certificates
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+
+# latest release (not compatible with pythonnet 2.4.0)
+#echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+
+# recommended release: 5.20.1
+echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic/snapshots/5.20.1 main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+
+sudo apt update
+sudo apt -y install mono-complete
+
+# install pythonnet
+sudo apt -y install clang libglib2.0-dev python-dev
+
+sudo apt -y install python3-pip
+sudo pip3 install -U setuptools wheel pycparser
+sudo pip3 install -U pythonnet --egg
+
+# install Tk
+sudo apt-get -y install python3-tk
+
+# install jupyterlab
+sudo pip3 install jupyterlab
+
+# install OpenCV
+sudo pip3 install opencv-python
+
+# install PlotOptiX
+sudo pip3 install -U plotoptix
