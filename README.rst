@@ -130,13 +130,13 @@ If ``mono`` command is not available, or the reported version is < 5.2, visit `M
 
 **Note:** pythonnet 2.4.0 is not compatible with Mono 6.0; install Mono 5.20.1 instead::
 
-   sudo apt -y install gnupg ca-certificates
-   sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+   apt -y install gnupg ca-certificates
+   apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 
    echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic/snapshots/5.20.1 main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
 
-   sudo apt update
-   sudo apt -y install mono-complete
+   apt update
+   apt -y install mono-complete
 
 *pythonnet:*
 
