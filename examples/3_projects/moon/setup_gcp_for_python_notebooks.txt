@@ -12,6 +12,11 @@
 # Add your SSH key to enable SCP communication, you'll need to copy the notebook
 # file to the instance.
 #
+# In the inscance, run the note notebook:
+# sudo jupyter notebook --no-browser --ip=0.0.0.0 --port=3389 --allow-root
+#
+# Copy the notebook link to your browser, replace addres with the instance IP.
+#
 
 # install CUDA and GPU driver
 curl -O http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.1.105-1_amd64.deb
