@@ -1,4 +1,4 @@
-# Prerequisites to run the "Making of the Moon" example on Google Cloud Platfom.
+# Prerequisites to run the "Making of the Moon" example on the Google Cloud Platfom.
 # Instructions assume Ubuntu 18.04 LTS Minimal instance.
 #
 # Configure at least:
@@ -12,10 +12,10 @@
 # Add your SSH key to enable SCP communication, you'll need to copy the notebook
 # file to the instance.
 #
-# In the inscance, run the note notebook:
+# In the inscance, run the notebook (use your open port):
 # sudo jupyter notebook --no-browser --ip=0.0.0.0 --port=3389 --allow-root
 #
-# Copy the notebook link to your browser, replace addres with the instance IP.
+# Copy the notebook link to your browser, replace addres with the instance external IP.
 #
 
 # install CUDA and GPU driver
