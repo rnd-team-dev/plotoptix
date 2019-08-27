@@ -284,26 +284,38 @@ class TkOptiX(NpOptiX):
         if self._optix.get_object_at(x, y, byref(c_handle), byref(c_index)):
             handle = c_handle.value
             index = c_index.value
-            if (handle != 0xFFFFFFFF) and (handle in self.geometry_names):
+            if (handle != 0xFFFFFFFF):
 
-                # switch selection: primitive / whole geom
-                if self._ctrl_key or (self._selection_handle == handle and self._selection_index == -1):
-                    self._status_main_text.set("Current selection: %s (primitive %d)" % (self.geometry_names[handle], index))
-                    self._selection_index = index
-                else:
-                    self._status_main_text.set("Current selection: %s" % self.geometry_names[handle])
-                    self._selection_handle = handle
-                    self._selection_index = -1
+                if handle in self.geometry_names:
+                    # switch selection: primitive / whole geom
+                    if self._ctrl_key or (self._selection_handle == handle and self._selection_index == -1):
+                        self._status_main_text.set("Current selection: %s (primitive %d)" % (self.geometry_names[handle], index))
+                        self._selection_index = index
+                    else:
+                        self._status_main_text.set("Current selection: %s" % self.geometry_names[handle])
+                        self._selection_handle = handle
+                        self._selection_index = -1
                     
-                if self._ctrl_key:
-                    hx, hy, hz, hd = self._get_hit_at(x, y)
-                    if hd > 0:
-                        self._status_action_text.set("Focused at [%f %f %f], distance %f" % (hx, hy, hz, hd))
-                        _ = self._optix.set_camera_focal_length(hd)
-            else:
-                self._status_main_text.set("Current selection: camera")
-                self._selection_handle = -1
-                self._selection_index = -1
+                    if self._ctrl_key:
+                        hx, hy, hz, hd = self._get_hit_at(x, y)
+                        if hd > 0:
+                            self._status_action_text.set("Focused at (%f %f %f), distance %f" % (hx, hy, hz, hd))
+                            _ = self._optix.set_camera_focal_length(hd)
+
+                    return
+
+                else:
+                    l_idx = self._optix.get_light_index(handle, index)
+                    if l_idx in self.light_names:
+                        self._status_main_text.set("Current selection: %s" % self.light_names[l_idx])
+                        self._selection_handle = -2
+                        self._selection_index = l_idx
+
+                        return
+
+        self._status_main_text.set("Current selection: camera")
+        self._selection_handle = -1
+        self._selection_index = -1
 
     def _gui_doubleclick_right(self, event):
         self._status_main_text.set("Current selection: camera")
@@ -414,6 +426,45 @@ class TkOptiX(NpOptiX):
                         eye = eye - dl * (target - eye)
                         self._optix.set_camera_eye(eye.ctypes.data)
             
+            elif self._selection_handle == -2:
+                # manipulate light:
+                if self._left_mouse:
+                    if not self._any_key:
+                        rx = np.pi * (self._mouse_to_y - self._mouse_from_y) / self._height
+                        ry = np.pi * (self._mouse_to_x - self._mouse_from_x) / self._width
+                        self._status_action_text.set("rotate light in camera XY")
+                        self._optix.rotate_light_in_view(self._selection_index, rx, ry, 0)
+
+                    elif self._ctrl_key and self._shift_key:
+                        s = 1 - (self._mouse_to_y - self._mouse_from_y) / self._height
+                        self._status_action_text.set("scale light")
+                        self._optix.scale_light(self._selection_index, s)
+
+                    elif self._ctrl_key:
+                        rx = np.pi * (self._mouse_to_y - self._mouse_from_y) / self._height
+                        rz = np.pi * (self._mouse_from_x - self._mouse_to_x) / self._width
+                        self._status_action_text.set("rotate light in camera XZ")
+                        self._optix.rotate_light_in_view(self._selection_index, rx, 0, rz)
+
+                    elif self._shift_key:
+                        dx = (self._mouse_to_x - self._mouse_from_x) / self._width
+                        dy = (self._mouse_from_y - self._mouse_to_y) / self._height
+                        self._status_action_text.set("move light in camera XY")
+                        self._optix.move_light_in_view(self._selection_index, dx, dy, 0)
+
+                elif self._right_mouse:
+                    if not self._any_key:
+                        dx = (self._mouse_to_x - self._mouse_from_x) / self._width
+                        dz = (self._mouse_to_y - self._mouse_from_y) / self._height
+                        self._status_action_text.set("move light in camera XZ")
+                        self._optix.move_light_in_view(self._selection_index, dx, 0, dz)
+
+                    elif self._shift_key:
+                        dx = (self._mouse_from_y - self._mouse_to_y) / self._height
+                        self._status_action_text.set("move light in normal direction")
+                        self._optix.dolly_light(self._selection_index, dx)
+
+
             else:
                 # manipulate selected ogject
                 name = self.geometry_names[self._selection_handle]
@@ -427,6 +478,7 @@ class TkOptiX(NpOptiX):
                         else:
                             self._status_action_text.set("rotate primitive in camera XY")
                             self._optix.rotate_primitive_in_view(name, self._selection_index, rx, ry, 0, True)
+
                     elif self._ctrl_key and self._shift_key:
                         s = 1 - (self._mouse_to_y - self._mouse_from_y) / self._height
                         if self._selection_index == -1:
@@ -445,6 +497,7 @@ class TkOptiX(NpOptiX):
                         else:
                             self._status_action_text.set("rotate primitive in camera XY")
                             self._optix.rotate_primitive_in_view(name, self._selection_index, rx, 0, rz, True)
+
                     elif self._shift_key:
                         dx = (self._mouse_to_x - self._mouse_from_x) / self._width
                         dy = (self._mouse_from_y - self._mouse_to_y) / self._height

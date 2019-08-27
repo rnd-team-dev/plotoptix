@@ -328,6 +328,9 @@ def _load_optix_win():
 
     optix.get_light_shading.restype = c_int
 
+    optix.get_light_index.argtypes = [c_int, c_int]
+    optix.get_light_index.restype = c_int
+
     optix.get_light_pos.argtypes = [c_int, c_void_p]
     optix.get_light_pos.restype = c_bool
 
@@ -360,6 +363,19 @@ def _load_optix_win():
 
     optix.fit_light.argtypes = [c_int, c_uint, c_float, c_float, c_float]
     optix.fit_light.restype = c_bool
+
+    optix.dolly_light.argtypes = [c_int, c_float]
+    optix.dolly_light.restype = c_bool
+
+    optix.move_light_in_view.argtypes = [c_int, c_float, c_float, c_float]
+    optix.move_light_in_view.restype = c_bool
+
+    optix.rotate_light_in_view.argtypes = [c_int, c_float, c_float, c_float]
+    optix.rotate_light_in_view.restype = c_bool
+
+    optix.scale_light.argtypes = [c_int, c_float]
+    optix.scale_light.restype = c_bool
+
 
     optix.get_object_at.argtypes = [c_int, c_int, POINTER(c_uint), POINTER(c_uint)]
     optix.get_object_at.restype = c_bool
@@ -791,6 +807,8 @@ class _ClrOptiX:
 
     def set_light_shading(self, mode): return self._optix.set_light_shading(mode)
 
+    def get_light_index(self, handle, primitive): return self._optix.get_light_index(handle, primitive)
+
     def get_light_pos(self, handle, pos):
         return self._optix.get_light_pos_ptr(handle, IntPtr.__overloads__[Int64](pos))
 
@@ -829,6 +847,14 @@ class _ClrOptiX:
 
     def fit_light(self, handle, cam_handle, horizontal_rot, vertical_rot, dist_scale):
         return self._optix.fit_light(handle, cam_handle, horizontal_rot, vertical_rot, dist_scale)
+
+    def dolly_light(self, idx, x): return self._optix.dolly_light(idx, x)
+
+    def move_light_in_view(self, idx, x, y, z): return self._optix.move_light_in_view(idx, x, y, z)
+
+    def rotate_light_in_view(self, idx, x, y, z): return self._optix.rotate_light_in_view(idx, x, y, z)
+
+    def scale_light(self, idx, x, y, z): return self._optix.scale_light(idx, x, y, z)
 
     def get_object_at(self, x, y, h_ref, idx_ref):
         return self._optix.get_object_at_ptr(x, y,

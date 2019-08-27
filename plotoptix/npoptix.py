@@ -105,6 +105,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self.geometry_sizes = {}   # geometry name to size dictionary
         self.camera_handles = {}   # camera name to handle dictionary
         self.light_handles = {}    # light name to handle dictionary
+        self.light_names = {}      # light handle to name dictionary
 
         # scene initialization / compute / upload / accumulation done callbacks:
         if on_initialization is not None: self._initialization_cb = self._make_list_of_callable(on_initialization)
@@ -2077,6 +2078,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if h >= 0:
             self._logger.info("Light %s handle: %d.", name, h)
             self.light_handles[name] = h
+            self.light_names[h] = name
 
             if autofit:
                 self.light_fit(name, camera=cam_name)
@@ -2163,6 +2165,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if h >= 0:
             self._logger.info("Light %s handle: %d.", name, h)
             self.light_handles[name] = h
+            self.light_names[h] = name
 
             if autofit:
                 self.light_fit(name, camera=cam_name)

@@ -10,7 +10,7 @@ Collection of short and simple scripts to get started.
 
 Many scripts are using Tkinter GUI, so here is a summary of mouse and keys actions:
 
-- camera is selected by default, double-click an object to select it, double click again to select a primitive within the object, double-click empty area to or double-right-click select camera
+- camera is selected by default, double-click an object/light to select it, double click again to select a primitive within the object, double-click empty area to or double-right-click select camera
 
 With camera selected:
 
@@ -23,12 +23,13 @@ With camera selected:
 - focus at an object: hold ctrl + double-click left mouse button
 - select an object: double-click left mouse button
 
-With an object / primitive selected:
+With a light or an object / primitive selected:
 
 - rotate around camera XY (right, up) coordinates: hold and drag left mouse button
 - rotate around camera XZ (right, forward) coordinates: hold ctrl and drag left mouse button
 - move in camera XY (right, up) coordinates: hold shift and drag left mouse button
 - move in camera XZ (right, forward) coordinates: hold and drag right mouse button
+- move in the normal direction (parallelogram light only): shift + right mouse button and drag up/down
 - scale up/down: hold ctrl + shift + left mouse button and drag up/down
 - select camera: double-click left mouse button in empty area or double-right-click anywhere
 
