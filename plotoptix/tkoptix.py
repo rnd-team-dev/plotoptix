@@ -146,17 +146,22 @@ class TkOptiX(NpOptiX):
         self._mouse_to_y = 0
         self._left_mouse = False
         self._right_mouse = False
+        self._any_mouse = False
         self._ctrl_key = False
         self._shift_key = False
         self._any_key = False
+
+        self._selection_handle = -1
+        self._selection_index = -1
 
         self._root.title("R&D PlotOptiX")
         self._root.protocol("WM_DELETE_WINDOW", self._gui_quit_callback)
 
         self._canvas = tk.Canvas(self._root, width=self._width, height=self._height)
-        self._canvas.pack(side="top", fill=tk.BOTH, expand=True)
+        self._canvas.grid(column=0, row=0, columnspan=3, sticky="nsew")
         self._canvas.pack_propagate(0)
         self._canvas.bind("<Configure>", self._gui_configure)
+        self._canvas.bind('<Motion>', self._gui_motion)
         self._canvas.bind('<B1-Motion>', self._gui_motion_left)
         self._canvas.bind('<B3-Motion>', self._gui_motion_right)
         self._canvas.bind("<Button-1>", self._gui_pressed_left)
@@ -164,11 +169,27 @@ class TkOptiX(NpOptiX):
         self._canvas.bind("<ButtonRelease-1>", self._gui_released_left)
         self._canvas.bind("<ButtonRelease-3>", self._gui_released_right)
         self._canvas.bind("<Double-Button-1>", self._gui_doubleclick_left)
+        self._canvas.bind("<Double-Button-3>", self._gui_doubleclick_right)
         self._root.bind_all("<KeyPress>", self._gui_key_pressed)
         self._root.bind_all("<KeyRelease>", self._gui_key_released)
         self._canvas.bind("<<LaunchFinished>>", self._gui_update_content)
         self._canvas.bind("<<ApplyUiEdits>>", self._gui_apply_scene_edits)
         self._canvas.bind("<<CloseScene>>", self._gui_quit_callback)
+
+        self._status_main_text = tk.StringVar(value="Current selection: camera")
+        self._status_main = tk.Label(self._root, textvariable=self._status_main_text, bd=1, relief=tk.SUNKEN, anchor=tk.W)
+        self._status_main.grid(column=0, row=1, sticky="ew")
+
+        self._status_action_text = tk.StringVar(value="")
+        self._status_action = tk.Label(self._root, textvariable=self._status_action_text, width=70, bd=1, relief=tk.SUNKEN, anchor=tk.W)
+        self._status_action.grid(column=1, row=1, sticky="ew")
+
+        self._status_fps = tk.Label(self._root, text="FPS", width=16, bd=1, relief=tk.SUNKEN, anchor=tk.W)
+        self._status_fps.grid(column=2, row=1, sticky="ew")
+
+        self._root.rowconfigure(0, weight=1)
+        self._root.columnconfigure(0, weight=1)
+
         self._logger.info("Tkinter widgets ready.")
 
         self._logger.info("Couple scene to the output window...")
@@ -203,6 +224,23 @@ class TkOptiX(NpOptiX):
         super().close()
         self._root.quit()
 
+    def _get_hit_at(self, x, y):
+        c_x = c_float()
+        c_y = c_float()
+        c_z = c_float()
+        c_d = c_float()
+        if self._optix.get_hit_at(x, y, byref(c_x), byref(c_y), byref(c_z), byref(c_d)):
+            return c_x.value, c_y.value, c_z.value, c_d.value
+        else: return 0, 0, 0, 0
+
+    def _gui_motion(self, event):
+        if not (self._any_mouse or self._any_key):
+            hx, hy, hz, hd = self._get_hit_at(event.x, event.y)
+            if hd > 0:
+                self._status_action_text.set("2D: (%d %d), 3D: (%f %f %f), distance %f" % (event.x, event.y, hx, hy, hz, hd))
+            else:
+                self._status_action_text.set("empty area")
+
     def _gui_motion_left(self, event):
         self._mouse_to_x, self._mouse_to_y = event.x, event.y
 
@@ -214,24 +252,28 @@ class TkOptiX(NpOptiX):
         self._mouse_to_x = self._mouse_from_x
         self._mouse_to_y = self._mouse_from_y
         self._left_mouse = True
+        self._any_mouse = True
 
     def _gui_pressed_right(self, event):
         self._mouse_from_x, self._mouse_from_y = event.x, event.y
         self._mouse_to_x = self._mouse_from_x
         self._mouse_to_y = self._mouse_from_y
         self._right_mouse = True
+        self._any_mouse = True
 
     def _gui_released_left(self, event):
         self._mouse_to_x, self._mouse_to_y = event.x, event.y
         self._mouse_from_x = self._mouse_to_x
         self._mouse_from_y = self._mouse_to_y
         self._left_mouse = False
+        self._any_mouse = False
 
     def _gui_released_right(self, event):
         self._mouse_to_x, self._mouse_to_y = event.x, event.y
         self._mouse_from_x = self._mouse_to_x
         self._mouse_from_y = self._mouse_to_y
         self._right_mouse = False
+        self._any_mouse = False
 
     def _gui_doubleclick_left(self, event):
         assert self._is_started, "Raytracing thread not running."
@@ -243,23 +285,31 @@ class TkOptiX(NpOptiX):
             handle = c_handle.value
             index = c_index.value
             if (handle != 0xFFFFFFFF) and (handle in self.geometry_names):
-                if not self._any_key:
-                    self._logger.info("Selected geometry: %s, primitive index %d", self.geometry_names[handle], index)
-                elif self._ctrl_key:
-                    c_x = c_float()
-                    c_y = c_float()
-                    c_z = c_float()
-                    c_d = c_float()
-                    if self._optix.get_hit_at(x, y, byref(c_x), byref(c_y), byref(c_z), byref(c_d)):
-                        hx = c_x.value
-                        hy = c_y.value
-                        hz = c_z.value
-                        hd = c_d.value
-                        if hd > 0:
-                            self._logger.info("Hit 3D coordinates: [%f %f %f], at focal distance %f", hx, hy, hz, hd)
-                            _ = self._optix.set_camera_focal_length(hd)
+
+                # switch selection: primitive / whole geom
+                if self._ctrl_key or (self._selection_handle == handle and self._selection_index == -1):
+                    self._status_main_text.set("Current selection: %s (primitive %d)" % (self.geometry_names[handle], index))
+                    self._selection_index = index
+                else:
+                    self._status_main_text.set("Current selection: %s" % self.geometry_names[handle])
+                    self._selection_handle = handle
+                    self._selection_index = -1
+                    
+                if self._ctrl_key:
+                    hx, hy, hz, hd = self._get_hit_at(x, y)
+                    if hd > 0:
+                        self._status_action_text.set("Focused at [%f %f %f], distance %f" % (hx, hy, hz, hd))
+                        _ = self._optix.set_camera_focal_length(hd)
             else:
-                self._logger.info("No object at [%d %d]", x, y)
+                self._status_main_text.set("Current selection: camera")
+                self._selection_handle = -1
+                self._selection_index = -1
+
+    def _gui_doubleclick_right(self, event):
+        self._status_main_text.set("Current selection: camera")
+        self._selection_handle = -1
+        self._selection_index = -1
+
 
     def _gui_key_pressed(self, event):
         if event.keysym == "Control_L":
@@ -267,6 +317,7 @@ class TkOptiX(NpOptiX):
             self._any_key = True
         elif event.keysym == "Shift_L":
             self._shift_key = True
+            self._any_key = True
             self._any_key = True
         else:
             self._any_key = False
@@ -323,41 +374,97 @@ class TkOptiX(NpOptiX):
     def _gui_apply_scene_edits(self, *args):
         if (self._mouse_from_x != self._mouse_to_x) or (self._mouse_from_y != self._mouse_to_y):
 
-            # manipulate camera:
-            if self._left_mouse:
-                if not self._any_key:
-                    self._optix.rotate_camera_eye(
-                        self._mouse_from_x, self._mouse_from_y,
-                        self._mouse_to_x, self._mouse_to_y)
-                elif self._ctrl_key:
-                    df = 1 + 0.01 * (self._mouse_from_y - self._mouse_to_y)
-                    f = self._optix.get_camera_focal_scale(0) # 0 is current cam
-                    self._optix.set_camera_focal_scale(df * f)
-                elif self._shift_key:
-                    df = 1 + 0.005 * (self._mouse_from_y - self._mouse_to_y)
-                    f = self._optix.get_camera_fov(0) # 0 is current cam
-                    self._optix.set_camera_fov(df * f)
+            if self._selection_handle == -1:
+                # manipulate camera:
+                if self._left_mouse:
+                    if not self._any_key:
+                        self._status_action_text.set("rotate camera eye XZ")
+                        self._optix.rotate_camera_eye(
+                            self._mouse_from_x, self._mouse_from_y,
+                            self._mouse_to_x, self._mouse_to_y)
+                    elif self._ctrl_key:
+                        self._status_action_text.set("change camera focus")
+                        df = 1 + 0.01 * (self._mouse_from_y - self._mouse_to_y)
+                        f = self._optix.get_camera_focal_scale(0) # 0 is current cam
+                        self._optix.set_camera_focal_scale(df * f)
+                    elif self._shift_key:
+                        self._status_action_text.set("change camera FoV")
+                        df = 1 + 0.005 * (self._mouse_from_y - self._mouse_to_y)
+                        f = self._optix.get_camera_fov(0) # 0 is current cam
+                        self._optix.set_camera_fov(df * f)
 
-            elif self._right_mouse:
-                if not self._any_key:
-                    self._optix.rotate_camera_tgt(
-                        self._mouse_from_x, self._mouse_from_y,
-                        self._mouse_to_x, self._mouse_to_y)
-                elif self._ctrl_key:
-                    da = 1 + 0.01 * (self._mouse_from_y - self._mouse_to_y)
-                    a = self._optix.get_camera_aperture(0) # 0 is current cam
-                    self._optix.set_camera_aperture(da * a)
-                elif self._shift_key:
-                    target = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-                    self._optix.get_camera_target(0, target.ctypes.data) # 0 is current cam
-                    eye = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-                    self._optix.get_camera_eye(0, eye.ctypes.data) # 0 is current cam
-                    dl = 0.01 * (self._mouse_from_y - self._mouse_to_y)
-                    eye = eye - dl * (target - eye)
-                    self._optix.set_camera_eye(eye.ctypes.data)
-                    pass
+                elif self._right_mouse:
+                    if not self._any_key:
+                        self._status_action_text.set("camera pan/tilt")
+                        self._optix.rotate_camera_tgt(
+                            self._mouse_from_x, self._mouse_from_y,
+                            self._mouse_to_x, self._mouse_to_y)
+                    elif self._ctrl_key:
+                        self._status_action_text.set("change camera aperture")
+                        da = 1 + 0.01 * (self._mouse_from_y - self._mouse_to_y)
+                        a = self._optix.get_camera_aperture(0) # 0 is current cam
+                        self._optix.set_camera_aperture(da * a)
+                    elif self._shift_key:
+                        self._status_action_text.set("camera dolly")
+                        target = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
+                        self._optix.get_camera_target(0, target.ctypes.data) # 0 is current cam
+                        eye = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
+                        self._optix.get_camera_eye(0, eye.ctypes.data) # 0 is current cam
+                        dl = 0.01 * (self._mouse_from_y - self._mouse_to_y)
+                        eye = eye - dl * (target - eye)
+                        self._optix.set_camera_eye(eye.ctypes.data)
+            
+            else:
+                # manipulate selected ogject
+                name = self.geometry_names[self._selection_handle]
+                if self._left_mouse:
+                    if not self._any_key:
+                        rx = np.pi * (self._mouse_to_y - self._mouse_from_y) / self._height
+                        ry = np.pi * (self._mouse_to_x - self._mouse_from_x) / self._width
+                        if self._selection_index == -1:
+                            self._status_action_text.set("rotate geometry in camera XY")
+                            self._optix.rotate_geometry_in_view(name, rx, ry, 0, True)
+                        else:
+                            self._status_action_text.set("rotate primitive in camera XY")
+                            self._optix.rotate_primitive_in_view(name, self._selection_index, rx, ry, 0, True)
+                    elif self._ctrl_key and self._shift_key:
+                        s = 1 - (self._mouse_to_y - self._mouse_from_y) / self._height
+                        if self._selection_index == -1:
+                            self._status_action_text.set("scale geometry")
+                            self._optix.scale_geometry(name, s, True)
+                        else:
+                            self._status_action_text.set("scale primitive")
+                            self._optix.scale_primitive(name, self._selection_index, s, True)
 
-            # ... or manipulate other ogjects (need to save selected object, to be implemented)
+                    elif self._ctrl_key:
+                        rx = np.pi * (self._mouse_to_y - self._mouse_from_y) / self._height
+                        rz = np.pi * (self._mouse_from_x - self._mouse_to_x) / self._width
+                        if self._selection_index == -1:
+                            self._status_action_text.set("rotate geometry in camera XZ")
+                            self._optix.rotate_geometry_in_view(name, rx, 0, rz, True)
+                        else:
+                            self._status_action_text.set("rotate primitive in camera XY")
+                            self._optix.rotate_primitive_in_view(name, self._selection_index, rx, 0, rz, True)
+                    elif self._shift_key:
+                        dx = (self._mouse_to_x - self._mouse_from_x) / self._width
+                        dy = (self._mouse_from_y - self._mouse_to_y) / self._height
+                        if self._selection_index == -1:
+                            self._status_action_text.set("move geometry in camera XY")
+                            self._optix.move_geometry_in_view(name, dx, dy, 0, True)
+                        else:
+                            self._status_action_text.set("move primitive in camera XY")
+                            self._optix.move_primitive_in_view(name, self._selection_index, dx, dy, 0, True)
+
+                elif self._right_mouse:
+                    if not self._any_key:
+                        dx = (self._mouse_to_x - self._mouse_from_x) / self._width
+                        dz = (self._mouse_to_y - self._mouse_from_y) / self._height
+                        if self._selection_index == -1:
+                            self._status_action_text.set("move geometry in camera XZ")
+                            self._optix.move_geometry_in_view(name, dx, 0, dz, True)
+                        else:
+                            self._status_action_text.set("move primitive in camera XZ")
+                            self._optix.move_primitive_in_view(name, self._selection_index, dx, 0, dz, True)
 
             self._mouse_from_x = self._mouse_to_x
             self._mouse_from_y = self._mouse_to_y

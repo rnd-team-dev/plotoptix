@@ -210,11 +210,23 @@ def _load_optix_win():
     optix.move_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_bool]
     optix.move_primitive.restype = c_bool
 
+    optix.move_geometry_in_view.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
+    optix.move_geometry_in_view.restype = c_bool
+
+    optix.move_primitive_in_view.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_bool]
+    optix.move_primitive_in_view.restype = c_bool
+
     optix.rotate_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
     optix.rotate_geometry.restype = c_bool
 
     optix.rotate_primitive.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_bool]
     optix.rotate_primitive.restype = c_bool
+
+    optix.rotate_geometry_in_view.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
+    optix.rotate_geometry_in_view.restype = c_bool
+
+    optix.rotate_primitive_in_view.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_bool]
+    optix.rotate_primitive_in_view.restype = c_bool
 
     optix.rotate_geometry_about.argtypes = [c_wchar_p, c_float, c_float, c_float, c_float, c_float, c_float, c_bool]
     optix.rotate_geometry_about.restype = c_bool
@@ -681,9 +693,17 @@ class _ClrOptiX:
 
     def move_primitive(self, name, idx, x, y, z, update): return self._optix.move_primitive(name, idx, x, y, z, update)
 
+    def move_geometry_in_view(self, name, x, y, z, update): return self._optix.move_geometry_in_view(name, x, y, z, update)
+
+    def move_primitive_in_view(self, name, idx, x, y, z, update): return self._optix.move_primitive_in_view(name, idx, x, y, z, update)
+
     def rotate_geometry(self, name, x, y, z, update): return self._optix.rotate_geometry(name, x, y, z, update)
 
     def rotate_primitive(self, name, idx, x, y, z, update): return self._optix.rotate_primitive(name, idx, x, y, z, update)
+
+    def rotate_geometry_in_view(self, name, x, y, z, update): return self._optix.rotate_geometry_in_view(name, x, y, z, update)
+
+    def rotate_primitive_in_view(self, name, idx, x, y, z, update): return self._optix.rotate_primitive_in_view(name, idx, x, y, z, update)
 
     def rotate_geometry_about(self, name, x, y, z, cx, cy, cz, update):
         return self._optix.rotate_geometry_about(name, x, y, z, cx, cy, cz, update)
