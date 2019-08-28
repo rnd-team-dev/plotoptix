@@ -12,7 +12,7 @@ import tkinter as tk
 
 from PIL import Image, ImageTk
 from ctypes import byref, c_float, c_uint
-from typing import Union
+from typing import Tuple, Union
 
 from plotoptix.enums import *
 from plotoptix._load_lib import PLATFORM
@@ -154,6 +154,10 @@ class TkOptiX(NpOptiX):
         self._selection_handle = -1
         self._selection_index = -1
 
+        self._fixed_size = None
+        self._image_scale = 1.0
+        self._image_at = (0, 0)
+
         self._root.title("R&D PlotOptiX")
         self._root.protocol("WM_DELETE_WINDOW", self._gui_quit_callback)
 
@@ -162,8 +166,8 @@ class TkOptiX(NpOptiX):
         self._canvas.pack_propagate(0)
         self._canvas.bind("<Configure>", self._gui_configure)
         self._canvas.bind('<Motion>', self._gui_motion)
-        self._canvas.bind('<B1-Motion>', self._gui_motion_left)
-        self._canvas.bind('<B3-Motion>', self._gui_motion_right)
+        self._canvas.bind('<B1-Motion>', self._gui_motion_pressed)
+        self._canvas.bind('<B3-Motion>', self._gui_motion_pressed)
         self._canvas.bind("<Button-1>", self._gui_pressed_left)
         self._canvas.bind("<Button-3>", self._gui_pressed_right)
         self._canvas.bind("<ButtonRelease-1>", self._gui_released_left)
@@ -184,7 +188,8 @@ class TkOptiX(NpOptiX):
         self._status_action = tk.Label(self._root, textvariable=self._status_action_text, width=70, bd=1, relief=tk.SUNKEN, anchor=tk.W)
         self._status_action.grid(column=1, row=1, sticky="ew")
 
-        self._status_fps = tk.Label(self._root, text="FPS", width=16, bd=1, relief=tk.SUNKEN, anchor=tk.W)
+        self._status_fps_text = tk.StringVar(value="FPS")
+        self._status_fps = tk.Label(self._root, textvariable=self._status_fps_text, width=16, bd=1, relief=tk.SUNKEN, anchor=tk.W)
         self._status_fps.grid(column=2, row=1, sticky="ew")
 
         self._root.rowconfigure(0, weight=1)
@@ -224,6 +229,13 @@ class TkOptiX(NpOptiX):
         super().close()
         self._root.quit()
 
+    def _get_image_xy(self, wnd_x, wnd_y):
+        if self._fixed_size is None: return wnd_x, wnd_y
+        else:
+            x = int((wnd_x - self._image_at[0]) / self._image_scale)
+            y = int((wnd_y - self._image_at[1]) / self._image_scale)
+            return x, y
+
     def _get_hit_at(self, x, y):
         c_x = c_float()
         c_y = c_float()
@@ -235,41 +247,40 @@ class TkOptiX(NpOptiX):
 
     def _gui_motion(self, event):
         if not (self._any_mouse or self._any_key):
-            hx, hy, hz, hd = self._get_hit_at(event.x, event.y)
+            x, y = self._get_image_xy(event.x, event.y)
+
+            hx, hy, hz, hd = self._get_hit_at(x, y)
             if hd > 0:
-                self._status_action_text.set("2D: (%d %d), 3D: (%f %f %f), distance %f" % (event.x, event.y, hx, hy, hz, hd))
+                self._status_action_text.set("2D: (%d %d), 3D: (%f %f %f), distance %f" % (x, y, hx, hy, hz, hd))
             else:
                 self._status_action_text.set("empty area")
 
-    def _gui_motion_left(self, event):
-        self._mouse_to_x, self._mouse_to_y = event.x, event.y
-
-    def _gui_motion_right(self, event):
-        self._mouse_to_x, self._mouse_to_y = event.x, event.y
+    def _gui_motion_pressed(self, event):
+        self._mouse_to_x, self._mouse_to_y = self._get_image_xy(event.x, event.y)
 
     def _gui_pressed_left(self, event):
-        self._mouse_from_x, self._mouse_from_y = event.x, event.y
+        self._mouse_from_x, self._mouse_from_y = self._get_image_xy(event.x, event.y)
         self._mouse_to_x = self._mouse_from_x
         self._mouse_to_y = self._mouse_from_y
         self._left_mouse = True
         self._any_mouse = True
 
     def _gui_pressed_right(self, event):
-        self._mouse_from_x, self._mouse_from_y = event.x, event.y
+        self._mouse_from_x, self._mouse_from_y = self._get_image_xy(event.x, event.y)
         self._mouse_to_x = self._mouse_from_x
         self._mouse_to_y = self._mouse_from_y
         self._right_mouse = True
         self._any_mouse = True
 
     def _gui_released_left(self, event):
-        self._mouse_to_x, self._mouse_to_y = event.x, event.y
+        self._mouse_to_x, self._mouse_to_y = self._get_image_xy(event.x, event.y)
         self._mouse_from_x = self._mouse_to_x
         self._mouse_from_y = self._mouse_to_y
         self._left_mouse = False
         self._any_mouse = False
 
     def _gui_released_right(self, event):
-        self._mouse_to_x, self._mouse_to_y = event.x, event.y
+        self._mouse_to_x, self._mouse_to_y = self._get_image_xy(event.x, event.y)
         self._mouse_from_x = self._mouse_to_x
         self._mouse_from_y = self._mouse_to_y
         self._right_mouse = False
@@ -278,7 +289,7 @@ class TkOptiX(NpOptiX):
     def _gui_doubleclick_left(self, event):
         assert self._is_started, "Raytracing thread not running."
 
-        x, y = event.x, event.y
+        x, y = self._get_image_xy(event.x, event.y)
         c_handle = c_uint()
         c_index = c_uint()
         if self._optix.get_object_at(x, y, byref(c_handle), byref(c_index)):
@@ -341,11 +352,69 @@ class TkOptiX(NpOptiX):
             self._shift_key = False
         self._any_key = False
 
+
+    def get_rt_size(self) -> Tuple[int, int]:
+        """Get size of ray-tracing output image.
+
+        Get fixed dimensions of the output image or ``None`` if the
+        image is fit to the GUI window size.
+
+        Returns
+        -------
+        out : tuple (int, int)
+            Output image size or ``None`` if set auto-fit mode.
+        """
+        return self._fixed_size
+
+    def set_rt_size(self, size: Tuple[int, int]) -> None:
+        """Set fixed / free size of ray-tracing output image.
+
+        Set fixed dimensions of the output image or allow automatic fit to the
+        GUI window size. Fixed size image updates are slower, but allow ray tracing
+        of any size. Default mode is fit to the GUI window size.
+
+        Parameters
+        ----------
+        size : tuple (int, int)
+            Output image size or ``None`` to set auto-fit mode.
+        """
+        assert self._is_started, "Raytracing thread not running."
+
+        if self._fixed_size == size: return
+
+        self._fixed_size = size
+        with self._padlock:
+            if self._fixed_size is None:
+                w, h = self._canvas.winfo_width(), self._canvas.winfo_height()
+            else:
+                w, h = self._fixed_size
+            self.resize(width=w, height=h)
+
     def _gui_internal_image_update(self):
         pil_img = Image.fromarray(self._img_rgba, mode="RGBX")
+
+        move_to = (0, 0)
+        self._image_scale = 1.0
+        if self._fixed_size is not None:
+            wc, hc = self._canvas.winfo_width(), self._canvas.winfo_height()
+            if self._width / wc > self._height / hc:
+                self._image_scale = wc / self._width
+                hnew = int(self._height * self._image_scale)
+                pil_img = pil_img.resize((wc, hnew), Image.ANTIALIAS)
+                move_to = (0, (hc - hnew) // 2)
+            else:
+                self._image_scale = hc / self._height
+                wnew = int(self._width * self._image_scale)
+                pil_img = pil_img.resize((wnew, hc), Image.ANTIALIAS)
+                move_to = ((wc - wnew) // 2, 0)
+
         tk_img = ImageTk.PhotoImage(pil_img)
         # update image on canvas
         self._canvas.itemconfig(self._img_id, image=tk_img)
+        if self._image_at != move_to:
+            self._canvas.move(self._img_id, -self._image_at[0], -self._image_at[1])
+            self._canvas.move(self._img_id, move_to[0], move_to[1])
+            self._image_at = move_to
         # swap reference stored in the window instance
         self._tk_img = tk_img
         # no redraws until the next launch
@@ -357,12 +426,13 @@ class TkOptiX(NpOptiX):
         if not self._started_event.is_set():
             self._started_event.set()
 
-        w, h = self._canvas.winfo_width(), self._canvas.winfo_height()
-        if (w == self._width) and (h == self._height): return
-
         with self._padlock:
-            self._logger.info("Resize to: %d x %d", w, h)
-            self.resize(width=w, height=h)
+            if self._fixed_size is None:
+                w, h = self._canvas.winfo_width(), self._canvas.winfo_height()
+                if (w == self._width) and (h == self._height): return
+                self._logger.info("Resize to: %d x %d", w, h)
+                self.resize(width=w, height=h)
+
             self._gui_internal_image_update()
 
     ###########################################################################
@@ -371,6 +441,7 @@ class TkOptiX(NpOptiX):
         assert self._is_started, "Raytracing thread not running."
 
         if self._update_req:
+            self._status_fps_text.set("FPS: %.3f" % self._optix.get_fps())
             with self._padlock:
                 self._gui_internal_image_update()
 

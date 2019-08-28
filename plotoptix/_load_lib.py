@@ -81,6 +81,8 @@ def _load_optix_win():
     optix.save_image_to_file.argtypes = [c_wchar_p]
     optix.save_image_to_file.restype = c_bool
 
+    optix.get_fps.restype = c_float
+
     optix.start_rt.restype = c_bool
     optix.stop_rt.restype = c_bool
 
@@ -526,6 +528,8 @@ class _ClrOptiX:
     def save_scene_to_file(self, fname): return self._optix.save_scene_to_file(fname)
 
     def save_image_to_file(self, fname): return self._optix.save_image_to_file(fname)
+
+    def get_fps(self): return self._optix.get_fps()
 
     def start_rt(self): return self._optix.start_rt()
     def stop_rt(self): return self._optix.stop_rt()

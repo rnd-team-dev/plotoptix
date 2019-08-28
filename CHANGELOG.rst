@@ -1,6 +1,16 @@
 Release history
 ===============
 
+`v0.4.7`_ - 2019-08-28
+----------------------
+
+Added
+~~~~~
+
+- select and rotate/move/scale objects and lights in GUI with mouse (same as for the camera)
+- status bar in GUI, shows selected item, 2D/3D coordinates of the surface under the pointer, and FPS
+- method to set fixed size of the ray-tracing output in GUI (or go back to auto-fit to window size)
+
 `v0.4.6`_ - 2019-08-19
 ----------------------
 
@@ -178,8 +188,9 @@ Added
 v0.1.2.5 - 2019-04-16
 ---------------------
 
-Two weeks and some steps from the initial release. Starting changelog w.r.t. this point.
+Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.4.7`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.7
 .. _`v0.4.6`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.6
 .. _`v0.4.5`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.5
 .. _`v0.4.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.2
