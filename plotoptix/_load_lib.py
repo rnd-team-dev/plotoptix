@@ -858,7 +858,7 @@ class _ClrOptiX:
 
     def rotate_light_in_view(self, idx, x, y, z): return self._optix.rotate_light_in_view(idx, x, y, z)
 
-    def scale_light(self, idx, x, y, z): return self._optix.scale_light(idx, x, y, z)
+    def scale_light(self, idx, s): return self._optix.scale_light(idx, s)
 
     def get_object_at(self, x, y, h_ref, idx_ref):
         return self._optix.get_object_at_ptr(x, y,
