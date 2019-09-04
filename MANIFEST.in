@@ -9,6 +9,7 @@ include plotoptix/bin/*.so
 include plotoptix/bin/*.dll
 include plotoptix/bin/*.xml
 include plotoptix/bin/*.config
+include plotoptix/bin/cuda/compute_30/*.ptx
 include plotoptix/bin/cuda/compute_50/*.ptx
 include plotoptix/bin/cuda/compute_52/*.ptx
 include plotoptix/bin/cuda/compute_60/*.ptx
