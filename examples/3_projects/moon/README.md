@@ -5,7 +5,7 @@ Making of the Moon
 
 Data-viz project for ray-tracing the Moon model with the highest possible details. Data is downloaded from NASA resources. Read also the [tutorial on Medium](https://medium.com/@sulej.robert/the-moon-made-twice-at-home-a2cb73b3f1e8), and have a look at [images on Behance](https://www.behance.net/gallery/84326717/Making-of-the-Moon).
 
-You can download project files from GitHub or use the installer::
+You can download project files from GitHub or use the installer:
 
 	python -m plotoptix.install moon
 
