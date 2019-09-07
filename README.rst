@@ -52,9 +52,9 @@ Features
 --------
 
 - progressive path tracing with explicit light sampling
-- pinhole cameras and cameras with depth of field simulation
+- pinhole cameras and thin-lens cameras with depth of field simulation
 - geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, surface mesh
-- parameterized materials shading: flat, diffuse, reflective, refractive; including light dispersion, surface roughness, and nested volumes
+- parameterized materials shading: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, and nested volumes
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
 - post-processing: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
@@ -219,8 +219,9 @@ if you like it!).
 The idea for development is:
 
 1. Binaries for Linux (done in v0.3.0).
-2. Complete the plot layout / cover more raytracing features.
-3. Convenience functions for various plot styles. Other GUI's.
+2. Migrate to OptiX 7.0.
+3. Complete the plot layout / cover more raytracing features.
+4. Convenience functions for various plot styles. Other GUI's.
 
    *Here, the community input is possible and warmly welcome!*
 
