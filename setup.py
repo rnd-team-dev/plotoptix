@@ -119,12 +119,12 @@ except ImportError:
 
 
 setup(name='plotoptix',
-      version='0.4.7',
-      url='https://plotoptix.rnd.team',
+      version='0.4.8',
+      url='https://rnd.team/project/plotoptix',
       project_urls={
           'Documentation': 'https://plotoptix.rnd.team',
           'Examples': 'https://github.com/rnd-team-dev/plotoptix/tree/master/examples',
-          'Source': 'https://github.com/rnd-team-dev/plotoptix'
+          'Source': 'https://github.com/rnd-team-dev/plotoptix',
           },
       author='Robert Sulej, R&D Team',
       author_email='dev@rnd.team',

@@ -1,6 +1,22 @@
 Release history
 ===============
 
+v0.4.8 - unreleased
+-------------------
+
+Added
+~~~~~
+
+- Oren-Nayar diffuse reflectance model (in addition to the default Lambertian), adjustable surface roughness
+- adjustable surface rougness also for metalic and dielectric (glass) materials, improved predefined materials
+
+Changes
+~~~~~~~
+
+- metalic and mirror materials use primitive colors to colorize the reflection (primitive color overrides
+  surface albedo) so color data can be effectively used also with these materials
+
+
 `v0.4.7`_ - 2019-08-28
 ----------------------
 
