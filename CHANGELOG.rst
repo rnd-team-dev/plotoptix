@@ -1,6 +1,14 @@
 Release history
 ===============
 
+v0.4.9 - unreleased
+-------------------
+
+Added
+~~~~~
+
+- thin-walled material
+
 `v0.4.8`_ - 2019-09-07
 ----------------------
 
@@ -15,7 +23,6 @@ Changes
 
 - metalic and mirror materials use primitive colors to colorize the reflection (primitive color overrides
   surface albedo) so color data can be effectively used also with these materials
-
 
 `v0.4.7`_ - 2019-08-28
 ----------------------
