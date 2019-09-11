@@ -179,7 +179,7 @@ m_thin_walled = {
         "light_emission": 0.0
       },
       "VarFloat3": {
-        "refraction_index": [ 1.2, 1.2, 1.2 ],
+        "refraction_index": [ 1.9, 1.9, 1.9 ],
       }
     }
 """
