@@ -1859,7 +1859,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             3D of the light or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -1871,7 +1871,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
         pos = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-        self._optix.get_light_pos(self.light_handles[name], pos.ctypes.data)
+        self._optix.get_light_pos(name, pos.ctypes.data)
         return pos
 
     def get_light_color(self, name: Optional[str] = None) -> Optional[np.ndarray]:
@@ -1888,7 +1888,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light color RGB or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -1900,7 +1900,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
         col = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-        self._optix.get_light_color(self.light_handles[name], col.ctypes.data)
+        self._optix.get_light_color(name, col.ctypes.data)
         return col
 
     def get_light_u(self, name: Optional[str] = None) -> Optional[np.ndarray]:
@@ -1917,7 +1917,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light U vector or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -1929,7 +1929,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
         u = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-        self._optix.get_light_u(self.light_handles[name], u.ctypes.data)
+        self._optix.get_light_u(name, u.ctypes.data)
         return u
 
     def get_light_v(self, name: Optional[str] = None) -> Optional[np.ndarray]:
@@ -1946,7 +1946,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light V vector or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -1958,7 +1958,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
         v = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-        self._optix.get_light_v(self.light_handles[name], v.ctypes.data)
+        self._optix.get_light_v(name, v.ctypes.data)
         return v
 
     def get_light_r(self, name: Optional[str] = None) -> Optional[float]:
@@ -1975,7 +1975,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light readius or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -1986,7 +1986,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None
 
-        return self._optix.get_light_r(self.light_handles[name])
+        return self._optix.get_light_r(name)
 
     def get_light(self, name: str) -> Optional[dict]:
         """Get light source parameters.
@@ -2012,7 +2012,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None
 
-        s = self._optix.get_light(self.light_handles[name])
+        s = self._optix.get_light(name)
         if len(s) > 2: return json.loads(s)
         else:
             msg = "Failed on reading light %s." % name
@@ -2073,9 +2073,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        h = self._optix.setup_spherical_light(pos.ctypes.data, color.ctypes.data,
+        h = self._optix.setup_spherical_light(name, pos.ctypes.data, color.ctypes.data,
                                               radius, in_geometry)
-        if h >= 0:
+        if h != 0:
             self._logger.info("Light %s handle: %d.", name, h)
             self.light_handles[name] = h
             self.light_names[h] = name
@@ -2083,7 +2083,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if autofit:
                 self.light_fit(name, camera=cam_name)
         else:
-            msg = "Light setup failed."
+            msg = "Light %s setup failed." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
 
@@ -2160,9 +2160,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        h = self._optix.setup_parallelogram_light(pos.ctypes.data, color.ctypes.data,
+        h = self._optix.setup_parallelogram_light(name, pos.ctypes.data, color.ctypes.data,
                                                   u.ctypes.data, v.ctypes.data, in_geometry)
-        if h >= 0:
+        if h != 0:
             self._logger.info("Light %s handle: %d.", name, h)
             self.light_handles[name] = h
             self.light_names[h] = name
@@ -2170,7 +2170,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if autofit:
                 self.light_fit(name, camera=cam_name)
         else:
-            msg = "Light setup failed."
+            msg = "Light %s setup failed." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
@@ -2277,7 +2277,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if v is not None: v_ptr = v.ctypes.data
         else:             v_ptr = 0
 
-        if self._optix.update_light(self.light_handles[name],
+        if self._optix.update_light(name,
                                     pos_ptr, color_ptr,
                                     radius, u_ptr, v_ptr):
             self._logger.info("Light %s updated.", name)
@@ -2309,7 +2309,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if light is None: raise ValueError()
 
         if not isinstance(light, str): light = str(light)
-        light_handle = self.light_handles[light]
+        if not light in self.light_handles:
+            msg = "Light %s not found." % light
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
         cam_handle = 0
         if camera is not None:
@@ -2320,7 +2323,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         horizontal_rot = math.pi * horizontal_rot / 180.0
         vertical_rot = math.pi * vertical_rot / 180.0
 
-        self._optix.fit_light(light_handle, cam_handle, horizontal_rot, vertical_rot, dist_scale)
+        self._optix.fit_light(light, cam_handle, horizontal_rot, vertical_rot, dist_scale)
 
 
     def get_material(self, name: str) -> Optional[dict]:
