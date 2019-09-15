@@ -104,6 +104,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self.geometry_names = {}   # geometry handle to name dictionary
         self.geometry_sizes = {}   # geometry name to size dictionary
         self.camera_handles = {}   # camera name to handle dictionary
+        self.camera_names = {}     # camera handle to name dictionary
         self.light_handles = {}    # light name to handle dictionary
         self.light_names = {}      # light handle to name dictionary
 
@@ -1551,7 +1552,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        h = self._optix.setup_camera(cam_type.value,
+        h = self._optix.setup_camera(name, cam_type.value,
                                      eye_ptr, target_ptr, up.ctypes.data,
                                      aperture_radius, aperture_fract,
                                      focal_scale, fov, blur,
@@ -1559,6 +1560,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if h > 0:
             self._logger.info("Camera %s handle: %d.", name, h)
             self.camera_handles[name] = h
+            self.camera_names[h] = name
         else:
             msg = "Camera setup failed."
             self._logger.error(msg)
@@ -1605,13 +1607,36 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if up is not None: up_ptr = up.ctypes.data
         else:              up_ptr = 0
 
-        if self._optix.update_camera(cam_handle, eye_ptr, target_ptr, up_ptr,
+        if self._optix.update_camera(name, eye_ptr, target_ptr, up_ptr,
                                      aperture_radius, focal_scale, fov):
             self._logger.info("Camera %s updated.", name)
         else:
             msg = "Camera %s update failed." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
+
+    def get_current_camera(self) -> Optional[str]:
+        """Get current camera name.
+
+        Returns
+        -------
+        out : string, optional
+            Name of the current camera or ``None`` if camera not set.
+        """
+        cam_handle = self._optix.get_current_camera()
+        if cam_handle == 0:
+            msg = "Current camera is not set."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return None
+
+        if cam_handle not in self.camera_names:
+            msg = "Camera handle %d does not exists." % cam_handle
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return None
+
+        return self.camera_names[cam_handle]
 
     def set_current_camera(self, name: str) -> None:
         """Switch to another camera.
@@ -1631,7 +1656,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        if self._optix.set_current_camera(self.camera_handles[name]):
+        if self._optix.set_current_camera(name):
             self._logger.info("Current camera: %s", name)
         else:
             msg = "Current camera not changed."
