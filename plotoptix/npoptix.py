@@ -111,18 +111,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         # scene initialization / compute / upload / accumulation done callbacks:
         if on_initialization is not None: self._initialization_cb = self._make_list_of_callable(on_initialization)
         else: self._initialization_cb = [self._default_initialization]
-
-        if on_scene_compute is not None: self._scene_compute_cb = self._make_list_of_callable(on_scene_compute)
-        else: self._scene_compute_cb = []
-
-        if on_rt_completed is not None: self._rt_completed_cb = self._make_list_of_callable(on_rt_completed)
-        else: self._rt_completed_cb = []
-
-        if on_launch_finished is not None: self._launch_finished_cb = self._make_list_of_callable(on_launch_finished)
-        else: self._launch_finished_cb = []
-
-        if on_rt_accum_done is not None: self._rt_accum_done_cb = self._make_list_of_callable(on_rt_accum_done)
-        else: self._rt_accum_done_cb = []
+        self.set_scene_compute_cb(on_scene_compute)
+        self.set_rt_completed_cb(on_rt_completed)
+        self.set_launch_finished_cb(on_launch_finished)
+        self.set_accum_done_cb(on_rt_accum_done)
 
         # create empty scene / optionally start raytracing thread:
         self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
@@ -325,6 +317,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             wnd.setup_camera("default", [0, 0, 10], [0, 0, 0])
 
     ###########################################################################
+    def set_launch_finished_cb(self, cb) -> None:
+        """Set callback function(s) executed after each finished frame.
+
+        Parameters
+        ----------
+        cb : callable or list
+            Callable or list of callables to set as the launch finished callback.
+        """
+        with self._padlock:
+            if cb is not None: self._launch_finished_cb = self._make_list_of_callable(cb)
+            else: self._launch_finished_cb = []
+
     def _launch_finished_callback(self, rt_result: int) -> None:
         """
         Callback executed after each finished frame (``min_accumulation_step``
@@ -367,6 +371,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
 
     ###########################################################################
+    def set_accum_done_cb(self, cb) -> None:
+        """Set callback function(s) executed when all accumulation frames
+        are completed.
+
+        Parameters
+        ----------
+        cb : callable or list
+            Callable or list of callables to set as the accum done callback.
+        """
+        with self._padlock:
+            if cb is not None: self._rt_accum_done_cb = self._make_list_of_callable(cb)
+            else: self._rt_accum_done_cb = []
+
     def _accum_done_callback(self) -> None:
         """
         Callback executed when all accumulation frames are completed.
@@ -386,6 +403,23 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
 
     ###########################################################################
+    def set_scene_compute_cb(self, cb) -> None:
+        """Set callback function(s) executed on each frame ray tracing start.
+
+        Callback(s) executed in parallel to the raytracing and intended for
+        CPU intensive computations. Note, set ``compute_timeout`` to appropriate
+        value if your computations are longer than single frame ray tracing, see
+        :meth:`plotoptix.NpOptiX.set_param`.
+
+        Parameters
+        ----------
+        cb : callable or list
+            Callable or list of callables to set as the scene compute callback.
+        """
+        with self._padlock:
+            if cb is not None: self._scene_compute_cb = self._make_list_of_callable(cb)
+            else: self._scene_compute_cb = []
+
     def _start_scene_compute_callback(self, n_frames : int) -> None:
         """
         Compute callback executed together with the start of each frame raytracing.
@@ -413,6 +447,22 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def _get_start_scene_compute_callback(self):
         def func(n_frames : int): self._start_scene_compute_callback(n_frames)
         return PARAM_INT_CALLBACK(func)
+
+    def set_rt_completed_cb(self, cb) -> None:
+        """Set callback function(s) executed on each frame ray tracing finished.
+
+        Callback(s) executed in the same thread as the scene compute callback. Note,
+        set ``compute_timeout`` to appropriate value if your computations are longer
+        than single frame ray tracing, see :meth:`plotoptix.NpOptiX.set_param`.
+
+        Parameters
+        ----------
+        cb : callable or list
+            Callable or list of callables to set as the RT completed callback.
+        """
+        with self._padlock:
+            if cb is not None: self._rt_completed_cb = self._make_list_of_callable(cb)
+            else: self._rt_completed_cb = []
 
     def _scene_rt_completed_callback(self, rt_result : int) -> None:
         """
@@ -1171,12 +1221,40 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
+    def get_scene(self) -> dict:
+        """Get dictionary with the scene description.
+
+        Returns a dictionary with the scene description. Geometry objects,
+        materials, lights, texture data or file names, cameras, postprocessing
+        and scene parameters are included. Callback functions and vieport dimensions
+        are not saved. Existing files are overwritten.
+
+        Returns
+        -------
+        out : dict, optional
+            Dictionary with the scene description.
+        """
+        try:
+            self._padlock.acquire()
+
+            s = self._optix.save_scene_to_json()
+            if len(s) > 2: return json.loads(s)
+            else: return {}
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+
+        finally:
+            self._padlock.release()
+
     def save_scene(self, file_name: str) -> None:
-        """Save scene JSON description to file.
+        """Save scene description to JSON file.
 
         Save description of the scene to file. Geometry objects, materials, lights,
-        cameras, postprocessing and scene parameters are included. Callback functions
-        and vieport dimensions are not saved. Existing files are overwritten.
+        texture data or file names, cameras, postprocessing and scene parameters
+        are included. Callback functions and vieport dimensions are not saved.
+        Existing files are overwritten.
 
         Parameters
         ----------
