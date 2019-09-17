@@ -6,7 +6,7 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
-import json, math, logging, threading, time
+import json, math, logging, os, threading, time
 import numpy as np
 
 from ctypes import byref, c_float, c_uint, c_int
@@ -34,6 +34,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     Parameters
     ----------
+    src : string or dict, optional
+        Scene description, file name or dictionary. Empty scene is prepared
+        if the default ``None`` value is used.
     on_initialization : callable or list, optional
         Callable or list of callables to execute upon starting the raytracing
         thread. These callbacks are executed on the main thread.
@@ -62,6 +65,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     """
 
     def __init__(self,
+                 src: Optional[Union[str, dict]] = None,
                  on_initialization = None,
                  on_scene_compute = None,
                  on_rt_completed = None,
@@ -110,20 +114,52 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         # scene initialization / compute / upload / accumulation done callbacks:
         if on_initialization is not None: self._initialization_cb = self._make_list_of_callable(on_initialization)
-        else: self._initialization_cb = [self._default_initialization]
+        elif src is None: self._initialization_cb = [self._default_initialization]
+        else: self._initialization_cb = []
         self.set_scene_compute_cb(on_scene_compute)
         self.set_rt_completed_cb(on_rt_completed)
         self.set_launch_finished_cb(on_launch_finished)
         self.set_accum_done_cb(on_rt_accum_done)
 
-        # create empty scene / optionally start raytracing thread:
-        self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
-        if self._is_scene_created:
-            self._logger.info("Empty scene ready.")
+        if src is None:                          # create empty scene
+            self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
+            if self._is_scene_created: self._logger.info("Empty scene ready.")
 
+        elif isinstance(src, str):               # create scene from file
+            if not os.path.isfile(src):
+                msg = "File %s not found." % src
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+
+            wd = os.getcwd()
+            if os.path.isabs(src):
+                d, f = os.path.split(src)
+                os.chdir(d)
+            else: f = file_name
+
+            self._is_scene_created = self._optix.create_scene_from_file(f, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
+            self._is_scene_created &= self._init_scene_metadata()
+            if self._is_scene_created:
+                self._logger.info("Scene loaded correctly.")
+
+            os.chdir(wd)
+
+        elif isinstance(src, dict):              # create scene from dictionary
+            s = json.dumps(src)
+            self._is_scene_created = self._optix.create_scene_from_json(s, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
+            self._is_scene_created &= self._init_scene_metadata()
+            if self._is_scene_created: self._logger.info("Scene loaded correctly.")
+
+        else:
+            msg = "Scene source type not supported."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+        if self._is_scene_created:
+            # optionally start raytracing thread:
             if start_now: self.start()
             else: self._logger.info("Use start() to start raytracing.")
-
         else:
             msg = "Initial setup failed, see errors above."
             self._logger.error(msg)
@@ -1134,7 +1170,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Available parameters:
 
         - ``min_accumulation_step``
-        - ``set_max_accumulation_frames``
+        - ``max_accumulation_frames``
         - ``compute_timeout``
 
         Parameters
@@ -1247,6 +1283,106 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         finally:
             self._padlock.release()
+
+    def _init_scene_metadata(self) -> bool:
+        s = self._optix.get_scene_metadata()
+        if len(s) > 2: meta = json.loads(s)
+        else:
+            self._logger.error("Scene loading failed.")
+            return False
+
+        self.geometry_handles = {} # geometry name to handle dictionary
+        self.geometry_names = {}   # geometry handle to name dictionary
+        self.geometry_sizes = {}   # geometry name to size dictionary
+        if "Geometry" in meta:
+            for key, value in meta["Geometry"].items():
+                self.geometry_handles[key] = value["Handle"]
+                self.geometry_names[value["Handle"]] = key
+                self.geometry_sizes[key] = value["Size"]
+        else: return False
+
+        self.camera_handles = {}   # camera name to handle dictionary
+        self.camera_names = {}     # camera handle to name dictionary
+        if "Cameras" in meta:
+            for key, value in meta["Cameras"].items():
+                self.camera_handles[key] = value
+                self.camera_names[value] = key
+        else: return False
+
+        self.light_handles = {}    # light name to handle dictionary
+        self.light_names = {}      # light handle to name dictionary
+        if  "Lights" in meta:
+            for key, value in meta["Lights"].items():
+                self.light_handles[key] = value
+                self.light_names[value] = key
+        else: return False
+
+        return True
+
+    def set_scene(self, scene: dict) -> None:
+        """Setup scene using description in provided dictionary.
+
+        Set new scene using provided description (and destroy current scene). Geometry
+        objects, materials, lights, texture data or file names, cameras, postprocessing
+        and scene parameters are replaced. Callback functions and vieport dimensions are
+        preserved.
+
+        Note: locations of external resources loaded from files (e.g. textures) are saved
+        as relative paths, ensure your working directory matches these locations.
+
+        Parameters
+        ----------
+        scene : dict
+            Dictionary with the scene description.
+        """
+        s = json.dumps(scene)
+        with self._padlock:
+            self._logger.info("Loading new scene from dictionary.")
+            if self._optix.load_scene_from_json(s) and self._init_scene_metadata():
+                self._logger.info("New scene ready.")
+            else:
+                msg = "Scene loading failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+
+    def load_scene(self, file_name: str) -> None:
+        """Load scene description from JSON file.
+
+        Load new scene from JSON file (and destroy current scene). Geometry objects,
+        materials, lights, texture data or file names, cameras, postprocessing and
+        scene parameters are replaced. Callback functions and vieport dimensions are
+        preserved.
+
+        Parameters
+        ----------
+        file_name : str
+            Input file name.
+        """
+        if not os.path.isfile(file_name):
+            msg = "File %s not found." % file_name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        wd = os.getcwd()
+        if os.path.isabs(file_name):
+            d, f = os.path.split(file_name)
+            os.chdir(d)
+        else:
+            f = file_name
+
+        with self._padlock:
+            self._logger.info("Loading new scene from file %s.", file_name)
+            if self._optix.load_scene_from_file(f) and self._init_scene_metadata():
+                self._logger.info("New scene ready.")
+            else:
+                msg = "Scene loading failed."
+                self._logger.error(msg)
+                if self._raise_on_error:
+                    os.chdir(wd)
+                    raise ValueError(msg)
+
+        os.chdir(wd)
 
     def save_scene(self, file_name: str) -> None:
         """Save scene description to JSON file.
@@ -3560,7 +3696,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 self._logger.info("...done, handle: %d", g_handle)
                 self.geometry_names[g_handle] = mesh_name
                 self.geometry_handles[mesh_name] = g_handle
-                self.geometry_sizes[mesh_name] = 1 # todo: read mesh size
+                self.geometry_sizes[mesh_name] = self._optix.get_geometry_size(mesh_name)
             else:
                 msg = "Mesh loading failed."
                 self._logger.error(msg)

@@ -69,11 +69,18 @@ def _load_optix_win():
     optix.create_scene_from_json.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int]
     optix.create_scene_from_json.restype = c_bool
 
+    optix.create_scene_from_file.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int]
+    optix.create_scene_from_file.restype = c_bool
+
     optix.load_scene_from_json.argtypes = [c_wchar_p]
     optix.load_scene_from_json.restype = c_bool
 
     optix.load_scene_from_file.argtypes = [c_wchar_p]
     optix.load_scene_from_file.restype = c_bool
+
+    optix.get_scene_metadata.restype = c_wchar_p
+
+    optix.save_scene_to_json.restype = c_wchar_p
 
     optix.save_scene_to_file.argtypes = [c_wchar_p]
     optix.save_scene_to_file.restype = c_bool
@@ -181,6 +188,9 @@ def _load_optix_win():
 
     optix.update_geometry.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_geometry.restype = c_uint
+
+    optix.get_geometry_size.argtypes = [c_wchar_p]
+    optix.get_geometry_size.restype = c_int
 
     optix.get_surface_size.argtypes = [c_wchar_p, POINTER(c_uint), POINTER(c_uint)]
     optix.get_surface_size.restype = c_bool
@@ -521,9 +531,17 @@ class _ClrOptiX:
         return self._optix.create_scene_from_json_ptr(jstr, width, height,
                                                       IntPtr.__overloads__[Int64](buf_ptr), buf_size)
 
+    def create_scene_from_file(self, jstr, width, height, buf_ptr, buf_size):
+        return self._optix.create_scene_from_file_ptr(jstr, width, height,
+                                                      IntPtr.__overloads__[Int64](buf_ptr), buf_size)
+
     def load_scene_from_json(self, jstr): return self._optix.load_scene_from_json(jstr)
 
     def load_scene_from_file(self, fname): return self._optix.load_scene_from_file(fname)
+
+    def get_scene_metadata(self): return self.get_scene_metadata()
+
+    def save_scene_to_json(self): return self.save_scene_to_json()
 
     def save_scene_to_file(self, fname): return self._optix.save_scene_to_file(fname)
 
@@ -653,6 +671,8 @@ class _ClrOptiX:
                                               IntPtr.__overloads__[Int64](u),
                                               IntPtr.__overloads__[Int64](v),
                                               IntPtr.__overloads__[Int64](w))
+
+    def get_geometry_size(self, name): return self._optix.get_geometry_size_ptr(name)
 
     def get_surface_size(self, name, x_ref, z_ref):
         return self._optix.get_surface_size_ptr(name,

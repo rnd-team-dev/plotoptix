@@ -12,7 +12,7 @@ import tkinter as tk
 
 from PIL import Image, ImageTk
 from ctypes import byref, c_float, c_uint
-from typing import Tuple, Union
+from typing import Tuple, Optional, Union
 
 from plotoptix.enums import *
 from plotoptix._load_lib import PLATFORM
@@ -37,6 +37,9 @@ class TkOptiX(NpOptiX):
 
     Parameters
     ----------
+    src : string or dict, optional
+        Scene description, file name or dictionary. Empty scene is prepared
+        if the default ``None`` value is used.
     on_initialization : callable or list, optional
         Callable or list of callables to execute upon starting the raytracing
         thread. These callbacks are executed on the main thread.
@@ -68,6 +71,7 @@ class TkOptiX(NpOptiX):
     """
 
     def __init__(self,
+                 src: Optional[Union[str, dict]] = None,
                  on_initialization = None,
                  on_scene_compute = None,
                  on_rt_completed = None,
@@ -82,6 +86,7 @@ class TkOptiX(NpOptiX):
 
         # pass all arguments, except start_now - we'll do that later
         super().__init__(
+            src=src,
             on_initialization=on_initialization,
             on_scene_compute=on_scene_compute,
             on_rt_completed=on_rt_completed,
