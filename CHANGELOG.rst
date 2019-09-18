@@ -1,12 +1,16 @@
 Release history
 ===============
 
-v0.4.9 - unreleased
+v0.5.0 - unreleased
 -------------------
 
 Added
 ~~~~~
 
+- scene saving/loading in JSON file format or python's dictionary (note, format is not finally freezed and may
+  change on migration to OptiX 7)
+- callbacks re-configurable after initialization
+- load selected/all/merged objects from Wavefront .obj files
 - thin-walled material
 
 `v0.4.8`_ - 2019-09-07

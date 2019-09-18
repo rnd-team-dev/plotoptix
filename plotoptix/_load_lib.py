@@ -214,7 +214,10 @@ def _load_optix_win():
     optix.update_mesh.restype = c_uint
 
     optix.load_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
-    optix.load_mesh_obj.restype = c_uint
+    optix.load_mesh_obj.restype = c_wchar_p
+
+    optix.load_merged_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
+    optix.load_merged_mesh_obj.restype = c_uint
 
     optix.move_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
     optix.move_geometry.restype = c_bool
@@ -728,6 +731,11 @@ class _ClrOptiX:
         return self._optix.load_mesh_obj_ptr(file_name, mesh_name, material,
                                              IntPtr.__overloads__[Int64](color),
                                              make_normals)
+
+    def load_merged_mesh_obj(self, file_name, mesh_name, material, color, make_normals):
+        return self._optix.load_merged_mesh_obj_ptr(file_name, mesh_name, material,
+                                                    IntPtr.__overloads__[Int64](color),
+                                                    make_normals)
 
     def move_geometry(self, name, x, y, z, update): return self._optix.move_geometry(name, x, y, z, update)
 

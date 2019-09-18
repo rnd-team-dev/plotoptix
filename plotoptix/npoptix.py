@@ -3649,10 +3649,76 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             col_ptr = c.ctypes.data
 
 
-    def load_mesh_obj(self, file_name: str, mesh_name: str,
+    def load_mesh_obj(self, file_name: str, mesh_name: Optional[str] = None,
                       c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                       mat: str = "diffuse", make_normals: bool = False) -> None:
         """Load mesh geometry from Wavefront .obj file.
+
+        Parameters
+        ----------
+        file_name : string
+            File name (local file path or url) to read from.
+        mesh_name : string, optional
+            Name of the mesh to import from the file. All meshes are imported
+            if ``None`` value or empty string is used.
+        c : Any, optional
+            Color of the mesh. Single value means a constant gray level.
+            3-component array means constant RGB color.
+        mat : string, optional
+            Material name.
+        make_normals : bool, optional
+            Calculate new normal for each vertex by averaging normals of connected
+            mesh triangles. If set to ``False`` (default) then original normals from
+            the .obj file are preserved or normals are not used (mesh triangles
+            define normals).
+        """
+        if file_name is None: raise ValueError()
+
+        if not isinstance(file_name, str): file_name = str(file_name)
+
+        if mesh_name is None: mesh_name = ""
+
+        if not isinstance(mesh_name, str): mesh_name = str(mesh_name)
+
+        if mesh_name in self.geometry_handles:
+            msg = "Geometry %s already exists, use update_mesh() instead." % mesh_name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        c = _make_contiguous_vector(c, n_dim=3)
+        if c is not None: col_ptr = c.ctypes.data
+        else: col_ptr = 0
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Load mesh from file %s ...", file_name)
+            s = self._optix.load_mesh_obj(file_name, mesh_name, mat, col_ptr, make_normals)
+
+            if len(s) > 2:
+                meta = json.loads(s)
+                for key, value in meta.items():
+                    self.geometry_handles[key] = value["Handle"]
+                    self.geometry_names[value["Handle"]] = key
+                    self.geometry_sizes[key] = value["Size"]
+                    self._logger.info("...loaded: %s (%d vertices)", key, value["Size"])
+            else:
+                msg = "Mesh loading failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+        finally:
+            self._padlock.release()
+
+    def load_merged_mesh_obj(self, file_name: str, mesh_name: str,
+                             c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
+                             mat: str = "diffuse", make_normals: bool = False) -> None:
+        """Load and merge mesh geometries from Wavefront .obj file.
+
+        All objects are imported from file and merged in a single PlotOptiX mesh.
 
         Parameters
         ----------
@@ -3689,8 +3755,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         try:
             self._padlock.acquire()
-            self._logger.info("Load mesh %s, from file %s ...", mesh_name, file_name)
-            g_handle = self._optix.load_mesh_obj(file_name, mesh_name, mat, col_ptr, make_normals)
+            self._logger.info("Load and merge meshes from file %s ...", file_name)
+            g_handle = self._optix.load_merged_mesh_obj(file_name, mesh_name, mat, col_ptr, make_normals)
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
