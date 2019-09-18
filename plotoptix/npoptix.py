@@ -3654,6 +3654,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                       mat: str = "diffuse", make_normals: bool = False) -> None:
         """Load mesh geometry from Wavefront .obj file.
 
+        Note: this method can read files with named objects. Use :meth:`plotoptix.NpOptiX.load_merged_mesh_obj`
+        for reading files with raw, unnamed mesh.
+
         Parameters
         ----------
         file_name : string
@@ -3718,7 +3721,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                              mat: str = "diffuse", make_normals: bool = False) -> None:
         """Load and merge mesh geometries from Wavefront .obj file.
 
-        All objects are imported from file and merged in a single PlotOptiX mesh.
+        All objects are imported from file and merged in a single PlotOptiX mesh. This method
+        can read files with no named objects specified.
 
         Parameters
         ----------
