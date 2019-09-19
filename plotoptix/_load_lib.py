@@ -69,11 +69,18 @@ def _load_optix_win():
     optix.create_scene_from_json.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int]
     optix.create_scene_from_json.restype = c_bool
 
+    optix.create_scene_from_file.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int]
+    optix.create_scene_from_file.restype = c_bool
+
     optix.load_scene_from_json.argtypes = [c_wchar_p]
     optix.load_scene_from_json.restype = c_bool
 
     optix.load_scene_from_file.argtypes = [c_wchar_p]
     optix.load_scene_from_file.restype = c_bool
+
+    optix.get_scene_metadata.restype = c_wchar_p
+
+    optix.save_scene_to_json.restype = c_wchar_p
 
     optix.save_scene_to_file.argtypes = [c_wchar_p]
     optix.save_scene_to_file.restype = c_bool
@@ -182,6 +189,9 @@ def _load_optix_win():
     optix.update_geometry.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_geometry.restype = c_uint
 
+    optix.get_geometry_size.argtypes = [c_wchar_p]
+    optix.get_geometry_size.restype = c_int
+
     optix.get_surface_size.argtypes = [c_wchar_p, POINTER(c_uint), POINTER(c_uint)]
     optix.get_surface_size.restype = c_bool
 
@@ -204,7 +214,10 @@ def _load_optix_win():
     optix.update_mesh.restype = c_uint
 
     optix.load_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
-    optix.load_mesh_obj.restype = c_uint
+    optix.load_mesh_obj.restype = c_wchar_p
+
+    optix.load_merged_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
+    optix.load_merged_mesh_obj.restype = c_uint
 
     optix.move_geometry.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
     optix.move_geometry.restype = c_bool
@@ -248,10 +261,10 @@ def _load_optix_win():
     optix.set_coordinates_geom.argtypes = [c_int, c_float]
     optix.set_coordinates_geom.restype = c_bool
 
-    optix.setup_camera.argtypes = [c_int, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_bool]
+    optix.setup_camera.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_bool]
     optix.setup_camera.restype = c_int
 
-    optix.update_camera.argtypes = [c_uint, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float]
+    optix.update_camera.argtypes = [c_wchar_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float]
     optix.update_camera.restype = c_bool
 
     optix.fit_camera.argtypes = [c_uint, c_wchar_p, c_float]
@@ -259,7 +272,7 @@ def _load_optix_win():
 
     optix.get_current_camera.restype = c_uint
 
-    optix.set_current_camera.argtypes = [c_uint]
+    optix.set_current_camera.argtypes = [c_wchar_p]
     optix.set_current_camera.restype = c_bool
 
     optix.move_camera_by.argtypes = [c_float, c_float, c_float]
@@ -330,52 +343,52 @@ def _load_optix_win():
 
     optix.get_light_shading.restype = c_int
 
-    optix.get_light_index.argtypes = [c_int, c_int]
-    optix.get_light_index.restype = c_int
+    optix.get_light_handle.argtypes = [c_int, c_int]
+    optix.get_light_handle.restype = c_int
 
-    optix.get_light_pos.argtypes = [c_int, c_void_p]
+    optix.get_light_pos.argtypes = [c_wchar_p, c_void_p]
     optix.get_light_pos.restype = c_bool
 
-    optix.get_light_color.argtypes = [c_int, c_void_p]
+    optix.get_light_color.argtypes = [c_wchar_p, c_void_p]
     optix.get_light_color.restype = c_bool
 
-    optix.get_light_u.argtypes = [c_int, c_void_p]
+    optix.get_light_u.argtypes = [c_wchar_p, c_void_p]
     optix.get_light_u.restype = c_bool
 
-    optix.get_light_v.argtypes = [c_int, c_void_p]
+    optix.get_light_v.argtypes = [c_wchar_p, c_void_p]
     optix.get_light_v.restype = c_bool
 
-    optix.get_light_r.argtypes = [c_int]
+    optix.get_light_r.argtypes = [c_wchar_p]
     optix.get_light_r.restype = c_float
 
-    optix.get_light.argtypes = [c_int]
+    optix.get_light.argtypes = [c_wchar_p]
     optix.get_light.restype = c_wchar_p
 
     optix.set_light_shading.argtypes = [c_int]
     optix.set_light_shading.restype = c_bool
 
-    optix.setup_spherical_light.argtypes = [c_void_p, c_void_p, c_float, c_bool]
+    optix.setup_spherical_light.argtypes = [c_wchar_p, c_void_p, c_void_p, c_float, c_bool]
     optix.setup_spherical_light.restype = c_int
 
-    optix.setup_parallelogram_light.argtypes = [c_void_p, c_void_p, c_void_p, c_void_p, c_bool]
+    optix.setup_parallelogram_light.argtypes = [c_wchar_p, c_void_p, c_void_p, c_void_p, c_void_p, c_bool]
     optix.setup_parallelogram_light.restype = c_int
 
-    optix.update_light.argtypes = [c_int, c_void_p, c_void_p, c_float, c_void_p, c_void_p]
+    optix.update_light.argtypes = [c_wchar_p, c_void_p, c_void_p, c_float, c_void_p, c_void_p]
     optix.update_light.restype = c_bool
 
-    optix.fit_light.argtypes = [c_int, c_uint, c_float, c_float, c_float]
+    optix.fit_light.argtypes = [c_wchar_p, c_uint, c_float, c_float, c_float]
     optix.fit_light.restype = c_bool
 
-    optix.dolly_light.argtypes = [c_int, c_float]
+    optix.dolly_light.argtypes = [c_wchar_p, c_float]
     optix.dolly_light.restype = c_bool
 
-    optix.move_light_in_view.argtypes = [c_int, c_float, c_float, c_float]
+    optix.move_light_in_view.argtypes = [c_wchar_p, c_float, c_float, c_float]
     optix.move_light_in_view.restype = c_bool
 
-    optix.rotate_light_in_view.argtypes = [c_int, c_float, c_float, c_float]
+    optix.rotate_light_in_view.argtypes = [c_wchar_p, c_float, c_float, c_float]
     optix.rotate_light_in_view.restype = c_bool
 
-    optix.scale_light.argtypes = [c_int, c_float]
+    optix.scale_light.argtypes = [c_wchar_p, c_float]
     optix.scale_light.restype = c_bool
 
 
@@ -521,9 +534,17 @@ class _ClrOptiX:
         return self._optix.create_scene_from_json_ptr(jstr, width, height,
                                                       IntPtr.__overloads__[Int64](buf_ptr), buf_size)
 
+    def create_scene_from_file(self, jstr, width, height, buf_ptr, buf_size):
+        return self._optix.create_scene_from_file_ptr(jstr, width, height,
+                                                      IntPtr.__overloads__[Int64](buf_ptr), buf_size)
+
     def load_scene_from_json(self, jstr): return self._optix.load_scene_from_json(jstr)
 
     def load_scene_from_file(self, fname): return self._optix.load_scene_from_file(fname)
+
+    def get_scene_metadata(self): return self.get_scene_metadata()
+
+    def save_scene_to_json(self): return self.save_scene_to_json()
 
     def save_scene_to_file(self, fname): return self._optix.save_scene_to_file(fname)
 
@@ -654,6 +675,8 @@ class _ClrOptiX:
                                               IntPtr.__overloads__[Int64](v),
                                               IntPtr.__overloads__[Int64](w))
 
+    def get_geometry_size(self, name): return self._optix.get_geometry_size_ptr(name)
+
     def get_surface_size(self, name, x_ref, z_ref):
         return self._optix.get_surface_size_ptr(name,
                                                 IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value),
@@ -709,6 +732,11 @@ class _ClrOptiX:
                                              IntPtr.__overloads__[Int64](color),
                                              make_normals)
 
+    def load_merged_mesh_obj(self, file_name, mesh_name, material, color, make_normals):
+        return self._optix.load_merged_mesh_obj_ptr(file_name, mesh_name, material,
+                                                    IntPtr.__overloads__[Int64](color),
+                                                    make_normals)
+
     def move_geometry(self, name, x, y, z, update): return self._optix.move_geometry(name, x, y, z, update)
 
     def move_primitive(self, name, idx, x, y, z, update): return self._optix.move_primitive(name, idx, x, y, z, update)
@@ -739,15 +767,15 @@ class _ClrOptiX:
 
     def set_coordinates_geom(self, mode, thickness): return self._optix.set_coordinates_geom(mode, thickness)
 
-    def setup_camera(self, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, fov, blur, make_current):
-        return self._optix.setup_camera_ptr(camera_type,
+    def setup_camera(self, name, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, fov, blur, make_current):
+        return self._optix.setup_camera_ptr(name, camera_type,
                                             IntPtr.__overloads__[Int64](eye),
                                             IntPtr.__overloads__[Int64](target),
                                             IntPtr.__overloads__[Int64](up),
                                             aperture_r, aperture_fract, focal_scale, fov, blur, make_current)
 
-    def update_camera(self, handle, eye, target, up, aperture_r, focal_scale, fov):
-        return self._optix.update_camera_ptr(handle,
+    def update_camera(self, name, eye, target, up, aperture_r, focal_scale, fov):
+        return self._optix.update_camera_ptr(name,
                                              IntPtr.__overloads__[Int64](eye),
                                              IntPtr.__overloads__[Int64](target),
                                              IntPtr.__overloads__[Int64](up),
@@ -757,7 +785,7 @@ class _ClrOptiX:
 
     def get_current_camera(self): return self._optix.get_current_camera()
 
-    def set_current_camera(self, handle): return self._optix.set_current_camera(handle)
+    def set_current_camera(self, name): return self._optix.set_current_camera(name)
 
     def move_camera_by(self, dx, dy, dz): return self._optix.move_camera_by(dx, dy, dz)
 
@@ -811,54 +839,56 @@ class _ClrOptiX:
 
     def set_light_shading(self, mode): return self._optix.set_light_shading(mode)
 
-    def get_light_index(self, handle, primitive): return self._optix.get_light_index(handle, primitive)
+    def get_light_handle(self, handle, primitive): return self._optix.get_light_handle(handle, primitive)
 
-    def get_light_pos(self, handle, pos):
-        return self._optix.get_light_pos_ptr(handle, IntPtr.__overloads__[Int64](pos))
+    def get_light_pos(self, name, pos):
+        return self._optix.get_light_pos_ptr(name, IntPtr.__overloads__[Int64](pos))
 
-    def get_light_color(self, handle, color):
-        return self._optix.get_light_color_ptr(handle, IntPtr.__overloads__[Int64](color))
+    def get_light_color(self, name, color):
+        return self._optix.get_light_color_ptr(name, IntPtr.__overloads__[Int64](color))
 
-    def get_light_u(self, handle, u):
-        return self._optix.get_light_u_ptr(handle, IntPtr.__overloads__[Int64](u))
+    def get_light_u(self, name, u):
+        return self._optix.get_light_u_ptr(name, IntPtr.__overloads__[Int64](u))
 
-    def get_light_v(self, handle, v):
-        return self._optix.get_light_v_ptr(handle, IntPtr.__overloads__[Int64](v))
+    def get_light_v(self, name, v):
+        return self._optix.get_light_v_ptr(name, IntPtr.__overloads__[Int64](v))
 
-    def get_light_r(self, handle): return self._optix.get_light_r(handle)
+    def get_light_r(self, name): return self._optix.get_light_r(name)
 
-    def get_light(self, handle): return self._optix.get_light(handle)
+    def get_light(self, name): return self._optix.get_light(name)
 
-    def setup_spherical_light(self, pos, color, r, in_geometry):
-        return self._optix.setup_spherical_light_ptr(IntPtr.__overloads__[Int64](pos),
+    def setup_spherical_light(self, name, pos, color, r, in_geometry):
+        return self._optix.setup_spherical_light_ptr(name,
+                                                     IntPtr.__overloads__[Int64](pos),
                                                      IntPtr.__overloads__[Int64](color),
                                                      r, in_geometry)
 
-    def setup_parallelogram_light(self, pos, color, u, v, in_geometry):
-        return self._optix.setup_parallelogram_light_ptr(IntPtr.__overloads__[Int64](pos),
+    def setup_parallelogram_light(self, name, pos, color, u, v, in_geometry):
+        return self._optix.setup_parallelogram_light_ptr(name,
+                                                         IntPtr.__overloads__[Int64](pos),
                                                          IntPtr.__overloads__[Int64](color),
                                                          IntPtr.__overloads__[Int64](u),
                                                          IntPtr.__overloads__[Int64](v),
                                                          in_geometry)
 
-    def update_light(self, handle, pos, color, r, u, v):
-        return self._optix.update_light_ptr(handle,
+    def update_light(self, name, pos, color, r, u, v):
+        return self._optix.update_light_ptr(name,
                                             IntPtr.__overloads__[Int64](pos),
                                             IntPtr.__overloads__[Int64](color),
                                             r,
                                             IntPtr.__overloads__[Int64](u),
                                             IntPtr.__overloads__[Int64](v))
 
-    def fit_light(self, handle, cam_handle, horizontal_rot, vertical_rot, dist_scale):
-        return self._optix.fit_light(handle, cam_handle, horizontal_rot, vertical_rot, dist_scale)
+    def fit_light(self, name, cam_handle, horizontal_rot, vertical_rot, dist_scale):
+        return self._optix.fit_light(name, cam_handle, horizontal_rot, vertical_rot, dist_scale)
 
-    def dolly_light(self, idx, x): return self._optix.dolly_light(idx, x)
+    def dolly_light(self, name, x): return self._optix.dolly_light(name, x)
 
-    def move_light_in_view(self, idx, x, y, z): return self._optix.move_light_in_view(idx, x, y, z)
+    def move_light_in_view(self, name, x, y, z): return self._optix.move_light_in_view(name, x, y, z)
 
-    def rotate_light_in_view(self, idx, x, y, z): return self._optix.rotate_light_in_view(idx, x, y, z)
+    def rotate_light_in_view(self, name, x, y, z): return self._optix.rotate_light_in_view(name, x, y, z)
 
-    def scale_light(self, idx, s): return self._optix.scale_light(idx, s)
+    def scale_light(self, name, s): return self._optix.scale_light(name, s)
 
     def get_object_at(self, x, y, h_ref, idx_ref):
         return self._optix.get_object_at_ptr(x, y,

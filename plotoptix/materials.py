@@ -168,3 +168,22 @@ Clear glass, with reflection and refraction simulated. Refraction index is varyi
 resulting with the light dispersion. Color components meaning is "attenuation length"
 and the range is <0; inf>.
 """
+
+m_thin_walled = {
+      "ClosestHitPrograms": [ "0::path_tracing_materials.ptx::glass_closest_hit" ],
+      "AnyHitPrograms": [ "1::path_tracing_materials.ptx::any_hit" ],
+      "VarInt": { "material_flags": 44 },
+      "VarFloat": {
+        "radiation_length": 0.0,
+        "vol_scattering": 1.0,
+        "light_emission": 0.0
+      },
+      "VarFloat3": {
+        "refraction_index": [ 1.9, 1.9, 1.9 ],
+      }
+    }
+"""
+Ideal for the soap-like bubbles. Reflection amount depends on the refraction index, however, there is
+no refraction on crossing the surface. Reflections can be textured or colorized with the primitive
+colors, and the color values range is <0; inf>.
+"""

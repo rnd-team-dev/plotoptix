@@ -6,7 +6,7 @@ Copyright (C) 2019 R&D Team. All Rights Reserved.
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
-import json, math, logging, threading, time
+import json, math, logging, os, threading, time
 import numpy as np
 
 from ctypes import byref, c_float, c_uint, c_int
@@ -34,6 +34,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     Parameters
     ----------
+    src : string or dict, optional
+        Scene description, file name or dictionary. Empty scene is prepared
+        if the default ``None`` value is used.
     on_initialization : callable or list, optional
         Callable or list of callables to execute upon starting the raytracing
         thread. These callbacks are executed on the main thread.
@@ -62,6 +65,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     """
 
     def __init__(self,
+                 src: Optional[Union[str, dict]] = None,
                  on_initialization = None,
                  on_scene_compute = None,
                  on_rt_completed = None,
@@ -104,33 +108,58 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self.geometry_names = {}   # geometry handle to name dictionary
         self.geometry_sizes = {}   # geometry name to size dictionary
         self.camera_handles = {}   # camera name to handle dictionary
+        self.camera_names = {}     # camera handle to name dictionary
         self.light_handles = {}    # light name to handle dictionary
         self.light_names = {}      # light handle to name dictionary
 
         # scene initialization / compute / upload / accumulation done callbacks:
         if on_initialization is not None: self._initialization_cb = self._make_list_of_callable(on_initialization)
-        else: self._initialization_cb = [self._default_initialization]
+        elif src is None: self._initialization_cb = [self._default_initialization]
+        else: self._initialization_cb = []
+        self.set_scene_compute_cb(on_scene_compute)
+        self.set_rt_completed_cb(on_rt_completed)
+        self.set_launch_finished_cb(on_launch_finished)
+        self.set_accum_done_cb(on_rt_accum_done)
 
-        if on_scene_compute is not None: self._scene_compute_cb = self._make_list_of_callable(on_scene_compute)
-        else: self._scene_compute_cb = []
+        if src is None:                          # create empty scene
+            self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
+            if self._is_scene_created: self._logger.info("Empty scene ready.")
 
-        if on_rt_completed is not None: self._rt_completed_cb = self._make_list_of_callable(on_rt_completed)
-        else: self._rt_completed_cb = []
+        elif isinstance(src, str):               # create scene from file
+            if not os.path.isfile(src):
+                msg = "File %s not found." % src
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
 
-        if on_launch_finished is not None: self._launch_finished_cb = self._make_list_of_callable(on_launch_finished)
-        else: self._launch_finished_cb = []
+            wd = os.getcwd()
+            if os.path.isabs(src):
+                d, f = os.path.split(src)
+                os.chdir(d)
+            else: f = file_name
 
-        if on_rt_accum_done is not None: self._rt_accum_done_cb = self._make_list_of_callable(on_rt_accum_done)
-        else: self._rt_accum_done_cb = []
+            self._is_scene_created = self._optix.create_scene_from_file(f, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
+            self._is_scene_created &= self._init_scene_metadata()
+            if self._is_scene_created:
+                self._logger.info("Scene loaded correctly.")
 
-        # create empty scene / optionally start raytracing thread:
-        self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
+            os.chdir(wd)
+
+        elif isinstance(src, dict):              # create scene from dictionary
+            s = json.dumps(src)
+            self._is_scene_created = self._optix.create_scene_from_json(s, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
+            self._is_scene_created &= self._init_scene_metadata()
+            if self._is_scene_created: self._logger.info("Scene loaded correctly.")
+
+        else:
+            msg = "Scene source type not supported."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
         if self._is_scene_created:
-            self._logger.info("Empty scene ready.")
-
+            # optionally start raytracing thread:
             if start_now: self.start()
             else: self._logger.info("Use start() to start raytracing.")
-
         else:
             msg = "Initial setup failed, see errors above."
             self._logger.error(msg)
@@ -324,6 +353,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             wnd.setup_camera("default", [0, 0, 10], [0, 0, 0])
 
     ###########################################################################
+    def set_launch_finished_cb(self, cb) -> None:
+        """Set callback function(s) executed after each finished frame.
+
+        Parameters
+        ----------
+        cb : callable or list
+            Callable or list of callables to set as the launch finished callback.
+        """
+        with self._padlock:
+            if cb is not None: self._launch_finished_cb = self._make_list_of_callable(cb)
+            else: self._launch_finished_cb = []
+
     def _launch_finished_callback(self, rt_result: int) -> None:
         """
         Callback executed after each finished frame (``min_accumulation_step``
@@ -366,6 +407,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
 
     ###########################################################################
+    def set_accum_done_cb(self, cb) -> None:
+        """Set callback function(s) executed when all accumulation frames
+        are completed.
+
+        Parameters
+        ----------
+        cb : callable or list
+            Callable or list of callables to set as the accum done callback.
+        """
+        with self._padlock:
+            if cb is not None: self._rt_accum_done_cb = self._make_list_of_callable(cb)
+            else: self._rt_accum_done_cb = []
+
     def _accum_done_callback(self) -> None:
         """
         Callback executed when all accumulation frames are completed.
@@ -385,6 +439,23 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
 
     ###########################################################################
+    def set_scene_compute_cb(self, cb) -> None:
+        """Set callback function(s) executed on each frame ray tracing start.
+
+        Callback(s) executed in parallel to the raytracing and intended for
+        CPU intensive computations. Note, set ``compute_timeout`` to appropriate
+        value if your computations are longer than single frame ray tracing, see
+        :meth:`plotoptix.NpOptiX.set_param`.
+
+        Parameters
+        ----------
+        cb : callable or list
+            Callable or list of callables to set as the scene compute callback.
+        """
+        with self._padlock:
+            if cb is not None: self._scene_compute_cb = self._make_list_of_callable(cb)
+            else: self._scene_compute_cb = []
+
     def _start_scene_compute_callback(self, n_frames : int) -> None:
         """
         Compute callback executed together with the start of each frame raytracing.
@@ -412,6 +483,22 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def _get_start_scene_compute_callback(self):
         def func(n_frames : int): self._start_scene_compute_callback(n_frames)
         return PARAM_INT_CALLBACK(func)
+
+    def set_rt_completed_cb(self, cb) -> None:
+        """Set callback function(s) executed on each frame ray tracing finished.
+
+        Callback(s) executed in the same thread as the scene compute callback. Note,
+        set ``compute_timeout`` to appropriate value if your computations are longer
+        than single frame ray tracing, see :meth:`plotoptix.NpOptiX.set_param`.
+
+        Parameters
+        ----------
+        cb : callable or list
+            Callable or list of callables to set as the RT completed callback.
+        """
+        with self._padlock:
+            if cb is not None: self._rt_completed_cb = self._make_list_of_callable(cb)
+            else: self._rt_completed_cb = []
 
     def _scene_rt_completed_callback(self, rt_result : int) -> None:
         """
@@ -1083,7 +1170,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Available parameters:
 
         - ``min_accumulation_step``
-        - ``set_max_accumulation_frames``
+        - ``max_accumulation_frames``
         - ``compute_timeout``
 
         Parameters
@@ -1170,12 +1257,140 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
+    def get_scene(self) -> dict:
+        """Get dictionary with the scene description.
+
+        Returns a dictionary with the scene description. Geometry objects,
+        materials, lights, texture data or file names, cameras, postprocessing
+        and scene parameters are included. Callback functions and vieport dimensions
+        are not saved. Existing files are overwritten.
+
+        Returns
+        -------
+        out : dict, optional
+            Dictionary with the scene description.
+        """
+        try:
+            self._padlock.acquire()
+
+            s = self._optix.save_scene_to_json()
+            if len(s) > 2: return json.loads(s)
+            else: return {}
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+
+        finally:
+            self._padlock.release()
+
+    def _init_scene_metadata(self) -> bool:
+        s = self._optix.get_scene_metadata()
+        if len(s) > 2: meta = json.loads(s)
+        else:
+            self._logger.error("Scene loading failed.")
+            return False
+
+        self.geometry_handles = {} # geometry name to handle dictionary
+        self.geometry_names = {}   # geometry handle to name dictionary
+        self.geometry_sizes = {}   # geometry name to size dictionary
+        if "Geometry" in meta:
+            for key, value in meta["Geometry"].items():
+                self.geometry_handles[key] = value["Handle"]
+                self.geometry_names[value["Handle"]] = key
+                self.geometry_sizes[key] = value["Size"]
+        else: return False
+
+        self.camera_handles = {}   # camera name to handle dictionary
+        self.camera_names = {}     # camera handle to name dictionary
+        if "Cameras" in meta:
+            for key, value in meta["Cameras"].items():
+                self.camera_handles[key] = value
+                self.camera_names[value] = key
+        else: return False
+
+        self.light_handles = {}    # light name to handle dictionary
+        self.light_names = {}      # light handle to name dictionary
+        if  "Lights" in meta:
+            for key, value in meta["Lights"].items():
+                self.light_handles[key] = value
+                self.light_names[value] = key
+        else: return False
+
+        return True
+
+    def set_scene(self, scene: dict) -> None:
+        """Setup scene using description in provided dictionary.
+
+        Set new scene using provided description (and destroy current scene). Geometry
+        objects, materials, lights, texture data or file names, cameras, postprocessing
+        and scene parameters are replaced. Callback functions and vieport dimensions are
+        preserved.
+
+        Note: locations of external resources loaded from files (e.g. textures) are saved
+        as relative paths, ensure your working directory matches these locations.
+
+        Parameters
+        ----------
+        scene : dict
+            Dictionary with the scene description.
+        """
+        s = json.dumps(scene)
+        with self._padlock:
+            self._logger.info("Loading new scene from dictionary.")
+            if self._optix.load_scene_from_json(s) and self._init_scene_metadata():
+                self._logger.info("New scene ready.")
+            else:
+                msg = "Scene loading failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+
+    def load_scene(self, file_name: str) -> None:
+        """Load scene description from JSON file.
+
+        Load new scene from JSON file (and destroy current scene). Geometry objects,
+        materials, lights, texture data or file names, cameras, postprocessing and
+        scene parameters are replaced. Callback functions and vieport dimensions are
+        preserved.
+
+        Parameters
+        ----------
+        file_name : str
+            Input file name.
+        """
+        if not os.path.isfile(file_name):
+            msg = "File %s not found." % file_name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        wd = os.getcwd()
+        if os.path.isabs(file_name):
+            d, f = os.path.split(file_name)
+            os.chdir(d)
+        else:
+            f = file_name
+
+        with self._padlock:
+            self._logger.info("Loading new scene from file %s.", file_name)
+            if self._optix.load_scene_from_file(f) and self._init_scene_metadata():
+                self._logger.info("New scene ready.")
+            else:
+                msg = "Scene loading failed."
+                self._logger.error(msg)
+                if self._raise_on_error:
+                    os.chdir(wd)
+                    raise ValueError(msg)
+
+        os.chdir(wd)
+
     def save_scene(self, file_name: str) -> None:
-        """Save scene JSON description to file.
+        """Save scene description to JSON file.
 
         Save description of the scene to file. Geometry objects, materials, lights,
-        cameras, postprocessing and scene parameters are included. Callback functions
-        and vieport dimensions are not saved. Existing files are overwritten.
+        texture data or file names, cameras, postprocessing and scene parameters
+        are included. Callback functions and vieport dimensions are not saved.
+        Existing files are overwritten.
 
         Parameters
         ----------
@@ -1551,7 +1766,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        h = self._optix.setup_camera(cam_type.value,
+        h = self._optix.setup_camera(name, cam_type.value,
                                      eye_ptr, target_ptr, up.ctypes.data,
                                      aperture_radius, aperture_fract,
                                      focal_scale, fov, blur,
@@ -1559,6 +1774,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if h > 0:
             self._logger.info("Camera %s handle: %d.", name, h)
             self.camera_handles[name] = h
+            self.camera_names[h] = name
         else:
             msg = "Camera setup failed."
             self._logger.error(msg)
@@ -1605,13 +1821,36 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if up is not None: up_ptr = up.ctypes.data
         else:              up_ptr = 0
 
-        if self._optix.update_camera(cam_handle, eye_ptr, target_ptr, up_ptr,
+        if self._optix.update_camera(name, eye_ptr, target_ptr, up_ptr,
                                      aperture_radius, focal_scale, fov):
             self._logger.info("Camera %s updated.", name)
         else:
             msg = "Camera %s update failed." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
+
+    def get_current_camera(self) -> Optional[str]:
+        """Get current camera name.
+
+        Returns
+        -------
+        out : string, optional
+            Name of the current camera or ``None`` if camera not set.
+        """
+        cam_handle = self._optix.get_current_camera()
+        if cam_handle == 0:
+            msg = "Current camera is not set."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return None
+
+        if cam_handle not in self.camera_names:
+            msg = "Camera handle %d does not exists." % cam_handle
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return None
+
+        return self.camera_names[cam_handle]
 
     def set_current_camera(self, name: str) -> None:
         """Switch to another camera.
@@ -1631,7 +1870,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        if self._optix.set_current_camera(self.camera_handles[name]):
+        if self._optix.set_current_camera(name):
             self._logger.info("Current camera: %s", name)
         else:
             msg = "Current camera not changed."
@@ -1859,7 +2098,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             3D of the light or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -1871,7 +2110,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
         pos = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-        self._optix.get_light_pos(self.light_handles[name], pos.ctypes.data)
+        self._optix.get_light_pos(name, pos.ctypes.data)
         return pos
 
     def get_light_color(self, name: Optional[str] = None) -> Optional[np.ndarray]:
@@ -1888,7 +2127,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light color RGB or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -1900,7 +2139,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
         col = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-        self._optix.get_light_color(self.light_handles[name], col.ctypes.data)
+        self._optix.get_light_color(name, col.ctypes.data)
         return col
 
     def get_light_u(self, name: Optional[str] = None) -> Optional[np.ndarray]:
@@ -1917,7 +2156,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light U vector or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -1929,7 +2168,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
         u = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-        self._optix.get_light_u(self.light_handles[name], u.ctypes.data)
+        self._optix.get_light_u(name, u.ctypes.data)
         return u
 
     def get_light_v(self, name: Optional[str] = None) -> Optional[np.ndarray]:
@@ -1946,7 +2185,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light V vector or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -1958,7 +2197,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
         v = np.ascontiguousarray([0, 0, 0], dtype=np.float32)
-        self._optix.get_light_v(self.light_handles[name], v.ctypes.data)
+        self._optix.get_light_v(name, v.ctypes.data)
         return v
 
     def get_light_r(self, name: Optional[str] = None) -> Optional[float]:
@@ -1975,7 +2214,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light readius or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -1986,7 +2225,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None
 
-        return self._optix.get_light_r(self.light_handles[name])
+        return self._optix.get_light_r(name)
 
     def get_light(self, name: str) -> Optional[dict]:
         """Get light source parameters.
@@ -2012,7 +2251,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None
 
-        s = self._optix.get_light(self.light_handles[name])
+        s = self._optix.get_light(name)
         if len(s) > 2: return json.loads(s)
         else:
             msg = "Failed on reading light %s." % name
@@ -2073,9 +2312,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        h = self._optix.setup_spherical_light(pos.ctypes.data, color.ctypes.data,
+        h = self._optix.setup_spherical_light(name, pos.ctypes.data, color.ctypes.data,
                                               radius, in_geometry)
-        if h >= 0:
+        if h != 0:
             self._logger.info("Light %s handle: %d.", name, h)
             self.light_handles[name] = h
             self.light_names[h] = name
@@ -2083,7 +2322,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if autofit:
                 self.light_fit(name, camera=cam_name)
         else:
-            msg = "Light setup failed."
+            msg = "Light %s setup failed." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
 
@@ -2160,9 +2399,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        h = self._optix.setup_parallelogram_light(pos.ctypes.data, color.ctypes.data,
+        h = self._optix.setup_parallelogram_light(name, pos.ctypes.data, color.ctypes.data,
                                                   u.ctypes.data, v.ctypes.data, in_geometry)
-        if h >= 0:
+        if h != 0:
             self._logger.info("Light %s handle: %d.", name, h)
             self.light_handles[name] = h
             self.light_names[h] = name
@@ -2170,7 +2409,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if autofit:
                 self.light_fit(name, camera=cam_name)
         else:
-            msg = "Light setup failed."
+            msg = "Light %s setup failed." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
@@ -2277,7 +2516,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if v is not None: v_ptr = v.ctypes.data
         else:             v_ptr = 0
 
-        if self._optix.update_light(self.light_handles[name],
+        if self._optix.update_light(name,
                                     pos_ptr, color_ptr,
                                     radius, u_ptr, v_ptr):
             self._logger.info("Light %s updated.", name)
@@ -2309,7 +2548,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if light is None: raise ValueError()
 
         if not isinstance(light, str): light = str(light)
-        light_handle = self.light_handles[light]
+        if not light in self.light_handles:
+            msg = "Light %s not found." % light
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
 
         cam_handle = 0
         if camera is not None:
@@ -2320,7 +2562,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         horizontal_rot = math.pi * horizontal_rot / 180.0
         vertical_rot = math.pi * vertical_rot / 180.0
 
-        self._optix.fit_light(light_handle, cam_handle, horizontal_rot, vertical_rot, dist_scale)
+        self._optix.fit_light(light, cam_handle, horizontal_rot, vertical_rot, dist_scale)
 
 
     def get_material(self, name: str) -> Optional[dict]:
@@ -3407,10 +3649,80 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             col_ptr = c.ctypes.data
 
 
-    def load_mesh_obj(self, file_name: str, mesh_name: str,
+    def load_mesh_obj(self, file_name: str, mesh_name: Optional[str] = None,
                       c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                       mat: str = "diffuse", make_normals: bool = False) -> None:
         """Load mesh geometry from Wavefront .obj file.
+
+        Note: this method can read files with named objects. Use :meth:`plotoptix.NpOptiX.load_merged_mesh_obj`
+        for reading files with raw, unnamed mesh.
+
+        Parameters
+        ----------
+        file_name : string
+            File name (local file path or url) to read from.
+        mesh_name : string, optional
+            Name of the mesh to import from the file. All meshes are imported
+            if ``None`` value or empty string is used.
+        c : Any, optional
+            Color of the mesh. Single value means a constant gray level.
+            3-component array means constant RGB color.
+        mat : string, optional
+            Material name.
+        make_normals : bool, optional
+            Calculate new normal for each vertex by averaging normals of connected
+            mesh triangles. If set to ``False`` (default) then original normals from
+            the .obj file are preserved or normals are not used (mesh triangles
+            define normals).
+        """
+        if file_name is None: raise ValueError()
+
+        if not isinstance(file_name, str): file_name = str(file_name)
+
+        if mesh_name is None: mesh_name = ""
+
+        if not isinstance(mesh_name, str): mesh_name = str(mesh_name)
+
+        if mesh_name in self.geometry_handles:
+            msg = "Geometry %s already exists, use update_mesh() instead." % mesh_name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        c = _make_contiguous_vector(c, n_dim=3)
+        if c is not None: col_ptr = c.ctypes.data
+        else: col_ptr = 0
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Load mesh from file %s ...", file_name)
+            s = self._optix.load_mesh_obj(file_name, mesh_name, mat, col_ptr, make_normals)
+
+            if len(s) > 2:
+                meta = json.loads(s)
+                for key, value in meta.items():
+                    self.geometry_handles[key] = value["Handle"]
+                    self.geometry_names[value["Handle"]] = key
+                    self.geometry_sizes[key] = value["Size"]
+                    self._logger.info("...loaded: %s (%d vertices)", key, value["Size"])
+            else:
+                msg = "Mesh loading failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+        finally:
+            self._padlock.release()
+
+    def load_merged_mesh_obj(self, file_name: str, mesh_name: str,
+                             c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
+                             mat: str = "diffuse", make_normals: bool = False) -> None:
+        """Load and merge mesh geometries from Wavefront .obj file.
+
+        All objects are imported from file and merged in a single PlotOptiX mesh. This method
+        can read files with no named objects specified.
 
         Parameters
         ----------
@@ -3447,14 +3759,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         try:
             self._padlock.acquire()
-            self._logger.info("Load mesh %s, from file %s ...", mesh_name, file_name)
-            g_handle = self._optix.load_mesh_obj(file_name, mesh_name, mat, col_ptr, make_normals)
+            self._logger.info("Load and merge meshes from file %s ...", file_name)
+            g_handle = self._optix.load_merged_mesh_obj(file_name, mesh_name, mat, col_ptr, make_normals)
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
                 self.geometry_names[g_handle] = mesh_name
                 self.geometry_handles[mesh_name] = g_handle
-                self.geometry_sizes[mesh_name] = 1 # todo: read mesh size
+                self.geometry_sizes[mesh_name] = self._optix.get_geometry_size(mesh_name)
             else:
                 msg = "Mesh loading failed."
                 self._logger.error(msg)

@@ -198,6 +198,7 @@ class TestScene(TestCase):
         self.assertFalse((cam is None) or (handle1 is None), msg="Could not get default camera.")
         self.assertTrue((cam == "default") and (handle1 > 0), msg="Wrong name / handle of the default camera: %s / %d." % (cam, handle1))
 
+        name = "test_cam1"
         eye=[10, 10, 0]
         target=[1, 1, 0]
         up=[-1, 1, 0]
@@ -208,7 +209,7 @@ class TestScene(TestCase):
         fov=35
         blur=0.5
         make_current=True
-        TestScene.scene.setup_camera("test_cam1",
+        TestScene.scene.setup_camera(name,
                                      eye=eye, target=target, up=up,
                                      cam_type=cam_type,
                                      aperture_radius=aperture_radius,
@@ -218,9 +219,12 @@ class TestScene(TestCase):
                                      make_current=make_current)
         cam, handle2 = TestScene.scene.get_camera_name_handle()
         self.assertFalse((cam is None) or (handle2 is None), msg="Could not get back the new camera.")
-        self.assertTrue((cam == "test_cam1") and (handle2 > handle1), msg="Wrong name/handle of the new camera: %s / %d." % (cam, handle2))
+        self.assertTrue((cam == name) and (handle2 > handle1), msg="Wrong name/handle of the new camera: %s / %d." % (cam, handle2))
         self.assertTrue(np.array_equal(TestScene.scene.get_camera_eye(cam), eye), msg="Camera eye did not match.")
         self.assertTrue(np.array_equal(TestScene.scene.get_camera_target(cam), target), msg="Camera target did not match.")
+
+        current_cam = TestScene.scene.get_current_camera()
+        self.assertTrue(current_cam == name, msg="Wrong current camera name: %s." % current_cam)
 
         eye_array = np.array(eye)
         tgt_array = np.array(target)
@@ -235,7 +239,7 @@ class TestScene(TestCase):
 
         atol = 0.0001
         rtol = 0.0001
-        cam_params = TestScene.scene.get_camera("test_cam1")
+        cam_params = TestScene.scene.get_camera(name)
         eye_dst = cam_params["Eye"]
         tgt_dst = cam_params["Target"]
         up_dst = cam_params["Up"]

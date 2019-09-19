@@ -11,6 +11,7 @@ Create, load, update plot
 .. automethod:: plotoptix.NpOptiX.set_surface
 .. automethod:: plotoptix.NpOptiX.update_surface
 .. automethod:: plotoptix.NpOptiX.load_mesh_obj
+.. automethod:: plotoptix.NpOptiX.load_merged_mesh_obj
 .. automethod:: plotoptix.NpOptiX.set_displacement
 
 Direct modifications of data

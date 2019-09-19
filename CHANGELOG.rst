@@ -1,8 +1,20 @@
 Release history
 ===============
 
-v0.4.8 - unreleased
+v0.5.0 - unreleased
 -------------------
+
+Added
+~~~~~
+
+- scene saving/loading in JSON file format or python's dictionary (note, format is not finally freezed and may
+  change on migration to OptiX 7)
+- callbacks re-configurable after initialization
+- load selected/all/merged objects from Wavefront .obj files
+- thin-walled material
+
+`v0.4.8`_ - 2019-09-07
+----------------------
 
 Added
 ~~~~~
@@ -15,7 +27,6 @@ Changes
 
 - metalic and mirror materials use primitive colors to colorize the reflection (primitive color overrides
   surface albedo) so color data can be effectively used also with these materials
-
 
 `v0.4.7`_ - 2019-08-28
 ----------------------
@@ -206,6 +217,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.4.8`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.8
 .. _`v0.4.7`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.7
 .. _`v0.4.6`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.6
 .. _`v0.4.5`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.5

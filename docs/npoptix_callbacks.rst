@@ -4,12 +4,17 @@ Callbacks
 Callback methods
 ----------------
 
-These methods launch callables provided to the NpOptiX constructor.
+Methods launching callables provided to the NpOptiX constructor and
+corresponding setters to configure callbacks after initialization.
 
+.. automethod:: plotoptix.NpOptiX.set_launch_finished_cb
 .. automethod:: plotoptix.NpOptiX._launch_finished_callback
 .. automethod:: plotoptix.NpOptiX._scene_rt_starting_callback
+.. automethod:: plotoptix.NpOptiX.set_accum_done_cb
 .. automethod:: plotoptix.NpOptiX._accum_done_callback
+.. automethod:: plotoptix.NpOptiX.set_scene_compute_cb
 .. automethod:: plotoptix.NpOptiX._start_scene_compute_callback
+.. automethod:: plotoptix.NpOptiX.set_rt_completed_cb
 .. automethod:: plotoptix.NpOptiX._scene_rt_completed_callback
 
 Pause and resume compute

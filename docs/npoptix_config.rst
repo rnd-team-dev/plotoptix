@@ -3,6 +3,10 @@ Start, configure, get output
 
 .. automethod:: plotoptix.NpOptiX.start
 .. automethod:: plotoptix.NpOptiX.close
+.. automethod:: plotoptix.NpOptiX.get_scene
+.. automethod:: plotoptix.NpOptiX.set_scene
+.. automethod:: plotoptix.NpOptiX.load_scene
+.. automethod:: plotoptix.NpOptiX.save_scene
 .. automethod:: plotoptix.NpOptiX.save_image
 .. automethod:: plotoptix.NpOptiX.get_rt_output
 .. automethod:: plotoptix.NpOptiX._run_event_loop

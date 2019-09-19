@@ -16,12 +16,13 @@ def main():
 
 
     # original Stanford Utah teapot (try also with default value of make_normals=False):
-    #optix.load_mesh_obj("https://graphics.stanford.edu/courses/cs148-10-summer/as3/code/as3/teapot.obj",
-    #                    "teapot", c=0.92, make_normals=True)
+    # note: this file has no named objects specified, and you have to use load_merged_mesh_obj
+    # method
+    #optix.load_merged_mesh_obj("https://graphics.stanford.edu/courses/cs148-10-summer/as3/code/as3/teapot.obj",
+    #                           "teapot", c=0.92, make_normals=True)
 
     # another public-domain version with normals included:
-    optix.load_mesh_obj("data/utah-teapot.obj", "teapot", c=0.92)
-
+    optix.load_mesh_obj("data/utah-teapot.obj", c=0.92)
 
     # camera and light position auto-fit the scene geometry
     optix.setup_camera("cam1")
