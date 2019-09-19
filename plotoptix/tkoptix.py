@@ -267,7 +267,14 @@ class TkOptiX(NpOptiX):
             handle, index = self._gui_get_object_at(x, y)
             if (handle != 0xFFFFFFFF):
                 hx, hy, hz, hd = self._get_hit_at(x, y)
-                self._status_action_text.set("%s[%d]: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (self.geometry_names[handle], index, x, y, hx, hy, hz, hd))
+                if handle in self.geometry_names:
+                    self._status_action_text.set("%s[%d]: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (self.geometry_names[handle], index, x, y, hx, hy, hz, hd))
+                else:
+                    lh = self._optix.get_light_handle(handle, index)
+                    if lh in self.light_names:
+                        self._status_action_text.set("%s: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (self.light_names[lh], x, y, hx, hy, hz, hd))
+                    else:
+                        self._status_action_text.set("unknown: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (x, y, hx, hy, hz, hd))
             else:
                 self._status_action_text.set("empty area")
 
