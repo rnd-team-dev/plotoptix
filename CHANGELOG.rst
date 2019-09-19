@@ -13,6 +13,12 @@ Added
 - load selected/all/merged objects from Wavefront .obj files
 - thin-walled material
 
+Changes
+~~~~~~~
+
+- load_mesh_obj() method renamed to load_merged_mesh_obj(); the new load_mesh_obj() loads meshes selected by
+  the name or loads all meshes from the file with no merging
+
 `v0.4.8`_ - 2019-09-07
 ----------------------
 
