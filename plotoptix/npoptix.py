@@ -136,7 +136,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if os.path.isabs(src):
                 d, f = os.path.split(src)
                 os.chdir(d)
-            else: f = file_name
+            else: f = src
 
             self._is_scene_created = self._optix.create_scene_from_file(f, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
             self._is_scene_created &= self._init_scene_metadata()

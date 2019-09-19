@@ -250,13 +250,24 @@ class TkOptiX(NpOptiX):
             return c_x.value, c_y.value, c_z.value, c_d.value
         else: return 0, 0, 0, 0
 
+    def _gui_get_object_at(self, x, y):
+        c_handle = c_uint()
+        c_index = c_uint()
+        if self._optix.get_object_at(x, y, byref(c_handle), byref(c_index)):
+            handle = c_handle.value
+            index = c_index.value
+            return handle, index
+        else:
+            return None, None
+
     def _gui_motion(self, event):
         if not (self._any_mouse or self._any_key):
             x, y = self._get_image_xy(event.x, event.y)
 
-            hx, hy, hz, hd = self._get_hit_at(x, y)
-            if hd > 0:
-                self._status_action_text.set("2D: (%d %d), 3D: (%f %f %f), distance %f" % (x, y, hx, hy, hz, hd))
+            handle, index = self._gui_get_object_at(x, y)
+            if (handle != 0xFFFFFFFF):
+                hx, hy, hz, hd = self._get_hit_at(x, y)
+                self._status_action_text.set("%s[%d]: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (self.geometry_names[handle], index, x, y, hx, hy, hz, hd))
             else:
                 self._status_action_text.set("empty area")
 
@@ -295,39 +306,36 @@ class TkOptiX(NpOptiX):
         assert self._is_started, "Raytracing thread not running."
 
         x, y = self._get_image_xy(event.x, event.y)
-        c_handle = c_uint()
-        c_index = c_uint()
-        if self._optix.get_object_at(x, y, byref(c_handle), byref(c_index)):
-            handle = c_handle.value
-            index = c_index.value
-            if (handle != 0xFFFFFFFF):
+        handle, index = self._gui_get_object_at(x, y)
 
-                if handle in self.geometry_names:
-                    # switch selection: primitive / whole geom
-                    if self._ctrl_key or (self._selection_handle == handle and self._selection_index == -1):
-                        self._status_main_text.set("Current selection: %s (primitive %d)" % (self.geometry_names[handle], index))
-                        self._selection_index = index
-                    else:
-                        self._status_main_text.set("Current selection: %s" % self.geometry_names[handle])
-                        self._selection_handle = handle
-                        self._selection_index = -1
+        if (handle != 0xFFFFFFFF):
+
+            if handle in self.geometry_names:
+                # switch selection: primitive / whole geom
+                if self._ctrl_key or (self._selection_handle == handle and self._selection_index == -1):
+                    self._status_main_text.set("Current selection: %s[%d]" % (self.geometry_names[handle], index))
+                    self._selection_index = index
+                else:
+                    self._status_main_text.set("Current selection: %s" % self.geometry_names[handle])
+                    self._selection_handle = handle
+                    self._selection_index = -1
                     
-                    if self._ctrl_key:
-                        hx, hy, hz, hd = self._get_hit_at(x, y)
-                        if hd > 0:
-                            self._status_action_text.set("Focused at (%f %f %f), distance %f" % (hx, hy, hz, hd))
-                            _ = self._optix.set_camera_focal_length(hd)
+                if self._ctrl_key:
+                    hx, hy, hz, hd = self._get_hit_at(x, y)
+                    if hd > 0:
+                        self._status_action_text.set("Focused at (%f %f %f), distance %f" % (hx, hy, hz, hd))
+                        _ = self._optix.set_camera_focal_length(hd)
+
+                return
+
+            else:
+                lh = self._optix.get_light_handle(handle, index)
+                if lh in self.light_names:
+                    self._status_main_text.set("Current selection: %s" % self.light_names[lh])
+                    self._selection_handle = -2
+                    self._selection_index = lh
 
                     return
-
-                else:
-                    lh = self._optix.get_light_handle(handle, index)
-                    if lh in self.light_names:
-                        self._status_main_text.set("Current selection: %s" % self.light_names[lh])
-                        self._selection_handle = -2
-                        self._selection_index = lh
-
-                        return
 
         self._status_main_text.set("Current selection: camera")
         self._selection_handle = -1

@@ -542,9 +542,9 @@ class _ClrOptiX:
 
     def load_scene_from_file(self, fname): return self._optix.load_scene_from_file(fname)
 
-    def get_scene_metadata(self): return self.get_scene_metadata()
+    def get_scene_metadata(self): return self._optix.get_scene_metadata()
 
-    def save_scene_to_json(self): return self.save_scene_to_json()
+    def save_scene_to_json(self): return self._optix.save_scene_to_json()
 
     def save_scene_to_file(self, fname): return self._optix.save_scene_to_file(fname)
 
@@ -675,7 +675,7 @@ class _ClrOptiX:
                                               IntPtr.__overloads__[Int64](v),
                                               IntPtr.__overloads__[Int64](w))
 
-    def get_geometry_size(self, name): return self._optix.get_geometry_size_ptr(name)
+    def get_geometry_size(self, name): return self._optix.get_geometry_size(name)
 
     def get_surface_size(self, name, x_ref, z_ref):
         return self._optix.get_surface_size_ptr(name,
