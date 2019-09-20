@@ -1,8 +1,8 @@
 Release history
 ===============
 
-v0.5.0 - unreleased
--------------------
+`v0.5.0`_ - 2019-09-20
+----------------------
 
 Added
 ~~~~~
@@ -18,6 +18,7 @@ Changes
 
 - load_mesh_obj() method renamed to load_merged_mesh_obj(); the new load_mesh_obj() loads meshes selected by
   the name or loads all meshes from the file with no merging
+- light shading mode configured with set_param() and get_param() methods
 
 `v0.4.8`_ - 2019-09-07
 ----------------------
@@ -223,6 +224,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.5.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.0
 .. _`v0.4.8`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.8
 .. _`v0.4.7`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.7
 .. _`v0.4.6`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.6
