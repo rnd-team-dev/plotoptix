@@ -1164,12 +1164,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.info("Ambient color updated.")
 
 
-    def get_param(self, name: str) -> None:
+    def get_param(self, name: str) -> Optional[Any]:
         """Get raytracer parameter.
 
         Available parameters:
 
         - ``compute_timeout``
+        - ``light_shading``
         - ``max_accumulation_frames``
         - ``min_accumulation_step``
 
@@ -1187,6 +1188,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         --------
         >>> optix = TkOptiX()
         >>> print(optix.get_param("max_accumulation_frames"))
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.set_param`
         """
         try:
             v = None
@@ -1195,7 +1200,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 v = self._optix.get_min_accumulation_step()
             elif name == "max_accumulation_frames":
                 v = self._optix.get_max_accumulation_frames()
-            elif key == "compute_timeout":
+            elif name == "light_shading":
+                shading = self._optix.get_light_shading()
+                if shading >= 0: v = LightShading(shading)
+            elif name == "compute_timeout":
                 v = self._optix.get_compute_timeout()
             else:
                 msg = "Unknown parameter " + name
@@ -1215,13 +1223,30 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_param(self, **kwargs) -> None:
         """Set raytracer parameter(s).
 
-        Set raytracer parameters (one or more).
-
         Available parameters:
 
-        - ``compute_timeout``
+        - ``compute_timeout``: timeout for the computation thread
+
+          Set this parameter if the computations performed in the scene_compute
+          callback are longer than the frame ray tracing. See also
+          :meth:`plotoptix.NpOptiX.set_scene_compute_cb`.
+
+        - ``light_shading``: light shading mode.
+
+          Use :attr:`plotoptix.enums.LightShading.Hard` for best caustics or
+          :attr:`plotoptix.enums.LightShading.Soft` for fast convergence. String
+          names ``"Hard"`` and ``"Soft"`` are accepted.
+        
+          Set mode before adding lights.
+        
         - ``max_accumulation_frames``
+        
+          Number of accumulation frames computed for the scene.
+        
         - ``min_accumulation_step``
+
+          Number of accumulation frames computed in a single step (before each
+          image refresh).
 
         Parameters
         ----------
@@ -1240,10 +1265,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 if key == "min_accumulation_step":
                     self._optix.set_min_accumulation_step(int(value))
+
                 elif key == "max_accumulation_frames":
                     self._optix.set_max_accumulation_frames(int(value))
+
+                elif key == "light_shading":
+                    if len(self.light_handles) > 0:
+                        msg = "Light shading has to be selected before adding lights."
+                        self._logger.error(msg)
+                        if self._raise_on_error: raise RuntimeError(msg)
+                        continue
+
+                    if isinstance(value, str): mode = LightShading[value]
+                    else: mode = value
+
+                    self._optix.set_light_shading(mode.value)
+
                 elif key == "compute_timeout":
                     self._optix.set_compute_timeout(int(value))
+
                 else:
                     msg = "Unknown parameter " + key
                     self._logger.error(msg)
@@ -2050,50 +2090,32 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def get_light_shading(self) -> Optional[LightShading]:
         """Get light shading mode.
 
+        Deprecated, use ``get_param("light_shading")`` instead.
+
         Returns
         ----------
         out : LightShading or None
             Light shading mode. ``None`` is returned if function could
             not read the mode from the raytracer.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.get_param`
         """
-        shading = self._optix.get_light_shading()
-        if shading >= 0:
-            mode = LightShading(shading)
-            self._logger.info("Current light shading is: %s", mode.name)
-            return mode
-        else:
-            msg = "Failed on reading the light shading mode."
-            self._logger.error(msg)
-            if self._raise_on_error: raise RuntimeError(msg)
-            return None
+        self._logger.warn("Deprecated, use get_param(\"light_shading\") instead.")
+        return self.get_param("light_shading")
 
     def set_light_shading(self, mode: Union[LightShading, str]) -> None:
         """Set light shading mode.
 
-        Use :attr:`plotoptix.enums.LightShading.Hard` for best caustics or
-        :attr:`plotoptix.enums.LightShading.Soft` for fast convergence.
-        
-        Set mode before adding lights.
+        Deprecated, use ``set_param(light_shading=mode)`` instead.
 
-        Parameters
-        ----------
-        mode : LightShading or string
-            Light shading mode.
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.set_param`
         """
-        if isinstance(mode, str): mode = LightShading[mode]
-
-        if len(self.light_handles) > 0:
-            msg = "Light shading has to be selected before adding lights."
-            self._logger.error(msg)
-            if self._raise_on_error: raise RuntimeError(msg)
-            return
-
-        if self._optix.set_light_shading(mode.value):
-            self._logger.info("Light shading %s is selected.", mode.name)
-        else:
-            msg = "Light shading setup failed."
-            self._logger.error(msg)
-            if self._raise_on_error: raise RuntimeError(msg)
+        self._logger.warn("Deprecated, use set_param(light_shading=mode) instead.")
+        self.set_param(light_shading=mode)
 
     def get_light_pos(self, name: Optional[str] = None) -> Optional[np.ndarray]:
         """Get light 3D position.

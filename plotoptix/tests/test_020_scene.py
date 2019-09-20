@@ -144,8 +144,8 @@ class TestScene(TestCase):
     def test050_light_shading(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
-        TestScene.scene.set_light_shading(LightShading.Hard)
-        m = TestScene.scene.get_light_shading()
+        TestScene.scene.set_param(light_shading=LightShading.Hard)
+        m = TestScene.scene.get_param("light_shading")
         self.assertTrue(m is not None and m == LightShading.Hard, msg="Returned light shading mode different than value set.")
 
     def test060_light(self):
