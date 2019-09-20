@@ -1169,9 +1169,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Available parameters:
 
-        - ``min_accumulation_step``
-        - ``max_accumulation_frames``
         - ``compute_timeout``
+        - ``max_accumulation_frames``
+        - ``min_accumulation_step``
 
         Parameters
         ----------
@@ -1219,9 +1219,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Available parameters:
 
-        - ``min_accumulation_step``
-        - ``set_max_accumulation_frames``
         - ``compute_timeout``
+        - ``max_accumulation_frames``
+        - ``min_accumulation_step``
 
         Parameters
         ----------
@@ -1583,6 +1583,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         return n
 
+
+    def get_camera_names(self) -> list:
+        """Return list of cameras' names.
+        """
+        return list(self.camera_handles.keys())
 
     def get_camera_name_handle(self, name: Optional[str] = None) -> (Optional[str], Optional[int]):
         """Get camera name and handle.
@@ -2035,6 +2040,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             msg = "Camera rotate target failed."
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
+
+
+    def get_light_names(self) -> list:
+        """Return list of lights' names.
+        """
+        return list(self.light_handles.keys())
 
     def get_light_shading(self) -> Optional[LightShading]:
         """Get light shading mode.
@@ -2594,8 +2605,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def setup_material(self, name: str, data: dict) -> None:
         """Setup new material.
 
-        Note: in order to keep maximum performance, setup only those materials
-        you need in the plot.
+        Note: for maximum performance, setup only those materials
+        you need in the scene.
 
         Parameters
         ----------
@@ -3778,6 +3789,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         finally:
             self._padlock.release()
 
+
+    def get_geometry_names(self) -> list:
+        """Return list of geometries' names.
+        """
+        return list(self.geometry_handles.keys())
 
     def move_geometry(self, name: str, v: Tuple[float, float, float],
                       update: bool = True) -> None:

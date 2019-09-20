@@ -1,6 +1,6 @@
 """
-This example shows how to save scene to JSON file. Use 9_2_load_scene.py to
-restore the scane saved in this script.
+This example shows how to save scene to JSON file. Use 9_2_load_scene.py or
+9_3_load_scene.py to restore the scane saved in this script.
 """
 
 import numpy as np
@@ -46,13 +46,18 @@ def main():
     y = np.sin(x + 5) + 1.3
     z = np.cos(x + 5) + 0.3
     data = np.stack((x, y, z)).T
+
+    # Add object to scene:
     rt.set_data("balls", pos=data, r=r, c=0.92)
+    # or use another geometry and save it in the second scene file:
+    #rt.set_data("cubes", geom="Parallelepipeds", pos=data, r=r, c=0.92)
 
     # Let's start:
     rt.start()
 
     # Save the scene. This actually can be called also before starting.
     rt.save_scene("strange_object.json")
+    #rt.save_scene("strange_object_2.json") # the second file will be usefull in the scene loading example
 
     print("done")
 

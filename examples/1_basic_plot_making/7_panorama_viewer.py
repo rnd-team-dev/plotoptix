@@ -1,6 +1,6 @@
 """
 This example uses `TextureEnvironment` background mode to view 360deg panoramas.
-Just run it with the image file as an argument. Google 'environment map', you
+Just run it with an image file as an argument. Google for 'environment map', you
 can find plenty of free images.
 """
 
@@ -17,7 +17,7 @@ def main():
         exit(0)
     
     fname = str(sys.argv[1])
-    # just in case you have spaces in the path...
+    # just in case you have white spaces in the path...
     for s in sys.argv[2:]: fname += " " + str(s)
     print("Reading:", fname)
 

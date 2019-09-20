@@ -10,6 +10,7 @@ Light shading mode
 Setup and update lighting
 -------------------------
 
+.. automethod:: plotoptix.NpOptiX.get_camera_names
 .. automethod:: plotoptix.NpOptiX.setup_light
 .. automethod:: plotoptix.NpOptiX.setup_spherical_light
 .. automethod:: plotoptix.NpOptiX.setup_parallelogram_light

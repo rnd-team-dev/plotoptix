@@ -4,6 +4,7 @@ Cameras
 Setup and update cameras
 ------------------------
 
+.. automethod:: plotoptix.NpOptiX.get_camera_names
 .. automethod:: plotoptix.NpOptiX.setup_camera
 .. automethod:: plotoptix.NpOptiX.update_camera
 .. automethod:: plotoptix.NpOptiX.get_current_camera

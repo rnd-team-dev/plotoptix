@@ -4,6 +4,7 @@ Plot geometry
 Create, load, update plot
 -------------------------
 
+.. automethod:: plotoptix.NpOptiX.get_geometry_names
 .. automethod:: plotoptix.NpOptiX.set_data
 .. automethod:: plotoptix.NpOptiX.update_data
 .. automethod:: plotoptix.NpOptiX.set_data_2d
