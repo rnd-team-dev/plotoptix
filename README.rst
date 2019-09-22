@@ -88,7 +88,7 @@ What's Included
 Installation
 ============
 
-**GPU drivers note:** *seems that problems are gone with the recent NVIDIA driver updates but if you experience problems with drivers release 430/431 then drivers 419 (Windows) and 418 (Ubuntu, CentOS) are recommended*.
+**GPU drivers note:** *Get ready for OptiX 7 backend and install the most recent drivers (>= 435)! If you experience problems with older driver releases then drivers 419 (Windows) and 418 (Ubuntu, CentOS) are recommended*.
 
 **Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04, CentOS 7.
 
