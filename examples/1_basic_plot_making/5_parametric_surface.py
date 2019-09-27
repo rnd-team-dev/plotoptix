@@ -43,7 +43,7 @@ def main():
 
     rt = TkOptiX(width=750, height=900)
 
-    rt.set_param(min_accumulation_step=2, max_accumulation_frames=500)
+    rt.set_param(min_accumulation_step=2, max_accumulation_frames=500, light_shading="Hard")
     rt.set_uint("path_seg_range", 6, 15)
 
     rt.setup_material("plastic", m_plastic)
@@ -69,7 +69,6 @@ def main():
                     aperture_radius=0.4, aperture_fract=0.2,
                     focal_scale=0.92, fov=35)
 
-    rt.set_light_shading("Hard")
     rt.setup_light("light1", pos=[-15, 20, 15], color=8, radius=6)
 
     rt.start()
