@@ -1,6 +1,20 @@
 Release history
 ===============
 
+`v0.5.1`_ - 2019-09-27
+----------------------
+
+Added
+~~~~~
+
+- ray tracing timeout parameter, use set_param(rt_timeout=n_ms) and get_param("rt_timeout")
+
+Fixed
+~~~~~
+
+- timeout instead of freeze if stucked in the internal OptiX launch() function
+- default lighting was not initialized properly after refactoring made in v0.5.0
+
 `v0.5.0`_ - 2019-09-20
 ----------------------
 
@@ -224,6 +238,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.5.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.1
 .. _`v0.5.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.0
 .. _`v0.4.8`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.8
 .. _`v0.4.7`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.7

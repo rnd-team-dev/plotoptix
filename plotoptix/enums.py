@@ -499,6 +499,14 @@ class RtResult(Enum):
     """There is no change in the output image.
     """
 
+    ComputeTimeout = 0x100
+    """Compute/upload task timed out.
+    """
+
+    LaunchTimeout = 0x101
+    """Ray-tracing task timed out.
+    """
+
 class RtFormat(Enum):
     """OptiX buffer formats.
     """

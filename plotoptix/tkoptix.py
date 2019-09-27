@@ -185,7 +185,7 @@ class TkOptiX(NpOptiX):
         self._canvas.bind("<<ApplyUiEdits>>", self._gui_apply_scene_edits)
         self._canvas.bind("<<CloseScene>>", self._gui_quit_callback)
 
-        self._status_main_text = tk.StringVar(value="Current selection: camera")
+        self._status_main_text = tk.StringVar(value="Selection: camera")
         self._status_main = tk.Label(self._root, textvariable=self._status_main_text, bd=1, relief=tk.SUNKEN, anchor=tk.W)
         self._status_main.grid(column=0, row=1, sticky="ew")
 
@@ -320,10 +320,10 @@ class TkOptiX(NpOptiX):
             if handle in self.geometry_names:
                 # switch selection: primitive / whole geom
                 if self._ctrl_key or (self._selection_handle == handle and self._selection_index == -1):
-                    self._status_main_text.set("Current selection: %s[%d]" % (self.geometry_names[handle], index))
+                    self._status_main_text.set("Selection: %s[%d]" % (self.geometry_names[handle], index))
                     self._selection_index = index
                 else:
-                    self._status_main_text.set("Current selection: %s" % self.geometry_names[handle])
+                    self._status_main_text.set("Selection: %s" % self.geometry_names[handle])
                     self._selection_handle = handle
                     self._selection_index = -1
                     
@@ -338,18 +338,18 @@ class TkOptiX(NpOptiX):
             else:
                 lh = self._optix.get_light_handle(handle, index)
                 if lh in self.light_names:
-                    self._status_main_text.set("Current selection: %s" % self.light_names[lh])
+                    self._status_main_text.set("Selection: %s" % self.light_names[lh])
                     self._selection_handle = -2
                     self._selection_index = lh
 
                     return
 
-        self._status_main_text.set("Current selection: camera")
+        self._status_main_text.set("Selection: camera")
         self._selection_handle = -1
         self._selection_index = -1
 
     def _gui_doubleclick_right(self, event):
-        self._status_main_text.set("Current selection: camera")
+        self._status_main_text.set("Selection: camera")
         self._selection_handle = -1
         self._selection_index = -1
 
@@ -467,7 +467,7 @@ class TkOptiX(NpOptiX):
 
     def _launch_finished_callback(self, rt_result: int):
         super()._launch_finished_callback(rt_result)
-        if self._is_started and rt_result != RtResult.NoUpdates.value:
+        if self._is_started and rt_result < RtResult.NoUpdates.value:
             self._update_req = True
             self._canvas.event_generate("<<LaunchFinished>>", when="now")
     ###########################################################################

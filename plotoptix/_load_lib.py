@@ -418,6 +418,11 @@ def _load_optix_win():
     optix.set_compute_timeout.argtypes = [c_int]
     optix.set_compute_timeout.restype = c_bool
 
+    optix.get_rt_timeout.restype = c_int
+
+    optix.set_rt_timeout.argtypes = [c_int]
+    optix.set_rt_timeout.restype = c_bool
+
     optix.get_min_accumulation_step.restype = c_int
 
     optix.set_min_accumulation_step.argtypes = [c_int]
@@ -920,6 +925,10 @@ class _ClrOptiX:
     def get_compute_timeout(self): return self._optix.get_compute_timeout()
 
     def set_compute_timeout(self, n): return self._optix.set_compute_timeout(n)
+
+    def get_rt_timeout(self): return self._optix.get_rt_timeout()
+
+    def set_rt_timeout(self, n): return self._optix.set_rt_timeout(n)
 
     def get_min_accumulation_step(self): return self._optix.get_min_accumulation_step()
 

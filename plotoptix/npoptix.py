@@ -383,8 +383,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         rt_result : int
             Raytracing result code corresponding to :class:`plotoptix.enums.RtResult`.
         """
-        if self._is_started and rt_result != RtResult.NoUpdates.value:
-            for c in self._launch_finished_cb: c(self)
+        if self._is_started:
+            if rt_result < RtResult.NoUpdates.value:
+                for c in self._launch_finished_cb: c(self)
     def _get_launch_finished_callback(self):
         def func(rt_result: int): self._launch_finished_callback(rt_result)
         return PARAM_INT_CALLBACK(func)
@@ -519,9 +520,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         rt_result : int
             Raytracing result code corresponding to RtResult enum.
         """
-        if self._is_started:
-            self._logger.info("RT completed, result %d.", rt_result)
+        if self._is_started and rt_result <= RtResult.NoUpdates.value:
+            self._logger.info("RT completed, result %s.", RtResult(rt_result))
             for c in self._rt_completed_cb: c(self)
+
     def _get_scene_rt_completed_callback(self):
         def func(rt_result : int): self._scene_rt_completed_callback(rt_result)
         return PARAM_INT_CALLBACK(func)
@@ -1023,6 +1025,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_background(self, bg: Any,
                        exposure: float = 1.0,
                        gamma: float = 1.0,
+                       keep_on_host: bool = False,
                        refresh: bool = False) -> None:
         """Set background color.
 
@@ -1035,6 +1038,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Color values are corrected to account for the postprocessing tone
         mapping if ``exposure`` and ``gamma`` values are provided.
+
+        Use ``keep_on_host=True`` to make a copy of data in the host memory (in addition
+        to GPU memory), this option is required when (small) textures are going to be saved
+        to JSON description of the scene.
 
         Note, color components range is <0; 1>.
 
@@ -1049,6 +1056,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Exposure value used in the postprocessing.
         gamma : float, optional
             Gamma value used in the postprocessing.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
 
@@ -1105,7 +1114,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if bg.shape[-1] == 4:
                 if gamma != 1: bg = np.power(bg, gamma)
                 if e != 1: bg = e * bg
-                self.set_texture_2d("bg_texture", bg, keep_on_host=False, refresh=refresh)
+                self.set_texture_2d("bg_texture", bg, keep_on_host=keep_on_host, refresh=refresh)
                 return
 
         msg = "Background should be a single gray level or [r,g,b] array_like or 2D array_like of [r,g,b]/[r,g,b,a] values."
@@ -1173,6 +1182,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         - ``light_shading``
         - ``max_accumulation_frames``
         - ``min_accumulation_step``
+        - ``rt_timeout``
 
         Parameters
         ----------
@@ -1205,6 +1215,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if shading >= 0: v = LightShading(shading)
             elif name == "compute_timeout":
                 v = self._optix.get_compute_timeout()
+            elif name == "rt_timeout":
+                v = self._optix.get_rt_timeout()
             else:
                 msg = "Unknown parameter " + name
                 self._logger.error(msg)
@@ -1248,6 +1260,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
           Number of accumulation frames computed in a single step (before each
           image refresh).
 
+        - ``rt_timeout``
+
+          Ray tracing timeout. Default value is 30000 (30s).
+
         Parameters
         ----------
         kwargs : Any
@@ -1283,6 +1299,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 elif key == "compute_timeout":
                     self._optix.set_compute_timeout(int(value))
+
+                elif key == "rt_timeout":
+                    self._optix.set_rt_timeout(int(value))
 
                 else:
                     msg = "Unknown parameter " + key
