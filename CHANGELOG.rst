@@ -1,6 +1,14 @@
 Release history
 ===============
 
+`v0.5.2`_ - 2019-10-15
+----------------------
+
+Fixed
+~~~~~
+
+- dependency on vcruntime140_1.dll in Windows binaries, introduced in v0.5.1 with the VS tools upgrade 
+
 `v0.5.1`_ - 2019-09-27
 ----------------------
 
@@ -238,6 +246,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.5.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.2
 .. _`v0.5.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.1
 .. _`v0.5.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.0
 .. _`v0.4.8`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.4.8
