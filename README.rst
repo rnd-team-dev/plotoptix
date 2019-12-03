@@ -15,6 +15,8 @@ PlotOptiX
 
 **Note:** active development is continuing, expect changes.
 
+**Working on transition to OptiX 7. This is quite a breaking change, low level code undergoes comlete rewrite. Please, be patient, next release is exected ~Xmas.**
+
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
 of several basic shapes, or projected onto the surfaces of objects in form of a color textures and displacement maps. All finished with
