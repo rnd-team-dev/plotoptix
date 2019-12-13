@@ -4,7 +4,7 @@ PlotOptiX
 .. image:: https://img.shields.io/pypi/v/plotoptix.svg
    :target: https://pypi.org/project/plotoptix
    :alt: Latest PlotOptiX version
-.. image:: https://img.shields.io/pypi/dm/plotoptix.svg
+.. image:: https://img.shields.io/pypi/dy/plotoptix.svg
    :target: https://pypi.org/project/plotoptix
    :alt: PlotOptiX downloads by pip install
 .. image:: https://img.shields.io/badge/support%20project-paypal-brightgreen.svg
