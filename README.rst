@@ -4,7 +4,7 @@ PlotOptiX
 .. image:: https://img.shields.io/pypi/v/plotoptix.svg
    :target: https://pypi.org/project/plotoptix
    :alt: Latest PlotOptiX version
-.. image:: https://img.shields.io/pypi/dm/plotoptix.svg
+.. image:: https://img.shields.io/pypi/dy/plotoptix.svg
    :target: https://pypi.org/project/plotoptix
    :alt: PlotOptiX downloads by pip install
 .. image:: https://img.shields.io/badge/support%20project-paypal-brightgreen.svg
@@ -13,7 +13,7 @@ PlotOptiX
 
 **Data visualisation in Python based on NVIDIA OptiX ray tracing framework.**
 
-**Note:** active development is continuing, expect changes.
+**Working on the transition to OptiX 7. This is quite a breaking change, the low-level code undergoes comlete rewrite. Please, be patient, things take a bit more time but the next release is expected soon!**
 
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
