@@ -13,7 +13,8 @@ PlotOptiX
 
 **Data visualisation in Python based on NVIDIA OptiX ray tracing framework.**
 
-**Working on the transition to OptiX 7. This is quite a breaking change, the low-level code undergoes comlete rewrite. Please, be patient, things take a bit more time but the next release is expected soon!**
+**Started pushing transition to OptiX 7. This is quite a breaking change, the low-level code is rewritten completely. Windows is working, examples are updated.
+Linux will follow soon. Please, be patient!**
 
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
@@ -42,7 +43,7 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
 see `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__
 for practical code samples.
 
-PlotOptiX is based on `NVIDIA OptiX <https://developer.nvidia.com/optix>`_ framework wrapped in RnD.SharpOptiX C#/C++ libraries
+PlotOptiX is based on `NVIDIA OptiX 7 <https://developer.nvidia.com/optix>`_ framework wrapped in RnD.SharpOptiX C#/C++ libraries
 and completed with custom CUDA shaders by `R&D Team <https://rnd.team>`_. PlotOptiX makes use of RTX-capable GPU's.
 
 .. image:: https://plotoptix.rnd.team/images/screenshots.jpg
@@ -58,16 +59,18 @@ Features
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
 - post-processing: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
-- GPU acceleration using RT Cores, multi-GPU support, and everything else what comes with `OptiX 6.0 <https://developer.nvidia.com/optix>`__
+- GPU acceleration using RT Cores and everything else what comes with `OptiX 7 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
 - hardware accelerated video output to MP4 file format using `NVENC 9.0 <https://developer.nvidia.com/nvidia-video-codec-sdk>`__
+- multi-GPU support
 - Tkinter based UI or headless raytracer
 
 System Requirements
 -------------------
 
-- a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Turing)
+- a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Turing),
+  NVIDIA driver release >= v435
 - **Python 3 64-bit**
 - Windows:
    - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
@@ -80,15 +83,12 @@ System Requirements
 What's Included
 ---------------
 
-- OptiX 6.0.0 libraries
 - RnD.SharpOptiX and RnD.SharpEncoder libraries
 - all other supporting 3'rd party libraries: FFmpeg (Windows only), LibTiff, Newtonsoft.Json
 - Python examples
 
 Installation
 ============
-
-**GPU drivers note:** *Get ready for OptiX 7 backend and install the most recent drivers (>= 435)! If you experience problems with older driver releases then drivers 419 (Windows) and 418 (Ubuntu, CentOS) are recommended*.
 
 **Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04, CentOS 7.
 
@@ -202,10 +202,6 @@ From GitHub sources::
 
 Then, try running code from the top of this readme, or one of the examples. You may also need to install ``tkinter`` and/or ``PyQt`` packages, if not shipped with your Python environment.
 
-Denoiser binaries are optional and can be downloaded after PlotOptiX installation (the package size is ~370 MB, administrator rights are required for the installation)::
-
-   python -m plotoptix.install denoiser
-
 Development path
 ================
 
@@ -219,7 +215,7 @@ if you like it!).
 The idea for development is:
 
 1. Binaries for Linux (done in v0.3.0).
-2. Migrate to OptiX 7.0.
+2. Migrate to OptiX 7.0 (done in v0.7.0).
 3. Complete the plot layout / cover more raytracing features.
 4. Convenience functions for various plot styles. Other GUI's.
 
