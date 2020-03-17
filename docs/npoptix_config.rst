@@ -41,6 +41,7 @@ Raytracer configuration
 .. automethod:: plotoptix.NpOptiX.get_float3
 .. automethod:: plotoptix.NpOptiX.set_texture_1d
 .. automethod:: plotoptix.NpOptiX.set_texture_2d
+.. automethod:: plotoptix.NpOptiX.load_texture
 
 Postprocessing 2D
 -----------------

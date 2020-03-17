@@ -83,19 +83,12 @@ class MissProgram(Enum):
 class GeomAttributeProgram(Enum):
     """Geometry attributes program.
     
-    Executed when the closest ray-object intersection is found. Calculates the
-    geometry and shading normals, texture coordinates and object.
+    Executed to find the closest ray-object intersection. Calculates the
+    geometry normal and texture coordinates.
     """
 
     Default = 0
     """
-    """
-
-    NormalTilt = 1
-    """Modulated shading normal.
-    
-    Modifies shading normal according to the provided texture. Available with:
-    parallelograms, tetrahedrons, parallelepipeds, textured particles.
     """
 
     DisplacedSurface = 2
@@ -390,13 +383,13 @@ class Postprocessing(Enum):
 
     Variables to configure:
     - tonemap_exposure, float, exposure value
-    - tonemap_igamma, float, 1/gamma value.
+    - tonemap_gamma, float, gamma value.
 
     Examples
     --------
     >>> optix = TkOptiX()
     >>> optix.set_float("tonemap_exposure", 0.6)
-    >>> optix.set_float("tonemap_igamma", 1/2.2)
+    >>> optix.set_float("tonemap_gamma", 1/2.2)
     >>> optix.add_postproc("Gamma")
     """
 
@@ -463,12 +456,12 @@ class Postprocessing(Enum):
     >>> optix.add_postproc("Mask")
     """
 
-    Overlay = 7
-    """2D overlay, applied to the image according to alpha channel.
+    Overlay = 6
+    """2D overlay, added to the image according to alpha channel.
 
     Variables to configure:
     
-    - frame_overlay, RGBA texture 2D, overlay to apply
+    - frame_overlay, RGBA texture 2D, an overlay to add
 
     Examples
     --------
@@ -478,6 +471,22 @@ class Postprocessing(Enum):
     >>>
     >>> optix.set_texture_2d("frame_overlay", M)
     >>> optix.add_postproc("Overlay")
+    """
+
+    Denoiser = 7
+    """AI denoiser.
+
+    Variables to configure:
+    
+    - denoiser_blend, float, amount of original image mixed with denoiser output
+      range: 0 (only denoiser output) to 1 (only original raytracing output)
+
+    Examples
+    --------
+    >>> optix = TkOptiX()
+    >>>
+    >>> optix.optix.set_float("denoiser_blend", 0.5)
+    >>> optix.add_postproc("Denoiser")
     """
 
 class RtResult(Enum):

@@ -50,7 +50,7 @@ def main():
 
     exposure = 0.8; gamma = 2.2
     rt.set_float("tonemap_exposure", exposure)
-    rt.set_float("tonemap_igamma", 1 / gamma)
+    rt.set_float("tonemap_gamma", gamma)
     rt.add_postproc("Gamma")
 
     rt.set_background(0)

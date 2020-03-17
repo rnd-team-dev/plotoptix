@@ -13,7 +13,7 @@ from ctypes import byref, c_float, c_uint, c_int
 from typing import List, Tuple, Callable, Optional, Union, Any
 
 from plotoptix.singleton import Singleton
-from plotoptix._load_lib import load_optix, load_denoiser, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
+from plotoptix._load_lib import load_optix, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
 from plotoptix.utils import _make_contiguous_vector, _make_contiguous_3d
 from plotoptix.enums import *
 
@@ -122,6 +122,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self.set_accum_done_cb(on_rt_accum_done)
 
         if src is None:                          # create empty scene
+            self._logger.info("  - ray-tracer initialization")
             self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
             if self._is_scene_created: self._logger.info("Empty scene ready.")
 
@@ -370,7 +371,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Callback executed after each finished frame (``min_accumulation_step``
         accumulation frames are raytraced together). This callback is
         executed in the raytracing thread and should not compute extensively
-        (make a copy of the image data and process it in another thread).
+        (get/save the image data here but calculate scene etc in another thread).
 
         Override this method in the UI class, call this base implementation
         and update image in UI (or raise an event to do so).
@@ -385,6 +386,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         if self._is_started:
             if rt_result < RtResult.NoUpdates.value:
+                #self._logger.info("Launch finished.")
                 for c in self._launch_finished_cb: c(self)
     def _get_launch_finished_callback(self):
         def func(rt_result: int): self._launch_finished_callback(rt_result)
@@ -656,7 +658,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         --------
         >>> optix = TkOptiX()
         >>> optix.set_float("tonemap_exposure", 0.8)
-        >>> optix.set_float("tonemap_igamma", 1/2.2) # set sRGB gamma of 2.2
+        >>> optix.set_float("tonemap_gamma", 2.2)
         """
         if not isinstance(name, str): name = str(name)
         if not isinstance(x, float): x = float(x)
@@ -908,18 +910,58 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
-    def set_displacement(self, name: str, data: Any,
-                         mapping: Union[TextureMapping, str] = TextureMapping.Flat,
-                         displacement: Union[DisplacementMapping, str] = DisplacementMapping.NormalTilt,
-                         keep_on_host: bool = False,
-                         refresh: bool = False) -> None:
-        """Set surface displacement data.
+    def load_texture(self, tex_name: str, file_name: str,
+                     rt_format: RtFormat = RtFormat.Float4,
+                     prescale: float = 1.0,
+                     baseline: float = 0.0,
+                     exposure: float = 1.0,
+                     gamma: float = 1.0,
+                     keep_on_host: bool = False,
+                     refresh: bool = False) -> None:
+        """Load texture from file.
 
-        Set displacement data for the object ``name``. Geometry attribute program of the object
-        has to be set to :attr:`plotoptix.enums.GeomAttributeProgram.NormalTilt` or
-        :attr:`plotoptix.enums.GeomAttributeProgram.DisplacedSurface`. The ``data`` has to be
-        a 2D array containing displacement mapping. ``mapping`` determines how the normal tilt is
-        calculated from the displacement map (see :class:`plotoptix.enums.TextureMapping`).
+        Parameters
+        ----------
+        tex_name : string
+            Texture name.
+        file_name : string
+            Source image file.
+        rt_format: RtFormat, optional
+            Target format of the texture.
+        prescale : float, optional
+            Scaling factor for color values.
+        baseline : float, optional
+            Baseline added to color values.
+        exposure : float, optional
+            Exposure value used in the postprocessing.
+        gamma : float, optional
+            Gamma value used in the postprocessing.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+
+        Examples
+        --------
+        >>> optix = TkOptiX()
+        >>> optix.load_texture("rainbow", "data/rainbow.jpg") # set gray background
+        """
+        if isinstance(rt_format, str): rt_format = RtFormat[rt_format]
+
+        if not self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, rt_format.value, refresh):
+            msg = "Failed on reading texture from file %s." % file_name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+
+    def set_normal_tilt(self, name: str, data: Any,
+                        mapping: Union[TextureMapping, str] = TextureMapping.Flat,
+                        keep_on_host: bool = False,
+                        refresh: bool = False) -> None:
+        """Set normal tilt data.
+
+        Set shading normal tilt according to displacement data for the material ``name``. The ``data``
+        has to be a 2D array containing displacement mapping. ``mapping`` determines how the normal tilt
+        is calculated from the displacement map (see :class:`plotoptix.enums.TextureMapping`).
         
         Use ``keep_on_host=True`` to make a copy of data in the host memory (in addition to GPU
         memory), this option is required when (small) arrays are going to be saved to JSON
@@ -933,8 +975,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Displacement map data.
         mapping : TextureMapping or string, optional
             Mapping mode (see :class:`plotoptix.enums.TextureMapping`).
-        displacement : DisplacementMapping or string, optional
-            Displacement mode (see :class:`plotoptix.enums.DisplacementMapping`).
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -944,7 +984,90 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
 
         if isinstance(mapping, str): mapping = TextureMapping[mapping]
-        if isinstance(displacement, str): displacement = DisplacementMapping[displacement]
+
+        if len(data.shape) != 2:
+            msg = "Data shape should be (height,width)."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
+        if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        self._logger.info("Set shading normal tilt map for %s: %d x %d.", name, data.shape[1], data.shape[0])
+        if not self._optix.set_normal_tilt(name, data.ctypes.data, data.shape[1], data.shape[0],
+                                           mapping.value, keep_on_host, refresh):
+            msg = "%s normal tilt map not uploaded." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+    def load_normal_tilt(self, name: str, file_name: str,
+                         mapping: Union[TextureMapping, str] = TextureMapping.Flat,
+                         prescale: float = 1.0,
+                         baseline: float = 0.0,
+                         keep_on_host: bool = False,
+                         refresh: bool = False) -> None:
+        """Set normal tilt data.
+
+        Set shading normal tilt according to displacement loaded from an image file. ``mapping``
+        determines how the normal tilt is calculated from the displacement data
+        (see :class:`plotoptix.enums.TextureMapping`).
+
+        Parameters
+        ----------
+        name : string
+            Object name.
+        file_name : string
+            Image file name with the displacement data.
+        mapping : TextureMapping or string, optional
+            Mapping mode (see :class:`plotoptix.enums.TextureMapping`).
+        prescale : float, optional
+            Scaling factor for displacement values.
+        baseline : float, optional
+            Baseline added to displacement values.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+        if not isinstance(name, str): name = str(name)
+        if not isinstance(file_name, str): name = str(file_name)
+
+        if isinstance(mapping, str): mapping = TextureMapping[mapping]
+
+        self._logger.info("Set shading normal tilt map for %s using %s.", name, file_name)
+        if not self._optix.load_normal_tilt(name, file_name, mapping.value, prescale, baseline,
+                                            keep_on_host, refresh):
+            msg = "%s normal tilt map not uploaded." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+    def set_displacement(self, name: str, data: Any,
+                         keep_on_host: bool = False,
+                         refresh: bool = False) -> None:
+        """Set surface displacement data.
+
+        Set displacement data for the object ``name``. Geometry attribute program of the object
+        has to be set to :attr:`plotoptix.enums.GeomAttributeProgram.DisplacedSurface`. The ``data``
+        has to be a 2D array containing displacement map.
+
+        Use ``keep_on_host=True`` to make a copy of data in the host memory (in addition to GPU
+        memory), this option is required when (small) arrays are going to be saved to JSON
+        description of the scene.
+
+        Parameters
+        ----------
+        name : string
+            Object name.
+        data : array_like
+            Displacement map data.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+        if not isinstance(name, str): name = str(name)
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
 
         if len(data.shape) != 2:
             msg = "Data shape should be (height,width)."
@@ -957,7 +1080,46 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._logger.info("Set displacement map for %s: %d x %d.", name, data.shape[1], data.shape[0])
         if not self._optix.set_displacement(name, data.ctypes.data, data.shape[1], data.shape[0],
-                                            mapping.value, displacement.value, keep_on_host, refresh):
+                                            keep_on_host, refresh):
+            msg = "%s displacement map not uploaded." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+    def load_displacement(self, name: str, file_name: str,
+                          prescale: float = 1.0,
+                          baseline: float = 0.0,
+                          keep_on_host: bool = False,
+                          refresh: bool = False) -> None:
+        """Load surface displacement data from file.
+
+        Load displacement data for the object ``name`` from an image file. Geometry attribute
+        program of the object has to be set to :attr:`plotoptix.enums.GeomAttributeProgram.DisplacedSurface`.
+
+        Use ``keep_on_host=True`` to make a copy of data in the host memory (in addition to GPU
+        memory), this option is required when (small) arrays are going to be saved to JSON
+        description of the scene.
+
+        Parameters
+        ----------
+        name : string
+            Object name.
+        file_name : string
+            Image file name with the displacement data.
+        prescale : float, optional
+            Scaling factor for displacement values.
+        baseline : float, optional
+            Baseline added to displacement values.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+        if not isinstance(name, str): name = str(name)
+        if not isinstance(file_name, str): name = str(file_name)
+
+        self._logger.info("Set displacement map for %s using %s.", name, file_name)
+        if not self._optix.load_displacement(name, file_name, prescale, baseline,
+                                            keep_on_host, refresh):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1023,6 +1185,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         return self.get_float3("bg_color")
 
     def set_background(self, bg: Any,
+                       prescale: float = 1.0,
+                       baseline: float = 0.0,
                        exposure: float = 1.0,
                        gamma: float = 1.0,
                        keep_on_host: bool = False,
@@ -1052,6 +1216,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             RGB color components can be provided as an array-like values, texture
             is provided as an array of shape ``(height, width, n)`` or string
             with the source image file path.
+        prescale : float, optional
+            Scaling factor for color values.
+        baseline : float, optional
+            Baseline added to color values.
         exposure : float, optional
             Exposure value used in the postprocessing.
         gamma : float, optional
@@ -1068,7 +1236,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         >>> optix.set_background([0.5, 0.7, 0.9]) # set light bluish background
         """
         if isinstance(bg, str):
-            if self._optix.load_texture_2d("bg_texture", bg, exposure, gamma, RtFormat.Float4.value, refresh):
+            if self._optix.load_texture_2d("bg_texture", bg, prescale, baseline, exposure, gamma, RtFormat.Float4.value, refresh):
                 self._logger.info("Background texture loaded from file.")
             else:
                 msg = "Failed on reading background texture."
@@ -2150,7 +2318,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             3D of the light or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -2179,7 +2347,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light color RGB or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -2208,7 +2376,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light U vector or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -2237,7 +2405,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light V vector or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -2266,7 +2434,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Light readius or ``None`` if failed on accessing light data.
         """
         if name is None:
-            if len(self.light_handles) > 0: name = list(self.light_handles.values())[-1]
+            if len(self.light_handles) > 0: name = list(self.light_handles.keys())[-1]
             else: raise ValueError()
 
         if not isinstance(name, str): name = str(name)
@@ -2811,62 +2979,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.info("Add postprocessing stage: %s.", stage.name)
         if not self._optix.add_postproc(stage.value, refresh):
             msg = "Configuration of postprocessing stage %s failed." % stage.name
-            self._logger.error(msg)
-            if self._raise_on_error: raise RuntimeError(msg)
-
-    def setup_denoiser(self, blend: float = 0.5,
-                       exposure: Optional[float] = None,
-                       gamma: Optional[float] = None,
-                       refresh: bool = False) -> None:
-        """Add AI denoiser to 2D postprocessing stages.
-
-        Configure AI denoiser as the first stage in 2D postprocessing.
-        Denoiser is applied after min. 4 accumulation frames and uses
-        a partially converged image, albedo, and normals of objects in
-        the scene to predict the final ray tracing result. Output of the
-        denoiser can be mixed with the raw image to improve quality in
-        the early accumulation stages using ``blend`` parameter.
-
-        Denoiser is trained on images prepared with gamma correction.
-        In order to match the training data characteristics, tone mapping
-        is applied before denoising, using ``exposure`` and ``gamma`` values
-        configured as for the :py:attr:`plotoptix.enums.Postprocessing.Gamma`
-        algorithm. For convenience, these values can be also provided as
-        parameters of this method.
-        
-        *Note:* additional binaries are required to dowload, please run
-        ``install_denoser.py`` script to enable denoiser features.
-
-        Parameters
-        ----------
-        blend : float, optional
-            Blend with the raw input, ``0`` means only denoiser output is
-            passing, ``1`` means only raw input is passing. Default value
-            of ``0.5`` is averaging raw image and denoiser output with
-            equal weights.
-        exposure : float or ``None``, optional
-            Set ``tonemap_exposure`` value if not ``None``.
-        gamma : float or ``None``, optional
-            Set ``tonemap_igamma`` value to ``1/gamma`` if not ``None``.
-        refresh : bool, optional
-            Set to ``True`` if the image should be re-computed.
-
-        See Also
-        --------
-        :py:mod:`plotoptix.enums.Postprocessing`
-        """
-        if exposure is not None:
-            self._logger.info("Set tonemap_exposure to %f.", exposure)
-            self._optix.set_float("tonemap_exposure", exposure)
-
-        if gamma is not None:
-            self._logger.info("Set tonemap_igamma to 1/%f.", gamma)
-            self._optix.set_float("tonemap_igamma", 1/gamma)
-
-        self._logger.info("Configure AI denoiser.")
-
-        if not load_denoiser() or not self._optix.setup_denoiser(blend, refresh):
-            msg = "AI denoiser setup failed."
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 

@@ -21,34 +21,6 @@ PARAM_NONE_CALLBACK = CFUNCTYPE(None)
 PARAM_INT_CALLBACK = CFUNCTYPE(None, c_int)
 
 
-denoiser_loaded = False
-def load_denoiser():
-    
-    global denoiser_loaded
-    if denoiser_loaded: return True
-
-    if PLATFORM == "Windows":
-        cudnn_lib = os.path.join(os.path.dirname(__file__), BIN_PATH, "cudnn64_7.dll")
-        denoiser_lib = os.path.join(os.path.dirname(__file__), BIN_PATH, "optix_denoiser.6.0.0.dll")
-    elif PLATFORM == "Linux":
-        cudnn_lib = os.path.join(os.path.dirname(__file__), BIN_PATH, "libcudnn.so.7.3.1")
-        denoiser_lib = os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptix_denoiser.so.6.0.0")
-    else:
-        raise NotImplementedError
-
-    if os.path.isfile(cudnn_lib) and os.path.isfile(denoiser_lib):
-        c_denoiser = cdll.LoadLibrary(cudnn_lib)
-        c_denoiser = cdll.LoadLibrary(denoiser_lib)
-        denoiser_loaded = True
-        return True
-    else:
-        print(80 * "*"); print(80 * "*")
-        print("AI denoiser binaries not available. Run with administrator access rights:")
-        print("python -m plotoptix.install denoiser")
-        print(80 * "*"); print(80 * "*")
-        return False
-
-
 sharp_optix = None
 def _load_optix_win():
     """
@@ -99,6 +71,9 @@ def _load_optix_win():
     optix.is_defined.argtypes = [c_wchar_p]
     optix.is_defined.restype = c_bool
 
+    optix.has_texture.argtypes = [c_wchar_p]
+    optix.has_texture.restype = c_bool
+
     optix.get_int.argtypes = [c_wchar_p, POINTER(c_int)]
     optix.get_int.restype = c_bool
 
@@ -141,25 +116,13 @@ def _load_optix_win():
     optix.set_texture_2d.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_uint, c_bool, c_bool]
     optix.set_texture_2d.restype = c_bool
 
-    optix.load_texture_2d.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_uint, c_bool]
+    optix.load_texture_2d.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_float, c_float, c_uint, c_bool]
     optix.load_texture_2d.restype = c_bool
 
-    optix.set_geom_texture.argtypes = [c_wchar_p, c_wchar_p, c_void_p, c_int, c_int, c_uint, c_bool, c_bool]
-    optix.set_geom_texture.restype = c_bool
-
-    optix.load_geom_texture.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_float, c_float, c_uint, c_bool]
-    optix.load_geom_texture.restype = c_bool
-
-    optix.set_geom_inst_texture.argtypes = [c_wchar_p, c_wchar_p, c_void_p, c_int, c_int, c_uint, c_bool, c_bool]
-    optix.set_geom_inst_texture.restype = c_bool
-
-    optix.load_geom_inst_texture.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_float, c_float, c_uint, c_bool]
-    optix.load_geom_inst_texture.restype = c_bool
-
-    optix.set_displacement.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_int, c_int, c_bool, c_bool]
+    optix.set_displacement.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_bool, c_bool]
     optix.set_displacement.restype = c_bool
 
-    optix.load_displacement.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_float, c_float, c_bool]
+    optix.load_displacement.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_bool]
     optix.load_displacement.restype = c_bool
 
     optix.resize_scene.argtypes = [c_int, c_int, c_void_p, c_int]
@@ -171,17 +134,17 @@ def _load_optix_win():
     optix.setup_material.argtypes = [c_wchar_p, c_wchar_p]
     optix.setup_material.restype = c_bool
 
-    optix.set_material_texture.argtypes = [c_wchar_p, c_int, c_void_p, c_int, c_int, c_uint, c_bool, c_bool]
-    optix.set_geom_texture.restype = c_bool
+    optix.set_normal_tilt.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_int, c_bool, c_bool]
+    optix.set_normal_tilt.restype = c_bool
+
+    optix.load_normal_tilt.argtypes = [c_wchar_p, c_wchar_p, c_int, c_float, c_float, c_bool]
+    optix.load_normal_tilt.restype = c_bool
 
     optix.set_correction_curve.argtypes = [c_void_p, c_int, c_int, c_int, c_float, c_bool]
     optix.set_correction_curve.restype = c_bool
 
     optix.add_postproc.argtypes = [c_int, c_bool]
     optix.add_postproc.restype = c_bool
-
-    optix.setup_denoiser.argtypes = [c_float, c_bool]
-    optix.setup_denoiser.restype = c_bool
 
     optix.setup_geometry.argtypes = [c_int, c_int, c_wchar_p, c_wchar_p, c_bool, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.setup_geometry.restype = c_uint
@@ -494,9 +457,7 @@ class _ClrOptiX:
             self._encoder_available = False
 
         try:
-            c_optix = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptix.so.6.0.0"))
-            c_optixu = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "liboptixu.so.6.0.0"))
-            c_rnd = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpOptiX.so"))
+            c_rnd = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpOptiX7.so"))
         except:
             print(80 * "*"); print(80 * "*")
             print("Low level ray tracing libraries initialization failed, cannot continue.")
@@ -564,6 +525,8 @@ class _ClrOptiX:
 
     def is_defined(self, name): return self._optix.is_defined(name)
 
+    def has_texture(self, name): return self._optix.has_texture(name)
+
     def get_int(self, name, x_ref):
         return self._optix.get_int_ptr(name,
                                        IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value))
@@ -614,32 +577,16 @@ class _ClrOptiX:
                                               IntPtr.__overloads__[Int64](data_ptr),
                                               width, height, tformat, keep_on_host, refresh)
 
-    def load_texture_2d(self, tex_name, file_name, exposure, gamma, tformat, refresh):
-        return self._optix.load_texture_2d(tex_name, file_name, exposure, gamma, tformat, refresh)
+    def load_texture_2d(self, tex_name, file_name, prescale, baseline, exposure, gamma, tformat, refresh):
+        return self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, tformat, refresh)
 
-    def set_geom_texture(self, obj_name, tex_name, data_ptr, width, height, tformat, keep_on_host, refresh):
-        return self._optix.set_geom_texture_ptr(obj_name, tex_name,
-                                                IntPtr.__overloads__[Int64](data_ptr),
-                                                width, height, tformat, keep_on_host, refresh)
-
-    def load_geom_texture(self, obj_name, tex_name, file_name, exposure, gamma, tformat, refresh):
-        return self._optix.load_geom_texture(obj_name, tex_name, file_name, exposure, gamma, tformat, refresh)
-
-    def set_geom_inst_texture(self, obj_name, tex_name, data_ptr, width, height, tformat, keep_on_host, refresh):
-        return self._optix.set_geom_texture_ptr(obj_name, tex_name,
-                                                IntPtr.__overloads__[Int64](data_ptr),
-                                                width, height, tformat, keep_on_host, refresh)
-
-    def load_geom_inst_texture(self, obj_name, tex_name, file_name, exposure, gamma, tformat, refresh):
-        return self._optix.load_geom_texture(obj_name, tex_name, file_name, exposure, gamma, tformat, refresh)
-
-    def set_displacement(self, obj_name, data_ptr, width, height, mapping, displacement, keep_on_host, refresh):
+    def set_displacement(self, obj_name, data_ptr, width, height, keep_on_host, refresh):
         return self._optix.set_displacement_ptr(obj_name,
                                                 IntPtr.__overloads__[Int64](data_ptr),
-                                                width, height, mapping, displacement, keep_on_host, refresh)
+                                                width, height, keep_on_host, refresh)
 
-    def load_displacement(self, obj_name, file_name, mapping, displacement, prescale, baseline, refresh):
-        return self._optix.load_displacement(obj_name, file_name, mapping, displacement, prescale, baseline, refresh)
+    def load_displacement(self, obj_name, file_name, prescale, baseline, refresh):
+        return self._optix.load_displacement(obj_name, file_name, prescale, baseline, refresh)
 
 
     def resize_scene(self, width, height, buf_ptr, buf_size):
@@ -649,18 +596,20 @@ class _ClrOptiX:
 
     def setup_material(self, name, jstr): return self._optix.setup_material(name, jstr)
 
-    def set_material_texture(self, mat_name, idx, data_ptr, width, height, tformat, keep_on_host, refresh):
-        return self._optix.set_material_texture_ptr(mat_name, idx,
-                                                    IntPtr.__overloads__[Int64](data_ptr),
-                                                    width, height, tformat, keep_on_host, refresh)
+    def set_normal_tilt(self, mat_name, data_ptr, width, height, mapping, keep_on_host, refresh):
+        return self._optix.set_normal_tilt_ptr(mat_name,
+                                               IntPtr.__overloads__[Int64](data_ptr),
+                                               width, height, mapping, keep_on_host, refresh)
+
+    def load_normal_tilt(self, mat_name, file_name, mapping, prescale, baseline, refresh):
+        return self._optix.load_normal_tilt(mat_name, file_name, mapping, prescale, baseline, refresh)
+
 
     def set_correction_curve(self, data_ptr, n_ctrl_points, n_curve_points, channel, vrange, refresh):
         return self._optix.set_correction_curve_ptr(IntPtr.__overloads__[Int64](data_ptr),
                                                     n_ctrl_points, n_curve_points, channel, vrange, refresh)
 
     def add_postproc(self, algorithm, refresh): return self._optix.add_postproc(algorithm, refresh)
-
-    def setup_denoiser(self, blend, refresh): return self._optix.setup_denoiser(blend, refresh)
 
     def setup_geometry(self, geomType, attrProg, name, material, rnd_missing, n_primitives, pos, c, r, u, v, w):
         return self._optix.setup_geometry_ptr(geomType, attrProg, name, material, rnd_missing, n_primitives,

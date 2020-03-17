@@ -37,7 +37,7 @@ def main():
 
     # some exposure and gamma adjutments
     optix.set_float("tonemap_exposure", 0.8)
-    optix.set_float("tonemap_igamma", 1/1.4)
+    optix.set_float("tonemap_gamma", 1.4)
     optix.add_postproc("Gamma")
 
     ################################################################################

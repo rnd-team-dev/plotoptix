@@ -1,6 +1,40 @@
 Release history
 ===============
 
+v0.7.0 - not yet released
+-------------------------
+
+*PlotOptiX has moved to OptiX 7 framework in this version.* This is a major change, basically a rewrite of entire
+ray-tracting engine, followed by several breaking changes in the Python API. Denoiser binaries included in GPU
+driver and improved compilation of shaders code are among advantages of the new framework. The long lasting issues
+with using PlotOptiX on some hardware configurations, related to the shader compilation should be resolved now.
+
+OptiX 7 shifts significant parts of functionality to the application side. Multi-GPU support and most of the
+ray-tracting host state is now maintained by PlotOptiX code. Be warned that this code is fresh! If you spot
+problems, go ahead and submit an issue to the tracker on GitHub.
+
+Changes
+~~~~~~~
+
+- no need to install denoiser binaries separately, no OptiX binaries shipped with PlotOptiX package (these libraries
+  are now included in the GPU driver)
+- setup_denoiser() removed, denoising is now configured with add_postproc() method
+- uniform configuration of textures used by materials, geometries, background, etc., see load_texture() and
+  set_texture_2d() methods
+- material textures are now referenced by texture name instead of full texture description included in the
+  material definition
+- some of material properties names changed, see updated pre-defined materials
+- NormalTilt removed from GeomAttributeProgram, surface normals are modulated with material textures
+- tonal correction parameter tonemap_igamma (inverse value of gamma) changed to tonemap_gamma (gamma value)
+- JSON structure changed and not backward-compatible for several scene components, which means scenes saved
+  with earlier releases wont load with v0.7.0
+
+Added
+~~~~~
+
+- surface roughness textures
+- load_texture() method to facilitate reading textures from file
+
 `v0.5.2`_ - 2019-10-15
 ----------------------
 

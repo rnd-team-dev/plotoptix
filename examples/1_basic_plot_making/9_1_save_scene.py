@@ -18,9 +18,9 @@ def main():
 
     exposure = 1.1; gamma = 2.2
     rt.set_float("tonemap_exposure", exposure)
-    rt.set_float("tonemap_igamma", 1 / gamma)
-    rt.add_postproc("Gamma")                   # Gamma correction, or use AI denoiser.
-    #rt.setup_denoiser()                       #    *** but not both together ***
+    rt.set_float("tonemap_gamma", gamma)
+    rt.add_postproc("Denoiser")                # Gamma correction, or use AI denoiser.
+    #rt.add_postproc("Gamma")                  #    *** but not both together ***
 
     rt.set_background(0)
     rt.set_ambient(0)

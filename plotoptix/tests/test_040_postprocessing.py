@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from plotoptix import NpOptiX # no UI, this was tested earlier
+from plotoptix.utils import make_color_2d
 from plotoptix.materials import *
 from plotoptix.enums import *
 
@@ -50,17 +51,17 @@ class TestScene(TestCase):
 
         # gamma correction
         exposure = 0.8
-        igamma = 1 / 1.9
+        gamma = 1.9
 
         TestScene.scene.set_float("tonemap_exposure", exposure)
-        TestScene.scene.set_float("tonemap_igamma", igamma)
+        TestScene.scene.set_float("tonemap_gamma", gamma)
 
         test_exposure = TestScene.scene.get_float("tonemap_exposure")
         self.assertTrue(test_exposure is not None and np.float32(test_exposure) == np.float32(exposure),
                         msg="Value set: %f, readback: %f." % (exposure, test_exposure))
-        test_igamma = TestScene.scene.get_float("tonemap_igamma")
-        self.assertTrue(test_igamma is not None and np.float32(test_igamma) == np.float32(igamma),
-                        msg="Value set: %f, readback: %f." % (igamma, test_igamma))
+        test_gamma = TestScene.scene.get_float("tonemap_gamma")
+        self.assertTrue(test_gamma is not None and np.float32(test_gamma) == np.float32(gamma),
+                        msg="Value set: %f, readback: %f." % (gamma, test_gamma))
 
         TestScene.scene.add_postproc("Gamma")
 
@@ -75,9 +76,13 @@ class TestScene(TestCase):
         TestScene.scene.add_postproc("RgbCurve")
 
 
-        # mask overlay
-        TestScene.scene.set_texture_2d("frame_mask", np.full((10, 10), 0.5))
+        # mask, overlay
+        M = make_color_2d(np.full((10, 10), 0.5), channel_order="RGBA")
+        TestScene.scene.set_texture_2d("frame_mask", M)
         TestScene.scene.add_postproc("Mask")
+
+        TestScene.scene.set_texture_2d("frame_overlay", M)
+        TestScene.scene.add_postproc("Overlay")
 
         TestScene.scene._raise_on_error = state
 

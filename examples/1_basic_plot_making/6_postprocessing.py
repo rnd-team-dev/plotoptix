@@ -4,7 +4,7 @@
 
 import numpy as np
 from plotoptix import TkOptiX
-
+from plotoptix.utils import make_color_2d
 
 def main():
 
@@ -26,7 +26,7 @@ def main():
 
     optix = TkOptiX() # create and configure, show the window later
 
-    optix.set_param(max_accumulation_frames=50)  # accumulate up to 50 frames
+    optix.set_param(max_accumulation_frames=5)  # accumulate up to 50 frames
     optix.set_background(0)          # black background
     optix.set_ambient([0, 0.2, 0.4]) # cold ambient light
 
@@ -56,7 +56,7 @@ def main():
 
     # 2. Gamma correction.
     #optix.set_float("tonemap_exposure", 0.8)
-    #optix.set_float("tonemap_igamma", 1 / 1.0)
+    #optix.set_float("tonemap_gamma", 2.2)
     #optix.add_postproc("Gamma")
 
     # 3. Tonal correction with a custom curve.
@@ -85,7 +85,9 @@ def main():
 
     #Mx, Mz = np.meshgrid(x, z)
     #M = np.abs(Mx) ** 3 + np.abs(Mz) ** 3
-    #M = 1 - (0.6 / np.max(M)) * M
+    #M = 1 - (0.9 / np.max(M)) * M
+
+    #M = make_color_2d(M, channel_order="RGBA")
 
     #optix.set_texture_2d("frame_mask", M)
     #optix.add_postproc("Mask")

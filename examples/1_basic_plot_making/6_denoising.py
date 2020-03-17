@@ -54,12 +54,13 @@ def main():
     # AI denoiser includes exposure and gamma corection, configured with the
     # same variables as the Gamma postprocessing algorithm.
     optix.set_float("tonemap_exposure", 0.5)
-    optix.set_float("tonemap_igamma", 1 / 2.2)
+    optix.set_float("tonemap_gamma", 2.2)
 
     # Denoiser blend allows for different mixing with the raw image. Its value
-    # can be modified also during ray tracing with the setup_denoiser() method.
+    # can be modified also during the ray tracing.
     # Note: denoising is applied when > 4 accumulation frames are completed.
-    optix.setup_denoiser(blend=0.25)
+    optix.set_float("denoiser_blend", 0.25)
+    optix.add_postproc("Denoiser")
 
     # Postprocessing stages are applied after AI denoiser (even if configured
     # in a different order).

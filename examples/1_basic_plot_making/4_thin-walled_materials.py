@@ -5,9 +5,8 @@ This example shows how to apply thin-walled materials, colorized and textured.
 import numpy as np
 from plotoptix import TkOptiX
 from plotoptix.materials import m_clear_glass, m_thin_walled
-from plotoptix.utils import map_to_colors
+from plotoptix.utils import map_to_colors, make_color_2d, read_image
 from plotoptix.enums import RtFormat
-
 
 def main():
 
@@ -21,25 +20,27 @@ def main():
 
     exposure = 1.5; gamma = 2.2
     rt.set_float("tonemap_exposure", exposure)
-    rt.set_float("tonemap_igamma", 1 / gamma)
-    rt.add_postproc("Gamma")                   # Gamma correction, or use AI denoiser.
-    #rt.setup_denoiser()                       #    *** but not both together ***
+    rt.set_float("tonemap_gamma", gamma)
+    rt.add_postproc("Denoiser")                # AI denoiser, or the gamma correction only.
+    #rt.add_postproc("Gamma")                  #    *** but not both together ***
 
     rt.set_background(0)
     rt.set_ambient(0)
 
+    # Setup texture:
+
+    # in one go, with gamma and exposure parameters saved to the scene:
+    rt.load_texture("rainbow", "data/rainbow.jpg", prescale=0.3, baseline=0.7, gamma=2.2)
+
+    # or through ndarray, allowing for custom processing:
+    #rainbow = 0.7 + 0.3 * read_image("data/rainbow.jpg", normalized=True)
+    #rainbow = make_color_2d(rainbow, gamma=2.2, channel_order="RGBA")
+    #rt.set_texture_2d("rainbow", rainbow)
+
     # Setup materials:
 
     m_thin2 = m_thin_walled.copy()             # textured material based on the predefined thin-walled material
-    m_thin2["Textures"] = [
-        {
-          "Baseline": 0.7,               # Prescale the texture to make it bright, as one would expect for a bubbles:
-          "Prescale": 0.3,               #    color = Baseline + Prescale * original_color
-          "Gamma": 2.2,                  # And compensate the gamma correction applied in 2D postprocessing.
-          "Source": "data/rainbow.jpg",
-          "Format": RtFormat.Float4.value
-        }
-      ]
+    m_thin2["ColorTextures"] = [ "rainbow" ]   # reference texture by name
 
     rt.setup_material("glass", m_clear_glass)
     rt.setup_material("thin", m_thin_walled)

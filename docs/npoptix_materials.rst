@@ -7,7 +7,8 @@ materials* section.
 .. automethod:: plotoptix.NpOptiX.setup_material
 .. automethod:: plotoptix.NpOptiX.get_material
 .. automethod:: plotoptix.NpOptiX.update_material
-.. automethod:: plotoptix.NpOptiX.update_material_texture
+.. automethod:: plotoptix.NpOptiX.set_normal_tilt
+.. automethod:: plotoptix.NpOptiX.load_normal_tilt
 
 .. toctree::
    :caption: API Reference

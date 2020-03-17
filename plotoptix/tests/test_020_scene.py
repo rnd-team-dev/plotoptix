@@ -44,11 +44,6 @@ class TestScene(TestCase):
         self.assertFalse(TestScene.scene._optix.is_defined("non_existing_var"), msg="Non-existing variable should not be reported as defined.")
         self.assertTrue(TestScene.scene._optix.is_defined("scene_epsilon"), msg="Not defined variable scene_epsilon.")
 
-        self.assertTrue(TestScene.scene._optix.is_defined("radiance_ray_type"), msg="Not defined variable radiance_ray_type.")
-        self.assertTrue(TestScene.scene._optix.is_defined("shadow_ray_type"), msg="Not defined variable shadow_ray_type.")
-
-        self.assertTrue(TestScene.scene._optix.is_defined("num_lights"), msg="Not defined variable num_lights.")
-
         seg_min, seg_max = TestScene.scene.get_uint2("path_seg_range")
         self.assertTrue(seg_min is not None and seg_min > 0, msg="Unreasonable min traced segments: %d." % seg_min)
         self.assertTrue(seg_max is not None and seg_max >= seg_min, msg="Unreasonable max traced segments: %d." % seg_max)
@@ -56,7 +51,7 @@ class TestScene(TestCase):
         self.assertTrue(TestScene.scene._optix.is_defined("bad_color"), msg="Not defined variable bad_color.")
 
         self.assertTrue(TestScene.scene._optix.is_defined("tonemap_exposure"), msg="Not defined variable tonemap_exposure.")
-        self.assertTrue(TestScene.scene._optix.is_defined("tonemap_igamma"), msg="Not defined variable tonemap_igamma.")
+        self.assertTrue(TestScene.scene._optix.is_defined("tonemap_gamma"), msg="Not defined variable tonemap_gamma.")
 
         cx, cy, cz = TestScene.scene.get_background()
         self.assertTrue(cx is not None and cx >= 0, msg="Unreasonable background color r: %f." % cx)
@@ -70,7 +65,7 @@ class TestScene(TestCase):
 
         mat = TestScene.scene.get_material("diffuse")
         self.assertFalse(mat is None, msg="Could not read diffuse material.")
-        self.assertTrue(("ClosestHitPrograms" in mat) and ("AnyHitPrograms" in mat), msg="Default material data is incomplete.")
+        self.assertTrue(("RadianceProgram" in mat) and ("OcclusionProgram" in mat) and ("VarUint" in mat), msg="Default material data is incomplete.")
 
         frames_min = TestScene.scene.get_param("min_accumulation_step")
         self.assertTrue(frames_min is not None and frames_min > 0, msg="Unreasonable min accumulation step value: %d." % frames_min)
@@ -104,7 +99,7 @@ class TestScene(TestCase):
 
         self.assertTrue(TestScene.scene._optix.is_defined("ambient_color"), msg="Not defined float3 ambient_color.")
         self.assertTrue(TestScene.scene._optix.is_defined("bg_color"), msg="Not defined float3 bg_color.")
-        self.assertTrue(TestScene.scene._optix.is_defined("bg_texture"), msg="Not defined texture sampler bg_texture.")
+        self.assertTrue(TestScene.scene._optix.has_texture("bg_texture"), msg="Not defined texture bg_texture.")
         self.assertTrue(TestScene.scene.get_background_mode() == MissProgram.AmbientLight, msg="Initial miss program should be AmbientLight.")
 
         state = TestScene.scene._raise_on_error

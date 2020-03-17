@@ -63,7 +63,7 @@ def main():
 
     # or if you'd like some edges fixed:
     #v = np.zeros((rc.shape[0], 3)); v[:,1] = rc[:]
-    #optix.set_data("cubes", pos=cubes, u=[0.05,0,0], v=v, w=[0,0,0.05,0], c=cc, geom="Parallelepipeds")
+    #optix.set_data("cubes", pos=cubes, u=[0.05,0,0], v=v, w=[0,0,0.05], c=cc, geom="Parallelepipeds")
 
     # show coordinates box
     optix.set_coordinates()

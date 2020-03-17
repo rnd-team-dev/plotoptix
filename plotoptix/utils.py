@@ -218,21 +218,23 @@ def make_color_2d(c: Any,
                   gamma: float = 1.0,
                   input_range: float = 1.0,
                   extend_scalars: bool = True,
-                  channel_order: Union[ChannelOrder, str] = ChannelOrder.RGB) -> np.ndarray:
+                  channel_order: Union[ChannelOrder, str] = ChannelOrder.RGB,
+                  alpha: float = 1.0) -> np.ndarray:
     """Prepare 2D array of colors to account for the postprocessing corrections.
 
     Colors of geometry objects in the ray traced image may look very different
     than expected from raw color values assigned at objects initialization, if
     post-processing corrections are applied. This method applies inverse gamma
     and exposure corrections and returns RGB values resulting with desired colors
-    in the image.
+    in the image. Optionally, alpha channel may be added and filled with provided
+    value.
 
     Input values range may be specified, so RGB can be provided as e.g. 0-255
     values, for convenience.
 
     Input array shape should be ``(n, m)``, ``(n, m, 1)``, or  ``(n, m, 3)``.
-    The output array shape is ``(n, m, 3)``. Single scalar values are treated as
-    a gray levels if ``extend_scalars=True``.
+    The output array shape is ``(n, m, 3)`` or ``(n, m, 4)``. Single scalar values
+    are treated as a gray levels if ``extend_scalars=True``.
 
     Parameters
     ----------
@@ -249,6 +251,8 @@ def make_color_2d(c: Any,
         Convert single scalar values to gray levels encoded as RGB.
     channel_order : ChannelOrder, optional
         Swap RGB to BGR and add aplha channel if necessary.
+    alpha : float, optional
+        Value used to fill alpha channel, if necessary.
 
     Returns
     -------
@@ -271,12 +275,14 @@ def make_color_2d(c: Any,
     if channel_order == ChannelOrder.RGBA:
         _c = np.zeros(c.shape[:2] + (4,), dtype=np.float32)
         _c[...,:-1] = c
+        _c[...,-1] = alpha
         c = _c
         if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
     elif channel_order == ChannelOrder.BGRA:
         c[...,[0, 2]] = c[...,[2, 0]]
         _c = np.zeros(c.shape[:2] + (4,), dtype=np.float32)
         _c[...,:-1] = c
+        _c[...,-1] = alpha
         c = _c
         if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
     elif channel_order == ChannelOrder.BGR:

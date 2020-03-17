@@ -44,7 +44,7 @@ class TestOutput(TestCase):
         TestOutput.scene.set_param(min_accumulation_step=4, max_accumulation_frames=8)
         TestOutput.scene.encoder_create(fps=20, bitrate=1, profile="High")
 
-        n = 1000 # 1k data points, in order to have something in view
+        n = 1000 # 1k data points, to have something in view
         xyz = 3 * (np.random.random((n, 3)) - 0.5)
         TestOutput.scene.set_data("plot", xyz, r=0.1)
         TestOutput.scene.setup_camera("cam1")
@@ -60,7 +60,6 @@ class TestOutput(TestCase):
         self.assertTrue(TestOutput.scene.encoded_frames() == 0, msg="Encoded frames on startup should be 0.")
 
     def test020_encode(self):
-
         frames_to_encode = 20 * 2
 
         fname = "test_encode.mp4"
@@ -96,10 +95,12 @@ class TestOutput(TestCase):
         TestOutput.scene.save_image(fname)
         self.assertTrue(os.path.isfile(fname), msg="Image file %s not created." % (fname,))
         os.remove(fname)
+        print("*** python test test030_image done")
 
     def test999_close(self):
         self.assertTrue(TestOutput.scene is not None and TestOutput.is_alive, msg="Wrong state of the test class.")
 
+        print("*** python test close")
         TestOutput.scene.close()
         TestOutput.scene.join(10)
         self.assertTrue(TestOutput.scene.is_closed(), msg="Scene did not flip to _is_closed=True state.")
