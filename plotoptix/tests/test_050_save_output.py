@@ -95,12 +95,10 @@ class TestOutput(TestCase):
         TestOutput.scene.save_image(fname)
         self.assertTrue(os.path.isfile(fname), msg="Image file %s not created." % (fname,))
         os.remove(fname)
-        print("*** python test test030_image done")
 
     def test999_close(self):
         self.assertTrue(TestOutput.scene is not None and TestOutput.is_alive, msg="Wrong state of the test class.")
 
-        print("*** python test close")
         TestOutput.scene.close()
         TestOutput.scene.join(10)
         self.assertTrue(TestOutput.scene.is_closed(), msg="Scene did not flip to _is_closed=True state.")

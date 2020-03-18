@@ -735,7 +735,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Set shader variable with given ``name`` and of the type ``uint`` or ``uint2``
         (if y provided). Raytrace the whole scene if refresh is set to ``True``.
-        Note, shader variables distinguish ``int`` and ``uint``, while the type
+        Note, shader variables distinguish ``int`` and ``uint`` while the type
         provided by Python methods is ``int`` in both cases.
 
         Parameters
@@ -796,7 +796,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Set shader variable with given ``name`` and of the type ``int``. Raytrace
         the whole scene if refresh is set to ``True``.
-        Note, shader variables distinguish ``int`` and ``uint``, while the type
+        Note, shader variables distinguish ``int`` and ``uint`` while the type
         provided by Python methods is ``int`` in both cases.
 
         Parameters
