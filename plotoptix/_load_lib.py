@@ -483,7 +483,7 @@ class _ClrOptiX:
 
         clr.AddReference(os.path.splitext(tail)[0])
 
-        self._optix = rnd_assembly.CreateInstance("RnD.SharpOptiX.Py.PyOptiX")
+        self._optix = rnd_assembly.CreateInstance("RnD.SharpOptiX.Py.PyOptiX7")
 
     def refresh_scene(self): self._optix.refresh_scene()
 
