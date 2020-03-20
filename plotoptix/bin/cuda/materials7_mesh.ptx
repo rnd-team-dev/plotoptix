@@ -10,10 +10,10 @@
 .target sm_30
 .address_size 64
 
-	// .globl	__closesthit__occlusion
+	// .globl	__closesthit__occlusion_mesh
 .const .align 8 .b8 params[264];
 
-.visible .entry __closesthit__occlusion(
+.visible .entry __closesthit__occlusion_mesh(
 
 )
 {
@@ -41,8 +41,8 @@
 	ret;
 }
 
-	// .globl	__closesthit__occlusion_transparency
-.visible .entry __closesthit__occlusion_transparency(
+	// .globl	__closesthit__occlusion_transparency_mesh
+.visible .entry __closesthit__occlusion_transparency_mesh(
 
 )
 {
@@ -158,8 +158,8 @@ BB1_7:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__flat
-.visible .entry __closesthit__radiance__flat(
+	// .globl	__closesthit__radiance__flat_mesh
+.visible .entry __closesthit__radiance__flat_mesh(
 
 )
 {
@@ -552,8 +552,8 @@ BB2_26:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__cos
-.visible .entry __closesthit__radiance__cos(
+	// .globl	__closesthit__radiance__cos_mesh
+.visible .entry __closesthit__radiance__cos_mesh(
 
 )
 {
@@ -959,8 +959,8 @@ BB3_26:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__blurred_dot
-.visible .entry __closesthit__radiance__blurred_dot(
+	// .globl	__closesthit__radiance__blurred_dot_mesh
+.visible .entry __closesthit__radiance__blurred_dot_mesh(
 
 )
 {
@@ -1391,8 +1391,8 @@ BB4_28:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__diffuse_masked
-.visible .entry __closesthit__radiance__diffuse_masked(
+	// .globl	__closesthit__radiance__diffuse_masked_mesh
+.visible .entry __closesthit__radiance__diffuse_masked_mesh(
 
 )
 {
@@ -2376,8 +2376,8 @@ BB5_64:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__diffuse
-.visible .entry __closesthit__radiance__diffuse(
+	// .globl	__closesthit__radiance__diffuse_mesh
+.visible .entry __closesthit__radiance__diffuse_mesh(
 
 )
 {
@@ -3331,8 +3331,8 @@ BB6_61:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__glass
-.visible .entry __closesthit__radiance__glass(
+	// .globl	__closesthit__radiance__glass_mesh
+.visible .entry __closesthit__radiance__glass_mesh(
 
 )
 {
@@ -4376,8 +4376,8 @@ BB7_101:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__reflective
-.visible .entry __closesthit__radiance__reflective(
+	// .globl	__closesthit__radiance__reflective_mesh
+.visible .entry __closesthit__radiance__reflective_mesh(
 
 )
 {
