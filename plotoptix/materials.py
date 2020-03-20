@@ -8,16 +8,16 @@ from plotoptix.enums import RtFormat
 __pkg_dir__ = os.path.dirname(__file__)
 
 m_flat = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__flat",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__flat",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
     }
 """
 Super-fast material, color is not shaded anyhow. Use color components range <0; 1>.
 """
 
 m_eye_normal_cos = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__cos",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__cos",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
     }
 """
 Fast material, color is shaded by the cos(eye-hit-normal). Use color components range
@@ -25,8 +25,8 @@ Fast material, color is shaded by the cos(eye-hit-normal). Use color components 
 """
 
 m_diffuse = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__diffuse",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__diffuse",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 2 }
     }
 """
@@ -35,8 +35,8 @@ Use color components range <0; 1>.
 """
 
 m_matt_diffuse = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__diffuse",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__diffuse",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 2 },
       "VarFloat": { "base_roughness": 1 }
     }
@@ -46,8 +46,8 @@ the Lambertian "diffuse" material.
 """
 
 m_mirror = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__reflective",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 6 },
       "VarFloat3": {
         "surface_albedo": [ 1.0, 1.0, 1.0 ]
@@ -61,8 +61,8 @@ range <0; 1>), which results with colorized reflections.
 """
 
 m_metalic = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__reflective",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 6 },
       "VarFloat": { "base_roughness": 0.002 },
 }
@@ -74,8 +74,8 @@ Roughness of the surface should be usually small.
 """
 
 m_plastic = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__reflective",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 6 },
       "VarFloat": {
         "reflectivity_index": 0.0,
@@ -93,8 +93,8 @@ reflectivity_range value (down to 0). Higher refraction_index gives a more gloss
 """
 
 m_matt_plastic = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__reflective",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 6 },
       "VarFloat": {
         "reflectivity_index": 0.0,
@@ -111,8 +111,8 @@ Similar to :attr:`plotoptix.materials.m_plastic` but slightly rough surface.
 """
 
 m_clear_glass = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__glass",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__glass",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 12 },
       "VarFloat": {
         "radiation_length": 0.0,
@@ -130,8 +130,8 @@ and the color range is <0; inf>.
 """
 
 m_matt_glass = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__glass",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__glass",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 12 },
       "VarFloat": {
         "radiation_length": 0.0,
@@ -150,8 +150,8 @@ Glass with surface roughness configured to obtain matt appearance. Color compone
 """
 
 m_dispersive_glass = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__glass",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__glass",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 12 },
       "VarFloat": {
         "radiation_length": 0.0,
@@ -170,8 +170,8 @@ and the range is <0; inf>.
 """
 
 m_thin_walled = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__glass",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "full7.ptx::__closesthit__radiance__glass",
+      "OcclusionProgram": "full7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 44 },
       "VarFloat": {
         "radiation_length": 0.0,
