@@ -10,10 +10,10 @@
 .target sm_30
 .address_size 64
 
-	// .globl	__closesthit__occlusion_mesh
+	// .globl	__closesthit__mesh_occlusion
 .const .align 8 .b8 params[264];
 
-.visible .entry __closesthit__occlusion_mesh(
+.visible .entry __closesthit__mesh_occlusion(
 
 )
 {
@@ -41,8 +41,8 @@
 	ret;
 }
 
-	// .globl	__closesthit__occlusion_transparency_mesh
-.visible .entry __closesthit__occlusion_transparency_mesh(
+	// .globl	__closesthit__mesh_occlusion_transparency
+.visible .entry __closesthit__mesh_occlusion_transparency(
 
 )
 {
@@ -158,8 +158,8 @@ BB1_7:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__flat_mesh
-.visible .entry __closesthit__radiance__flat_mesh(
+	// .globl	__closesthit__mesh_radiance__flat
+.visible .entry __closesthit__mesh_radiance__flat(
 
 )
 {
@@ -552,8 +552,8 @@ BB2_26:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__cos_mesh
-.visible .entry __closesthit__radiance__cos_mesh(
+	// .globl	__closesthit__mesh_radiance__cos
+.visible .entry __closesthit__mesh_radiance__cos(
 
 )
 {
@@ -959,8 +959,8 @@ BB3_26:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__blurred_dot_mesh
-.visible .entry __closesthit__radiance__blurred_dot_mesh(
+	// .globl	__closesthit__mesh_radiance__blurred_dot
+.visible .entry __closesthit__mesh_radiance__blurred_dot(
 
 )
 {
@@ -1391,8 +1391,8 @@ BB4_28:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__diffuse_masked_mesh
-.visible .entry __closesthit__radiance__diffuse_masked_mesh(
+	// .globl	__closesthit__mesh_radiance__diffuse_masked
+.visible .entry __closesthit__mesh_radiance__diffuse_masked(
 
 )
 {
@@ -2376,8 +2376,8 @@ BB5_64:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__diffuse_mesh
-.visible .entry __closesthit__radiance__diffuse_mesh(
+	// .globl	__closesthit__mesh_radiance__diffuse
+.visible .entry __closesthit__mesh_radiance__diffuse(
 
 )
 {
@@ -3331,8 +3331,8 @@ BB6_61:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__glass_mesh
-.visible .entry __closesthit__radiance__glass_mesh(
+	// .globl	__closesthit__mesh_radiance__glass
+.visible .entry __closesthit__mesh_radiance__glass(
 
 )
 {
@@ -4376,8 +4376,8 @@ BB7_101:
 	ret;
 }
 
-	// .globl	__closesthit__radiance__reflective_mesh
-.visible .entry __closesthit__radiance__reflective_mesh(
+	// .globl	__closesthit__mesh_radiance__reflective
+.visible .entry __closesthit__mesh_radiance__reflective(
 
 )
 {
