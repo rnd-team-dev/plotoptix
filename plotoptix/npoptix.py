@@ -89,6 +89,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._is_started = False
         self._is_closed = False
 
+        rt_log = 0
+        if isinstance(log_level, int):
+            if log_level == logging.ERROR: rt_log = 1
+            elif log_level == logging.WARNING: rt_log = 2
+            elif log_level == logging.INFO: rt_log = 3
+            elif log_level == logging.DEBUG: rt_log = 4
+        if isinstance(log_level, str):
+            if log_level == 'ERROR': rt_log = 1
+            elif log_level == 'WARNING': rt_log = 2
+            elif log_level == 'WARN': rt_log = 2
+            elif log_level == 'INFO': rt_log = 3
+            elif log_level == 'DEBUG': rt_log = 4
+
         # load SharpOptiX library, configure paths ####################
         self._logger.info("Configure RnD.SharpOptiX library...")
         self._optix = load_optix()
@@ -123,7 +136,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if src is None:                          # create empty scene
             self._logger.info("  - ray-tracer initialization")
-            self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
+            self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size, rt_log)
             if self._is_scene_created: self._logger.info("Empty scene ready.")
 
         elif isinstance(src, str):               # create scene from file
