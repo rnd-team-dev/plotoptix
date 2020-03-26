@@ -77,7 +77,6 @@ System Requirements
    - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2, recommended: 5.20.1
    - `pythonnet <http://pythonnet.github.io>`__ >= 2.4
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
-- for video encoding: `CUDA Toolkit v10.x <https://developer.nvidia.com/cuda-downloads>`__ (tested with v10.0 and v10.1)
 
 What's Included
 ---------------
@@ -94,7 +93,7 @@ Installation
 PlotOptiX was also successfully tested on the `Google Cloud Platform <https://cloud.google.com/>`__, using Compute Engine instance with 2x V100 GPU's and Ubuntu 18.04 image.
 Here are the `installation steps <https://github.com/rnd-team-dev/plotoptix/blob/master/gcp_install_gpu.txt>`__ so you can save some precious seconds (FFmpeg not included).
 
-Windows should be ready to go in most cases. You need to do some more typing in Linux. For video encoding you need to install CUDA toolkit in both Linux and Windows.
+Windows should be ready to go in most cases. You need to do some more typing in Linux.
 
 Windows prerequisites
 ---------------------
@@ -177,15 +176,6 @@ Add FFmpeg's shared library path to your config::
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
    sudo ldconfig
 
-CUDA Toolkit
-------------
-
-CUDA libraries are not included in the package and required only for the video encoding features of PlotOptiX. Visit
-`CUDA download page <https://developer.nvidia.com/cuda-downloads>`__, select your operating system and CUDA version **10.x**.
-Download and run the installer.
-
-*Linux note:* Install the GPU driver before installing CUDA toolkit, it makes things easier.
-
 PlotOptiX
 ---------
 
@@ -204,7 +194,7 @@ Then, try running code from the top of this readme, or one of the examples. You 
 Development path
 ================
 
-This is an early version. There are some important features not available yet, eg. ticks and labels on plot axes.
+This is still an early version. There are some important features not available yet, eg. ticks and labels on plot axes.
 
 PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers
 much more functionality than it is now available through PlotOptiX. We'll progressively add more to PlotOptiX if there is interest in
