@@ -13,7 +13,7 @@ PlotOptiX
 
 **Data visualisation in Python based on NVIDIA OptiX ray tracing framework.**
 
-**Transition to OptiX 7 is almost finished. New release should be ready in a few days, after code cleanup. Please, be patient!**
+**The package is moved to OptiX 7. See `release history <https://plotoptix.rnd.team/changelog.html>`__ for changes.**
 
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers

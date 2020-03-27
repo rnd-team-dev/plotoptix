@@ -1,8 +1,8 @@
 Release history
 ===============
 
-v0.7.0 - not yet released
--------------------------
+`v0.7.0`_ - 2020-03-27
+----------------------
 
 *PlotOptiX has moved to OptiX 7 framework in this version.* This is a major change, basically a rewrite of entire
 ray-tracting engine, followed by several breaking changes in the Python API. Denoiser binaries included in GPU
@@ -11,7 +11,7 @@ with using PlotOptiX on some hardware configurations, related to the shader comp
 
 OptiX 7 shifts significant parts of functionality to the application side. Multi-GPU support and most of the
 ray-tracting host state is now maintained by PlotOptiX code. Be warned that this code is fresh! If you spot
-problems, go ahead and submit an issue to the tracker on GitHub.
+problems, go ahead and submit issue to the tracker on GitHub.
 
 Changes
 ~~~~~~~
@@ -280,6 +280,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.7.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.0
 .. _`v0.5.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.2
 .. _`v0.5.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.1
 .. _`v0.5.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.0
