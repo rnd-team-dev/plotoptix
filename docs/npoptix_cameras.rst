@@ -22,12 +22,14 @@ Shifts and rotations
 .. automethod:: plotoptix.NpOptiX.camera_rotate_eye_local
 .. automethod:: plotoptix.NpOptiX.camera_rotate_target
 .. automethod:: plotoptix.NpOptiX.camera_rotate_target_local
+.. automethod:: plotoptix.NpOptiX.set_camera_glock
 
 Read back camera properties
 ---------------------------
 
 .. automethod:: plotoptix.NpOptiX.get_camera_eye
 .. automethod:: plotoptix.NpOptiX.get_camera_target
+.. automethod:: plotoptix.NpOptiX.get_camera_glock
 .. automethod:: plotoptix.NpOptiX.get_camera
 .. automethod:: plotoptix.NpOptiX.get_camera_name_handle
 

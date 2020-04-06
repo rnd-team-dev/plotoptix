@@ -1940,6 +1940,40 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.get_camera_target(cam_handle, target.ctypes.data)
         return target
 
+    def get_camera_glock(self, name: Optional[str] = None) -> Optional[bool]:
+        """Get camera gimbal lock state.
+
+        Parameters
+        ----------
+        name : string, optional
+            Name of the camera, use current camera if name not provided.
+
+        Returns
+        -------
+        out : bool, optional
+            Gimbal lock state of the camera or ``None`` if failed on
+            accessing camera data.
+        """
+        if name is not None and not isinstance(name, str): name = str(name)
+
+        name, cam_handle = self.get_camera_name_handle(name)
+        if name is None: return None
+
+        return self._optix.get_camera_glock(cam_handle)
+
+    def set_camera_glock(self, state: bool) -> None:
+        """Set current camera's gimbal lock.
+
+        Parameters
+        ----------
+        state : bool
+            Gimbal lock state.
+        """
+        if not self._optix.set_camera_glock(state):
+            msg = "Camera gimbal lock not set."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
     def setup_camera(self, name: str,
                      eye: Optional[Any] = None,
                      target: Optional[Any] = None,
@@ -1950,6 +1984,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                      focal_scale: float = 1.0,
                      fov: float = 35.0,
                      blur: float = 1,
+                     glock: bool = False,
                      make_current: bool = True) -> None:
         """Setup new camera with given name.
 
@@ -1980,6 +2015,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Weight of the new frame in averaging with already accumulated frames.
             Range is (0; 1>, lower values result with a higher motion blur, value
             1.0 turns off the blur (default). Cannot be changed after construction.
+        glock : bool, optional
+            Gimbal lock state of the new camera. 
         make_current : bool, optional
             Automatically switch to this camera if set to ``True``.
         """
@@ -2012,7 +2049,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         h = self._optix.setup_camera(name, cam_type.value,
                                      eye_ptr, target_ptr, up.ctypes.data,
                                      aperture_radius, aperture_fract,
-                                     focal_scale, fov, blur,
+                                     focal_scale, fov, blur, glock,
                                      make_current)
         if h > 0:
             self._logger.info("Camera %s handle: %d.", name, h)
