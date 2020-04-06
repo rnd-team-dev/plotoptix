@@ -1,6 +1,20 @@
 Release history
 ===============
 
+v0.7.1 - not released
+---------------------
+
+Added
+~~~~~
+
+- set/release gimbal lock in camera rotations
+
+Fixed
+~~~~~
+
+- nan's in mesh normal calculatons
+- improved bvh memory allocations can handle more primitives in data sets
+
 `v0.7.0`_ - 2020-03-27
 ----------------------
 
