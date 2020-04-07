@@ -1027,7 +1027,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Object name.
+            Material name.
         file_name : string
             Image file name with the displacement data.
         mapping : TextureMapping or string, optional
