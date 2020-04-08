@@ -226,6 +226,7 @@ class TkOptiX(NpOptiX):
         :meth:`plotoptix.NpOptiX.close`
         """
         if not self._is_closed:
+            self._optix.break_launch()
             self._canvas.event_generate("<<CloseScene>>", when="head")
         else:
             self._logger.warn("UI already closed.")
@@ -280,6 +281,7 @@ class TkOptiX(NpOptiX):
 
     def _gui_motion_pressed(self, event):
         self._mouse_to_x, self._mouse_to_y = self._get_image_xy(event.x, event.y)
+        self._optix.break_launch()
 
     def _gui_pressed_left(self, event):
         self._mouse_from_x, self._mouse_from_y = self._get_image_xy(event.x, event.y)

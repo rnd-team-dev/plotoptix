@@ -65,6 +65,8 @@ def _load_optix_win():
     optix.start_rt.restype = c_bool
     optix.stop_rt.restype = c_bool
 
+    optix.break_launch.restype = c_bool
+
     optix.set_compute_paused.argtypes = [c_bool]
     optix.set_compute_paused.restype = c_bool
 
@@ -526,6 +528,8 @@ class _ClrOptiX:
 
     def start_rt(self): return self._optix.start_rt()
     def stop_rt(self): return self._optix.stop_rt()
+
+    def break_launch(self): return self._optix.break_launch()
 
     def set_compute_paused(self, state): return self._optix.set_compute_paused(state)
 

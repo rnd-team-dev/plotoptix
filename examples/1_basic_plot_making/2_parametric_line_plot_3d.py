@@ -38,7 +38,7 @@ def main():
     r = np.linalg.norm(xyz, axis=1)
     r = 5 - (5 / r.max()) * r + 0.02
 
-    # Create the plots:
+    # Create the plot:
 
     optix = TkOptiX() # create and configure, show the window later
 
