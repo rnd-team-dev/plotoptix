@@ -1,19 +1,22 @@
 Release history
 ===============
 
-v0.7.1 - not released
----------------------
+`v0.7.1`_ - 2020-04-11
+----------------------
 
 Added
 ~~~~~
 
 - set/release gimbal lock in camera rotations
+- geometry scaling by vector and w.r.t. provided point
+- sub-launch loop breaking on UI events (e.g. camera rotation)
 
 Fixed
 ~~~~~
 
 - nan's in mesh normal calculatons
 - improved bvh memory allocations can handle more primitives in data sets
+- texture values prescale when gamma is 1.0
 
 `v0.7.0`_ - 2020-03-27
 ----------------------
@@ -294,6 +297,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.7.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.1
 .. _`v0.7.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.0
 .. _`v0.5.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.2
 .. _`v0.5.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.1

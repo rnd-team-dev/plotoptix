@@ -4122,7 +4122,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 self._logger.error(msg)
                 if self._raise_on_error: raise RuntimeError(msg)
 
-    def scale_geometry(self, name: str, s: float,
+    def scale_geometry(self, name: str, s: Union[float, Tuple[float, float, float]],
+                       center: Optional[Tuple[float, float, float]] = None,
                        update: bool = True) -> None:
         """Scale all primitive's positions and sizes.
 
@@ -4136,19 +4137,44 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         name : string
             Name of the geometry.
-        s : float
-            Scaling factor.
+        s : float,  tuple (float, float, float)
+            Scaling factor, single value or (x, y, z) scales.
+        center : tuple (float, float, float), optional
+            Scaling center. If not provided, scaling is made w.r.t. the primitive center.
         update : bool, optional
             Update GPU buffer.
         """
         if name is None: raise ValueError()
 
-        if not self._optix.scale_geometry(name, s, update):
-            msg = "Geometry scale failed."
-            self._logger.error(msg)
-            if self._raise_on_error: raise RuntimeError(msg)
+        if isinstance(s, float) or isinstance(s, int):
+            s = float(s)
+            if center is None:
+                if not self._optix.scale_geometry(name, s, update):
+                    msg = "Geometry scale by scalar failed."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
+            else:
+                if not isinstance(center, tuple): center = tuple(center)
+                if not self._optix.scale_geometry_c(name, s, center[0], center[1], center[2], update):
+                    msg = "Geometry scale by scalar w.r.t. the center failed."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
+        else:
+            if not isinstance(s, tuple): s = tuple(s)
+            if center is None:
+                if not self._optix.scale_geometry_xyz(name, s[0], s[1], s[2], update):
+                    msg = "Geometry scale by vector failed."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
+            else:
+                if not isinstance(center, tuple): center = tuple(center)
+                if not self._optix.scale_geometry_xyz_c(name, s[0], s[1], s[2], center[0], center[1], center[2], update):
+                    msg = "Geometry scale by vector w.r.t. the center failed."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
 
-    def scale_primitive(self, name: str, idx: int, s: float,
+    def scale_primitive(self, name: str, idx: int, s: Union[float, Tuple[float, float, float]],
+                        center: Optional[Tuple[float, float, float]] = None,
                         update: bool = True) -> None:
         """Scale selected primitive.
 
@@ -4164,17 +4190,41 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Name of the geometry.
         idx : int
             Primitive index.
-        s : float
-            Scaling factor.
+        s : float,  tuple (float, float, float)
+            Scaling factor, single value or (x, y, z) scales.
+        center : tuple (float, float, float), optional
+            Scaling center. If not provided, scaling is made w.r.t. the primitive center.
         update : bool, optional
             Update GPU buffer.
         """
         if name is None: raise ValueError()
 
-        if not self._optix.scale_primitive(name, idx, s, update):
-            msg = "Primitive scale failed."
-            self._logger.error(msg)
-            if self._raise_on_error: raise RuntimeError(msg)
+        if isinstance(s, float) or isinstance(s, int):
+            s = float(s)
+            if center is None:
+                if not self._optix.scale_primitive(name, idx, s, update):
+                    msg = "Primitive scale by scalar failed."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
+            else:
+                if not isinstance(center, tuple): center = tuple(center)
+                if not self._optix.scale_primitive_c(name, idx, s, center[0], center[1], center[2], update):
+                    msg = "Primitive scale by scalar w.r.t. the center failed."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
+        else:
+            if not isinstance(s, tuple): s = tuple(s)
+            if center is None:
+                if not self._optix.scale_primitive_xyz(name, idx, s[0], s[1], s[2], update):
+                    msg = "Primitive scale by vector failed."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
+            else:
+                if not isinstance(center, tuple): center = tuple(center)
+                if not self._optix.scale_primitive_xyz_c(name, idx, s[0], s[1], s[2], center[0], center[1], center[2], update):
+                    msg = "Primitive scale by vector w.r.t. the center failed."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
 
     def update_geom_buffers(self, name: str,
                             mask: Union[GeomBuffer, str] = GeomBuffer.All) -> None:

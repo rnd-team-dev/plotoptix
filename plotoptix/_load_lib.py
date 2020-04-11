@@ -220,6 +220,24 @@ def _load_optix_win():
     optix.scale_primitive.argtypes = [c_wchar_p, c_long, c_float, c_bool]
     optix.scale_primitive.restype = c_bool
 
+    optix.scale_geometry_c.argtypes = [c_wchar_p, c_float, c_float, c_float, c_float, c_bool]
+    optix.scale_geometry_c.restype = c_bool
+
+    optix.scale_primitive_c.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_float, c_bool]
+    optix.scale_primitive_c.restype = c_bool
+
+    optix.scale_geometry_xyz.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
+    optix.scale_geometry_xyz.restype = c_bool
+
+    optix.scale_primitive_xyz.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_bool]
+    optix.scale_primitive_xyz.restype = c_bool
+
+    optix.scale_geometry_xyz_c.argtypes = [c_wchar_p, c_float, c_float, c_float, c_float, c_float, c_float, c_bool]
+    optix.scale_geometry_xyz_c.restype = c_bool
+
+    optix.scale_primitive_xyz_c.argtypes = [c_wchar_p, c_long, c_float, c_float, c_float, c_float, c_float, c_float, c_bool]
+    optix.scale_primitive_xyz_c.restype = c_bool
+
     optix.update_geom_buffers.argtypes = [c_wchar_p, c_uint]
     optix.update_geom_buffers.restype = c_bool
 
@@ -726,6 +744,18 @@ class _ClrOptiX:
     def scale_geometry(self, name, s, update): return self._optix.scale_geometry(name, s, update)
 
     def scale_primitive(self, name, idx, s, update): return self._optix.scale_primitive(name, idx, s, update)
+
+    def scale_geometry_c(self, name, s, cx, cy, cz, update): return self._optix.scale_geometry_c(name, s, cx, cy, cz, update)
+
+    def scale_primitive_c(self, name, idx, s, cx, cy, cz, update): return self._optix.scale_primitive_c(name, idx, s, cx, cy, cz, update)
+
+    def scale_geometry_xyz(self, name, x, y, z, update): return self._optix.scale_geometry_xyz(name, x, y, z, update)
+
+    def scale_primitive_xyz(self, name, idx, x, y, z, update): return self._optix.scale_primitive_xyz(name, idx, x, y, z, update)
+
+    def scale_geometry_xyz_c(self, name, x, y, z, cx, cy, cz, update): return self._optix.scale_geometry_xyz_c(name, x, y, z, cx, cy, cz, update)
+
+    def scale_primitive_xyz_c(self, name, idx, x, y, z, cx, cy, cz, update): return self._optix.scale_primitive_xyz_c(name, idx, x, y, z, cx, cy, cz, update)
 
     def update_geom_buffers(self, name, mask): return self._optix.update_geom_buffers(name, mask)
 
