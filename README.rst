@@ -7,11 +7,11 @@ PlotOptiX
 .. image:: https://img.shields.io/pypi/dm/plotoptix.svg
    :target: https://pypi.org/project/plotoptix
    :alt: PlotOptiX downloads by pip install
-   
+|
 .. image:: https://plotoptix.rnd.team/images/become_a_patron_button.png
    :target: https://www.patreon.com/bePatron?u=33442314
    :alt: Become a Patron!
-
+   
 **Data visualisation in Python based on NVIDIA OptiX ray tracing framework.**
 
 **The package is moved to OptiX 7.** See `release history <https://plotoptix.rnd.team/changelog.html>`__ for changes.
