@@ -7,7 +7,6 @@ PlotOptiX
 .. image:: https://img.shields.io/pypi/dm/plotoptix.svg
    :target: https://pypi.org/project/plotoptix
    :alt: PlotOptiX downloads by pip install
-|
 .. image:: https://plotoptix.rnd.team/images/become_a_patron_button.png
    :target: https://www.patreon.com/bePatron?u=33442314
    :alt: Become a Patron!
