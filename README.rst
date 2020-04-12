@@ -7,14 +7,15 @@ PlotOptiX
 .. image:: https://img.shields.io/pypi/dm/plotoptix.svg
    :target: https://pypi.org/project/plotoptix
    :alt: PlotOptiX downloads by pip install
-.. image:: https://img.shields.io/badge/support%20project-paypal-brightgreen.svg
-   :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RG47ZEL5GKLNA&source=url
-   :alt: Support project
+   
+.. image:: https://plotoptix.rnd.team/images/become_a_patron_button.png
+   :target: https://www.patreon.com/bePatron?u=33442314
+   :alt: Become a Patron!
 
 **Data visualisation in Python based on NVIDIA OptiX ray tracing framework.**
 
 **The package is moved to OptiX 7.** See `release history <https://plotoptix.rnd.team/changelog.html>`__ for changes.
-
+   
 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
 of several basic shapes, or projected onto the surfaces of objects in form of a color textures and displacement maps. All finished with
@@ -198,7 +199,7 @@ This is still an early version. There are some important features not available 
 
 PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers
 much more functionality than it is now available through PlotOptiX. We'll progressively add more to PlotOptiX if there is interest in
-this project (download, star, and `support <https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RG47ZEL5GKLNA&source=url>`__
+this project (download, star, and `become our Patron <https://www.patreon.com/bePatron?u=33442314>`__
 if you like it!).
 
 The idea for development is:
