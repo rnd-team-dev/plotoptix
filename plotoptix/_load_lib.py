@@ -30,7 +30,7 @@ def _load_optix_win():
 
     optix = cdll.LoadLibrary(dll_name)
 
-    optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int, c_int]
+    optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int, c_void_p, c_int, c_int]
     optix.create_empty_scene.restype = c_bool
 
     optix.get_miss_program.restype = c_int
@@ -515,9 +515,11 @@ class _ClrOptiX:
 
     def destroy_scene(self): self._optix.destroy_scene()
 
-    def create_empty_scene(self, width, height, buf_ptr, buf_size, log_level):
+    def create_empty_scene(self, width, height, buf_ptr, buf_size, dev_ptr, dev_size, log_level):
         return self._optix.create_empty_scene_ptr(width, height,
-                                                  IntPtr.__overloads__[Int64](buf_ptr), buf_size, log_level)
+                                                  IntPtr.__overloads__[Int64](buf_ptr), buf_size,
+                                                  IntPtr.__overloads__[Int64](dev_ptr), dev_size,
+                                                  log_level)
 
     def get_miss_program(self): return self._optix.get_miss_program()
     def set_miss_program(self, algorithm, refresh): return self._optix.set_miss_program(algorithm, refresh)

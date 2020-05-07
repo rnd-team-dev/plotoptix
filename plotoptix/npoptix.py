@@ -60,6 +60,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     start_now : bool, optional
         Start raytracing thread immediately. If set to False, then user should
         call start() method. Default is ``False``.
+    devices : list, optional
+        List of selected devices, with the primary device at index 0. Empty list
+        is default, resulting with all compatible devices selected for processing.
     log_level : int or string, optional
         Log output level. Default is ``WARN``.
     """
@@ -74,6 +77,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                  width: int = -1,
                  height: int = -1,
                  start_now: bool = False,
+                 devices: List = [],
                  log_level: Union[int, str] = logging.WARN) -> None:
         """NpOptiX constructor.
         """
@@ -134,9 +138,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self.set_launch_finished_cb(on_launch_finished)
         self.set_accum_done_cb(on_rt_accum_done)
 
+        device_ptr = 0
+        device_count = 0
+        if len(devices) > 0:
+            self._logger.info("Configure selected devices.")
+            device_idx = [int(d) for d in devices]
+            device_idx = np.ascontiguousarray(device_idx, dtype=np.int32)
+            device_ptr = device_idx.ctypes.data
+            device_count = device_idx.shape[0]
+            print(device_count, device_idx, type(device_idx))
+
         if src is None:                          # create empty scene
             self._logger.info("  - ray-tracer initialization")
-            self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size, rt_log)
+            self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size, device_ptr, device_count, rt_log)
             if self._is_scene_created: self._logger.info("Empty scene ready.")
 
         elif isinstance(src, str):               # create scene from file

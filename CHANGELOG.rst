@@ -1,6 +1,19 @@
 Release history
 ===============
 
+v0.7.2 - unreleased
+-------------------
+
+Added
+~~~~~
+
+- selection of devices
+
+Fixed
+~~~~~
+
+- color range scaling for arrays of const coloe (utility function)
+
 `v0.7.1`_ - 2020-04-11
 ----------------------
 
