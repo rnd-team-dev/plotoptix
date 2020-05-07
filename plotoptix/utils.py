@@ -316,7 +316,11 @@ def map_to_colors(x: Any, cm_name: str) -> np.ndarray:
     if not isinstance(x, np.ndarray): x = np.asarray(x)
 
     min_x = x.min()
-    x = (1 / (x.max() - min_x)) * (x - min_x)
+    max_x = x.max()
+    if min_x != max_x:
+        x = (1 / (x.max() - min_x)) * (x - min_x)
+    else:
+        x = np.zeros(x.shape)
 
     c = cm.get_cmap(cm_name)(x)
     return np.delete(c, np.s_[-1], len(c.shape) - 1) # skip alpha
