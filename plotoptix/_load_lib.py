@@ -38,10 +38,10 @@ def _load_optix_win():
     optix.set_miss_program.argtypes = [c_int, c_bool]
     optix.set_miss_program.restype = c_bool
 
-    optix.create_scene_from_json.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int]
+    optix.create_scene_from_json.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int, c_void_p, c_int]
     optix.create_scene_from_json.restype = c_bool
 
-    optix.create_scene_from_file.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int]
+    optix.create_scene_from_file.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int, c_void_p, c_int]
     optix.create_scene_from_file.restype = c_bool
 
     optix.load_scene_from_json.argtypes = [c_wchar_p]
@@ -524,13 +524,15 @@ class _ClrOptiX:
     def get_miss_program(self): return self._optix.get_miss_program()
     def set_miss_program(self, algorithm, refresh): return self._optix.set_miss_program(algorithm, refresh)
 
-    def create_scene_from_json(self, jstr, width, height, buf_ptr, buf_size):
+    def create_scene_from_json(self, jstr, width, height, buf_ptr, buf_size, dev_ptr, dev_size):
         return self._optix.create_scene_from_json_ptr(jstr, width, height,
-                                                      IntPtr.__overloads__[Int64](buf_ptr), buf_size)
+                                                      IntPtr.__overloads__[Int64](buf_ptr), buf_size,
+                                                      IntPtr.__overloads__[Int64](dev_ptr), dev_size)
 
-    def create_scene_from_file(self, jstr, width, height, buf_ptr, buf_size):
+    def create_scene_from_file(self, jstr, width, height, buf_ptr, buf_size, dev_ptr, dev_size):
         return self._optix.create_scene_from_file_ptr(jstr, width, height,
-                                                      IntPtr.__overloads__[Int64](buf_ptr), buf_size)
+                                                      IntPtr.__overloads__[Int64](buf_ptr), buf_size,
+                                                      IntPtr.__overloads__[Int64](dev_ptr), dev_size)
 
     def load_scene_from_json(self, jstr): return self._optix.load_scene_from_json(jstr)
 

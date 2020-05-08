@@ -12,7 +12,7 @@ import tkinter as tk
 
 from PIL import Image, ImageTk
 from ctypes import byref, c_float, c_uint
-from typing import Tuple, Optional, Union
+from typing import List, Tuple, Optional, Union
 
 from plotoptix.enums import *
 from plotoptix._load_lib import PLATFORM
@@ -64,8 +64,11 @@ class TkOptiX(NpOptiX):
         screen height.
     start_now : bool, optional
         Open the GUI window and start raytracing thread immediately. If set
-        to False, then user should call start() or show() method. Default is
-        False.
+        to ``False``, then user should call ``start()`` or ``show()`` method.
+        Default is ``False``.
+    devices : list, optional
+        List of selected devices, with the primary device at index 0. Empty list
+        is default, resulting with all compatible devices selected for processing.
     log_level : int or string, optional
         Log output level. Default is ``WARN``.
     """
@@ -80,6 +83,7 @@ class TkOptiX(NpOptiX):
                  width: int = -1,
                  height: int = -1,
                  start_now: bool = False,
+                 devices: List = [],
                  log_level: Union[int, str] = logging.WARN) -> None:
         """TkOptiX constructor
         """
@@ -94,6 +98,7 @@ class TkOptiX(NpOptiX):
             on_rt_accum_done=on_rt_accum_done,
             width=width, height=height,
             start_now=False, # do not start yet
+            devices=devices,
             log_level=log_level)
 
         # save initial values to set size of Tk window on startup 

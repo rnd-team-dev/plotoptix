@@ -58,8 +58,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     height : int, optional
         Pixel height of the raytracing output. Default value is 16.
     start_now : bool, optional
-        Start raytracing thread immediately. If set to False, then user should
-        call start() method. Default is ``False``.
+        Start raytracing thread immediately. If set to ``False``, then user should
+        call ``start()`` method. Default is ``False``.
     devices : list, optional
         List of selected devices, with the primary device at index 0. Empty list
         is default, resulting with all compatible devices selected for processing.
@@ -146,7 +146,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             device_idx = np.ascontiguousarray(device_idx, dtype=np.int32)
             device_ptr = device_idx.ctypes.data
             device_count = device_idx.shape[0]
-            print(device_count, device_idx, type(device_idx))
 
         if src is None:                          # create empty scene
             self._logger.info("  - ray-tracer initialization")
@@ -166,7 +165,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 os.chdir(d)
             else: f = src
 
-            self._is_scene_created = self._optix.create_scene_from_file(f, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
+            self._is_scene_created = self._optix.create_scene_from_file(f, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size, device_ptr, device_count)
             self._is_scene_created &= self._init_scene_metadata()
             if self._is_scene_created:
                 self._logger.info("Scene loaded correctly.")
@@ -175,7 +174,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         elif isinstance(src, dict):              # create scene from dictionary
             s = json.dumps(src)
-            self._is_scene_created = self._optix.create_scene_from_json(s, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size)
+            self._is_scene_created = self._optix.create_scene_from_json(s, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size, device_ptr, device_count)
             self._is_scene_created &= self._init_scene_metadata()
             if self._is_scene_created: self._logger.info("Scene loaded correctly.")
 
