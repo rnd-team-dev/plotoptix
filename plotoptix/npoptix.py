@@ -3853,25 +3853,163 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
-    def set_mesh(self, name: str, pos: Any, pidx = None, normals = None, nidx = None,
+    def set_mesh(self, name: str, pos: Any, faces: Any,
                  c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
-                 mat: str = "diffuse", make_normals: bool = False) -> None:
+                 normals: Optional[Any] = None,
+                 nidx: Optional[Any] = None,
+                 uvmap: Optional[Any] = None,
+                 uvidx: Optional[Any] = None,
+                 mat: str = "diffuse",
+                 make_normals: bool = False) -> None:
+        """Create new mesh geometry.
+
+       Data is provided in form of arrays: vertices :math:`[x, y, z]`, with the shape
+        ``(n, 3)``, and faces (triplets of vertex indices), with the shape ``(n, 3)``
+       or ``(m)`` where ``m = 3*n``. Data features can be visualized with color (array
+       of RGB values assigned to the mesh vertices, shape ``(n, 3)``).
+
+       Mesh ``normals`` can be provided as an array of 3D vectors. Mappng of normals to
+       faces can be provided as an array of ``nidx`` indexes. If mapping is not provided
+       then face vertex data is used (requires same number of vertices and normal vectors).
+
+       Smooth shading normals can be pre-calculated if ``make_normals=True`` and normals
+       data is not provided.
+
+       Texture UV mapping ``uvmap`` can be provided as an array of 2D vectors. Mappng of
+       UV coordinates to faces can be provided as an array of ``uvidx`` indexes. If mapping
+       is not provided then face vertex data is used (requires same number of vertices
+       and UV points).
+        
+        Parameters
+        ----------
+        name : string
+            Name of the new surface geometry.
+        pos : array_like
+            XYZ values of mesh vertices.
+        faces : array_like
+            Mesh faces as indices (triplets) to the ``pos`` array.
+        c : Any, optional
+            Colors of mesh vertices. Single value means a constant gray level.
+            3-component array means a constant RGB color. Array of the shape
+            ``(n, 3)`` will set individual color for each vertex,
+            interpolated on face surfaces; ``n`` has to be equal to the vertex
+            number in ``pos`` array.
+        normals : array_like, optional
+            Normal vectors.
+        nidx : array_like, optional
+            Normal to face mapping, ``faces`` is used if not provided.
+        uvmap : array_like, optional
+            Texture UV coordinates.
+        uvidx : array_like, optional
+            Texture UV to face mapping, ``faces`` is used if not provided.
+        mat : string, optional
+            Material name.
+        make_normals : bool, optional
+            Calculate smooth shading of the mesh, if ``normals`` are not provided.
+            Normals of all triangles attached to the mesh vertex are averaged.
+        """
 
         if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if name in self.geometry_handles:
+            msg = "Geometry %s already exists, use update_mesh() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
 
         if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
         assert len(pos.shape) == 2 and pos.shape[0] > 2 and pos.shape[1] == 3, "Required vertex data shape is (n,3), where n >= 3."
+        if pos.dtype != np.float32: pos = np.ascontiguousarray(pos, dtype=np.float32)
+        if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
+        pos_ptr = pos.ctypes.data
+        n_vertices = pos.shape[0]
 
-        if pidx is not None and not isinstance(pidx, np.ndarray): pidx = np.ascontiguousarray(pidx, dtype=np.int32)
-        pidx_ptr = 0
-        if pidx is not None:
-            assert (len(pidx.shape) == 2 and pidx.shape[0] > 0 and pos.shape[1] == 3) or (len(pidx.shape) == 1 and pidx.shape[0] > 3 and (pidx.shape[0] % 3) == 0), "Required index shape is (n,3) or (m), where m % 3 == 0."
-            pidx_ptr = pidx.ctypes.data
+        if not isinstance(faces, np.ndarray): faces = np.ascontiguousarray(faces, dtype=np.int32)
+        if faces.dtype != np.int32: faces = np.ascontiguousarray(faces, dtype=np.int32)
+        if not faces.flags['C_CONTIGUOUS']: faces = np.ascontiguousarray(faces, dtype=np.int32)
+        assert (len(faces.shape) == 2 and faces.shape[1] == 3) or (len(faces.shape) == 1 and (faces.shape[0] % 3 == 0)), "Required index shape is (n,3) or (m), where m is a multiple of 3."
+        faces_ptr = faces.ctypes.data
+        n_faces = faces.size // 3
 
-        c = _make_contiguous_3d(c, n=pos.shape[0], extend_scalars=True)
-        col_ptr = 0
+        c_ptr = 0
+        c_const = None
         if c is not None:
-            col_ptr = c.ctypes.data
+            if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
+            if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
+            if len(c.shape) == 1 and c.shape[0] == 3:
+                c_const = c
+                cm = np.zeros(pos.shape, dtype=np.float32)
+                cm[:,:] = c
+                c = cm
+            assert np.array_equal(c.shape, pos.shape), "Colors shape must be (n,3), with n matching the number of mesh vertices."
+            if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
+            if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+            c_ptr = c.ctypes.data
+
+        n_ptr = 0
+        n_normals = 0
+        if normals is not None:
+            if not isinstance(normals, np.ndarray): normals = np.ascontiguousarray(normals, dtype=np.float32)
+            if nidx is None:
+                assert normals.shape == pos.shape, "If normal index data not provided, normals shape must be (n,3), with n matching the mesh vertex positions shape."
+            else:
+                assert len(normals.shape) == 2 and normals.shape[0] > 2 and normals.shape[1] == 3, "Required normals data shape is (n,3), where n >= 3."
+            if normals.dtype != np.float32: normals = np.ascontiguousarray(normals, dtype=np.float32)
+            if not normals.flags['C_CONTIGUOUS']: normals = np.ascontiguousarray(normals, dtype=np.float32)
+            n_ptr = normals.ctypes.data
+            n_normals = normals.shape[0]
+            make_normals = False
+
+        nidx_ptr = 0
+        if nidx is not None:
+            if not isinstance(nidx, np.ndarray): nidx = np.ascontiguousarray(nidx, dtype=np.int32)
+            if nidx.dtype != np.int32: nidx = np.ascontiguousarray(nidx, dtype=np.int32)
+            if not nidx.flags['C_CONTIGUOUS']: nidx = np.ascontiguousarray(nidx, dtype=np.int32)
+            assert np.array_equal(nidx.shape, faces.shape), "Required same shape of normal index and face index arrays."
+            nidx_ptr = nidx.ctypes.data
+
+        uv_ptr = 0
+        n_uv = 0
+        if uvmap is not None:
+            if not isinstance(uvmap, np.ndarray): uvmap = np.ascontiguousarray(uvmap, dtype=np.float32)
+            if uvidx is None:
+                assert uvmap.shape[0] == pos.shape[0], "If UV index data not provided, uvmap shape must be (n,2), with n matching the number of mesh vertices."
+            else:
+                assert len(uvmap.shape) == 2 and uvmap.shape[0] > 2 and uvmap.shape[1] == 2, "Required UV data shape is (n,2), where n >= 3."
+            if uvmap.dtype != np.float32: uvmap = np.ascontiguousarray(uvmap, dtype=np.float32)
+            if not uvmap.flags['C_CONTIGUOUS']: uvmap = np.ascontiguousarray(uvmap, dtype=np.float32)
+            uv_ptr = uvmap.ctypes.data
+            n_uv = uvmap.shape[0]
+
+        uvidx_ptr = 0
+        if uvidx is not None:
+            if not isinstance(uvidx, np.ndarray): uvidx = np.ascontiguousarray(uvidx, dtype=np.int32)
+            if uvidx.dtype != np.int32: uvidx = np.ascontiguousarray(uvidx, dtype=np.int32)
+            if not uvidx.flags['C_CONTIGUOUS']: uvidx = np.ascontiguousarray(uvidx, dtype=np.int32)
+            assert np.array_equal(uvidx.shape, faces.shape), "Required same shape of UV index and face index arrays."
+            uvidx_ptr = uvidx.ctypes.data
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Setup mesh %s...", name)
+            g_handle = self._optix.setup_mesh(name, mat, n_vertices, n_faces, n_normals, n_uv, pos_ptr, faces_ptr, c_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr, make_normals)
+
+            if g_handle > 0:
+                self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_names[g_handle] = name
+                self.geometry_handles[name] = g_handle
+                self.geometry_sizes[name] = pos.shape[0] * pos.shape[1]
+            else:
+                msg = "Mesh setup failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+        finally:
+            self._padlock.release()
 
 
     def load_mesh_obj(self, file_name: str, mesh_name: Optional[str] = None,
