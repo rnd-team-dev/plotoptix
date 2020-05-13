@@ -1,12 +1,13 @@
 Release history
 ===============
 
-v0.7.2 - unreleased
--------------------
+`v0.7.2`_ - 2020-05-13
+----------------------
 
 Added
 ~~~~~
 
+- raw mesh geometry (defined explicitly with vertices, faces, normals, and uv mapping)
 - selection of devices
 
 Fixed
@@ -310,6 +311,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.7.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.2
 .. _`v0.7.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.1
 .. _`v0.7.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.0
 .. _`v0.5.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.5.2
