@@ -157,6 +157,9 @@ def _load_optix_win():
     optix.get_geometry_size.argtypes = [c_wchar_p]
     optix.get_geometry_size.restype = c_int
 
+    optix.get_faces_count.argtypes = [c_wchar_p]
+    optix.get_faces_count.restype = c_int
+
     optix.get_surface_size.argtypes = [c_wchar_p, POINTER(c_uint), POINTER(c_uint)]
     optix.get_surface_size.restype = c_bool
 
@@ -172,10 +175,10 @@ def _load_optix_win():
     optix.setup_psurface.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_bool, c_bool, c_bool]
     optix.setup_psurface.restype = c_uint
 
-    optix.setup_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.setup_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_bool]
     optix.setup_mesh.restype = c_uint
 
-    optix.update_mesh.argtypes = [c_wchar_p, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.update_mesh.argtypes = [c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_mesh.restype = c_uint
 
     optix.load_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
@@ -663,6 +666,8 @@ class _ClrOptiX:
 
     def get_geometry_size(self, name): return self._optix.get_geometry_size(name)
 
+    def get_faces_count(self, name): return self._optix.get_faces_count(name)
+
     def get_surface_size(self, name, x_ref, z_ref):
         return self._optix.get_surface_size_ptr(name,
                                                 IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value),
@@ -697,21 +702,26 @@ class _ClrOptiX:
                                               IntPtr.__overloads__[Int64](c),
                                               wrap_u, wrap_v, make_normals)
 
-    def setup_mesh(self, name, material, n_vtx, n_tri, n_norm, pos, c, vidx, norm, nidx):
-        return self._optix.setup_mesh_ptr(name, material, n_vtx, n_tri, n_norm,
+    def setup_mesh(self, name, material, n_vtx, n_tri, n_norm, n_uv, pos, c, vidx, norm, nidx, uvmap, uvidx, make_normals):
+        return self._optix.setup_mesh_ptr(name, material, n_vtx, n_tri, n_norm, n_uv,
                                           IntPtr.__overloads__[Int64](pos),
                                           IntPtr.__overloads__[Int64](c),
                                           IntPtr.__overloads__[Int64](vidx),
                                           IntPtr.__overloads__[Int64](norm),
-                                          IntPtr.__overloads__[Int64](nidx))
+                                          IntPtr.__overloads__[Int64](nidx),
+                                          IntPtr.__overloads__[Int64](uvmap),
+                                          IntPtr.__overloads__[Int64](uvidx),
+                                          make_normals)
 
-    def update_mesh(self, name, n_vtx, n_tri, n_norm, pos, c, vidx, norm, nidx):
-        return self._optix.update_mesh_ptr(name, n_vtx, n_tri, n_norm,
+    def update_mesh(self, name, n_vtx, n_tri, n_norm, n_uv, pos, c, vidx, norm, nidx, uvmap, uvidx):
+        return self._optix.update_mesh_ptr(name, n_vtx, n_tri, n_norm, n_uv,
                                            IntPtr.__overloads__[Int64](pos),
                                            IntPtr.__overloads__[Int64](c),
                                            IntPtr.__overloads__[Int64](vidx),
                                            IntPtr.__overloads__[Int64](norm),
-                                           IntPtr.__overloads__[Int64](nidx))
+                                           IntPtr.__overloads__[Int64](nidx),
+                                           IntPtr.__overloads__[Int64](uvmap),
+                                           IntPtr.__overloads__[Int64](uvidx))
 
     def load_mesh_obj(self, file_name, mesh_name, material, color, make_normals):
         return self._optix.load_mesh_obj_ptr(file_name, mesh_name, material,
