@@ -1,6 +1,19 @@
 Release history
 ===============
 
+v0.7.3 - unreleased
+-------------------
+
+Added
+~~~~~
+
+- diffuse/reflective/plastic material transparency handled with alpha channel of textures
+
+Fixed
+~~~~~
+
+- scatterng in volumes
+
 `v0.7.2`_ - 2020-05-13
 ----------------------
 
