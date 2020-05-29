@@ -45,6 +45,17 @@ Oren-Nayar diffuse material. Surface roughness range is <0; inf), 0 is equivalen
 the Lambertian "diffuse" material.
 """
 
+m_transparent_diffuse = {
+      "RadianceProgram": "materials7.ptx::__closesthit__radiance__diffuse_masked",
+      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion_transparency",
+      "VarUInt": { "flags": 2 },
+      "VarFloat": { "base_roughness": 0 }
+    }
+"""
+Diffuse material with transparency set according to alpha channel of ``ColorTextures``.
+Roughness can be set to Lambertian or Oren-Nayar with ``base_roughness`` parameter.
+"""
+
 m_mirror = {
       "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective",
       "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
@@ -60,17 +71,28 @@ the shading algorithm overrides ``surface_albedo`` with the color assigned to ea
 range <0; 1>), which results with colorized reflections.
 """
 
-m_metalic = {
+m_metallic = {
       "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective",
       "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 6 },
       "VarFloat": { "base_roughness": 0.002 },
 }
 """
-Strongly reflective, metalic material. Note, this material has default values: ``reflectivity_index = 1``
+Strongly reflective, metallic material. Note, this material has default values: ``reflectivity_index = 1``
 and ``reflectivity_range = 1``. In this configuration the shading algorithm overrides ``surface_albedo``
 with the color assigned to each primitive (RGB range <0; 1>), which results with colorized reflections.
 Roughness of the surface should be usually small.
+"""
+
+m_transparent_metallic = {
+      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective_masked",
+      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion_transparency",
+      "VarUInt": { "flags": 6 },
+      "VarFloat": { "base_roughness": 0.002 },
+}
+"""
+Strongly reflective, metallic material with transparency set according to alpha channel of
+``ColorTextures``. See also :attr:`plotoptix.materials.m_metallic`.
 """
 
 m_plastic = {
@@ -108,6 +130,26 @@ m_matt_plastic = {
 }
 """
 Similar to :attr:`plotoptix.materials.m_plastic` but slightly rough surface.
+"""
+
+m_transparent_plastic = {
+      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective_masked",
+      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion_transparency",
+      "VarUInt": { "flags": 6 },
+      "VarFloat": {
+        "reflectivity_index": 0.0,
+        "reflectivity_range": 0.5,
+        "base_roughness": 0
+      },
+      "VarFloat3": {
+        "refraction_index": [ 2.0, 2.0, 2.0 ],
+        "surface_albedo": [ 1.0, 1.0, 1.0 ]
+      }
+}
+"""
+Combined reflective and diffuse surface with transparency set according to alpha channel of
+``ColorTextures``. See :attr:`plotoptix.materials.m_plastic` and :attr:`plotoptix.materials.m_matt_plastic`
+for details.
 """
 
 m_clear_glass = {

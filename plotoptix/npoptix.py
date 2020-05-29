@@ -4172,7 +4172,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                       mat: str = "diffuse", make_normals: bool = False) -> None:
         """Load mesh geometry from Wavefront .obj file.
 
-        Note: this method can read files with named objects. Use :meth:`plotoptix.NpOptiX.load_merged_mesh_obj`
+        Note: this method can read files with named objects only. Use :meth:`plotoptix.NpOptiX.load_merged_mesh_obj`
         for reading files with raw, unnamed mesh.
 
         Parameters
@@ -4233,6 +4233,55 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise
         finally:
             self._padlock.release()
+
+    def load_multiple_mesh_obj(self, file_name: str, mat: dict, default: str = "diffuse") -> None:
+        """Load meshesh from Wavefront .obj file, assign materials from dictrionary.
+
+        Note: this method can read files with named objects only. Use :meth:`plotoptix.NpOptiX.load_merged_mesh_obj`
+        for reading files with raw, unnamed mesh.
+
+        Parameters
+        ----------
+        file_name : string
+            File name (local file path or url) to read from.
+        mat : dict
+            Mesh name to material name dictionary. All meshes with names starting with keys in ``dict`` will have
+            corresponding material assigned.
+        default : string, optional
+            Default material name, assigned if mesh name not fount in ``mat``.
+        """
+        if file_name is None: raise ValueError()
+
+        if not isinstance(file_name, str): file_name = str(file_name)
+
+        for n in mat:
+            if not isinstance(mat[n], str):
+                mat[n] = str(mat[n])
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Load mesh from file %s ...", file_name)
+
+            s = self._optix.load_multiple_mesh_obj(file_name, json.dumps(mat), default)
+
+            if len(s) > 2:
+                meta = json.loads(s)
+                for key, value in meta.items():
+                    self.geometry_handles[key] = value["Handle"]
+                    self.geometry_names[value["Handle"]] = key
+                    self.geometry_sizes[key] = value["Size"]
+                    self._logger.info("...loaded: %s (%d vertices)", key, value["Size"])
+            else:
+                msg = "Mesh loading failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+        finally:
+            self._padlock.release()
+
 
     def load_merged_mesh_obj(self, file_name: str, mesh_name: str,
                              c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),

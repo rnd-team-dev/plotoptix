@@ -184,6 +184,9 @@ def _load_optix_win():
     optix.load_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
     optix.load_mesh_obj.restype = c_wchar_p
 
+    optix.load_multiple_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p]
+    optix.load_multiple_mesh_obj.restype = c_wchar_p
+
     optix.load_merged_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
     optix.load_merged_mesh_obj.restype = c_uint
 
@@ -727,6 +730,9 @@ class _ClrOptiX:
         return self._optix.load_mesh_obj_ptr(file_name, mesh_name, material,
                                              IntPtr.__overloads__[Int64](color),
                                              make_normals)
+
+    def load_multiple_mesh_obj(self, file_name, materials, default_mat):
+        return self._optix.load_multiple_mesh_obj_ptr(file_name, materials, default_mat)
 
     def load_merged_mesh_obj(self, file_name, mesh_name, material, color, make_normals):
         return self._optix.load_merged_mesh_obj_ptr(file_name, mesh_name, material,
