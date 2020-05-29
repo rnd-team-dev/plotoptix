@@ -4167,9 +4167,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
-    def load_mesh_obj(self, file_name: str, mesh_name: Optional[str] = None,
+    def load_mesh_obj(self, file_name: str, mesh_name: Optional[str] = None, parent: Optional[str] = None,
                       c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
-                      mat: str = "diffuse", make_normals: bool = False) -> None:
+                      mat: str = "diffuse",
+                      make_normals: bool = False) -> None:
         """Load mesh geometry from Wavefront .obj file.
 
         Note: this method can read files with named objects only. Use :meth:`plotoptix.NpOptiX.load_merged_mesh_obj`
@@ -4182,6 +4183,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         mesh_name : string, optional
             Name of the mesh to import from the file. All meshes are imported
             if ``None`` value or empty string is used.
+        parent : string, optional
+            Optional name of a mesh to set as a parent of all other meshes loaded from the file. All transformations
+            applied to the parent will be applied to children meshes as well.
         c : Any, optional
             Color of the mesh. Single value means a constant gray level.
             3-component array means constant RGB color.
@@ -4200,6 +4204,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if mesh_name is None: mesh_name = ""
 
         if not isinstance(mesh_name, str): mesh_name = str(mesh_name)
+
+        if parent is None: parent = ""
+
+        if not isinstance(parent, str): parent = str(parent)
 
         if mesh_name in self.geometry_handles:
             msg = "Geometry %s already exists, use update_mesh() instead." % mesh_name
@@ -4234,7 +4242,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         finally:
             self._padlock.release()
 
-    def load_multiple_mesh_obj(self, file_name: str, mat: dict, default: str = "diffuse") -> None:
+    def load_multiple_mesh_obj(self, file_name: str, mat: dict, default: str = "diffuse",
+                               parent: Optional[str] = None) -> None:
         """Load meshesh from Wavefront .obj file, assign materials from dictrionary.
 
         Note: this method can read files with named objects only. Use :meth:`plotoptix.NpOptiX.load_merged_mesh_obj`
@@ -4249,10 +4258,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             corresponding material assigned.
         default : string, optional
             Default material name, assigned if mesh name not fount in ``mat``.
+        parent : string, optional
+            Optional full name of a mesh to set as a parent of all other meshes loaded from the file. All transformations
+            applied to the parent will be applied to children meshes as well.
         """
         if file_name is None: raise ValueError()
 
         if not isinstance(file_name, str): file_name = str(file_name)
+
+        if parent is None: parent = ""
+
+        if not isinstance(parent, str): parent = str(parent)
 
         for n in mat:
             if not isinstance(mat[n], str):
@@ -4262,7 +4278,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.acquire()
             self._logger.info("Load mesh from file %s ...", file_name)
 
-            s = self._optix.load_multiple_mesh_obj(file_name, json.dumps(mat), default)
+            s = self._optix.load_multiple_mesh_obj(file_name, json.dumps(mat), default, parent)
 
             if len(s) > 2:
                 meta = json.loads(s)

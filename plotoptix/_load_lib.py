@@ -181,10 +181,10 @@ def _load_optix_win():
     optix.update_mesh.argtypes = [c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_mesh.restype = c_uint
 
-    optix.load_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
+    optix.load_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
     optix.load_mesh_obj.restype = c_wchar_p
 
-    optix.load_multiple_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p]
+    optix.load_multiple_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_wchar_p]
     optix.load_multiple_mesh_obj.restype = c_wchar_p
 
     optix.load_merged_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
@@ -726,13 +726,13 @@ class _ClrOptiX:
                                            IntPtr.__overloads__[Int64](uvmap),
                                            IntPtr.__overloads__[Int64](uvidx))
 
-    def load_mesh_obj(self, file_name, mesh_name, material, color, make_normals):
-        return self._optix.load_mesh_obj_ptr(file_name, mesh_name, material,
+    def load_mesh_obj(self, file_name, mesh_name, material, parent, color, make_normals):
+        return self._optix.load_mesh_obj_ptr(file_name, mesh_name, material, parent,
                                              IntPtr.__overloads__[Int64](color),
                                              make_normals)
 
-    def load_multiple_mesh_obj(self, file_name, materials, default_mat):
-        return self._optix.load_multiple_mesh_obj_ptr(file_name, materials, default_mat)
+    def load_multiple_mesh_obj(self, file_name, materials, default_mat, parent):
+        return self._optix.load_multiple_mesh_obj_ptr(file_name, materials, default_mat, parent)
 
     def load_merged_mesh_obj(self, file_name, mesh_name, material, color, make_normals):
         return self._optix.load_merged_mesh_obj_ptr(file_name, mesh_name, material,

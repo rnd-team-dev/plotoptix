@@ -34,7 +34,7 @@ def main():
     # are assigned with single material by providing only a part of
     # the mesh name:
     materials = { "eye": "plastic", "wing": "transparent" }
-    rt.load_multiple_mesh_obj("data/fly.obj", materials)
+    rt.load_multiple_mesh_obj("data/fly.obj", materials, parent="head_Icosphere")
 
     # camera and light position auto-fit the scene geometry
     rt.setup_camera("cam1")
