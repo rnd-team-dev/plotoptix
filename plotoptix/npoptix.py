@@ -4222,7 +4222,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Load mesh from file %s ...", file_name)
-            s = self._optix.load_mesh_obj(file_name, mesh_name, mat, col_ptr, make_normals)
+            s = self._optix.load_mesh_obj(file_name, mesh_name, parent, mat, col_ptr, make_normals)
 
             if len(s) > 2:
                 meta = json.loads(s)
