@@ -13,9 +13,10 @@ def main():
     rt = TkOptiX() # create and configure, show the window later
 
     rt.set_param(max_accumulation_frames=100)  # accumulate up to 100 frames
-    rt.set_background(0.99) # black background
+    rt.set_background(0.99) # white background
     rt.set_ambient(0.25) # some ambient light
 
+    # setup materials:
     m_diffuse["VarFloat3"] = { "base_color": [ 0.15, 0.17, 0.2 ] }
     rt.update_material("diffuse", m_diffuse)
 
@@ -29,7 +30,9 @@ def main():
 
     rt.load_normal_tilt("transparent", "data/wing.png", prescale=0.002)
 
-    # another public-domain version with normals included:
+    # prepare dictionary and load meshes; note that both eyes and wings
+    # are assigned with single material by providing only a part of
+    # the mesh name:
     materials = { "eye": "plastic", "wing": "transparent" }
     rt.load_multiple_mesh_obj("data/fly.obj", materials)
 
