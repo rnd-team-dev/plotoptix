@@ -355,6 +355,43 @@ class TkOptiX(NpOptiX):
         self._selection_handle = -1
         self._selection_index = -1
 
+    def select(self, name: Optional[str] = None, index: int = -1):
+        """Select geometry, light or camera.
+
+        Select object for manual manipulations (rotations, shifts, etc). Geometry or light
+        is selected by its name. If ``name`` is not provided, then active camera is selected.
+        Optional ``index`` allows selection of a primitive within the geometry.
+
+        Parameters
+        ----------
+        name : string, optional
+            Name of the geometry or light to select. If ``None`` then active camera is selected.
+        index : int, optional
+            Primitive index to select. Entire geometry is selected if ``index`` is out of primitives range. 
+        """
+        if name is None:
+            self._status_main_text.set("Selection: camera")
+            self._selection_handle = -1
+            self._selection_index = -1
+            return
+
+        if name in self.geometry_handles:
+            self._selection_handle = self.geometry_handles[name]
+            if index >= 0 and index < self.geometry_sizes[name]:
+                self._status_main_text.set("Selection: %s[%d]" % (name, index))
+                self._selection_index = index
+            else:
+                self._status_main_text.set("Selection: %s" % name)
+                self._selection_index = -1
+            return
+
+        if name in self.light_handles:
+            self._status_main_text.set("Selection: %s" % name)
+            self._selection_handle = -2
+            self._selection_index = self.light_handles[name]
+            return
+
+
     def _gui_doubleclick_right(self, event):
         self._status_main_text.set("Selection: camera")
         self._selection_handle = -1

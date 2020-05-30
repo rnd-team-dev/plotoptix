@@ -34,6 +34,7 @@ API reference
 
 .. automethod:: plotoptix.TkOptiX.get_rt_size
 .. automethod:: plotoptix.TkOptiX.set_rt_size
+.. automethod:: plotoptix.TkOptiX.select
 .. automethod:: plotoptix.TkOptiX.show
 .. automethod:: plotoptix.TkOptiX.close
 
