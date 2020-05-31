@@ -2694,6 +2694,52 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
+    def setup_area_light(self, name: str, center: Any, target: Any, u: float, v: float,
+                         color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),
+                         in_geometry: bool = True) -> None:
+        """Setup new area (parallelogram) light.
+
+        Convenience method to setup parallelogram light with ``center`` and ``target`` 3D points,
+        and scalar lenghts of sides ``u`` and ``v``.
+
+        Parameters
+        ----------
+        name : string
+            Name of the new light.
+        center : array_like
+            3D position of the light center.
+        target : array_like
+            3D position of the light target.
+        u : float
+            Horizontal side length.
+        v : float
+            Vertical side length.
+        color : Any, optional
+            RGB color of the light; single value is gray, array_like is RGB
+            color components. Color value range is (0; inf) as it means the
+            light intensity.
+        in_geometry: bool, optional
+            Visible in the scene if set to ``True``.
+        """
+        center = _make_contiguous_vector(center, 3)
+        target = _make_contiguous_vector(target, 3)
+
+        n = target - center
+        n = n / np.linalg.norm(n)
+
+        uvec = np.cross(n, [0, 1, 0])
+        uvec = uvec / np.linalg.norm(uvec)
+
+        vvec = np.cross(uvec, n)
+        vvec = vvec / np.linalg.norm(vvec)
+
+        uvec *= -u
+        vvec *= v
+
+        pos = center - 0.5 * (vvec + uvec)
+
+        self.setup_parallelogram_light(name, pos=pos, color=color, u=uvec, v=vvec, in_geometry=in_geometry)
+
     def setup_light(self, name: str,
                     light_type: Union[Light, str] = Light.Spherical,
                     pos: Optional[Any] = None,
