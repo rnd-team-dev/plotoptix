@@ -1,6 +1,9 @@
 """
 Load multiple mesh from Wavefront .obj file, assign materials
-by mesh names.
+by mesh names, set parent for all meshes.
+Select (double-click) parent object (head) to rotate, scale, etc,
+all meshes tohether. Select any other object to manipulate it
+individually.
 """
 
 import numpy as np
