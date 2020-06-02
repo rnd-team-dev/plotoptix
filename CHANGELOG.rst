@@ -8,11 +8,15 @@ Added
 ~~~~~
 
 - diffuse/reflective/plastic material transparency handled with alpha channel of textures
+- load multiple meshes from .obj with materials specified in a dictionary, and an option to select parent mesh (then transormations of parent are applied to children meshes as well)
+- setup parallelogram light using center/target 3D points and scalar lengths of u/v sides
+- method to select objects for manual manipulation in gui (if e.g. cannot click object invisible in the view)
 
 Fixed
 ~~~~~
 
-- scatterng in volumes
+- scatterng in volumes: support enabled in background modes AmbientAndVolume, TextureFixed, and TextureEnvironment;
+  subsurface color added to material parameters
 
 `v0.7.2`_ - 2020-05-13
 ----------------------

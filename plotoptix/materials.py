@@ -158,12 +158,12 @@ m_clear_glass = {
       "VarUInt": { "flags": 12 },
       "VarFloat": {
         "radiation_length": 0.0,
-        "vol_scattering": 1.0,
         "light_emission": 0.0
       },
       "VarFloat3": {
         "refraction_index": [ 1.4, 1.4, 1.4 ],
-        "surface_albedo": [ 1.0, 1.0, 1.0 ]
+        "surface_albedo": [ 1.0, 1.0, 1.0 ],
+        "subsurface_color": [ 1.0, 1.0, 1.0 ]
       }
     }
 """
@@ -177,13 +177,13 @@ m_matt_glass = {
       "VarUInt": { "flags": 12 },
       "VarFloat": {
         "radiation_length": 0.0,
-        "vol_scattering": 1.0,
         "light_emission": 0.0,
         "base_roughness": 0.2
       },
       "VarFloat3": {
         "refraction_index": [ 1.4, 1.4, 1.4 ],
-        "surface_albedo": [ 1.0, 1.0, 1.0 ]
+        "surface_albedo": [ 1.0, 1.0, 1.0 ],
+        "subsurface_color": [ 1.0, 1.0, 1.0 ]
       }
     }
 """
@@ -197,12 +197,12 @@ m_dispersive_glass = {
       "VarUInt": { "flags": 12 },
       "VarFloat": {
         "radiation_length": 0.0,
-        "vol_scattering": 1.0,
         "light_emission": 0.0
       },
       "VarFloat3": {
         "refraction_index": [ 1.4, 1.42, 1.45 ],
-        "surface_albedo": [ 1.0, 1.0, 1.0 ]
+        "surface_albedo": [ 1.0, 1.0, 1.0 ],
+        "subsurface_color": [ 1.0, 1.0, 1.0 ]
       }
     }
 """
@@ -217,7 +217,6 @@ m_thin_walled = {
       "VarUInt": { "flags": 44 },
       "VarFloat": {
         "radiation_length": 0.0,
-        "vol_scattering": 1.0,
         "light_emission": 0.0
       },
       "VarFloat3": {

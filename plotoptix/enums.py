@@ -7,7 +7,7 @@ class Coordinates(Enum):
     """Coordinate system styles.
 
     Note, implementation of the coordinate system geometries is ongoing. Now
-    only a simple box containing the data points is visible in plots.
+    only a simple box containing the data points is ready to use.
     """
 
     Hidden = 0
@@ -51,15 +51,16 @@ class MissProgram(Enum):
     :meth:`plotoptix.NpOptiX.set_ambient`, :meth:`plotoptix.NpOptiX.set_background`
     """
 
-    #AmbientAndVolume = 2
-    #"""***Not yet used.*** Same as AmbientLight but supports volumetric
-    #scattering.
-    #"""
+    AmbientAndVolume = 2
+    """Same as :attr:`plotoptix.enums.MissProgram.AmbientLight` but supports
+    volumetric scattering (just a tiny fraction slower).
+    """
 
     TextureFixed = 3
     """Texture color is used if the ray is not scattering of any surface;
     ambient light color is used otherwise. Texture in the background is not
     reacting to the camera changes and is not affacting the scene illumination.
+    This mode supports volumetric scattering.
 
     See Also
     --------
@@ -70,6 +71,7 @@ class MissProgram(Enum):
     """Texture color is used for both, the background and the scene illumination.
     Texture pixel is selected by the ray direction, so effectively the texture
     is mapped on the sphere with infinite radius: use 360 deg environment maps.
+    This mode supports volumetric scattering.
 
     See Also
     --------
