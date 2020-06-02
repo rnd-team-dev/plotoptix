@@ -118,7 +118,7 @@ BB1_5:
 )
 {
 	.reg .pred 	%p<5>;
-	.reg .f32 	%f<62>;
+	.reg .f32 	%f<66>;
 	.reg .b32 	%r<19>;
 	.reg .b64 	%rd<6>;
 
@@ -155,19 +155,19 @@ BB1_5:
 	mul.ftz.f32 	%f11, %f10, %f10;
 	mov.f32 	%f12, 0f3F800000;
 	sub.ftz.f32 	%f2, %f12, %f11;
-	mov.f32 	%f61, 0f00000000;
+	mov.f32 	%f65, 0f00000000;
 	setp.leu.ftz.f32	%p2, %f2, 0f00000000;
 	@%p2 bra 	BB2_3;
 
-	sqrt.approx.ftz.f32 	%f61, %f2;
+	sqrt.approx.ftz.f32 	%f65, %f2;
 
 BB2_3:
 	add.ftz.f32 	%f13, %f1, %f1;
 	mul.ftz.f32 	%f14, %f13, 0f40490FDB;
 	cos.approx.ftz.f32 	%f15, %f14;
 	sin.approx.ftz.f32 	%f16, %f14;
-	mul.ftz.f32 	%f17, %f61, %f16;
-	mul.ftz.f32 	%f18, %f61, %f15;
+	mul.ftz.f32 	%f17, %f65, %f16;
+	mul.ftz.f32 	%f18, %f65, %f15;
 	st.v2.f32 	[%rd1+128], {%f18, %f17};
 	ld.v4.f32 	{%f19, %f20, %f21, %f22}, [%rd1+80];
 	mul.ftz.f32 	%f27, %f22, %f19;
@@ -178,11 +178,8 @@ BB2_3:
 	mov.b32 	 %r14, %f28;
 	mov.b32 	 %r15, %f27;
 	st.v4.u32 	[%rd1], {%r15, %r14, %r13, %r18};
-	mul.ftz.f32 	%f30, %f21, 0f41490FDB;
-	mul.ftz.f32 	%f31, %f20, 0f41490FDB;
-	mul.ftz.f32 	%f32, %f19, 0f41490FDB;
-	mov.f32 	%f33, 0f3DA2F983;
-	st.v4.f32 	[%rd1+48], {%f32, %f31, %f30, %f33};
+	ld.v4.f32 	{%f30, %f31, %f32, %f33}, [%rd1+80];
+	st.v4.f32 	[%rd1+48], {%f30, %f31, %f32, %f12};
 	bra.uni 	BB2_8;
 
 BB2_4:
@@ -190,17 +187,17 @@ BB2_4:
 	setp.eq.s32	%p3, %r16, 0;
 	@%p3 bra 	BB2_6;
 
-	ld.const.v2.f32 	{%f34, %f35}, [params+232];
-	ld.const.f32 	%f38, [params+240];
-	st.v2.f32 	[%rd1], {%f34, %f35};
-	st.f32 	[%rd1+8], %f38;
+	ld.const.v2.f32 	{%f38, %f39}, [params+232];
+	ld.const.f32 	%f42, [params+240];
+	st.v2.f32 	[%rd1], {%f38, %f39};
+	st.f32 	[%rd1+8], %f42;
 	bra.uni 	BB2_7;
 
 BB2_6:
-	ld.const.v2.f32 	{%f39, %f40}, [params+224];
-	ld.const.f32 	%f43, [params+220];
-	st.v2.f32 	[%rd1], {%f43, %f39};
-	st.f32 	[%rd1+8], %f40;
+	ld.const.v2.f32 	{%f43, %f44}, [params+224];
+	ld.const.f32 	%f47, [params+220];
+	st.v2.f32 	[%rd1], {%f47, %f43};
+	st.f32 	[%rd1+8], %f44;
 
 BB2_7:
 	or.b32  	%r18, %r1, -2147483648;
@@ -211,13 +208,13 @@ BB2_8:
 	setp.eq.s32	%p4, %r17, 0;
 	@%p4 bra 	BB2_10;
 
-	ld.v4.f32 	{%f44, %f45, %f46, %f47}, [%rd1+16];
-	ld.v4.f32 	{%f51, %f52, %f53, %f54}, [%rd1];
-	mul.ftz.f32 	%f56, %f52, %f45;
-	mul.ftz.f32 	%f58, %f51, %f44;
-	st.v2.f32 	[%rd1+16], {%f58, %f56};
-	mul.ftz.f32 	%f60, %f53, %f46;
-	st.f32 	[%rd1+24], %f60;
+	ld.v4.f32 	{%f48, %f49, %f50, %f51}, [%rd1+16];
+	ld.v4.f32 	{%f55, %f56, %f57, %f58}, [%rd1];
+	mul.ftz.f32 	%f60, %f56, %f49;
+	mul.ftz.f32 	%f62, %f55, %f48;
+	st.v2.f32 	[%rd1+16], {%f62, %f60};
+	mul.ftz.f32 	%f64, %f57, %f50;
+	st.f32 	[%rd1+24], %f64;
 
 BB2_10:
 	ret;
@@ -229,7 +226,7 @@ BB2_10:
 )
 {
 	.reg .pred 	%p<5>;
-	.reg .f32 	%f<67>;
+	.reg .f32 	%f<71>;
 	.reg .b32 	%r<31>;
 	.reg .b64 	%rd<11>;
 
@@ -266,19 +263,19 @@ BB2_10:
 	mul.ftz.f32 	%f11, %f10, %f10;
 	mov.f32 	%f12, 0f3F800000;
 	sub.ftz.f32 	%f2, %f12, %f11;
-	mov.f32 	%f66, 0f00000000;
+	mov.f32 	%f70, 0f00000000;
 	setp.leu.ftz.f32	%p2, %f2, 0f00000000;
 	@%p2 bra 	BB3_3;
 
-	sqrt.approx.ftz.f32 	%f66, %f2;
+	sqrt.approx.ftz.f32 	%f70, %f2;
 
 BB3_3:
 	add.ftz.f32 	%f13, %f1, %f1;
 	mul.ftz.f32 	%f14, %f13, 0f40490FDB;
 	cos.approx.ftz.f32 	%f15, %f14;
 	sin.approx.ftz.f32 	%f16, %f14;
-	mul.ftz.f32 	%f17, %f66, %f16;
-	mul.ftz.f32 	%f18, %f66, %f15;
+	mul.ftz.f32 	%f17, %f70, %f16;
+	mul.ftz.f32 	%f18, %f70, %f15;
 	st.v2.f32 	[%rd1+128], {%f18, %f17};
 	ld.v4.f32 	{%f19, %f20, %f21, %f22}, [%rd1+80];
 	mul.ftz.f32 	%f27, %f22, %f19;
@@ -289,11 +286,8 @@ BB3_3:
 	mov.b32 	 %r15, %f28;
 	mov.b32 	 %r16, %f27;
 	st.v4.u32 	[%rd1], {%r16, %r15, %r14, %r30};
-	mul.ftz.f32 	%f30, %f21, 0f41490FDB;
-	mul.ftz.f32 	%f31, %f20, 0f41490FDB;
-	mul.ftz.f32 	%f32, %f19, 0f41490FDB;
-	mov.f32 	%f33, 0f3DA2F983;
-	st.v4.f32 	[%rd1+48], {%f32, %f31, %f30, %f33};
+	ld.v4.f32 	{%f30, %f31, %f32, %f33}, [%rd1+80];
+	st.v4.f32 	[%rd1+48], {%f30, %f31, %f32, %f12};
 	bra.uni 	BB3_7;
 
 BB3_4:
@@ -303,10 +297,10 @@ BB3_4:
 	setp.eq.s32	%p3, %r17, 0;
 	@%p3 bra 	BB3_6;
 
-	ld.const.v2.f32 	{%f34, %f35}, [params+232];
-	ld.const.f32 	%f38, [params+240];
-	st.v2.f32 	[%rd1], {%f34, %f35};
-	st.f32 	[%rd1+8], %f38;
+	ld.const.v2.f32 	{%f38, %f39}, [params+232];
+	ld.const.f32 	%f42, [params+240];
+	st.v2.f32 	[%rd1], {%f38, %f39};
+	st.f32 	[%rd1+8], %f42;
 	bra.uni 	BB3_7;
 
 BB3_6:
@@ -318,17 +312,17 @@ BB3_6:
 	mul.wide.u32 	%rd8, %r18, 8;
 	add.s64 	%rd9, %rd7, %rd8;
 	ld.global.v2.u32 	{%r21, %r22}, [%rd9];
-	cvt.rn.f32.s32	%f39, %r21;
-	cvt.rn.f32.s32	%f40, %r22;
+	cvt.rn.f32.s32	%f43, %r21;
+	cvt.rn.f32.s32	%f44, %r22;
 	ld.const.v2.u32 	{%r25, %r26}, [params+64];
-	cvt.rn.f32.u32	%f41, %r25;
-	cvt.rn.f32.u32	%f42, %r26;
-	div.approx.ftz.f32 	%f43, %f39, %f41;
-	div.approx.ftz.f32 	%f44, %f40, %f42;
+	cvt.rn.f32.u32	%f45, %r25;
+	cvt.rn.f32.u32	%f46, %r26;
+	div.approx.ftz.f32 	%f47, %f43, %f45;
+	div.approx.ftz.f32 	%f48, %f44, %f46;
 	ld.const.u64 	%rd10, [params+248];
-	tex.2d.v4.f32.f32	{%f45, %f46, %f47, %f48}, [%rd10, {%f43, %f44}];
-	st.v2.f32 	[%rd1], {%f45, %f46};
-	st.f32 	[%rd1+8], %f47;
+	tex.2d.v4.f32.f32	{%f49, %f50, %f51, %f52}, [%rd10, {%f47, %f48}];
+	st.v2.f32 	[%rd1], {%f49, %f50};
+	st.f32 	[%rd1+8], %f51;
 	ld.u32 	%r30, [%rd2];
 
 BB3_7:
@@ -336,13 +330,13 @@ BB3_7:
 	setp.eq.s32	%p4, %r29, 0;
 	@%p4 bra 	BB3_9;
 
-	ld.v4.f32 	{%f49, %f50, %f51, %f52}, [%rd1+16];
-	ld.v4.f32 	{%f56, %f57, %f58, %f59}, [%rd1];
-	mul.ftz.f32 	%f61, %f57, %f50;
-	mul.ftz.f32 	%f63, %f56, %f49;
-	st.v2.f32 	[%rd1+16], {%f63, %f61};
-	mul.ftz.f32 	%f65, %f58, %f51;
-	st.f32 	[%rd1+24], %f65;
+	ld.v4.f32 	{%f53, %f54, %f55, %f56}, [%rd1+16];
+	ld.v4.f32 	{%f60, %f61, %f62, %f63}, [%rd1];
+	mul.ftz.f32 	%f65, %f61, %f54;
+	mul.ftz.f32 	%f67, %f60, %f53;
+	st.v2.f32 	[%rd1+16], {%f67, %f65};
+	mul.ftz.f32 	%f69, %f62, %f55;
+	st.f32 	[%rd1+24], %f69;
 
 BB3_9:
 	ret;
