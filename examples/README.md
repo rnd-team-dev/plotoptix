@@ -10,7 +10,9 @@ Collection of short and simple scripts to get started.
 
 Many scripts are using Tkinter GUI, so here is a summary of mouse and keys actions:
 
-- camera is selected by default, double-click an object/light to select it, double click again to select a primitive within the object, double-click empty area to or double-right-click select camera
+- camera is selected by default, double-click an object/light to select it, double click again to select a primitive within the object, double-click in empty area or double-right-click to select camera
+- use ``rt.select(name)`` method if an object or light is not in the view or it is hard to be selected
+- select parent mesh to apply transformations to all children as well
 
 With camera selected:
 
