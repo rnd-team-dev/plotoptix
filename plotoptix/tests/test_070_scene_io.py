@@ -33,7 +33,7 @@ class TestOutput(TestCase):
 
         TestOutput.scene.set_param(min_accumulation_step=2, max_accumulation_frames=6)
 
-        TestOutput.scene.load_mesh_obj("tests/data/two_mesh.obj", c=0.9)
+        TestOutput.scene.load_mesh_obj("tests/data/two_mesh.obj", parent="Cube", c=0.9)
         n_obj = len(TestOutput.scene.geometry_handles)
         self.assertTrue(n_obj == 2, msg="Expected 2 objects, %d loaded." % n_obj)
         self.assertTrue("Cube" in TestOutput.scene.geometry_handles, msg="Cube not loaded.")

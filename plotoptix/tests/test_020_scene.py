@@ -87,7 +87,11 @@ class TestScene(TestCase):
     def test030_predefined_materials(self):
         self.assertTrue(TestScene.scene is not None, msg="Wrong state of the test class.")
 
-        m_list = ["m_flat", "m_eye_normal_cos", "m_diffuse", "m_mirror", "m_metalic", "m_plastic", "m_clear_glass"]
+        m_list = ["m_flat", "m_eye_normal_cos", "m_diffuse", "m_matt_diffuse", "m_transparent_diffuse",
+                  "m_mirror", "m_metallic", "m_transparent_metallic",
+                  "m_plastic", "m_matt_plastic", "m_transparent_plastic",
+                  "m_clear_glass", "m_matt_glass", "m_dispersive_glass",
+                  "m_thin_walled"]
 
         for m in m_list:
             TestScene.scene.setup_material(m, globals()[m])
@@ -130,7 +134,7 @@ class TestScene(TestCase):
 
         TestScene.scene._raise_on_error = state
 
-        bg_list = ["Default", "TextureFixed", "TextureEnvironment"]
+        bg_list = ["Default", "AmbientLight", "AmbientAndVolume", "TextureFixed", "TextureEnvironment"]
 
         for m in bg_list:
             TestScene.scene.set_background_mode(m)
@@ -159,8 +163,14 @@ class TestScene(TestCase):
         TestScene.scene.setup_light("test_light2", light_type=Light.Parallelogram,
                     pos=pos2, color=col2, u=u, v=v, in_geometry=True)
 
+        center3=np.array(pos2) + 0.5 * (np.array(u) + np.array(v))
+        target3=center3 + np.array([0, 0, 5])
+        TestScene.scene.setup_area_light("test_light3", center=center3, target=target3,
+                    u=1, v=1, color=col2, in_geometry=True)
+
         self.assertTrue(np.array_equal(TestScene.scene.get_light_pos("test_light1"), pos1), msg="Light 1 position did not match.")
         self.assertTrue(np.array_equal(TestScene.scene.get_light_pos("test_light2"), pos2), msg="Light 2 position did not match.")
+        self.assertTrue(np.array_equal(TestScene.scene.get_light_pos("test_light3"), pos2), msg="Light 3 position did not match.")
 
         self.assertTrue(np.array_equal(TestScene.scene.get_light_color("test_light1"), col1), msg="Light 1 color did not match.")
         self.assertTrue(np.array_equal(TestScene.scene.get_light_color("test_light2"), col2), msg="Light 2 color did not match.")
@@ -169,6 +179,8 @@ class TestScene(TestCase):
 
         self.assertTrue(np.array_equal(TestScene.scene.get_light_u("test_light2"), u), msg="Light 2 U did not match.")
         self.assertTrue(np.array_equal(TestScene.scene.get_light_v("test_light2"), v), msg="Light 2 V did not match.")
+        self.assertTrue(np.array_equal(TestScene.scene.get_light_u("test_light3"), u), msg="Light 3 U did not match.")
+        self.assertTrue(np.array_equal(TestScene.scene.get_light_v("test_light3"), v), msg="Light 3 V did not match.")
 
         l1 = TestScene.scene.get_light("test_light1")
         self.assertTrue(l1["Type"] == Light.Spherical.value, msg="Light 1 type did not match.")
