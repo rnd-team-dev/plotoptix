@@ -1,8 +1,8 @@
 Release history
 ===============
 
-v0.7.3 - unreleased
--------------------
+`v0.8.0`_ - 2020-06-04
+----------------------
 
 Added
 ~~~~~
@@ -17,6 +17,7 @@ Fixed
 
 - scatterng in volumes: support enabled in background modes AmbientAndVolume, TextureFixed, and TextureEnvironment;
   subsurface color added to material parameters
+- keep_on_host argument of load_displacement() and load_normal_tilt() removed (value always set to false now; it was a bug in linux);
 
 `v0.7.2`_ - 2020-05-13
 ----------------------
@@ -328,6 +329,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.8.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.0
 .. _`v0.7.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.2
 .. _`v0.7.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.1
 .. _`v0.7.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.0

@@ -56,6 +56,10 @@ You'll find here super-basic examples of displaying data, like scatter plots or 
 
 ![screenshots5](https://plotoptix.rnd.team/images/normal_shading_with_textures.jpg "PlotOptiX 2D postprocessing")
 
+...or subsurface scattering parameters:
+
+![screenshots5](https://plotoptix.rnd.team/images/subsurface.jpg "PlotOptiX scattering in volumes")
+
 ### 2. Animations and callbacks
 
 Callbacks in PlotOptiX are widely available throughout the raytracing process. You can provide functions to execute on each frame raytracing start, completion, etc., allowing for progressive image updates, saving output to file or making animated plots. Callbacks designed for heavy compute are executed in parallel to the raytracing, and those intended for accessing image data are synchronized with GPU transfers. That is a really powerfull pattern!
