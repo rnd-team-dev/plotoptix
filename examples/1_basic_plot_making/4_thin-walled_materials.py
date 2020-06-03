@@ -2,6 +2,7 @@
 This example shows how to apply thin-walled materials, colorized and textured.
 """
 
+import copy
 import numpy as np
 from plotoptix import TkOptiX
 from plotoptix.materials import m_clear_glass, m_thin_walled
@@ -39,7 +40,7 @@ def main():
 
     # Setup materials:
 
-    m_thin2 = m_thin_walled.copy()             # textured material based on the predefined thin-walled material
+    m_thin2 = copy.deepcopy(m_thin_walled)     # textured material based on the predefined thin-walled material
     m_thin2["ColorTextures"] = [ "rainbow" ]   # reference texture by name
 
     rt.setup_material("glass", m_clear_glass)
