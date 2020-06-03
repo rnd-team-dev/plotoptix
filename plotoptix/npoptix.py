@@ -1029,13 +1029,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                          mapping: Union[TextureMapping, str] = TextureMapping.Flat,
                          prescale: float = 1.0,
                          baseline: float = 0.0,
-                         keep_on_host: bool = False,
                          refresh: bool = False) -> None:
         """Set normal tilt data.
 
-        Set shading normal tilt according to displacement loaded from an image file. ``mapping``
+        Set shading normal tilt according to displacement map loaded from an image file. ``mapping``
         determines how the normal tilt is calculated from the displacement data
-        (see :class:`plotoptix.enums.TextureMapping`).
+        (see :class:`plotoptix.enums.TextureMapping`). Tilt data is stored in the device memory only
+        (there is no host copy).
 
         Parameters
         ----------
@@ -1049,8 +1049,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Scaling factor for displacement values.
         baseline : float, optional
             Baseline added to displacement values.
-        keep_on_host : bool, optional
-            Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
         """
@@ -1060,8 +1058,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(mapping, str): mapping = TextureMapping[mapping]
 
         self._logger.info("Set shading normal tilt map for %s using %s.", name, file_name)
-        if not self._optix.load_normal_tilt(name, file_name, mapping.value, prescale, baseline,
-                                            keep_on_host, refresh):
+        if not self._optix.load_normal_tilt(name, file_name, mapping.value, prescale, baseline, refresh):
             msg = "%s normal tilt map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1112,16 +1109,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def load_displacement(self, name: str, file_name: str,
                           prescale: float = 1.0,
                           baseline: float = 0.0,
-                          keep_on_host: bool = False,
                           refresh: bool = False) -> None:
         """Load surface displacement data from file.
 
         Load displacement data for the object ``name`` from an image file. Geometry attribute
         program of the object has to be set to :attr:`plotoptix.enums.GeomAttributeProgram.DisplacedSurface`.
-
-        Use ``keep_on_host=True`` to make a copy of data in the host memory (in addition to GPU
-        memory), this option is required when (small) arrays are going to be saved to JSON
-        description of the scene.
+        Tilt data is stored in the device memory only (there is no host copy).
 
         Parameters
         ----------
@@ -1133,8 +1126,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Scaling factor for displacement values.
         baseline : float, optional
             Baseline added to displacement values.
-        keep_on_host : bool, optional
-            Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
         """
@@ -1142,8 +1133,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(file_name, str): name = str(file_name)
 
         self._logger.info("Set displacement map for %s using %s.", name, file_name)
-        if not self._optix.load_displacement(name, file_name, prescale, baseline,
-                                            keep_on_host, refresh):
+        if not self._optix.load_displacement(name, file_name, prescale, baseline, refresh):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
