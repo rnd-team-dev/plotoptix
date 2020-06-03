@@ -25,8 +25,9 @@ class MissProgram(Enum):
 
     Miss program is executed when ray segment is not intersecting any object
     at a defined maximum distance. Radiance assigned to the ray by the miss
-    program appears as a color of the background (e.g. on primary segments)
-    or environmental light color (segments scattered off a diffuse surfaces).
+    program appears as a color of the background (i.e. on primary segments)
+    or environmental light color (segments scattered off a diffuse surfaces)
+    or sub-surface color (segments scattered inside volumes).
 
     See Also
     --------
