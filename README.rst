@@ -51,7 +51,7 @@ Features
 
 - progressive path tracing with explicit light sampling
 - pinhole cameras and thin-lens cameras with depth of field simulation
-- geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, mesh (generated for parametric surface or f(x,y) plots; defined with vertices and faces; import from Wavefront .obj file)
+- geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, mesh (generated from parametric surface or f(x,y) plots; defined with vertices and faces; import from Wavefront .obj file)
 - parameterized materials shading: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
 - spherical and parallelogram light sources
 - environmental light and ambient occlusion
