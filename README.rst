@@ -40,8 +40,7 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
 see `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__
 for practical code samples.
 
-PlotOptiX is based on `NVIDIA OptiX 7 <https://developer.nvidia.com/optix>`_ framework wrapped in RnD.SharpOptiX C#/C++ libraries
-and completed with custom CUDA shaders by `R&D Team <https://rnd.team>`_. PlotOptiX makes use of RTX-capable GPU's.
+PlotOptiX is based on `NVIDIA OptiX 7 <https://developer.nvidia.com/optix>`_ framework. It is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in RnD.SharpOptiX C#/C++ libraries with a Python API. PlotOptiX makes use of RTX-capable GPU's.
 
 .. image:: https://plotoptix.rnd.team/images/screenshots.jpg
    :alt: PlotOptiX screenshots, scatter and line plots ray tracing
@@ -61,7 +60,7 @@ Features
 - image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
 - hardware accelerated video output to MP4 file format using `NVENC 9.0 <https://developer.nvidia.com/nvidia-video-codec-sdk>`__
 - configurable multi-GPU support
-- Tkinter based UI or headless raytracer
+- Tkinter based simple GUI window or headless raytracer
 
 System Requirements
 -------------------
