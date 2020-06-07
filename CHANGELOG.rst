@@ -1,6 +1,14 @@
 Release history
 ===============
 
+v0.8.1 - unreleased
+-------------------
+
+Added
+~~~~~
+
+- camera mode for baking 360 degree panoramic views
+
 `v0.8.0`_ - 2020-06-04
 ----------------------
 

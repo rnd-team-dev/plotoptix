@@ -279,7 +279,10 @@ class Camera(Enum):
     """Perspective camera with depth of field simulation.
     """
 
-    #Ortho = 2
+    Panoramic = 2
+    """360 deg panoramic camera.
+    """
+    #Ortho = 3
 
 class LightShading(Enum):
     """Light shading program.
