@@ -73,6 +73,8 @@ GitHub can render notebooks content, so it is best to look at descriptions inlin
 
 Collection of tutorials and artistic projects. Expect this section to grow slowly. Projects are large and need lots of work to prepare. We started with the *"Making of the Moon"*, a really big one!
 
+![moon ray_traced](https://plotoptix.rnd.team/images/moon_2res_banner.jpg "The Moon ray-traced with PlotOptiX")
+
 Now we're collecting scripts for the next project, *"Simplex noise trajectories"*:
 
 ![noise trajectories](https://plotoptix.rnd.team/images/opensimplex_banner.jpg "Noise compositions ray-traced with PlotOptiX")
