@@ -66,6 +66,8 @@ Other
     :members:
 .. autoclass:: plotoptix.enums.ChannelOrder
     :members:
+.. autoclass:: plotoptix.enums.ChannelDepth
+    :members:
 
 .. toctree::
    :caption: API Reference

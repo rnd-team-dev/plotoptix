@@ -357,6 +357,22 @@ class ChannelOrder(Enum):
     """
     """
 
+class ChannelDepth(Enum):
+    """Color channel depth: 8, 16 or 32 bits per sample.
+    """
+
+    Bps8 = 1
+    """
+    """
+
+    Bps16 = 2
+    """
+    """
+
+    Bps32 = 3
+    """
+    """
+
 class Postprocessing(Enum):
     """2D postprocessing stages.
 

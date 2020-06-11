@@ -60,6 +60,15 @@ def _load_optix_win():
     optix.save_image_to_file.argtypes = [c_wchar_p]
     optix.save_image_to_file.restype = c_bool
 
+    optix.save_image_to_file_16bps.argtypes = [c_wchar_p]
+    optix.save_image_to_file_16bps.restype = c_bool
+
+    optix.save_image_to_file_32bps.argtypes = [c_wchar_p]
+    optix.save_image_to_file_32bps.restype = c_bool
+
+    optix.get_output.argtypes = [c_void_p, c_int, c_int]
+    optix.get_output.restype = c_bool
+
     optix.get_fps.restype = c_float
 
     optix.start_rt.restype = c_bool
@@ -551,6 +560,14 @@ class _ClrOptiX:
     def save_scene_to_file(self, fname): return self._optix.save_scene_to_file(fname)
 
     def save_image_to_file(self, fname): return self._optix.save_image_to_file(fname)
+
+    def save_image_to_file_16bps(self, fname): return self._optix.save_image_to_file_16bps(fname)
+
+    def save_image_to_file_32bps(self, fname): return self._optix.save_image_to_file_32bps(fname)
+
+    def get_output(self, buf_ptr, buf_size, depth):
+        return self._optix.get_output_ptr(IntPtr.__overloads__[Int64](buf_ptr), buf_size, depth)
+
 
     def get_fps(self): return self._optix.get_fps()
 

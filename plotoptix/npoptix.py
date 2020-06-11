@@ -329,20 +329,67 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def is_started(self) -> bool: return self._is_started
     def is_closed(self) -> bool: return self._is_closed
 
-    def get_rt_output(self) -> np.ndarray:
+    def get_rt_output(self, bps: Union[ChannelDepth, str] = ChannelDepth.Bps8) -> np.ndarray:
         """Return a copy of the output image.
+
+        The image data type is specified with the ``bps`` argument. 8 bit per channel data,
+        ``numpy.uint8``, is returned by default. Use ``Bps16`` value to read the image in
+        16 bit per channel depth, ``numpy.uint16``. Use ``Bps32`` value to read the HDR image
+        in 32 bit per channel format, ``numpy.float32``.
+
+        Channels ordering is RGBA, with constant values in the alpha channel (100% opaque,
+        to be used in the future releases).
         
         Safe to call at any time, from any thread.
+
+        Parameters
+        ----------
+        bps : ChannelDepth enum or string, optional
+            Color depth.
 
         Returns
         -------
         out : ndarray
-            RGBA array of shape (height, width, 4) and type ``numpy.uint8``.
+            RGBA array of shape (height, width, 4) and type corresponding to ``bps`` argument.
+
+        See Also
+        --------
+        :class:`plotoptix.enums.ChannelDepth`
         """
         assert self._is_started, "Raytracing output not running."
-        with self._padlock:
-            a = self._img_rgba.copy()
+
+        if isinstance(bps, str): bps = ChannelDepth[bps]
+
+        a = None
+
+        try:
+            self._padlock.acquire()
+
+            ok = True
+
+            if bps == ChannelDepth.Bps8:
+                a = self._img_rgba.copy()
+            elif bps == ChannelDepth.Bps16:
+                a = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint16))
+                ok = self._optix.get_output(a.ctypes.data, a.nbytes, bps.value)
+            elif bps == ChannelDepth.Bps32:
+                a = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.float32))
+                ok = self._optix.get_output(a.ctypes.data, a.nbytes, bps.value)
+
+            if not ok:
+                msg = "Image not saveed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+
+        finally:
+            self._padlock.release()
+
         return a
+
 
     def resize(self, width: Optional[int] = None, height: Optional[int] = None) -> None:
         """Change dimensions of the raytracing output.
@@ -1642,7 +1689,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.acquire()
 
             if not self._optix.save_scene_to_file(file_name):
-                msg = "Scene not saveed."
+                msg = "Scene not saved."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
 
@@ -1654,22 +1701,45 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
-    def save_image(self, file_name: str) -> None:
+    def save_image(self, file_name: str,
+                   bps: Union[ChannelDepth, str] = ChannelDepth.Bps8) -> None:
         """Save current image to file.
 
-        Save current content of the image buffer to file. Accepted formats,
-        recognized by the extension used in the ``file_name``, are bmp, gif,
-        png, jpg, and tif. Existing files are overwritten.
+        Save current content of the image buffer to a file. Accepted formats,
+        recognized by the extension used in the ``file_name``, are:
+
+           - bmp, gif, png, jpg, and tif for 8bps color depth,
+           - png, and tif for 16bps color depth,
+           - tif for 32bps hdr images.
+
+        Existing files are overwritten.
 
         Parameters
         ----------
         file_name : str
             Output file name.
+        bps : ChannelDepth enum or string, optional
+            Color depth.
+
+        See Also
+        --------
+        :class:`plotoptix.enums.ChannelDepth`
         """
+        if isinstance(bps, str): bps = ChannelDepth[bps]
+
         try:
             self._padlock.acquire()
 
-            if not self._optix.save_image_to_file(file_name):
+            if bps == ChannelDepth.Bps8:
+                ok = self._optix.save_image_to_file(file_name)
+            elif bps == ChannelDepth.Bps16:
+                ok = self._optix.save_image_to_file_16bps(file_name)
+            elif bps == ChannelDepth.Bps32:
+                ok = self._optix.save_image_to_file_32bps(file_name)
+            else:
+                ok = False
+
+            if not ok:
                 msg = "Image not saveed."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)

@@ -8,6 +8,13 @@ Added
 ~~~~~
 
 - camera mode for baking 360 degree panoramic views
+- support 16 bit per channel and hdr (32 bit fp per channel) output to image files and ndarray
+
+Fixed
+~~~~~
+
+- correct light emission in volumes
+- fix restoring scene global variables from json
 
 `v0.8.0`_ - 2020-06-04
 ----------------------
