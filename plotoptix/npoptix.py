@@ -329,7 +329,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def is_started(self) -> bool: return self._is_started
     def is_closed(self) -> bool: return self._is_closed
 
-    def get_rt_output(self, bps: Union[ChannelDepth, str] = ChannelDepth.Bps8) -> np.ndarray:
+    def get_rt_output(self,
+                      bps: Union[ChannelDepth, str] = ChannelDepth.Bps8,
+                      channels: Union[ChannelOrder, str] = ChannelOrder.RGBA) -> Optional[np.ndarray]:
         """Return a copy of the output image.
 
         The image data type is specified with the ``bps`` argument. 8 bit per channel data,
@@ -337,8 +339,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         16 bit per channel depth, ``numpy.uint16``. Use ``Bps32`` value to read the HDR image
         in 32 bit per channel format, ``numpy.float32``.
 
-        Channels ordering is RGBA, with constant values in the alpha channel (100% opaque,
-        to be used in the future releases).
+        If channels ordering includes alpha channel then it is a constant, 100% opaque value,
+        to be used in the future releases.
         
         Safe to call at any time, from any thread.
 
@@ -346,38 +348,54 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         bps : ChannelDepth enum or string, optional
             Color depth.
+        channels : ChannelOrder enum or string, optional
+            Color channels ordering.
 
         Returns
         -------
         out : ndarray
-            RGBA array of shape (height, width, 4) and type corresponding to ``bps`` argument.
+            RGB(A) array of shape (height, width, 3) or (height, width, 4) and type corresponding
+            to ``bps`` argument. ``None`` in case of errors.
 
         See Also
         --------
-        :class:`plotoptix.enums.ChannelDepth`
+        :class:`plotoptix.enums.ChannelDepth`, :class:`plotoptix.enums.ChannelOrder`
         """
         assert self._is_started, "Raytracing output not running."
 
         if isinstance(bps, str): bps = ChannelDepth[bps]
+        if isinstance(channels, str): channels = ChannelOrder[channels]
 
         a = None
 
         try:
             self._padlock.acquire()
 
-            ok = True
+            if bps == ChannelDepth.Bps8 and channels == ChannelOrder.RGBA:
+                return self._img_rgba.copy()
 
             if bps == ChannelDepth.Bps8:
-                a = self._img_rgba.copy()
-            elif bps == ChannelDepth.Bps16:
-                a = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint16))
-                ok = self._optix.get_output(a.ctypes.data, a.nbytes, bps.value)
-            elif bps == ChannelDepth.Bps32:
-                a = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.float32))
-                ok = self._optix.get_output(a.ctypes.data, a.nbytes, bps.value)
+                if channels == ChannelOrder.BGRA:
+                    a = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint8))
+                elif channels == ChannelOrder.RGB or channels == ChannelOrder.BGR:
+                    a = np.ascontiguousarray(np.zeros((self._height, self._width, 3), dtype=np.uint8))
 
-            if not ok:
-                msg = "Image not saveed."
+            elif bps == ChannelDepth.Bps16:
+                if channels == ChannelOrder.RGBA or channels == ChannelOrder.BGRA:
+                    a = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint16))
+                elif channels == ChannelOrder.RGB or channels == ChannelOrder.BGR:
+                    a = np.ascontiguousarray(np.zeros((self._height, self._width, 3), dtype=np.uint16))
+
+            elif bps == ChannelDepth.Bps32:
+                if channels == ChannelOrder.RGBA or channels == ChannelOrder.BGRA:
+                    a = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.float32))
+                elif channels == ChannelOrder.RGB or channels == ChannelOrder.BGR:
+                    a = np.ascontiguousarray(np.zeros((self._height, self._width, 3), dtype=np.float32))
+
+            else: return a
+
+            if not self._optix.get_output(a.ctypes.data, a.nbytes, bps.value, channels.value):
+                msg = "Image not copied."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
 
@@ -1740,7 +1758,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 ok = False
 
             if not ok:
-                msg = "Image not saveed."
+                msg = "Image not saved."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
 
