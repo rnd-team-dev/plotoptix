@@ -1727,7 +1727,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         recognized by the extension used in the ``file_name``, are:
 
            - bmp, gif, png, jpg, and tif for 8bps color depth,
-           - png, and tif for 16bps color depth,
+           - png (Windows only), and tif for 16bps color depth,
            - tif for 32bps hdr images.
 
         Existing files are overwritten.

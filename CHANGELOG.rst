@@ -1,14 +1,15 @@
 Release history
 ===============
 
-v0.8.1 - unreleased
--------------------
+`v0.8.1`_ - 2020-06-14
+----------------------
 
 Added
 ~~~~~
 
 - camera mode for baking 360 degree panoramic views
 - support 16 bit per channel and hdr (32 bit fp per channel) output to image files and ndarray
+- support reading hdr images
 
 Fixed
 ~~~~~
@@ -344,6 +345,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.8.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.1
 .. _`v0.8.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.0
 .. _`v0.7.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.2
 .. _`v0.7.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.1

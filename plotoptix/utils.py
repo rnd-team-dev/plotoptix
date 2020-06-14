@@ -385,6 +385,7 @@ def read_image(file_name: str, normalized: bool = False) -> Optional[np.ndarray]
     else:
         if c_bps.value == 8: t = np.uint8
         elif c_bps.value == 16: t = np.uint16
+        elif c_bps.value == 32: t = np.float32
         else: raise ValueError("Image bits per sample value not supported.")
 
     if c_spp.value == 1: data = np.zeros((c_height.value, c_width.value), dtype=t)
