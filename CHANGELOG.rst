@@ -16,6 +16,8 @@ Fixed
 
 - correct light emission in volumes
 - fix restoring scene global variables from json
+- more verbose messaging on initialization problems
+- fix camera switching when ray generation program changes
 
 `v0.8.0`_ - 2020-06-04
 ----------------------
