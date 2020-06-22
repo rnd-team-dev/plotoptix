@@ -52,12 +52,12 @@ Features
 - pinhole camera, thin-lens camera with depth of field simulation, panoramic camera for making 360 deg environment maps
 - geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, mesh (generated from parametric surface or f(x,y) plots; defined with vertices and faces; import from Wavefront .obj file)
 - parameterized materials shading: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
-- spherical and parallelogram light sources
-- environmental light and ambient occlusion
+- spherical and parallelogram light sources, light emission in volumes
+- environmental light, environmetn maps, and ambient occlusion
 - post-processing: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
 - GPU acceleration using RT Cores and everything else what comes with `OptiX 7 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
-- 8/16/32bps image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
+- 8/16/32bps(hdr) image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
 - hardware accelerated video output to MP4 file format using `NVENC 9.0 <https://developer.nvidia.com/nvidia-video-codec-sdk>`__
 - Tkinter based simple GUI window or headless raytracer
 - configurable multi-GPU support

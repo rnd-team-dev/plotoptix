@@ -2880,7 +2880,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Parameters
         ----------
-        name : string, optional
+        name : string
             Name of the light.
         pos : array_like, optional
             3D position.
@@ -2929,6 +2929,74 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             msg = "Light %s update failed." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
+
+    def update_area_light(self, name: str,
+                          center: Optional[Any] = None, target: Optional[Any] = None,
+                          u: Optional[float] = None, v: Optional[float] = None,
+                          color: Optional[Any] = None) -> None:
+        """Setup new area (parallelogram) light.
+
+        Convenience method to update parallelogram light with ``center`` and ``target`` 3D points,
+        and scalar lenghts of sides ``u`` and ``v``.
+
+        Parameters
+        ----------
+        name : string
+            Name of the new light.
+        center : array_like, optional
+            3D position of the light center.
+        target : array_like, optional
+            3D position of the light target.
+        u : float, optional
+            Horizontal side length.
+        v : float, optional
+            Vertical side length.
+        color : Any, optional
+            RGB color of the light; single value is gray, array_like is RGB
+            color components. Color value range is (0; inf) as it means the
+            light intensity.
+        """
+        if name is None: raise ValueError()
+
+        if not isinstance(name, str): name = str(name)
+
+        if name not in self.light_handles:
+            msg = "Light %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if u is None:
+            u = np.linalg.norm(self.get_light_u(name))
+
+        if v is None:
+            v = np.linalg.norm(self.get_light_v(name))
+
+        if center is None:
+            center = self.get_light_pos(name) + 0.5 * (self.get_light_u(name) + self.get_light_v(name))
+
+        if target is None:
+            n = np.cross(self.get_light_u(name), self.get_light_v(name))
+            target = center + 100 * n
+
+        center = _make_contiguous_vector(center, 3)
+        target = _make_contiguous_vector(target, 3)
+
+        n = target - center
+        n = n / np.linalg.norm(n)
+
+        uvec = np.cross(n, [0, 1, 0])
+        uvec = uvec / np.linalg.norm(uvec)
+
+        vvec = np.cross(uvec, n)
+        vvec = vvec / np.linalg.norm(vvec)
+
+        uvec *= -u
+        vvec *= v
+
+        pos = center - 0.5 * (vvec + uvec)
+
+        self.update_light(name, pos=pos, color=color, u=uvec, v=vvec)
 
     def light_fit(self, light: str,
                   camera: Optional[str] = None,

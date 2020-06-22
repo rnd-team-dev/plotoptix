@@ -23,6 +23,7 @@ Setup and update lighting
 .. automethod:: plotoptix.NpOptiX.setup_parallelogram_light
 .. automethod:: plotoptix.NpOptiX.setup_area_light
 .. automethod:: plotoptix.NpOptiX.update_light
+.. automethod:: plotoptix.NpOptiX.update_area_light
 .. automethod:: plotoptix.NpOptiX.light_fit
 
 Read back light properties

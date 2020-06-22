@@ -1,6 +1,14 @@
 Release history
 ===============
 
+v0.8.2 - unreleased
+-------------------
+
+Added
+~~~~~
+
+- method to update parallelogram light using center/target 3D points and scalar lengths of u/v sides (missing in v0.8.0)
+
 `v0.8.1`_ - 2020-06-14
 ----------------------
 
