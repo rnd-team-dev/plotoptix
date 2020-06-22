@@ -53,7 +53,7 @@ Features
 - geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, mesh (generated from parametric surface or f(x,y) plots; defined with vertices and faces; import from Wavefront .obj file)
 - parameterized materials shading: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
 - spherical and parallelogram light sources, light emission in volumes
-- environmental light, environmetn maps, and ambient occlusion
+- environmental light, environment maps, and ambient occlusion
 - post-processing: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
 - GPU acceleration using RT Cores and everything else what comes with `OptiX 7 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
