@@ -62,14 +62,14 @@ def main():
 
     rt.set_data("plane", geom="Parallelograms",
                 pos=[[-100, -14, -100]], u=[200, 0, 0], v=[0, 0, 200],
-                c=make_color([0.1, 0.2, 0.3], exposure=exposure, gamma=gamma))
+                c=make_color([0.1, 0.2, 0.3], exposure=exposure, gamma=gamma)[0])
 
     rt.setup_camera("cam1", cam_type="DoF",
                     eye=[-50, -7, -15], target=[0, 0, -1], up=[0, 1, 0],
                     aperture_radius=0.4, aperture_fract=0.2,
                     focal_scale=0.92, fov=35)
 
-    rt.setup_light("light1", pos=[-15, 20, 15], color=8, radius=6)
+    rt.setup_light("light1", pos=[-15, 20, 15], color=5, radius=6)
 
     rt.start()
 

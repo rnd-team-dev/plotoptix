@@ -3319,9 +3319,20 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         pos_ptr = pos.ctypes.data
 
         # Prepare colors data
-        c = _make_contiguous_3d(c, n=n_primitives, extend_scalars=True)
-        if c is not None: col_ptr = c.ctypes.data
-        else: col_ptr = 0
+        c = np.ascontiguousarray(c, dtype=np.float32)
+        if c.shape == (1,):
+            c = np.ascontiguousarray([c[0], c[0], c[0]], dtype=np.float32)
+            col_const_ptr = c.ctypes.data
+            col_ptr = 0
+        elif c.shape == (3,):
+            col_const_ptr = c.ctypes.data
+            col_ptr = 0            
+        else:
+            c = _make_contiguous_3d(c, n=n_primitives, extend_scalars=True)
+            assert c.shape == pos.shape, "Colors and data points shapes must be the same."
+            if c is not None: col_ptr = c.ctypes.data
+            else: col_ptr = 0
+            col_const_ptr = 0
 
         # Prepare radii data
         if r is not None:
@@ -3453,7 +3464,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 self._logger.info("Create %s %s, %d primitives...", geom.name, name, n_primitives)
                 g_handle = self._optix.setup_geometry(geom.value, geom_attr.value, name, mat, rnd, n_primitives,
-                                                      pos_ptr, col_ptr, radii_ptr, u_ptr, v_ptr, w_ptr)
+                                                      pos_ptr, col_const_ptr, col_ptr, radii_ptr, u_ptr, v_ptr, w_ptr)
 
                 if g_handle > 0:
                     self._logger.info("...done, handle: %d", g_handle)
@@ -3531,12 +3542,23 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             pos_ptr = pos.ctypes.data
 
         # Prepare colors data
+        col_const_ptr = 0
+        col_ptr = 0
+
         if size_changed and c is None:
             c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
-        c = _make_contiguous_3d(c, n=n_primitives, extend_scalars=True)
-        col_ptr = 0
+        elif c is not None:
+            c = np.ascontiguousarray(c, dtype=np.float32)
+
         if c is not None:
-            col_ptr = c.ctypes.data
+            if c.shape == (1,):
+                c = np.ascontiguousarray([c[0], c[0], c[0]], dtype=np.float32)
+                col_const_ptr = c.ctypes.data
+            elif c.shape == (3,):
+                col_const_ptr = c.ctypes.data           
+            else:
+                c = _make_contiguous_3d(c, n=n_primitives, extend_scalars=True)
+                if c is not None: col_ptr = c.ctypes.data
 
         # Prepare radii data
         if size_changed and r is None:
@@ -3577,7 +3599,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.acquire()
             self._logger.info("Update %s, %d primitives...", name, n_primitives)
             g_handle = self._optix.update_geometry(name, n_primitives,
-                                                   pos_ptr, col_ptr, radii_ptr,
+                                                   pos_ptr, col_const_ptr, col_ptr, radii_ptr,
                                                    u_ptr, v_ptr, w_ptr)
 
             if (g_handle > 0) and (g_handle == self.geometry_handles[name]):
@@ -3673,7 +3695,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if c is not None:
             if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
             if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
-            if len(c.shape) == 1 and c.shape[0] == 3:
+            if c.shape == (3,):
                 c_const = c
                 cm = np.zeros(pos.shape + (3,), dtype=np.float32)
                 cm[:,:] = c
@@ -3691,7 +3713,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if floor_c is not None:
                 if isinstance(floor_c, float) or isinstance(floor_c, int): floor_c = np.full(3, floor_c, dtype=np.float32)
                 if not isinstance(floor_c, np.ndarray): floor_c = np.ascontiguousarray(floor_c, dtype=np.float32)
-                if len(floor_c.shape) == 1 and floor_c.shape[0] == 3:
+                if floor_c.shape == (3,):
                     if floor_c.dtype != np.float32: floor_c = np.ascontiguousarray(floor_c, dtype=np.float32)
                     if not floor_c.flags['C_CONTIGUOUS']: floor_c = np.ascontiguousarray(floor_c, dtype=np.float32)
                     cl_ptr = floor_c.ctypes.data
@@ -3915,24 +3937,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             make_normals = False
 
         c_ptr = 0
-        c_const = None
+        c_const_ptr = 0
         if c is not None:
             if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
             if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
-            if len(c.shape) == 1 and c.shape[0] == 3:
-                c_const = c
-                cm = np.zeros(pos.shape, dtype=np.float32)
-                cm[:,:] = c
-                c = cm
-            assert c.shape == pos.shape, "Colors shape must be (v,u,3), with u and v matching the surface points shape."
             if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
             if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
-            c_ptr = c.ctypes.data
+            if c.shape == (3,):
+                c_const_ptr = c.ctypes.data
+            elif c.shape == pos.shape:
+                c_ptr = c.ctypes.data
+            else:
+                msg = "Colors shape must be (3,) or (v,u,3), with u and v matching the surface points shape."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
 
         try:
             self._padlock.acquire()
             self._logger.info("Setup surface %s...", name)
-            g_handle = self._optix.setup_psurface(name, mat, pos.shape[1], pos.shape[0], pos_ptr, n_ptr, c_ptr, wrap_u, wrap_v, make_normals)
+            g_handle = self._optix.setup_psurface(name, mat, pos.shape[1], pos.shape[0], pos_ptr, n_ptr, c_const_ptr, c_ptr, wrap_u, wrap_v, make_normals)
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
@@ -4002,20 +4025,21 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             pos_ptr = pos.ctypes.data
 
         c_ptr = 0
-        c_const = None
+        c_const_ptr = 0
         if size_changed and c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
         if c is not None:
             if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
             if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
-            if len(c.shape) == 1 and c.shape[0] == 3:
-                c_const = c
-                cm = np.zeros(size_uv, dtype=np.float32)
-                cm[:,:] = c
-                c = cm
-            assert c.shape == size_uv, "Colors shape must be (m,n,3), with m and n matching the surface points shape."
             if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
             if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
-            c_ptr = c.ctypes.data
+            if c.shape == (3,):
+                c_const_ptr = c.ctypes.data
+            elif c.shape == size_uv:
+                c_ptr = c.ctypes.data
+            else:
+                msg = "Colors shape must be (3,) or (v,u,3), with u and v matching the surface points shape."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
 
         n_ptr = 0
         if normals is not None:
@@ -4028,7 +4052,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Update surface %s, size (%d, %d)...", name, size_uv[1], size_uv[0])
-            g_handle = self._optix.update_psurface(name, size_uv[1], size_uv[0], pos_ptr, n_ptr, c_ptr)
+            g_handle = self._optix.update_psurface(name, size_uv[1], size_uv[0], pos_ptr, n_ptr, c_const_ptr, c_ptr)
 
             if (g_handle > 0) and (g_handle == self.geometry_handles[name]):
                 self._logger.info("...done, handle: %d", g_handle)
@@ -4124,20 +4148,20 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         faces_ptr = faces.ctypes.data
         n_faces = faces.size // 3
 
-        c_ptr = 0
-        c_const = None
-        if c is not None:
-            if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
-            if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
-            if len(c.shape) == 1 and c.shape[0] == 3:
-                c_const = c
-                cm = np.zeros(pos.shape, dtype=np.float32)
-                cm[:,:] = c
-                c = cm
-            assert np.array_equal(c.shape, pos.shape), "Colors shape must be (n,3), with n matching the number of mesh vertices."
-            if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
-            if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
-            c_ptr = c.ctypes.data
+        c = np.ascontiguousarray(c, dtype=np.float32)
+        if c.shape == (1,):
+            c = np.ascontiguousarray([c[0], c[0], c[0]], dtype=np.float32)
+            col_const_ptr = c.ctypes.data
+            col_ptr = 0
+        elif c.shape == (3,):
+            col_const_ptr = c.ctypes.data
+            col_ptr = 0            
+        else:
+            c = _make_contiguous_3d(c, n=n_vertices, extend_scalars=True)
+            assert c.shape == pos.shape,  "Colors shape must be (n,3), with n matching the number of mesh vertices."
+            if c is not None: col_ptr = c.ctypes.data
+            else: col_ptr = 0
+            col_const_ptr = 0
 
         n_ptr = 0
         n_normals = 0
@@ -4185,7 +4209,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Setup mesh %s...", name)
-            g_handle = self._optix.setup_mesh(name, mat, n_vertices, n_faces, n_normals, n_uv, pos_ptr, faces_ptr, c_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr, make_normals)
+            g_handle = self._optix.setup_mesh(name, mat, n_vertices, n_faces, n_normals, n_uv, pos_ptr, faces_ptr, col_const_ptr, col_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr, make_normals)
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
@@ -4281,20 +4305,21 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             m_faces = n_faces
 
         c_ptr = 0
-        c_const = None
+        c_const_ptr = 0
         if size_changed and c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
         if c is not None:
             if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
             if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
-            if len(c.shape) == 1 and c.shape[0] == 3:
-                c_const = c
-                cm = np.zeros((m_vertices, 3), dtype=np.float32)
-                cm[:,:] = c
-                c = cm
-            assert c.shape[0] == m_vertices, "Colors shape must be (n,3), with n matching the number of mesh vertices."
             if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
             if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
-            c_ptr = c.ctypes.data
+            if c.shape == (3,):
+                c_const_ptr = c.ctypes.data
+            elif c.shape == (m_vertices, 3):
+                c_ptr = c.ctypes.data
+            else:
+                msg = "Colors shape must be (n,3), with n matching the number of mesh vertices."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
 
         n_ptr = 0
         n_normals = 0
@@ -4342,7 +4367,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Update mesh %s...", name)
-            g_handle = self._optix.update_mesh(name, n_vertices, n_faces, n_normals, n_uv, pos_ptr, faces_ptr, c_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr)
+            g_handle = self._optix.update_mesh(name, n_vertices, n_faces, n_normals, n_uv, pos_ptr, faces_ptr, c_const_ptr, c_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr)
 
             if (g_handle > 0) and (g_handle == self.geometry_handles[name]):
                 self._logger.info("...done, handle: %d", g_handle)

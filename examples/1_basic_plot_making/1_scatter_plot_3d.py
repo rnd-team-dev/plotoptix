@@ -76,7 +76,7 @@ def main():
 
     # camera and lighting configured by hand
     optix.update_camera(eye=[5, 0, -8])
-    optix.setup_light("light1", color=15*np.array([0.99, 0.9, 0.7]), radius=2)
+    optix.setup_light("light1", color=10*np.array([0.99, 0.9, 0.7]), radius=2)
 
     print("done")
 

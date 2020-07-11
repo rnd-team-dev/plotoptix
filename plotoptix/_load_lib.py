@@ -157,10 +157,10 @@ def _load_optix_win():
     optix.add_postproc.argtypes = [c_int, c_bool]
     optix.add_postproc.restype = c_bool
 
-    optix.setup_geometry.argtypes = [c_int, c_int, c_wchar_p, c_wchar_p, c_bool, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.setup_geometry.argtypes = [c_int, c_int, c_wchar_p, c_wchar_p, c_bool, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.setup_geometry.restype = c_uint
 
-    optix.update_geometry.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.update_geometry.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_geometry.restype = c_uint
 
     optix.get_geometry_size.argtypes = [c_wchar_p]
@@ -178,16 +178,16 @@ def _load_optix_win():
     optix.setup_surface.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_bool]
     optix.setup_surface.restype = c_uint
 
-    optix.update_psurface.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p]
+    optix.update_psurface.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_psurface.restype = c_uint
 
-    optix.setup_psurface.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_bool, c_bool, c_bool]
+    optix.setup_psurface.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_bool, c_bool, c_bool]
     optix.setup_psurface.restype = c_uint
 
-    optix.setup_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_bool]
+    optix.setup_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_bool]
     optix.setup_mesh.restype = c_uint
 
-    optix.update_mesh.argtypes = [c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.update_mesh.argtypes = [c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_mesh.restype = c_uint
 
     optix.load_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
@@ -666,23 +666,25 @@ class _ClrOptiX:
 
     def add_postproc(self, algorithm, refresh): return self._optix.add_postproc(algorithm, refresh)
 
-    def setup_geometry(self, geomType, attrProg, name, material, rnd_missing, n_primitives, pos, c, r, u, v, w):
+    def setup_geometry(self, geomType, attrProg, name, material, rnd_missing, n_primitives, pos, cconst, c, r, u, v, w):
         return self._optix.setup_geometry_ptr(geomType, attrProg, name, material, rnd_missing, n_primitives,
                                               IntPtr.__overloads__[Int64](pos),
+                                              IntPtr.__overloads__[Int64](cconst),
                                               IntPtr.__overloads__[Int64](c),
                                               IntPtr.__overloads__[Int64](r),
                                               IntPtr.__overloads__[Int64](u),
                                               IntPtr.__overloads__[Int64](v),
                                               IntPtr.__overloads__[Int64](w))
 
-    def update_geometry(self, name, n_primitives, pos, c, r, u, v, w):
+    def update_geometry(self, name, n_primitives, pos, cconst, c, r, u, v, w):
         return self._optix.update_geometry_ptr(name, n_primitives,
                                                IntPtr.__overloads__[Int64](pos),
-                                              IntPtr.__overloads__[Int64](c),
-                                              IntPtr.__overloads__[Int64](r),
-                                              IntPtr.__overloads__[Int64](u),
-                                              IntPtr.__overloads__[Int64](v),
-                                              IntPtr.__overloads__[Int64](w))
+                                               IntPtr.__overloads__[Int64](cconst),
+                                               IntPtr.__overloads__[Int64](c),
+                                               IntPtr.__overloads__[Int64](r),
+                                               IntPtr.__overloads__[Int64](u),
+                                               IntPtr.__overloads__[Int64](v),
+                                               IntPtr.__overloads__[Int64](w))
 
     def get_geometry_size(self, name): return self._optix.get_geometry_size(name)
 
@@ -709,22 +711,25 @@ class _ClrOptiX:
                                              IntPtr.__overloads__[Int64](cfloor),
                                              x_min, x_max, z_min, z_max, floor_level, make_normals)
 
-    def update_psurface(self, name, u_size, v_size, pos, norm, c):
+    def update_psurface(self, name, u_size, v_size, pos, norm, cconst, c):
         return self._optix.update_psurface_ptr(name, u_size, v_size,
                                                IntPtr.__overloads__[Int64](pos),
                                                IntPtr.__overloads__[Int64](norm),
+                                               IntPtr.__overloads__[Int64](cconst),
                                                IntPtr.__overloads__[Int64](c))
 
-    def setup_psurface(self, name, material, u_size, v_size, pos, norm, c, wrap_u, wrap_v, make_normals):
+    def setup_psurface(self, name, material, u_size, v_size, pos, norm, cconst, c, wrap_u, wrap_v, make_normals):
         return self._optix.setup_psurface_ptr(name, material, u_size, v_size,
                                               IntPtr.__overloads__[Int64](pos),
                                               IntPtr.__overloads__[Int64](norm),
+                                              IntPtr.__overloads__[Int64](cconst),
                                               IntPtr.__overloads__[Int64](c),
                                               wrap_u, wrap_v, make_normals)
 
-    def setup_mesh(self, name, material, n_vtx, n_tri, n_norm, n_uv, pos, c, vidx, norm, nidx, uvmap, uvidx, make_normals):
+    def setup_mesh(self, name, material, n_vtx, n_tri, n_norm, n_uv, pos, cconst, c, vidx, norm, nidx, uvmap, uvidx, make_normals):
         return self._optix.setup_mesh_ptr(name, material, n_vtx, n_tri, n_norm, n_uv,
                                           IntPtr.__overloads__[Int64](pos),
+                                          IntPtr.__overloads__[Int64](cconst),
                                           IntPtr.__overloads__[Int64](c),
                                           IntPtr.__overloads__[Int64](vidx),
                                           IntPtr.__overloads__[Int64](norm),
@@ -733,9 +738,10 @@ class _ClrOptiX:
                                           IntPtr.__overloads__[Int64](uvidx),
                                           make_normals)
 
-    def update_mesh(self, name, n_vtx, n_tri, n_norm, n_uv, pos, c, vidx, norm, nidx, uvmap, uvidx):
+    def update_mesh(self, name, n_vtx, n_tri, n_norm, n_uv, pos, cconst, c, vidx, norm, nidx, uvmap, uvidx):
         return self._optix.update_mesh_ptr(name, n_vtx, n_tri, n_norm, n_uv,
                                            IntPtr.__overloads__[Int64](pos),
+                                           IntPtr.__overloads__[Int64](const),
                                            IntPtr.__overloads__[Int64](c),
                                            IntPtr.__overloads__[Int64](vidx),
                                            IntPtr.__overloads__[Int64](norm),

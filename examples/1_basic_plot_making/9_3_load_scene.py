@@ -36,8 +36,8 @@ def main():
     rt.load_scene("strange_object_2.json")
 
     # Apply some modification:
-    if "cubes" in rt.get_geometry_names():
-        rt.update_data("cubes", c=[0.5, 0, 0.1])
+    if "block2" in rt.get_geometry_names():
+        rt.update_data("block2", c=[0.5, 0, 0.1])
 
     input("Press Enter to continue...")
 
@@ -45,7 +45,7 @@ def main():
     # and load it back:
 
     if "light2" in d["Lights"]:
-        d["Lights"]["light2"]["Color"] = [12, 6, 2]
+        d["Lights"]["light2"]["Color"] = [10, 5, 1.5]
 
     rt.set_scene(d)
 

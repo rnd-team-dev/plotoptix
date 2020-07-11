@@ -48,7 +48,7 @@ def main():
     rt.setup_camera("cam1", cam_type="DoF",
                     eye=[0.5, -3, 2], target=[0, 0, 0.5],
                     focal_scale=0.9, fov=25)
-    rt.setup_light("light1", pos=[15, 0, 10], color=[14, 13, 12], radius=4)
+    rt.setup_light("light1", pos=[15, 0, 10], color=[8, 7, 6], radius=4)
     rt.set_ambient([0.1, 0.15, 0.2])
 
     # add mesh geometry to the scene

@@ -33,9 +33,9 @@ def main():
 
     # Setup lights and the camera:
 
-    rt.setup_light("light1", light_type="Parallelogram", pos=[-2.5, 2.6, 3], u=[0.8, 0, 0], v=[0, -0.8, 0], color=[6, 5.7, 5.4])
-    rt.setup_light("light2", light_type="Parallelogram", pos=[-0.5, 3.2, 0], u=[0.8, 0, 0], v=[0, 0, 0.8], color=[8, 7.6, 7.2])
-    rt.setup_light("light3", light_type="Parallelogram", pos=[1.5, 2.6, 3], u=[0.8, 0, 0], v=[0, -0.8, 0], color=[6, 5.7, 5.4])
+    rt.setup_light("light1", light_type="Parallelogram", pos=[-2.5, 2.6, 3], u=[0.8, 0, 0], v=[0, -0.8, 0], color=[4, 4.7, 5])
+    rt.setup_light("light2", light_type="Parallelogram", pos=[-0.5, 3.2, 0], u=[0.8, 0, 0], v=[0, 0, 0.8], color=[6, 5.6, 5.2])
+    rt.setup_light("light3", light_type="Parallelogram", pos=[1.5, 2.6, 3], u=[0.8, 0, 0], v=[0, -0.8, 0], color=[4, 4.7, 5])
     rt.setup_camera("cam1", cam_type="DoF", eye=[0, 0.4, 6], target=[0, 1.2, 0], aperture_radius=0.025, fov=35, focal_scale=0.9)
 
     # Make some data:
@@ -48,7 +48,7 @@ def main():
     data = np.stack((x, y, z)).T
 
     # Add object to scene:
-    rt.set_data("balls", pos=data, r=r, c=0.92)
+    rt.set_data("balls", pos=data, r=r, c=0.93)
     # or use another geometry and save it in the second scene file:
     #rt.set_data("cubes", geom="Parallelepipeds", pos=data, r=r, c=0.92)
 

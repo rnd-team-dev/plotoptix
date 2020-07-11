@@ -37,15 +37,15 @@ def main():
 
     rt.set_param(min_accumulation_step=2, max_accumulation_frames=100)
     rt.setup_camera("cam1", cam_type="DoF", eye=[1, -6, 4], focal_scale=0.9, fov=25)
-    rt.setup_light("light1", pos=[10, -9, -8], color=[14, 13, 12], radius=4)
+    rt.setup_light("light1", pos=[10, -9, -8], color=[10, 9, 8], radius=4)
     rt.set_ambient([0.2, 0.3, 0.4])
 
     # add mesh geometry to the scene
     rt.set_mesh("m", points, faces, c=colors)
 
     rt.start()
-    print("done")
 
+    print("done")
 
 if __name__ == '__main__':
     main()

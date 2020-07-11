@@ -46,7 +46,7 @@ def main():
     optix.update_camera("cam1", eye=eye)
 
     d = np.linalg.norm(optix.get_camera_target() - eye)
-    optix.setup_light("light1", color=15, radius=0.3 * d)
+    optix.setup_light("light1", color=10, radius=0.3 * d)
 
     optix.start()
     print("done")

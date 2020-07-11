@@ -9,6 +9,11 @@ Added
 
 - method to update parallelogram light using center/target 3D points and scalar lengths of u/v sides (missing in v0.8.0)
 
+Changes
+~~~~~~~
+
+- lower memory usage on both host and device
+
 `v0.8.1`_ - 2020-06-14
 ----------------------
 

@@ -27,7 +27,7 @@ def main():
     # camera and light position auto-fit the scene geometry
     optix.setup_camera("cam1")
     d = np.linalg.norm(optix.get_camera_target() - optix.get_camera_eye())
-    optix.setup_light("light1", color=10, radius=0.3 * d)
+    optix.setup_light("light1", color=8, radius=0.3 * d)
 
     optix.start()
     print("done")
