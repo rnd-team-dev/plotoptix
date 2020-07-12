@@ -12,15 +12,14 @@ sudo apt-get -y install cuda-10-1
 sudo nvidia-smi -pm 1
 
 # install Mono
-# note: due to incompatibiliby of Mono 6.0 and pythonnet 2.4.0, install Mono 5.20.1 
 sudo apt -y install gnupg ca-certificates
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 
-# this would install the most recent release:
-# echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+# setup for the most recent release:
+echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
 
-# use this to install Mono 5.20.1:
-echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic/snapshots/5.20.1 main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+# if disk size is an issue, use smaller Mono release, e.g. use this to install Mono 5.20.1:
+# echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic/snapshots/5.20.1 main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
 
 sudo apt update
 sudo apt -y install mono-complete
