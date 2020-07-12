@@ -74,8 +74,8 @@ System Requirements
 - Windows:
    - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
 - Linux:
-   - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2, recommended: 5.20.1
-   - `pythonnet <http://pythonnet.github.io>`__ >= 2.4
+   - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2
+   - `pythonnet <http://pythonnet.github.io>`__ >= 2.5.1
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
 
 What's Included
@@ -126,16 +126,6 @@ Check if / which Mono release is present in your system::
 
 If ``mono`` command is not available, or the reported version is < 5.2, visit `Mono download page <https://www.mono-project.com/download/stable/#download-lin>`__ and follow instructions related to your Linux distribution. You want to install **mono-complete** package.
 
-**Note:** pythonnet 2.4.0 is not compatible with Mono 6.0; install Mono 5.20.1 instead::
-
-   apt -y install gnupg ca-certificates
-   apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-
-   echo "deb https://download.mono-project.com/repo/ubuntu stable-bionic/snapshots/5.20.1 main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
-
-   apt update
-   apt -y install mono-complete
-
 *pythonnet:*
 
 The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however, some prerequisities are needed. Instuctions below are based on APT, replace ``apt`` with ``yum`` depending on your OS::
@@ -154,7 +144,7 @@ or in CentOS::
 Then, update required packages and install ``pythonnet``::
 
    pip install -U setuptools wheel pycparser
-   pip install -U pythonnet
+   pip install -U pythonnet --egg
    
 After successful installation you should be able to do python's import:
 
