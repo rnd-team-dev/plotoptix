@@ -1,8 +1,8 @@
 Release history
 ===============
 
-v0.8.2 - unreleased
--------------------
+`v0.8.2`_ - 2020-07-12
+----------------------
 
 Added
 ~~~~~
@@ -12,7 +12,8 @@ Added
 Changes
 ~~~~~~~
 
-- lower memory usage on both host and device
+- lower memory usage on both host and gpu
+- tested with pythonnet 2.5.1 and Mono 6.x - linux installation made easier
 
 `v0.8.1`_ - 2020-06-14
 ----------------------
@@ -360,6 +361,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.8.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.2
 .. _`v0.8.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.1
 .. _`v0.8.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.0
 .. _`v0.7.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.7.2
