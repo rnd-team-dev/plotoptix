@@ -69,7 +69,7 @@ System Requirements
 -------------------
 
 - a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Turing),
-  NVIDIA driver release >= v435
+  NVIDIA driver release >= v450
 - **Python 3 64-bit**
 - Windows:
    - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)

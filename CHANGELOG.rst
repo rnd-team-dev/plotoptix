@@ -1,6 +1,21 @@
 Release history
 ===============
 
+v0.9.0 - unreleased
+-------------------
+
+NVIDIA driver >= 450 is required to run this release.
+
+Added
+~~~~~
+
+- support for the normal buffer in AI denoiser
+
+Changes
+~~~~~~~
+
+- update to OptiX 7.1 SDK and CUDA 11 (note: CUDA toolkit is not required in your system to run PlotOptiX)
+
 `v0.8.2`_ - 2020-07-12
 ----------------------
 
