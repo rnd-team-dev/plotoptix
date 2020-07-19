@@ -3452,6 +3452,63 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
+        elif geom == Geometry.SegmentChain:
+            if n_primitives < 2:
+                msg = "SegmentChain requires at least 2 data points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if c is None:
+                msg = "SegmentChain setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if r is None:
+                msg = "SegmentChain setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+        elif geom == Geometry.BSplineQuad:
+            if n_primitives < 3:
+                msg = "BSplineQuad requires at least 3 data points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if c is None:
+                msg = "BSplineQuad setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if r is None:
+                msg = "BSplineQuad setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+        elif geom == Geometry.BSplineCubic:
+            if n_primitives < 4:
+                msg = "BSplineCubic requires at least 4 data points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if c is None:
+                msg = "BSplineCubic setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if r is None:
+                msg = "BSplineCubic setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
         else:
             msg = "Unknown geometry"
             self._logger.error(msg)

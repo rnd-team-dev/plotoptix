@@ -40,33 +40,38 @@ def main():
 
     # Create the plot:
 
-    optix = TkOptiX() # create and configure, show the window later
+    rt = TkOptiX() # create and configure, show the window later
 
-    optix.set_background(0.99) # white background
-    optix.set_ambient(0.2)     # dim ambient light
+    rt.set_background(0.99) # white background
+    rt.set_ambient(0.2)     # dim ambient light
 
     # add plot, BezierChain geometry makes a smooth line interpolating data points
-    optix.set_data("curve", pos=xyz, r=r, c=0.9, geom="BezierChain")
+    rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="BezierChain")
+    #rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="SegmentChain")
+    #rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="BSplineQuad")
+    #rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="BSplineCubic")
 
     # show the UI window here - this method is calling some default
     # initialization for us, e.g. creates camera, so any modification
     # of these defaults should come below (or we provide on_initialization
     # callback)
-    optix.show()
+    rt.show()
 
     # camera auto-configured to fit the plot
-    optix.camera_fit()
+    rt.camera_fit()
+
+    #rt.update_camera(eye=[200, -1000, 350], target=[0,180,0], fov=25)
 
     # 2 spherical light sources, warm and cool, fit positions with respect to
     # the current camera plane: 45 deg right/left and 25 deg up;
     # do not include lights in geometry, so they do not appear in the image
-    optix.setup_light("light1", color=10*np.array([0.99, 0.9, 0.7]), radius=250, in_geometry=False)
-    optix.light_fit("light1", horizontal_rot=45, vertical_rot=25, dist_scale=1.1)
-    optix.setup_light("light2", color=15*np.array([0.7, 0.9, 0.99]), radius=200, in_geometry=False)
-    optix.light_fit("light2", horizontal_rot=-45, vertical_rot=25, dist_scale=1.1)
+    rt.setup_light("light1", color=10*np.array([0.99, 0.9, 0.7]), radius=250, in_geometry=False)
+    rt.light_fit("light1", horizontal_rot=45, vertical_rot=25, dist_scale=1.1)
+    rt.setup_light("light2", color=15*np.array([0.7, 0.9, 0.99]), radius=200, in_geometry=False)
+    rt.light_fit("light2", horizontal_rot=-45, vertical_rot=25, dist_scale=1.1)
 
     # accumulate up to 30 frames (override default of 4 frames)
-    optix.set_param(max_accumulation_frames=200)
+    rt.set_param(max_accumulation_frames=200)
 
     print("done")
 

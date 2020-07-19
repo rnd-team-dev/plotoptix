@@ -162,7 +162,36 @@ class Geometry(Enum):
     """Bezier line interpolating data points.
 
     Line thickness and color can be provided for each data point.
-    Line is smoothed, use SegmentChain for a piecewise linear plot.
+    Line is smoothed, use :attr:`plotoptix.enums.Geometry.SegmentChain`
+    for a piecewise linear plot.
+    """
+
+    SegmentChain = 11
+    """Linear segments connecting data points.
+
+    Line thickness and color can be provided for each data point.
+    """
+
+    BSplineQuad = 12
+    """Quadratic b-spline with nodes at data points.
+
+    Line thickness and color can be provided for each data point.
+    
+    Note: b-spline is not interpolating data points; see examples
+    how to pin start/end to a fixed position. Use
+    :attr:`plotoptix.enums.Geometry.BezierChain` for a smooth curve
+    interpolating all data points.
+    """
+
+    BSplineCubic = 13
+    """Cubic b-spline with nodes at data points.
+
+    Line thickness and color can be provided for each data point.
+    
+    Note: b-spline is not interpolating data points; see examples
+    how to pin start/end to a fixed position. Use
+    :attr:`plotoptix.enums.Geometry.BezierChain` for a smooth curve
+    interpolating all data points.
     """
 
     Parallelograms = 7
