@@ -2,7 +2,7 @@
 Parametric line plot 3D.
 
 This example shows how to:
-   - create a line plot using bezier curves
+   - create a line plot using one of curve geometries
    - present data feature as a line thickness
    - setup 2-color lighting
 """
@@ -45,9 +45,13 @@ def main():
     rt.set_background(0.99) # white background
     rt.set_ambient(0.2)     # dim ambient light
 
-    # add plot, BezierChain geometry makes a smooth line interpolating data points
+    # add plot: BezierChain geometry makes a smooth line interpolating data points
     rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="BezierChain")
+
+    # or use SegmentChain for a piecewise-linear plot
     #rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="SegmentChain")
+
+    # or use b-spline geometry (approximating data points, flat end caps)
     #rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="BSplineQuad")
     #rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="BSplineCubic")
 
@@ -60,6 +64,7 @@ def main():
     # camera auto-configured to fit the plot
     rt.camera_fit()
 
+    # or fixed camera position, e.g. for comparison of geometry performance
     #rt.update_camera(eye=[200, -1000, 350], target=[0,180,0], fov=25)
 
     # 2 spherical light sources, warm and cool, fit positions with respect to

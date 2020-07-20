@@ -9,7 +9,8 @@ NVIDIA driver >= 450 is required to run this release.
 Added
 ~~~~~
 
-- support for the normal buffer in AI denoiser
+- enabled normal buffer in AI denoiser
+- new geometries for curves: BSplineQuad and BSplineCubic approximating data points, SegmentChain for a piecewise-linear plot
 
 Changes
 ~~~~~~~

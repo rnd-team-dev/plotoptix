@@ -39,9 +39,7 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
 
 ... but PlotOptiX is much faster on large data and, with all the raytraced shades and DoF, more readable and eye catching.
 
-`Documentation pages <https://plotoptix.rnd.team>`__ are currently generated from the source code docstrings. Please,
-see `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__
-for practical code samples.
+Check `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__ for practical code samples and `documentation pages <https://plotoptix.rnd.team>`__ for a complete API reference.
 
 PlotOptiX is based on `NVIDIA OptiX 7.1 <https://developer.nvidia.com/optix>`_ framework. It is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in RnD.SharpOptiX C#/C++ libraries with a Python API. PlotOptiX makes use of RTX-capable GPU's.
 
@@ -53,7 +51,7 @@ Features
 
 - progressive path tracing with explicit light sampling
 - pinhole camera, thin-lens camera with depth of field simulation, panoramic camera for making 360 deg environment maps
-- geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, bezier line, mesh (generated from parametric surface or f(x,y) plots; defined with vertices and faces; import from Wavefront .obj file)
+- geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines, mesh (automatically generated from parametric surface or f(x,y) data; or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__; or loaded from a Wavefront .obj file)
 - parameterized materials shading: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
 - spherical and parallelogram light sources, light emission in volumes
 - environmental light, environment maps, and ambient occlusion
