@@ -1,8 +1,8 @@
 Release history
 ===============
 
-v0.9.0 - unreleased
--------------------
+`v0.9.0`_ - 2020-07-20
+----------------------
 
 NVIDIA driver >= 450 is required to run this release.
 
@@ -377,6 +377,7 @@ v0.1.2.5 - 2019-04-16
 
 Two weeks and some steps from the initial release. Starting changelog relative to this point.
 
+.. _`v0.9.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.9.0
 .. _`v0.8.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.2
 .. _`v0.8.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.1
 .. _`v0.8.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.0
