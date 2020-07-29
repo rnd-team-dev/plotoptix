@@ -24,7 +24,7 @@ def main():
     # try various m: 0.4, 2.48, -1.383, -2.03, ...
 
     m = math.exp(m)
-    k = 1
+    k = 3
 
     xyz = [np.array([0, s * (math.e - 2), 0])]
 

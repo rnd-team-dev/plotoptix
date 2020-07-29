@@ -36,7 +36,7 @@ def main():
                        focal_scale=0.75)
 
     # some exposure and gamma adjutments
-    optix.set_float("tonemap_exposure", 0.8)
+    optix.set_float("tonemap_exposure", 0.9)
     optix.set_float("tonemap_gamma", 1.4)
     optix.add_postproc("Gamma")
 
@@ -108,6 +108,9 @@ def main():
 
     # create a plot of parametric curve calculated above, and open the window
     optix.set_data("plot", pos=pos, r=r, c=0.94, geom="BezierChain", mat="plastic")
+    #optix.set_data("plot", pos=pos, r=r, c=0.94, geom="BSplineQuad", mat="plastic")
+    #optix.set_data("plot", pos=pos, r=r, c=0.94, geom="BSplineCubic", mat="plastic")
+    #optix.set_data("plot", pos=pos, r=r, c=0.94, geom="SegmentChain", mat="plastic")
 
     optix.start()
 
