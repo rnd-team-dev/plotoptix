@@ -105,6 +105,8 @@ class TkOptiX(NpOptiX):
         self._ini_width = width
         self._ini_height = height
 
+        self._dummy_rgba = np.ascontiguousarray(np.zeros((8, 8, 4), dtype=np.uint8))
+
         if PLATFORM == "Windows":
             dpi_scale = self._optix.get_display_scaling()
             self._logger.info("DPI scaling: %d", dpi_scale)
@@ -209,7 +211,10 @@ class TkOptiX(NpOptiX):
 
         self._logger.info("Couple scene to the output window...")
         with self._padlock:
-            pil_img = Image.fromarray(self._img_rgba, mode="RGBX")
+            if self._img_rgba is not None:
+                pil_img = Image.fromarray(self._img_rgba, mode="RGBX")
+            else:
+                pil_img = Image.fromarray(self._dummy_rgba, mode="RGBX")
             self._tk_img = ImageTk.PhotoImage(pil_img)
             self._img_id = self._canvas.create_image(0, 0, image=self._tk_img, anchor=tk.NW)
         ###############################################################
@@ -455,7 +460,10 @@ class TkOptiX(NpOptiX):
             self.resize(width=w, height=h)
 
     def _gui_internal_image_update(self):
-        pil_img = Image.fromarray(self._img_rgba, mode="RGBX")
+        if self._img_rgba is not None:
+            pil_img = Image.fromarray(self._img_rgba, mode="RGBX")
+        else:
+            pil_img = Image.fromarray(self._dummy_rgba, mode="RGBX")
 
         move_to = (0, 0)
         self._image_scale = 1.0

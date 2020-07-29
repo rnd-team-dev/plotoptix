@@ -8,7 +8,7 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 
 import os, platform, sys
 
-from ctypes import cdll, CFUNCTYPE, POINTER, byref, cast, c_float, c_uint, c_int, c_long, c_bool, c_char_p, c_wchar_p, c_void_p
+from ctypes import cdll, CFUNCTYPE, POINTER, byref, cast, c_float, c_uint, c_int, c_long, c_longlong, c_bool, c_char_p, c_wchar_p, c_void_p
 
 BIN_PATH = "bin"
 
@@ -30,7 +30,7 @@ def _load_optix_win():
 
     optix = cdll.LoadLibrary(dll_name)
 
-    optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int, c_void_p, c_int, c_int]
+    optix.create_empty_scene.argtypes = [c_int, c_int, c_void_p, c_int, c_int]
     optix.create_empty_scene.restype = c_bool
 
     optix.get_miss_program.restype = c_int
@@ -38,10 +38,10 @@ def _load_optix_win():
     optix.set_miss_program.argtypes = [c_int, c_bool]
     optix.set_miss_program.restype = c_bool
 
-    optix.create_scene_from_json.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int, c_void_p, c_int]
+    optix.create_scene_from_json.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int]
     optix.create_scene_from_json.restype = c_bool
 
-    optix.create_scene_from_file.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int, c_void_p, c_int]
+    optix.create_scene_from_file.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_int]
     optix.create_scene_from_file.restype = c_bool
 
     optix.load_scene_from_json.argtypes = [c_wchar_p]
@@ -136,8 +136,11 @@ def _load_optix_win():
     optix.load_displacement.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_bool]
     optix.load_displacement.restype = c_bool
 
-    optix.resize_scene.argtypes = [c_int, c_int, c_void_p, c_int]
+    optix.resize_scene.argtypes = [c_int, c_int, POINTER(c_longlong), POINTER(c_int)]
     optix.resize_scene.restype = c_bool
+
+    optix.get_device_buf.argtypes = [POINTER(c_longlong), POINTER(c_int)]
+    optix.get_device_buf.restype = c_bool
 
     optix.get_material.argtypes = [c_wchar_p]
     optix.get_material.restype = c_wchar_p
@@ -530,23 +533,20 @@ class _ClrOptiX:
 
     def destroy_scene(self): self._optix.destroy_scene()
 
-    def create_empty_scene(self, width, height, buf_ptr, buf_size, dev_ptr, dev_size, log_level):
+    def create_empty_scene(self, width, height, dev_ptr, dev_size, log_level):
         return self._optix.create_empty_scene_ptr(width, height,
-                                                  IntPtr.__overloads__[Int64](buf_ptr), buf_size,
                                                   IntPtr.__overloads__[Int64](dev_ptr), dev_size,
                                                   log_level)
 
     def get_miss_program(self): return self._optix.get_miss_program()
     def set_miss_program(self, algorithm, refresh): return self._optix.set_miss_program(algorithm, refresh)
 
-    def create_scene_from_json(self, jstr, width, height, buf_ptr, buf_size, dev_ptr, dev_size):
+    def create_scene_from_json(self, jstr, width, height, dev_ptr, dev_size):
         return self._optix.create_scene_from_json_ptr(jstr, width, height,
-                                                      IntPtr.__overloads__[Int64](buf_ptr), buf_size,
                                                       IntPtr.__overloads__[Int64](dev_ptr), dev_size)
 
-    def create_scene_from_file(self, jstr, width, height, buf_ptr, buf_size, dev_ptr, dev_size):
+    def create_scene_from_file(self, jstr, width, height, dev_ptr, dev_size):
         return self._optix.create_scene_from_file_ptr(jstr, width, height,
-                                                      IntPtr.__overloads__[Int64](buf_ptr), buf_size,
                                                       IntPtr.__overloads__[Int64](dev_ptr), dev_size)
 
     def load_scene_from_json(self, jstr): return self._optix.load_scene_from_json(jstr)
@@ -644,8 +644,14 @@ class _ClrOptiX:
         return self._optix.load_displacement(obj_name, file_name, prescale, baseline, refresh)
 
 
-    def resize_scene(self, width, height, buf_ptr, buf_size):
-        return self._optix.resize_scene_ptr(width, height, IntPtr.__overloads__[Int64](buf_ptr), buf_size)
+    def resize_scene(self, width, height, buf_ptr_ref, gpu_size_ref):
+        return self._optix.resize_scene_ptr(width, height,
+                                            IntPtr.__overloads__[Int64](cast(buf_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(gpu_size_ref, c_void_p).value))
+
+    def get_device_buf(self, buf_ptr_ref, gpu_size_ref):
+        return self._optix.get_device_buf_ptr(IntPtr.__overloads__[Int64](cast(buf_ptr_ref, c_void_p).value),
+                                              IntPtr.__overloads__[Int64](cast(gpu_size_ref, c_void_p).value))
 
     def get_material(self, name): return self._optix.get_material(name)
 

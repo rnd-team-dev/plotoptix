@@ -9,14 +9,14 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 import json, math, logging, os, threading, time
 import numpy as np
 
-from ctypes import byref, c_float, c_uint, c_int
+import ctypes
+from ctypes import byref, c_ubyte, c_float, c_uint, c_int, c_longlong
 from typing import List, Tuple, Callable, Optional, Union, Any
 
 from plotoptix.singleton import Singleton
 from plotoptix._load_lib import load_optix, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
 from plotoptix.utils import _make_contiguous_vector, _make_contiguous_3d
 from plotoptix.enums import *
-
 
 class NpOptiX(threading.Thread, metaclass=Singleton):
     """No-UI raytracer, output to numpy array only.
@@ -119,6 +119,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._height = 0
         if width < 16: width = 16
         if height < 16: height = 16
+
+        self._img_rgba = None      # ndarray wrapped aroud the gpu output bufffer
         self.resize(width, height)
 
         self.geometry_handles = {} # geometry name to handle dictionary
@@ -149,7 +151,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if src is None:                          # create empty scene
             self._logger.info("  - ray-tracer initialization")
-            self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size, device_ptr, device_count, rt_log)
+            self._is_scene_created = self._optix.create_empty_scene(self._width, self._height, device_ptr, device_count, rt_log)
             if self._is_scene_created: self._logger.info("Empty scene ready.")
 
         elif isinstance(src, str):               # create scene from file
@@ -165,7 +167,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 os.chdir(d)
             else: f = src
 
-            self._is_scene_created = self._optix.create_scene_from_file(f, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size, device_ptr, device_count)
+            self._is_scene_created = self._optix.create_scene_from_file(f, self._width, self._height, device_ptr, device_count)
             self._is_scene_created &= self._init_scene_metadata()
             if self._is_scene_created:
                 self._logger.info("Scene loaded correctly.")
@@ -174,7 +176,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         elif isinstance(src, dict):              # create scene from dictionary
             s = json.dumps(src)
-            self._is_scene_created = self._optix.create_scene_from_json(s, self._width, self._height, self._img_rgba.ctypes.data, self._img_rgba.size, device_ptr, device_count)
+            self._is_scene_created = self._optix.create_scene_from_json(s, self._width, self._height, device_ptr, device_count)
             self._is_scene_created &= self._init_scene_metadata()
             if self._is_scene_created: self._logger.info("Scene loaded correctly.")
 
@@ -274,6 +276,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         assert self._is_scene_created, "Scene is not ready, see initialization messages."
 
+        c_buf = c_longlong()
+        c_len = c_int()
+        if self._optix.resize_scene(self._width, self._height, byref(c_buf), byref(c_len)):
+            buf = (((ctypes.c_ubyte * 4) * self._width) * self._height).from_address(c_buf.value)
+            self._img_rgba = np.ctypeslib.as_array(buf)
+        else:
+            msg = "Image buffer setup failed."
+            self._logger.error()
+            if self._raise_on_error: raise RuntimeError(msg)
+
         c1_ptr = self._get_launch_finished_callback()
         r1 = self._optix.register_launch_finished_callback(c1_ptr)
         c2_ptr = self._get_accum_done_callback()
@@ -372,7 +384,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.acquire()
 
             if bps == ChannelDepth.Bps8 and channels == ChannelOrder.RGBA:
-                return self._img_rgba.copy()
+                if self._img_rgba is not None:
+                    return self._img_rgba.copy()
+                else:
+                    a = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint8))
 
             if bps == ChannelDepth.Bps8:
                 if channels == ChannelOrder.BGRA:
@@ -429,12 +444,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         with self._padlock:
             self._width = width
             self._height = height
-            # allocate new buffer
-            img_buffer = np.ascontiguousarray(np.zeros((self._height, self._width, 4), dtype=np.uint8))
-            # update buffer pointer and size in the underlying library
-            self._optix.resize_scene(self._width, self._height, img_buffer.ctypes.data, img_buffer.size)
-            # swap references stored in the raytracer instance
-            self._img_rgba = img_buffer
+
+            # resize the scene, update gpu memory address
+            c_buf = c_longlong()
+            c_len = c_int()
+            if self._optix.resize_scene(self._width, self._height, byref(c_buf), byref(c_len)):
+                buf = (((ctypes.c_ubyte * 4) * self._width) * self._height).from_address(c_buf.value)
+                
+                #buf_from_mem = ctypes.pythonapi.PyMemoryView_FromMemory
+                #buf_from_mem.restype = ctypes.py_object
+                #buf_from_mem.argtypes = (ctypes.c_void_p, ctypes.c_int, ctypes.c_int)
+                #buf = buf_from_mem(c_buf.value, c_len.value, 0x100)
+
+                self._img_rgba = np.ctypeslib.as_array(buf)
+                #self._img_rgba = np.ndarray((height, width, 4), np.uint8, buf, order='C')
+
+                #print(self._img_rgba.shape, self._img_rgba.__array_interface__)
+                #print(self._img_rgba[int(height/2), int(width/2)])
+            else:
+                self._img_rgba = None
 
     @staticmethod
     def _default_initialization(wnd) -> None:
