@@ -8,6 +8,8 @@ Scene
 
 .. autoclass:: plotoptix.enums.Postprocessing
     :members:
+.. autoclass:: plotoptix.enums.DenoiserKind
+    :members:
 .. autoclass:: plotoptix.enums.MissProgram
     :members:
 

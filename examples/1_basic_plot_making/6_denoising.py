@@ -10,6 +10,7 @@ to download denoiser.
 
 import numpy as np
 from plotoptix import TkOptiX
+from plotoptix.enums import DenoiserKind
 
 
 def main():
@@ -60,6 +61,14 @@ def main():
     # can be modified also during the ray tracing.
     # Note: denoising is applied when > 4 accumulation frames are completed.
     optix.set_float("denoiser_blend", 0.25)
+
+    # Denoiser can use various inputs. By default it is raw RGB and surface
+    # albedo, but not always it results with optimal quality at the output.
+    # Try one of the below settings and find best configuration for your scene. 
+    #optix.set_int("denoiser_kind", DenoiserKind.Rgb.value)
+    #optix.set_int("denoiser_kind", DenoiserKind.RgbAlbedo.value)
+    #optix.set_int("denoiser_kind", DenoiserKind.RgbAlbedoNormal.value)
+
     optix.add_postproc("Denoiser")
 
     # Postprocessing stages are applied after AI denoiser (even if configured

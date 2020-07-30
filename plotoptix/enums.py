@@ -532,12 +532,34 @@ class Postprocessing(Enum):
     - denoiser_blend, float, amount of original image mixed with denoiser output
       range: 0 (only denoiser output) to 1 (only original raytracing output)
 
+    - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
+      which buffers are used as denoiser inputs
+
     Examples
     --------
     >>> optix = TkOptiX()
     >>>
-    >>> optix.optix.set_float("denoiser_blend", 0.5)
+    >>> optix.set_float("denoiser_blend", 0.5)
+    >>> optix.set_int("denoiser_kind", DenoiserKind.Rgb.value)
     >>> optix.add_postproc("Denoiser")
+    """
+
+class DenoiserKind(Enum):
+    """Inputs provided to the denoiser.
+    """
+
+    Rgb = 0x2301
+    """Only raw RGB values are used. Use this mode to save memory or
+    if denoising in other modes is not satisfactory.
+    """
+
+    RgbAlbedo = 0x2302
+    """Default mode. Raw RGB values and surface albedo are used.
+    """
+
+    RgbAlbedoNormal = 0x2303
+    """Raw RGB values, surface albedo and normals are used. Use this
+    mode for scenes with fine details of surface structures.
     """
 
 class RtResult(Enum):
