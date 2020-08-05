@@ -9,6 +9,12 @@ Start, configure, get output
 .. automethod:: plotoptix.NpOptiX.save_scene
 .. automethod:: plotoptix.NpOptiX.save_image
 .. automethod:: plotoptix.NpOptiX.get_rt_output
+.. autoattribute:: plotoptix.NpOptiX._img_rgba
+.. autoattribute:: plotoptix.NpOptiX._raw_rgba
+.. autoattribute:: plotoptix.NpOptiX._hit_pos
+.. autoattribute:: plotoptix.NpOptiX._geo_id
+.. autoattribute:: plotoptix.NpOptiX._albedo
+.. autoattribute:: plotoptix.NpOptiX._normal
 .. automethod:: plotoptix.NpOptiX._run_event_loop
 .. automethod:: plotoptix.NpOptiX.run
 .. automethod:: plotoptix.NpOptiX.get_gpu_architecture

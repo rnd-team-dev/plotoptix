@@ -264,10 +264,9 @@ class TkOptiX(NpOptiX):
     def _gui_get_object_at(self, x, y):
         c_handle = c_uint()
         c_index = c_uint()
-        if self._optix.get_object_at(x, y, byref(c_handle), byref(c_index)):
-            handle = c_handle.value
-            index = c_index.value
-            return handle, index
+        c_face = c_uint()
+        if self._optix.get_object_at(x, y, byref(c_handle), byref(c_index), byref(c_face)):
+            return c_handle.value, c_index.value, c_face.value
         else:
             return None, None
 
@@ -275,11 +274,14 @@ class TkOptiX(NpOptiX):
         if not (self._any_mouse or self._any_key):
             x, y = self._get_image_xy(event.x, event.y)
 
-            handle, index = self._gui_get_object_at(x, y)
-            if (handle != 0xFFFFFFFF):
+            handle, index, face = self._gui_get_object_at(x, y)
+            if (handle != 0x3FFFFFFF):
                 hx, hy, hz, hd = self._get_hit_at(x, y)
                 if handle in self.geometry_names:
-                    self._status_action_text.set("%s[%d]: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (self.geometry_names[handle], index, x, y, hx, hy, hz, hd))
+                    if (face != 0xFFFFFFFF):
+                        self._status_action_text.set("%s[f:%d; vtx:%d]: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (self.geometry_names[handle], face, index, x, y, hx, hy, hz, hd))
+                    else:
+                        self._status_action_text.set("%s[%d]: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (self.geometry_names[handle], index, x, y, hx, hy, hz, hd))
                 else:
                     lh = self._optix.get_light_handle(handle, index)
                     if lh in self.light_names:
@@ -325,7 +327,7 @@ class TkOptiX(NpOptiX):
         assert self._is_started, "Raytracing thread not running."
 
         x, y = self._get_image_xy(event.x, event.y)
-        handle, index = self._gui_get_object_at(x, y)
+        handle, index, _ = self._gui_get_object_at(x, y)
 
         if (handle != 0xFFFFFFFF):
 

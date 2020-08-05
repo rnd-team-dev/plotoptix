@@ -9,7 +9,6 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 import json, math, logging, os, threading, time
 import numpy as np
 
-import ctypes
 from ctypes import byref, c_ubyte, c_float, c_uint, c_int, c_longlong
 from typing import List, Tuple, Callable, Optional, Union, Any
 
@@ -67,6 +66,73 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Log output level. Default is ``WARN``.
     """
 
+    _img_rgba = None
+    """Ray-tracing output, 8bps color.
+
+    Shape: ``(height, width, 4)``, ``dtype = np.uint8``, contains RGBA data
+    (alpha channel is now constant, ``255``).
+
+    A ndarray wrapped aroud the gpu bufffer. It enables reading the image with no
+    additional memory copy. Access the buffer in the ``on_launch_finished`` callback
+    or in/after the ``on_rt_accum_done`` callback to avoid reading while the buffer
+    content is being updated.
+    """
+
+    _raw_rgba = None
+    """Ray-tracing output, raw floating point data.
+
+    Shape: ``(height, width, 4)``, ``dtype = np.float32``, contains RGBA data
+    (alpha channel is now constant, ``1.0``).
+
+    A ndarray wrapped aroud the gpu bufffer. It enables reading the image with no
+    additional memory copy. Access the buffer in the ``on_launch_finished`` callback
+    or in/after the ``on_rt_accum_done`` callback to avoid reading while the buffer
+    content is being updated.
+    """
+
+    _hit_pos = None
+    """Hit position.
+
+    Shape: ``(height, width, 4)``, ``dtype = np.float32``, contains XYZD data, where
+    XYZ is the hit 3D position and D channel is the hit distance to camera plane.
+    """
+
+    _geo_id = None
+    """Object info.
+    
+    Encodes the object handle and primitive index (or vertex/face index for meshes)
+    for each pixel in the output image.
+
+    Shape: ``(height, width, 2)``, ``dtype = np.int32``, contains:
+       - ``_geo_id[h, w, 0] = handle | (vtx_id << 30)``, where ``handle`` is the object
+         handle, ``vtx_id`` is the vertex index for the triangular face that was hit
+         (values are ``0``, ``1``, ``2``);
+       - ``_geo_id[h, w, 1] = prim_idx``, where ``prim_idx`` is the primitive index in
+         a data set, or face index of a mesh.
+    """
+
+    _albedo = None
+    """Surface albedo.
+
+    Shape: ``(height, width, 4)``, ``dtype = np.float32``, contains RGBA data
+    (alpha channel is now constant, ``0.0``).
+
+    Available only when the denoiser is enabled (:attr:`plotoptix.enums.Postprocessing.Denoiser`),
+    and set to :attr:`plotoptix.enums.DenoiserKind.RgbAlbedo`
+    or :attr:`plotoptix.enums.DenoiserKind.RgbAlbedoNormal` mode.
+    """
+
+    _normal = None
+    """Surface normal.
+
+    Shape: ``(height, width, 4)``, ``dtype = np.float32``, contains XYZ0 data
+    (4'th channel is constant, ``0.0``).
+
+    Surface normal vector in camera space. Available only when the denoiser is enabled
+    (:attr:`plotoptix.enums.Postprocessing.Denoiser`), and set to
+    :attr:`plotoptix.enums.DenoiserKind.RgbAlbedoNormal` mode.
+    """
+
     def __init__(self,
                  src: Optional[Union[str, dict]] = None,
                  on_initialization = None,
@@ -120,7 +186,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if width < 16: width = 16
         if height < 16: height = 16
 
-        self._img_rgba = None      # ndarray wrapped aroud the gpu output bufffer
         self.resize(width, height)
 
         self.geometry_handles = {} # geometry name to handle dictionary
@@ -265,6 +330,52 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if self._raise_on_error: raise TimeoutError(msg)
 
+    def update_device_buffers(self):
+        """Update buffer pointers.
+
+        Use after changing denoiser mode since albedo and normal
+        buffer wrappers are not updated automatically.
+        """
+        c_buf = c_longlong()
+        c_len = c_int()
+        r_buf = c_longlong()
+        r_len = c_int()
+        h_buf = c_longlong()
+        h_len = c_int()
+        g_buf = c_longlong()
+        g_len = c_int()
+        a_buf = c_longlong()
+        a_len = c_int()
+        n_buf = c_longlong()
+        n_len = c_int()
+        if self._optix.get_device_buffers(
+                                    byref(c_buf), byref(c_len),
+                                    byref(r_buf), byref(r_len),
+                                    byref(h_buf), byref(h_len),
+                                    byref(g_buf), byref(g_len),
+                                    byref(a_buf), byref(a_len),
+                                    byref(n_buf), byref(n_len)):
+            buf = (((c_ubyte * 4) * self._width) * self._height).from_address(c_buf.value)
+            self._img_rgba = np.ctypeslib.as_array(buf)
+            buf = (((c_float * 4) * self._width) * self._height).from_address(r_buf.value)
+            self._raw_rgba = np.ctypeslib.as_array(buf)
+            buf = (((c_float * 4) * self._width) * self._height).from_address(h_buf.value)
+            self._hit_pos = np.ctypeslib.as_array(buf)
+            buf = (((c_uint * 2) * self._width) * self._height).from_address(g_buf.value)
+            self._geo_id = np.ctypeslib.as_array(buf)
+            if a_len.value > 0:
+                buf = (((c_float * 4) * self._width) * self._height).from_address(a_buf.value)
+                self._albedo = np.ctypeslib.as_array(buf)
+            else: self._albedo = None
+            if n_len.value > 0:
+                buf = (((c_float * 4) * self._width) * self._height).from_address(n_buf.value)
+                self._normal = np.ctypeslib.as_array(buf)
+            else: self._normal = None
+        else:
+            msg = "Image buffers setup failed."
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
     def run(self):
         """Starts UI event loop.
 
@@ -278,12 +389,42 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         c_buf = c_longlong()
         c_len = c_int()
-        if self._optix.resize_scene(self._width, self._height, byref(c_buf), byref(c_len)):
-            buf = (((ctypes.c_ubyte * 4) * self._width) * self._height).from_address(c_buf.value)
+        r_buf = c_longlong()
+        r_len = c_int()
+        h_buf = c_longlong()
+        h_len = c_int()
+        g_buf = c_longlong()
+        g_len = c_int()
+        a_buf = c_longlong()
+        a_len = c_int()
+        n_buf = c_longlong()
+        n_len = c_int()
+        if self._optix.resize_scene(self._width, self._height,
+                                    byref(c_buf), byref(c_len),
+                                    byref(r_buf), byref(r_len),
+                                    byref(h_buf), byref(h_len),
+                                    byref(g_buf), byref(g_len),
+                                    byref(a_buf), byref(a_len),
+                                    byref(n_buf), byref(n_len)):
+            buf = (((c_ubyte * 4) * self._width) * self._height).from_address(c_buf.value)
             self._img_rgba = np.ctypeslib.as_array(buf)
+            buf = (((c_float * 4) * self._width) * self._height).from_address(r_buf.value)
+            self._raw_rgba = np.ctypeslib.as_array(buf)
+            buf = (((c_float * 4) * self._width) * self._height).from_address(h_buf.value)
+            self._hit_pos = np.ctypeslib.as_array(buf)
+            buf = (((c_uint * 2) * self._width) * self._height).from_address(g_buf.value)
+            self._geo_id = np.ctypeslib.as_array(buf)
+            if a_len.value > 0:
+                buf = (((c_float * 4) * self._width) * self._height).from_address(a_buf.value)
+                self._albedo = np.ctypeslib.as_array(buf)
+            else: self._albedo = None
+            if n_len.value > 0:
+                buf = (((c_float * 4) * self._width) * self._height).from_address(n_buf.value)
+                self._normal = np.ctypeslib.as_array(buf)
+            else: self._normal = None
         else:
-            msg = "Image buffer setup failed."
-            self._logger.error()
+            msg = "Image buffers setup failed."
+            self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
         c1_ptr = self._get_launch_finished_callback()
@@ -299,7 +440,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if r1 & r2 & r3 & r4 & r5: self._logger.info("Callbacks registered.")
         else:
             msg = "Callbacks setup failed."
-            self._logger.error()
+            self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
         self._run_event_loop()
@@ -448,8 +589,24 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             # resize the scene, update gpu memory address
             c_buf = c_longlong()
             c_len = c_int()
-            if self._optix.resize_scene(self._width, self._height, byref(c_buf), byref(c_len)):
-                buf = (((ctypes.c_ubyte * 4) * self._width) * self._height).from_address(c_buf.value)
+            r_buf = c_longlong()
+            r_len = c_int()
+            h_buf = c_longlong()
+            h_len = c_int()
+            g_buf = c_longlong()
+            g_len = c_int()
+            a_buf = c_longlong()
+            a_len = c_int()
+            n_buf = c_longlong()
+            n_len = c_int()
+            if self._optix.resize_scene(self._width, self._height,
+                                    byref(c_buf), byref(c_len),
+                                    byref(r_buf), byref(r_len),
+                                    byref(h_buf), byref(h_len),
+                                    byref(g_buf), byref(g_len),
+                                    byref(a_buf), byref(a_len),
+                                    byref(n_buf), byref(n_len)):
+                buf = (((c_ubyte * 4) * self._width) * self._height).from_address(c_buf.value)
                 
                 #buf_from_mem = ctypes.pythonapi.PyMemoryView_FromMemory
                 #buf_from_mem.restype = ctypes.py_object
@@ -461,8 +618,27 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 #print(self._img_rgba.shape, self._img_rgba.__array_interface__)
                 #print(self._img_rgba[int(height/2), int(width/2)])
+
+                buf = (((c_float * 4) * self._width) * self._height).from_address(r_buf.value)
+                self._raw_rgba = np.ctypeslib.as_array(buf)
+                buf = (((c_float * 4) * self._width) * self._height).from_address(h_buf.value)
+                self._hit_pos = np.ctypeslib.as_array(buf)
+                buf = (((c_uint * 2) * self._width) * self._height).from_address(g_buf.value)
+                self._geo_id = np.ctypeslib.as_array(buf)
+                if a_len.value > 0:
+                    buf = (((c_float * 4) * self._width) * self._height).from_address(a_buf.value)
+                    self._albedo = np.ctypeslib.as_array(buf)
+                else: self._albedo = None
+                if n_len.value > 0:
+                    buf = (((c_float * 4) * self._width) * self._height).from_address(n_buf.value)
+                    self._normal = np.ctypeslib.as_array(buf)
+                else: self._normal = None
             else:
                 self._img_rgba = None
+                self._hit_pos = None
+                self._geo_id = None
+                self._albedo = None
+                self._normal = None
 
     @staticmethod
     def _default_initialization(wnd) -> None:
@@ -504,7 +680,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if self._is_started:
             if rt_result < RtResult.NoUpdates.value:
                 #self._logger.info("Launch finished.")
-                for c in self._launch_finished_cb: c(self)
+                with self._padlock:
+                    for c in self._launch_finished_cb: c(self)
     def _get_launch_finished_callback(self):
         def func(rt_result: int): self._launch_finished_callback(rt_result)
         return PARAM_INT_CALLBACK(func)
@@ -552,7 +729,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         if self._is_started:
             self._logger.info("RT accumulation finished.")
-            for c in self._rt_accum_done_cb: c(self)
+            with self._padlock:
+                for c in self._rt_accum_done_cb: c(self)
     def _get_accum_done_callback(self):
         def func(): self._accum_done_callback()
         return PARAM_NONE_CALLBACK(func)

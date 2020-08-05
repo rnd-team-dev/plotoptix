@@ -59,6 +59,7 @@ Features
 - GPU acceleration using RT Cores and everything else what comes with `OptiX 7.1 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - 8/16/32bps(hdr) image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
+- zero-copy access to GPU buffers wrapped in ndarrays: 8/32bps image, hit and object info, albedo, normals
 - hardware accelerated video output to MP4 file format using `NVENC 9.0 <https://developer.nvidia.com/nvidia-video-codec-sdk>`__
 - Tkinter based simple GUI window or headless raytracer
 - configurable multi-GPU support

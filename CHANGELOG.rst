@@ -1,6 +1,15 @@
 Release history
 ===============
 
+v0.9.1 - unreleased
+-------------------
+
+Added
+~~~~~
+
+- zero-copy access to device buffers wrapped in ndarrays: 8/32bps image, hit and object info, albedo, normals
+- configurable denoiser inputs: rgb-only, rgb+albedo, rgb+albedo+normals
+
 `v0.9.0`_ - 2020-07-20
 ----------------------
 

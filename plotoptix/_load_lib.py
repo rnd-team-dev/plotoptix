@@ -136,8 +136,11 @@ def _load_optix_win():
     optix.load_displacement.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_bool]
     optix.load_displacement.restype = c_bool
 
-    optix.resize_scene.argtypes = [c_int, c_int, POINTER(c_longlong), POINTER(c_int)]
+    optix.resize_scene.argtypes = [c_int, c_int, POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int)]
     optix.resize_scene.restype = c_bool
+
+    optix.get_device_buffers.argtypes = [POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int)]
+    optix.get_device_buffers.restype = c_bool
 
     optix.get_device_buf.argtypes = [POINTER(c_longlong), POINTER(c_int)]
     optix.get_device_buf.restype = c_bool
@@ -399,7 +402,7 @@ def _load_optix_win():
     optix.scale_light.restype = c_bool
 
 
-    optix.get_object_at.argtypes = [c_int, c_int, POINTER(c_uint), POINTER(c_uint)]
+    optix.get_object_at.argtypes = [c_int, c_int, POINTER(c_uint), POINTER(c_uint), POINTER(c_uint)]
     optix.get_object_at.restype = c_bool
 
     optix.get_hit_at.argtypes = [c_int, c_int, POINTER(c_float), POINTER(c_float), POINTER(c_float), POINTER(c_float)]
@@ -644,10 +647,47 @@ class _ClrOptiX:
         return self._optix.load_displacement(obj_name, file_name, prescale, baseline, refresh)
 
 
-    def resize_scene(self, width, height, buf_ptr_ref, gpu_size_ref):
+    def resize_scene(self, width, height,
+                     img_ptr_ref, img_size_ref,
+                     raw_ptr_ref, raw_size_ref,
+                     hit_ptr_ref, hit_size_ref,
+                     geo_ptr_ref, geo_size_ref,
+                     albedo_ptr_ref, albedo_size_ref,
+                     normal_ptr_ref, normal_size_ref):
         return self._optix.resize_scene_ptr(width, height,
-                                            IntPtr.__overloads__[Int64](cast(buf_ptr_ref, c_void_p).value),
-                                            IntPtr.__overloads__[Int64](cast(gpu_size_ref, c_void_p).value))
+                                            IntPtr.__overloads__[Int64](cast(img_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(img_size_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(raw_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(raw_size_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(hit_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(hit_size_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(geo_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(geo_size_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(albedo_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(albedo_size_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(normal_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(normal_size_ref, c_void_p).value))
+
+    def get_device_buffers(self, width, height,
+                     img_ptr_ref, img_size_ref,
+                     raw_ptr_ref, raw_size_ref,
+                     hit_ptr_ref, hit_size_ref,
+                     geo_ptr_ref, geo_size_ref,
+                     albedo_ptr_ref, albedo_size_ref,
+                     normal_ptr_ref, normal_size_ref):
+        return self._optix.get_device_buffers_ptr(
+                                            IntPtr.__overloads__[Int64](cast(img_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(img_size_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(raw_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(raw_size_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(hit_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(hit_size_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(geo_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(geo_size_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(albedo_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(albedo_size_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(normal_ptr_ref, c_void_p).value),
+                                            IntPtr.__overloads__[Int64](cast(normal_size_ref, c_void_p).value))
 
     def get_device_buf(self, buf_ptr_ref, gpu_size_ref):
         return self._optix.get_device_buf_ptr(IntPtr.__overloads__[Int64](cast(buf_ptr_ref, c_void_p).value),
@@ -938,10 +978,11 @@ class _ClrOptiX:
 
     def scale_light(self, name, s): return self._optix.scale_light(name, s)
 
-    def get_object_at(self, x, y, h_ref, idx_ref):
+    def get_object_at(self, x, y, h_ref, idx_ref, fece_ref):
         return self._optix.get_object_at_ptr(x, y,
                                              IntPtr.__overloads__[Int64](cast(h_ref, c_void_p).value),
-                                             IntPtr.__overloads__[Int64](cast(idx_ref, c_void_p).value))
+                                             IntPtr.__overloads__[Int64](cast(idx_ref, c_void_p).value),
+                                             IntPtr.__overloads__[Int64](cast(face_ref, c_void_p).value))
 
     def get_hit_at(self, x, y, px_ref, py_ref, pz_ref, d_ref):
         return self._optix.get_hit_at_ptr(x, y,
