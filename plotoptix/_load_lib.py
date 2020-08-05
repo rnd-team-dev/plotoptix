@@ -978,7 +978,7 @@ class _ClrOptiX:
 
     def scale_light(self, name, s): return self._optix.scale_light(name, s)
 
-    def get_object_at(self, x, y, h_ref, idx_ref, fece_ref):
+    def get_object_at(self, x, y, h_ref, idx_ref, face_ref):
         return self._optix.get_object_at_ptr(x, y,
                                              IntPtr.__overloads__[Int64](cast(h_ref, c_void_p).value),
                                              IntPtr.__overloads__[Int64](cast(idx_ref, c_void_p).value),
