@@ -11,7 +11,7 @@
 .address_size 64
 
 	// .globl	__closesthit__dummy
-.const .align 8 .b8 params[264];
+.const .align 8 .b8 params[280];
 
 .visible .entry __closesthit__dummy(
 

@@ -1,14 +1,21 @@
 Release history
 ===============
 
-v0.9.1 - unreleased
--------------------
+`v0.10.0`_ - 2020-08-17
+-----------------------
 
 Added
 ~~~~~
 
+- fisheye camera, custom projection camera
+- thin lens and fisheye camera variants supporting chromatic aberration (transverse and longitudinal)
 - zero-copy access to device buffers wrapped in ndarrays: 8/32bps image, hit and object info, albedo, normals
 - configurable denoiser inputs: rgb-only, rgb+albedo, rgb+albedo+normals
+
+Fixed
+~~~~~
+
+- more accurate light dispersion
 
 `v0.9.0`_ - 2020-07-20
 ----------------------
@@ -371,6 +378,8 @@ Changed
 `v0.1.3`_ - 2019-04-19
 ----------------------
 
+Two weeks and some steps from the initial release. Starting changelog.
+
 Added
 ~~~~~
 
@@ -381,11 +390,8 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
-v0.1.2.5 - 2019-04-16
----------------------
 
-Two weeks and some steps from the initial release. Starting changelog relative to this point.
-
+.. _`v0.10.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.10.0
 .. _`v0.9.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.9.0
 .. _`v0.8.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.2
 .. _`v0.8.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.8.1

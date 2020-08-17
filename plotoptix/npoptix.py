@@ -2279,9 +2279,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                      aperture_radius: float = 0.1,
                      aperture_fract: float = 0.15,
                      focal_scale: float = 1.0,
+                     chroma_l: float = 0.05,
+                     chroma_t: float = 0.01,
                      fov: float = 35.0,
                      blur: float = 1,
                      glock: bool = False,
+                     textures: Optional[Any] = None,
                      make_current: bool = True) -> None:
         """Setup new camera with given name.
 
@@ -2305,7 +2308,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Fraction of blind central spot of the aperture (results with ring-like
             bokeh if > 0). Cannot be changed after construction.
         focal_scale : float, optional
-            Focus distance / (eye - target).length.
+            Focusing distance, relative to ``eye - target`` length.
+        chroma_l : float, optional
+            Longitudinal chromatic aberration strength, relative variation of the focusing
+            distance for different wavelengths. Use be a small positive value << 1.0. Default
+            is ``0.05``, use ``0.0`` for no aberration.
+        chroma_t : float, optional
+            Transverse chromatic aberration strength, relative variation of the lens
+            magnification for different wavelengths. Use be a small positive value << 1.0.
+            Default is ``0.01``, use ``0.0`` for no aberration.
         fov : float, optional
             Field of view in degrees.
         blur : float, optional
@@ -2313,7 +2324,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Range is (0; 1>, lower values result with a higher motion blur, value
             1.0 turns off the blur (default). Cannot be changed after construction.
         glock : bool, optional
-            Gimbal lock state of the new camera. 
+            Gimbal lock state of the new camera.
+        textures : array_like, optional
+            List of textures used by the camera ray generation program.
         make_current : bool, optional
             Automatically switch to this camera if set to ``True``.
         """
@@ -2343,11 +2356,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
+        tex_list = ""
+        if textures is not None: tex_list = ";".join(textures)
+
         h = self._optix.setup_camera(name, cam_type.value,
                                      eye_ptr, target_ptr, up.ctypes.data,
                                      aperture_radius, aperture_fract,
-                                     focal_scale, fov, blur, glock,
-                                     make_current)
+                                     focal_scale, chroma_l, chroma_t,
+                                     fov, blur, glock,
+                                     tex_list, make_current)
         if h > 0:
             self._logger.info("Camera %s handle: %d.", name, h)
             self.camera_handles[name] = h
@@ -2984,7 +3001,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Setup new area (parallelogram) light.
 
         Convenience method to setup parallelogram light with ``center`` and ``target`` 3D points,
-        and scalar lenghts of sides ``u`` and ``v``.
+        and scalar lengths of sides ``u`` and ``v``.
 
         Parameters
         ----------
@@ -3143,7 +3160,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Setup new area (parallelogram) light.
 
         Convenience method to update parallelogram light with ``center`` and ``target`` 3D points,
-        and scalar lenghts of sides ``u`` and ``v``.
+        and scalar lengths of sides ``u`` and ``v``.
 
         Parameters
         ----------

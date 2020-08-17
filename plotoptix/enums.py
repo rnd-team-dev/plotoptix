@@ -305,13 +305,50 @@ class Camera(Enum):
     """
 
     DoF = 1
-    """Perspective camera with depth of field simulation.
+    """Thin lens perspective camera with depth of field simulation.
+
+    This camera produces ideal, straight perspective lines.
+    """
+
+    ThinLens = 1
+    """Alias for DoF.
+    
+    Actually a better name that should replace DoF at some point.
     """
 
     Panoramic = 2
-    """360 deg panoramic camera.
+    """360 deg panoramic (equirectangular) camera.
     """
+
     #Ortho = 3
+
+    Fisheye = 4
+    """Fisheye (equisolid) camera with depth of field simulation.
+
+    This camera renders a fisheye lens distortion of perspective lines. It
+    also focuses on a sphere rather than on a plane like ThinLens camera.
+    """
+
+    ThinLensChroma = 5
+    """Thin lens perspective camera with depth of field and chromatic abberation simulation.
+
+    This camera produces ideal, straight perspective lines.
+    """
+
+    FisheyeChroma = 6
+    """Fisheye (equisolid) camera with depth of field and chromatic abberation simulation.
+
+    This camera renders a fisheye lens distortion of perspective lines. It
+    also focuses on a sphere rather than on a plane like thin lens camera.
+    """
+
+    CustomProj = 98
+    """Custom projection camera.
+    """
+
+    TexTest = 99
+    """Test texture mapping in the camera shader.
+    """
 
 class LightShading(Enum):
     """Light shading program.

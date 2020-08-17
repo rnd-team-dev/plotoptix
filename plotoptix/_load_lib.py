@@ -265,7 +265,7 @@ def _load_optix_win():
     optix.set_coordinates_geom.argtypes = [c_int, c_float]
     optix.set_coordinates_geom.restype = c_bool
 
-    optix.setup_camera.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_bool, c_bool]
+    optix.setup_camera.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_bool, c_wchar_p, c_bool]
     optix.setup_camera.restype = c_int
 
     optix.update_camera.argtypes = [c_wchar_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float]
@@ -850,12 +850,12 @@ class _ClrOptiX:
 
     def set_coordinates_geom(self, mode, thickness): return self._optix.set_coordinates_geom(mode, thickness)
 
-    def setup_camera(self, name, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, fov, blur, glock, make_current):
+    def setup_camera(self, name, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, blur, glock, textures, make_current):
         return self._optix.setup_camera_ptr(name, camera_type,
                                             IntPtr.__overloads__[Int64](eye),
                                             IntPtr.__overloads__[Int64](target),
                                             IntPtr.__overloads__[Int64](up),
-                                            aperture_r, aperture_fract, focal_scale, fov, blur, glock, make_current)
+                                            aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, blur, glock, textures, make_current)
 
     def update_camera(self, name, eye, target, up, aperture_r, focal_scale, fov):
         return self._optix.update_camera_ptr(name,

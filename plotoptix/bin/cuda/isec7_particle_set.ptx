@@ -11,7 +11,7 @@
 .address_size 64
 
 	// .globl	__intersection__particles
-.const .align 8 .b8 params[264];
+.const .align 8 .b8 params[280];
 
 .visible .entry __intersection__particles(
 
@@ -902,7 +902,7 @@ BB3_8:
 	mul.ftz.f32 	%f165, %f164, %f164;
 	setp.ltu.ftz.f32	%p16, %f9, %f165;
 	selp.f32	%f29, 0fBF800000, 0f3F800000, %p16;
-	ld.const.f32 	%f166, [params+196];
+	ld.const.f32 	%f166, [params+76];
 	mul.ftz.f32 	%f30, %f166, 0f3F000000;
 
 BB3_9:

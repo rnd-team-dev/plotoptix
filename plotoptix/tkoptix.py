@@ -345,7 +345,12 @@ class TkOptiX(NpOptiX):
                     hx, hy, hz, hd = self._get_hit_at(x, y)
                     if hd > 0:
                         self._status_action_text.set("Focused at (%f %f %f), distance %f" % (hx, hy, hz, hd))
-                        _ = self._optix.set_camera_focal_length(hd)
+                        cam_info = self.get_camera()
+                        if "fisheye" in cam_info["RayGeneration"]:
+                            w = np.array([hx, hy, hz], dtype=np.float32) - np.array(cam_info["Eye"], dtype=np.float32)
+                            _ = self._optix.set_camera_focal_length(np.linalg.norm(w))
+                        else:
+                            _ = self._optix.set_camera_focal_length(hd)
 
                 return
 
