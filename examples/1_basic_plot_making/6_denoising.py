@@ -34,8 +34,8 @@ def main():
     optix = TkOptiX() # create and configure, show the window later
 
     optix.set_param(max_accumulation_frames=50)  # accumulate up to 50 frames
-    optix.set_background(0)          # black background
-    optix.set_ambient([0, 0.2, 0.4]) # cold ambient light
+    optix.set_background(0)             # black background
+    optix.set_ambient([0.1, 0.15, 0.2]) # cold ambient light
 
     # add plot geometry
     size_u = 0.98 * (rx[1] - rx[0]) / (n - 1)
@@ -49,7 +49,7 @@ def main():
     optix.setup_camera("cam1", cam_type="DoF",
                        eye=[-0.3, 2, -0.3], target=[1, 1, 1],
                        fov=60, focal_scale=0.85)
-    optix.setup_light("light1", pos=[3, 4.5, 1], color=[6, 5, 4.5], radius=2)
+    optix.setup_light("light1", pos=[3, 5.5, 1], color=[6.5, 5, 4.5], radius=2)
 
 
     # AI denoiser includes exposure and gamma corection, configured with the

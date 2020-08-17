@@ -26,7 +26,7 @@ def main():
 
     optix = TkOptiX() # create and configure, show the window later
 
-    optix.set_param(max_accumulation_frames=5)  # accumulate up to 50 frames
+    optix.set_param(max_accumulation_frames=50)  # accumulate up to 50 frames
     optix.set_background(0)          # black background
     optix.set_ambient([0, 0.2, 0.4]) # cold ambient light
 
