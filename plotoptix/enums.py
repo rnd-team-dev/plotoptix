@@ -326,7 +326,7 @@ class Camera(Enum):
     """Fisheye (equisolid) camera with depth of field simulation.
 
     This camera renders a fisheye lens distortion of perspective lines. It
-    also focuses on a sphere rather than on a plane like ThinLens camera.
+    also focuses on a sphere rather than on a plane like thin lens camera.
     """
 
     ThinLensChroma = 5
@@ -344,6 +344,14 @@ class Camera(Enum):
 
     CustomProj = 98
     """Custom projection camera.
+
+    Ray angles are defined with a 2D texture ``[height, width, 2]`` composed of angles
+    ``[horizontal, vertical]`` w.r.t. the camera axis. Angles should be provided in radians,
+    and normalized so the value ``1.0`` is corresponding to ``pi``. Negative angles are to
+    the left (horizontal) and down (vertical) w.r.t. the camera axis.
+
+    Exact values from the texture are used if the render size and texture size are the
+    same. Otherwise ray angles are interpolated.
     """
 
     TexTest = 99
