@@ -202,6 +202,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         else: self._initialization_cb = []
         self.set_scene_compute_cb(on_scene_compute)
         self.set_rt_completed_cb(on_rt_completed)
+        self.set_rt_starting_cb(cb=None)
         self.set_launch_finished_cb(on_launch_finished)
         self.set_accum_done_cb(on_rt_accum_done)
 
@@ -688,6 +689,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     ###########################################################################
 
     ###########################################################################
+    def set_rt_starting_cb(self, cb) -> None:
+        """Set callback function(s) executed before each frame raytracing.
+
+        Parameters
+        ----------
+        cb : callable or list
+            Callable or list of callables to set as the rt starting callback.
+        """
+        with self._padlock:
+            if cb is not None: self._rt_starting_cb = self._make_list_of_callable(cb)
+            else: self._rt_starting_cb = []
+
     def _scene_rt_starting_callback(self) -> None:
         """
         Callback executed before starting frame raytracing. Appropriate to
@@ -697,7 +710,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         This callback is executed in the raytracing thread and should not
         compute extensively.
         """
-        pass
+        for c in self._rt_starting_cb: c(self)
     def _get_scene_rt_starting_callback(self):
         def func(): self._scene_rt_starting_callback()
         return PARAM_NONE_CALLBACK(func)

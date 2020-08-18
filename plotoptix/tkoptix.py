@@ -675,5 +675,6 @@ class TkOptiX(NpOptiX):
 
     def _scene_rt_starting_callback(self):
         if self._is_started:
+            super()._scene_rt_starting_callback()
             self._canvas.event_generate("<<ApplyUiEdits>>", when="now")
     ###########################################################################
