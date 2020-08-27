@@ -50,7 +50,7 @@ Features
 --------
 
 - progressive path tracing with explicit light sampling
-- pinhole camera, thin-lens and fisheye cameras with depth of field and chromatic aberration simulation, panoramic camera for making 360 deg environment maps, user-defined projection camera for shooting rays at any angle
+- cameras: orthogonal, pinhole, thin-lens and fisheye with depth of field and chromatic aberration simulation, panoramic camera for making 360 deg environment maps, user-defined projection for shooting rays at any angle
 - geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines, mesh (automatically generated from parametric surface or f(x,y) data; or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__; or loaded from a Wavefront .obj file)
 - parameterized materials shading: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
 - spherical and parallelogram light sources, light emission in volumes
