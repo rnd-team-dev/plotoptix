@@ -1,6 +1,14 @@
 Release history
 ===============
 
+v0.10.1 - unreleased
+--------------------
+
+Added
+~~~~~
+
+- enabled orthogonal projection camera
+
 `v0.10.0`_ - 2020-08-17
 -----------------------
 
