@@ -320,7 +320,9 @@ class Camera(Enum):
     """360 deg panoramic (equirectangular) camera.
     """
 
-    #Ortho = 3
+    Ortho = 3
+    """Orthogonal projection camera.
+    """
 
     Fisheye = 4
     """Fisheye (equisolid) camera with depth of field simulation.
