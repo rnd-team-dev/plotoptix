@@ -9,6 +9,11 @@ Added
 
 - enabled orthogonal projection camera
 
+Fixed
+~~~~~
+
+- crash on empty geometries that appeared with the driver 452
+
 `v0.10.0`_ - 2020-08-17
 -----------------------
 
