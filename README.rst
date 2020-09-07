@@ -53,8 +53,7 @@ Features
 - cameras: orthogonal, pinhole, thin-lens and fisheye with depth of field and chromatic aberration simulation, panoramic camera for making 360 deg environment maps, user-defined projection for shooting rays at any angle
 - geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines, mesh (automatically generated from parametric surface or f(x,y) data; or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__; or loaded from a Wavefront .obj file)
 - parameterized materials shading: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
-- spherical and parallelogram light sources, light emission in volumes
-- environmental light, environment maps, and ambient occlusion
+- spherical and parallelogram light sources, light emission in volumes, uniform environmental light or environment map
 - post-processing: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
 - GPU acceleration using RT Cores and everything else what comes with `OptiX 7.1 <https://developer.nvidia.com/optix>`__
 - callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
