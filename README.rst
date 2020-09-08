@@ -50,16 +50,15 @@ Features
 --------
 
 - progressive path tracing with explicit light sampling
-- cameras: orthogonal, pinhole, thin-lens and fisheye with depth of field and chromatic aberration simulation, panoramic camera for making 360 deg environment maps, user-defined projection for shooting rays at any angle
-- geometries: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines, mesh (automatically generated from parametric surface or f(x,y) data; or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__; or loaded from a Wavefront .obj file)
-- parameterized materials shading: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
-- spherical and parallelogram light sources, light emission in volumes
-- environmental light, environment maps, and ambient occlusion
-- post-processing: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
-- GPU acceleration using RT Cores and everything else what comes with `OptiX 7.1 <https://developer.nvidia.com/optix>`__
-- callbacks at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
+- *cameras*: orthogonal, pinhole, thin-lens and fisheye with depth of field and chromatic aberration simulation, panoramic camera for making 360 deg environment maps, user-defined projection for shooting rays at any angle
+- *geometries*: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines, mesh (automatically generated from parametric surface or f(x,y) data; or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__; or loaded from a Wavefront .obj file)
+- *materials*: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
+- *light sources*: spherical and parallelogram, light emission in volumes, uniform environmental light or environment map
+- *post-processing*: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
+- *callbacks*: at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - 8/16/32bps(hdr) image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
 - zero-copy access to GPU buffers wrapped in ndarrays: 8/32bps image, hit and object info, albedo, normals
+- GPU acceleration using RT Cores and everything else what comes with `OptiX 7.1 <https://developer.nvidia.com/optix>`__
 - hardware accelerated video output to MP4 file format using `NVENC 9.0 <https://developer.nvidia.com/nvidia-video-codec-sdk>`__
 - Tkinter based simple GUI window or headless raytracer
 - configurable multi-GPU support
