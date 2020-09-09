@@ -18,8 +18,8 @@ PlotOptiX
 
 PlotOptiX is a 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
-of several basic shapes, or projected onto the surfaces of objects in form of a color textures and displacement maps. All finished with
-a photorealistic lighting and depth of field.
+of several basic shapes, or projected onto the surfaces of objects in form of a color textures and displacement maps. Triangular meshes,
+generated in the code or loaded from a file, are supported as well. All finished with a photorealistic lighting and depth of field.
 
 No need to write shaders, intersection algorithms, handle 3D scene technicalities. Basic usage is even more simple than with
 `matplotlib <https://matplotlib.org/gallery/mplot3d/scatter3d.html>`__:
@@ -51,7 +51,7 @@ Features
 
 - progressive path tracing with explicit light sampling
 - *cameras*: orthogonal, pinhole, thin-lens and fisheye with depth of field and chromatic aberration simulation, panoramic camera for making 360 deg environment maps, user-defined projection for shooting rays at any angle
-- *geometries*: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines, mesh (automatically generated from parametric surface or f(x,y) data; or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__; or loaded from a Wavefront .obj file)
+- *geometries*: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines; *meshes*: automatically generated from parametric surface or f(x,y) data, or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__, or loaded from a Wavefront .obj file
 - *materials*: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
 - *light sources*: spherical and parallelogram, light emission in volumes, uniform environmental light or environment map
 - *post-processing*: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
