@@ -37,11 +37,11 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
    plot.set_data("my plot", xyz, r=r)
    plot.show()
 
-... but PlotOptiX is much faster on large data and, with all the raytraced shades and DoF, more readable and eye catching.
+... but PlotOptiX is much faster on large data, and, with all the raytraced shades and DoF, more readable and eye catching.
 
 Check `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__ for practical code samples and `documentation pages <https://plotoptix.rnd.team>`__ for a complete API reference.
 
-PlotOptiX is based on `NVIDIA OptiX 7.1 <https://developer.nvidia.com/optix>`_ framework. It is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. PlotOptiX makes use of RTX-capable GPU's.
+PlotOptiX is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. PlotOptiX is based on `NVIDIA OptiX 7.1 <https://developer.nvidia.com/optix>`_ framework and makes use of RTX-capable GPU's.
 
 You can quickly display data in a simple plot:
 
@@ -58,7 +58,7 @@ Features
 
 - progressive path tracing with explicit light sampling
 - *cameras*: orthogonal, pinhole, thin-lens and fisheye with depth of field and chromatic aberration simulation, panoramic camera for making 360 deg environment maps, user-defined projection for shooting rays at any angle
-- *geometries*: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines; *meshes*: automatically generated from parametric surface or f(x,y) data, or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__, or loaded from a Wavefront .obj file
+- *geometries*: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines; *meshes*: automatically generated from a parametric surface or f(x,y) data, or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__, or loaded from a Wavefront .obj file
 - *materials*: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
 - *light sources*: spherical and parallelogram, light emission in volumes, uniform environmental light or environment map
 - *post-processing*: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
