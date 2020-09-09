@@ -43,8 +43,15 @@ Check `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master
 
 PlotOptiX is based on `NVIDIA OptiX 7.1 <https://developer.nvidia.com/optix>`_ framework. It is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. PlotOptiX makes use of RTX-capable GPU's.
 
+You can quickly display data in a simple plot:
+
 .. image:: https://plotoptix.rnd.team/images/screenshots.jpg
    :alt: PlotOptiX screenshots, scatter and line plots ray tracing
+
+or prepare complex scenes, combining your generated data with meshes modeled elsewhere:
+
+.. image:: https://plotoptix.rnd.team/images/screenshot2.jpg
+   :alt: PlotOptiX screenshots, ray tracing for generative art
 
 Features
 --------
