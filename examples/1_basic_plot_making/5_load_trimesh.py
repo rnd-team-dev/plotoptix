@@ -48,7 +48,7 @@ def main():
         else:
             rt.set_mesh(name, mesh.vertices, mesh.faces)
 
-    # camera and light position auto-fit the scene geometry
+    # camera and light
     rt.setup_light("light1", pos=[6,7.5,-15], color=30, radius=2)
     rt.setup_camera("cam1", eye=[-2,5,-10], target=[-0.75,1.4,5], fov=23, glock=True)
 
