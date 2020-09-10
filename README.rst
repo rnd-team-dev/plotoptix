@@ -17,8 +17,8 @@ PlotOptiX
 - Join us on `Patreon <https://www.patreon.com/rndteam?fan_landing=true>`__ for news, release plans and hi-res content.
 
 PlotOptiX is a 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
-of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
-of several basic shapes, or projected onto the surfaces of objects in form of a color textures and displacement maps. Triangular meshes,
+of large datasets (and small as well). Data features can be represented in images as a position, size/thickness and color of primitives
+of several basic shapes, or projected onto surfaces of objects in form of a color textures and displacement maps. Triangular meshes,
 generated in the code or loaded from a file, are supported as well. All finished with a photorealistic lighting and depth of field.
 
 No need to write shaders, intersection algorithms, handle 3D scene technicalities. Basic usage is even more simple than with
