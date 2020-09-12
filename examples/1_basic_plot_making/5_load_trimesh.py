@@ -22,19 +22,19 @@ def main():
     rt.set_uint("path_seg_range", 6, 12)       # allow some more ray segments
     rt.set_background(0)                       # black background
     rt.set_ambient([0.1, 0.12, 0.15])          # some ambient light
-    #rt.set_param(light_shading="Hard")        # accurate caustics, but slower convergence
+    #rt.set_param(light_shading="Hard")        # nice, accurate caustics, but slower convergence
 
     exposure = 1; gamma = 2.2
     rt.set_float("tonemap_exposure", exposure)
     rt.set_float("tonemap_gamma", gamma)
     rt.add_postproc("Gamma")                   # gamma correction
 
-
     # setup materials:
-    m_diffuse["VarFloat3"] = { "base_color": [ 0.85, 0.87, 0.89 ], "refraction_index": [ 1.3, 1.4, 1.5 ] }
+    m_diffuse["VarFloat3"] = { "base_color": [ 0.85, 0.87, 0.89 ] }
     rt.update_material("diffuse", m_diffuse)
 
     m_clear_glass["VarFloat3"]["base_color"] = [ 100, 110, 120 ]
+    m_clear_glass["VarFloat3"]["refraction_index"] = [ 1.3, 1.4, 1.5 ]
     rt.setup_material("glass", m_clear_glass)
 
     # read the scene:
