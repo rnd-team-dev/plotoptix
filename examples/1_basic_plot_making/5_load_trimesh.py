@@ -9,7 +9,7 @@ Materials are assigned by mesh names.
 
 import numpy as np
 from plotoptix import TkOptiX
-from plotoptix.materials import m_diffuse, m_clear_glass
+from plotoptix.materials import m_diffuse, m_dispersive_glass
 
 import trimesh
 
@@ -34,8 +34,8 @@ def main():
     rt.update_material("diffuse", m_diffuse)
 
     m_clear_glass["VarFloat3"]["base_color"] = [ 100, 110, 120 ]
-    m_clear_glass["VarFloat3"]["refraction_index"] = [ 1.3, 1.4, 1.5 ]
-    rt.setup_material("glass", m_clear_glass)
+    #m_clear_glass["VarFloat3"]["refraction_index"] = [ 1.3, 1.4, 1.5 ]
+    rt.setup_material("glass", m_dispersive_glass)
 
     # read the scene:
     scene = trimesh.load("data/chemistry.glb")
