@@ -19,7 +19,7 @@ PlotOptiX
 PlotOptiX is a 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented in images as a position, size/thickness and color of primitives
 of several basic shapes, or projected onto surfaces of objects in form of a color textures and displacement maps. Triangular meshes,
-generated in the code or loaded from a file, are supported as well. All finished with a photorealistic lighting and depth of field.
+generated in the code or loaded from a file, are supported as well. All is finished with a photorealistic lighting, depth of field, and many other physically based effects simulated with a high quality.
 
 No need to write shaders, intersection algorithms, handle 3D scene technicalities. Basic usage is even more simple than with
 `matplotlib <https://matplotlib.org/gallery/mplot3d/scatter3d.html>`__:
@@ -67,7 +67,7 @@ Features
 - zero-copy access to GPU buffers wrapped in ndarrays: 8/32bps image, hit and object info, albedo, normals
 - GPU acceleration using RT Cores and everything else what comes with `OptiX 7.1 <https://developer.nvidia.com/optix>`__
 - hardware accelerated video output to MP4 file format using `NVENC 9.0 <https://developer.nvidia.com/nvidia-video-codec-sdk>`__
-- Tkinter based simple GUI window or headless raytracer
+- Tkinter based simple GUI window or a headless raytracer
 - configurable multi-GPU support
 
 System Requirements
