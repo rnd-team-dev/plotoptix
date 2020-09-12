@@ -33,8 +33,7 @@ def main():
     m_diffuse["VarFloat3"] = { "base_color": [ 0.85, 0.87, 0.89 ] }
     rt.update_material("diffuse", m_diffuse)
 
-    m_clear_glass["VarFloat3"]["base_color"] = [ 100, 110, 120 ]
-    #m_clear_glass["VarFloat3"]["refraction_index"] = [ 1.3, 1.4, 1.5 ]
+    m_dispersive_glass["VarFloat3"]["base_color"] = [ 100, 110, 120 ]
     rt.setup_material("glass", m_dispersive_glass)
 
     # read the scene:
