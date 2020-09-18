@@ -38,10 +38,10 @@ class TestOutput(TestCase):
         materials = { "Cube": "plastic", "Cone": "glass" }
 
         TestOutput.scene.load_multiple_mesh_obj("tests/data/two_mesh.obj", materials, parent="Cube")
-        n_obj = len(TestOutput.scene.geometry_handles)
+        n_obj = len(TestOutput.scene.geometry_data)
         self.assertTrue(n_obj == 2, msg="Expected 2 objects, %d loaded." % n_obj)
-        self.assertTrue("Cube" in TestOutput.scene.geometry_handles, msg="Cube not loaded.")
-        self.assertTrue("Cone" in TestOutput.scene.geometry_handles, msg="Cone not loaded.")
+        self.assertTrue("Cube" in TestOutput.scene.geometry_data, msg="Cube not loaded.")
+        self.assertTrue("Cone" in TestOutput.scene.geometry_data, msg="Cone not loaded.")
 
         TestOutput.scene.setup_camera("cam1")
         TestOutput.scene.setup_light("light1", color=10, radius=3)

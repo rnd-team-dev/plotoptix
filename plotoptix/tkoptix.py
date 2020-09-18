@@ -1,7 +1,7 @@
 """
 Tkinter UI for PlotOptiX raytracer.
 
-Copyright (C) 2019 R&D Team. All Rights Reserved.
+https://github.com/rnd-team-dev/plotoptix/blob/master/LICENSE.txt
 
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
@@ -387,9 +387,9 @@ class TkOptiX(NpOptiX):
             self._selection_index = -1
             return
 
-        if name in self.geometry_handles:
-            self._selection_handle = self.geometry_handles[name]
-            if index >= 0 and index < self.geometry_sizes[name]:
+        if name in self.geometry_data:
+            self._selection_handle = self.geometry_data[name]._handle
+            if index >= 0 and index < self.geometry_data[name]._size:
                 self._status_main_text.set("Selection: %s[%d]" % (name, index))
                 self._selection_index = index
             else:

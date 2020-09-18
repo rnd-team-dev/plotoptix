@@ -1,7 +1,6 @@
-"""
-No-UI PlotOptiX raytracer (output to numpy array only).
+"""No-UI PlotOptiX raytracer (output to numpy array only).
 
-Copyright (C) 2019 R&D Team. All Rights Reserved.
+https://github.com/rnd-team-dev/plotoptix/blob/master/LICENSE.txt
 
 Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
@@ -13,6 +12,7 @@ from ctypes import byref, c_ubyte, c_float, c_uint, c_int, c_longlong
 from typing import List, Tuple, Callable, Optional, Union, Any
 
 from plotoptix.singleton import Singleton
+from plotoptix.geometry import GeometryMeta
 from plotoptix._load_lib import load_optix, PARAM_NONE_CALLBACK, PARAM_INT_CALLBACK
 from plotoptix.utils import _make_contiguous_vector, _make_contiguous_3d
 from plotoptix.enums import *
@@ -188,9 +188,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self.resize(width, height)
 
-        self.geometry_handles = {} # geometry name to handle dictionary
+        self.geometry_data = {}    # geometry name to metadata dictionary
         self.geometry_names = {}   # geometry handle to name dictionary
-        self.geometry_sizes = {}   # geometry name to size dictionary
         self.camera_handles = {}   # camera name to handle dictionary
         self.camera_names = {}     # camera handle to name dictionary
         self.light_handles = {}    # light name to handle dictionary
@@ -1122,7 +1121,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.set_int(name, x, refresh)
 
 
-    def set_texture_1d(self, name: str, data: Any, keep_on_host: bool = False, refresh: bool = False) -> None:
+    def set_texture_1d(self, name: str, data: Any,
+                       addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
+                       keep_on_host: bool = False,
+                       refresh: bool = False) -> None:
         """Set texture data.
 
         Set texture ``name`` data. Texture format (float, float2 or float4) and
@@ -1137,6 +1139,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Texture name.
         data : array_like
             Texture data.
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1144,6 +1148,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         if not isinstance(name, str): name = str(name)
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
 
         if len(data.shape) == 1:     rt_format = RtFormat.Float
         elif len(data.shape) == 2:
@@ -1165,12 +1171,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
 
         self._logger.info("Set texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
-        if not self._optix.set_texture_1d(name, data.ctypes.data, data.shape[0], rt_format.value, keep_on_host, refresh):
+        if not self._optix.set_texture_1d(name, data.ctypes.data, data.shape[0], rt_format.value, addr_mode.value, keep_on_host, refresh):
             msg = "Texture 1D %s not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
-    def set_texture_2d(self, name: str, data: Any, keep_on_host: bool = False, refresh: bool = False) -> None:
+    def set_texture_2d(self, name: str, data: Any,
+                       addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                       keep_on_host: bool = False,
+                       refresh: bool = False) -> None:
         """Set texture data.
 
         Set texture ``name`` data. Texture format (float, float2 or float4) and
@@ -1185,6 +1194,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Texture name.
         data : array_like
             Texture data.
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1192,6 +1203,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         if not isinstance(name, str): name = str(name)
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
 
         if len(data.shape) == 2:     rt_format = RtFormat.Float
         elif len(data.shape) == 3:
@@ -1213,7 +1226,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
 
         self._logger.info("Set texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
-        if not self._optix.set_texture_2d(name, data.ctypes.data, data.shape[1], data.shape[0], rt_format.value, keep_on_host, refresh):
+        if not self._optix.set_texture_2d(name, data.ctypes.data, data.shape[1], data.shape[0], rt_format.value, addr_mode.value, keep_on_host, refresh):
             msg = "Texture 2D %s not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1224,6 +1237,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                      baseline: float = 0.0,
                      exposure: float = 1.0,
                      gamma: float = 1.0,
+                     addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
                      keep_on_host: bool = False,
                      refresh: bool = False) -> None:
         """Load texture from file.
@@ -1244,6 +1258,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Exposure value used in the postprocessing.
         gamma : float, optional
             Gamma value used in the postprocessing.
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1256,13 +1272,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         if isinstance(rt_format, str): rt_format = RtFormat[rt_format]
 
-        if not self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, rt_format.value, refresh):
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+
+        if not self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, rt_format.value, addr_mode.value, refresh):
             msg = "Failed on reading texture from file %s." % file_name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
 
     def set_normal_tilt(self, name: str, data: Any,
                         mapping: Union[TextureMapping, str] = TextureMapping.Flat,
+                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
                         keep_on_host: bool = False,
                         refresh: bool = False) -> None:
         """Set normal tilt data.
@@ -1283,6 +1302,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Displacement map data.
         mapping : TextureMapping or string, optional
             Mapping mode (see :class:`plotoptix.enums.TextureMapping`).
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1292,6 +1313,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
 
         if isinstance(mapping, str): mapping = TextureMapping[mapping]
+
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
 
         if len(data.shape) != 2:
             msg = "Data shape should be (height,width)."
@@ -1304,13 +1327,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._logger.info("Set shading normal tilt map for %s: %d x %d.", name, data.shape[1], data.shape[0])
         if not self._optix.set_normal_tilt(name, data.ctypes.data, data.shape[1], data.shape[0],
-                                           mapping.value, keep_on_host, refresh):
+                                           mapping.value, addr_mode.value, keep_on_host, refresh):
             msg = "%s normal tilt map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
     def load_normal_tilt(self, name: str, file_name: str,
                          mapping: Union[TextureMapping, str] = TextureMapping.Flat,
+                         addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
                          prescale: float = 1.0,
                          baseline: float = 0.0,
                          refresh: bool = False) -> None:
@@ -1329,6 +1353,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Image file name with the displacement data.
         mapping : TextureMapping or string, optional
             Mapping mode (see :class:`plotoptix.enums.TextureMapping`).
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
         prescale : float, optional
             Scaling factor for displacement values.
         baseline : float, optional
@@ -1341,13 +1367,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if isinstance(mapping, str): mapping = TextureMapping[mapping]
 
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+
         self._logger.info("Set shading normal tilt map for %s using %s.", name, file_name)
-        if not self._optix.load_normal_tilt(name, file_name, mapping.value, prescale, baseline, refresh):
+        if not self._optix.load_normal_tilt(name, file_name, mapping.value, addr_mode.value, prescale, baseline, refresh):
             msg = "%s normal tilt map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
     def set_displacement(self, name: str, data: Any,
+                         addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
                          keep_on_host: bool = False,
                          refresh: bool = False) -> None:
         """Set surface displacement data.
@@ -1366,6 +1395,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Object name.
         data : array_like
             Displacement map data.
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1373,6 +1404,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         if not isinstance(name, str): name = str(name)
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
 
         if len(data.shape) != 2:
             msg = "Data shape should be (height,width)."
@@ -1385,7 +1418,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._logger.info("Set displacement map for %s: %d x %d.", name, data.shape[1], data.shape[0])
         if not self._optix.set_displacement(name, data.ctypes.data, data.shape[1], data.shape[0],
-                                            keep_on_host, refresh):
+                                            addr_mode, keep_on_host, refresh):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1393,6 +1426,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def load_displacement(self, name: str, file_name: str,
                           prescale: float = 1.0,
                           baseline: float = 0.0,
+                          addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
                           refresh: bool = False) -> None:
         """Load surface displacement data from file.
 
@@ -1410,14 +1444,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Scaling factor for displacement values.
         baseline : float, optional
             Baseline added to displacement values.
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
         """
         if not isinstance(name, str): name = str(name)
         if not isinstance(file_name, str): name = str(file_name)
 
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+
         self._logger.info("Set displacement map for %s using %s.", name, file_name)
-        if not self._optix.load_displacement(name, file_name, prescale, baseline, refresh):
+        if not self._optix.load_displacement(name, file_name, prescale, baseline, addr_mode, refresh):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1534,7 +1572,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         >>> optix.set_background([0.5, 0.7, 0.9]) # set light bluish background
         """
         if isinstance(bg, str):
-            if self._optix.load_texture_2d("bg_texture", bg, prescale, baseline, exposure, gamma, RtFormat.Float4.value, refresh):
+            if self._optix.load_texture_2d("bg_texture",
+                                           bg, prescale, baseline, exposure, gamma,
+                                           RtFormat.Float4.value,
+                                           TextureAddressMode.Mirror.value,
+                                           refresh):
                 self._logger.info("Background texture loaded from file.")
             else:
                 msg = "Failed on reading background texture."
@@ -1580,7 +1622,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if bg.shape[-1] == 4:
                 if gamma != 1: bg = np.power(bg, gamma)
                 if e != 1: bg = e * bg
-                self.set_texture_2d("bg_texture", bg, keep_on_host=keep_on_host, refresh=refresh)
+                self.set_texture_2d("bg_texture", bg, addr_mode=TextureAddressMode.Mirror, keep_on_host=keep_on_host, refresh=refresh)
                 return
 
         msg = "Background should be a single gray level or [r,g,b] array_like or 2D array_like of [r,g,b]/[r,g,b,a] values."
@@ -1816,14 +1858,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error("Scene loading failed.")
             return False
 
-        self.geometry_handles = {} # geometry name to handle dictionary
+        self.geometry_data = {} # geometry name to handle dictionary
         self.geometry_names = {}   # geometry handle to name dictionary
-        self.geometry_sizes = {}   # geometry name to size dictionary
         if "Geometry" in meta:
             for key, value in meta["Geometry"].items():
-                self.geometry_handles[key] = value["Handle"]
+                self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"])
                 self.geometry_names[value["Handle"]] = key
-                self.geometry_sizes[key] = value["Size"]
         else: return False
 
         self.camera_handles = {}   # camera name to handle dictionary
@@ -3531,7 +3571,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(geom, str): geom = Geometry[geom]
         if isinstance(geom_attr, str): geom_attr = GeomAttributeProgram[geom_attr]
 
-        if name in self.geometry_handles:
+        if name in self.geometry_data:
             msg = "Geometry %s already exists, use update_data() instead." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -3761,9 +3801,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 if g_handle > 0:
                     self._logger.info("...done, handle: %d", g_handle)
+                    self.geometry_data[name] = GeometryMeta(name, g_handle, n_primitives)
                     self.geometry_names[g_handle] = name
-                    self.geometry_handles[name] = g_handle
-                    self.geometry_sizes[name] = n_primitives
                 else:
                     msg = "Geometry setup failed."
                     self._logger.error(msg)
@@ -3812,13 +3851,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if not isinstance(name, str): name = str(name)
 
-        if not name in self.geometry_handles:
+        if not name in self.geometry_data:
             msg = "Geometry %s does not exists yet, use set_data() instead." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        n_primitives = self.geometry_sizes[name]
+        n_primitives = self.geometry_data[name]._size
         size_changed = False
 
         # Prepare positions data
@@ -3831,7 +3870,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 return
             n_primitives = pos.shape[0]
-            size_changed = (n_primitives != self.geometry_sizes[name])
+            size_changed = (n_primitives != self.geometry_data[name]._size)
             pos_ptr = pos.ctypes.data
 
         # Prepare colors data
@@ -3895,9 +3934,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                                                    pos_ptr, col_const_ptr, col_ptr, radii_ptr,
                                                    u_ptr, v_ptr, w_ptr)
 
-            if (g_handle > 0) and (g_handle == self.geometry_handles[name]):
+            if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
                 self._logger.info("...done, handle: %d", g_handle)
-                self.geometry_sizes[name] = n_primitives
+                self.geometry_data[name]._size = n_primitives
             else:
                 msg = "Geometry update failed."
                 self._logger.error(msg)
@@ -3962,7 +4001,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
 
-        if name in self.geometry_handles:
+        if name in self.geometry_data:
             msg = "Geometry %s already exists, use update_data_2d() instead." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -4027,9 +4066,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_data[name] = GeometryMeta(name, g_handle, pos.shape[0] * pos.shape[1])
                 self.geometry_names[g_handle] = name
-                self.geometry_handles[name] = g_handle
-                self.geometry_sizes[name] = pos.shape[0] * pos.shape[1]
             else:
                 msg = "Surface setup failed."
                 self._logger.error(msg)
@@ -4078,7 +4116,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
 
-        if not name in self.geometry_handles:
+        if not name in self.geometry_data:
             msg = "Surface %s does not exists yet, use set_data_2d() instead." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -4152,9 +4190,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                                                   range_x[0], range_x[1], range_z[0], range_z[1],
                                                   floor_y)
 
-            if (g_handle > 0) and (g_handle == self.geometry_handles[name]):
+            if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
                 self._logger.info("...done, handle: %d", g_handle)
-                self.geometry_sizes[name] = size_xz[0] * size_xz[1]
+                self.geometry_data[name]._size = size_xz[0] * size_xz[1]
             else:
                 msg = "Geometry update failed."
                 self._logger.error(msg)
@@ -4208,7 +4246,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
 
-        if name in self.geometry_handles:
+        if name in self.geometry_data:
             msg = "Geometry %s already exists, use update_surface() instead." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -4252,9 +4290,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_data[name] = GeometryMeta(name, g_handle, pos.shape[0] * pos.shape[1])
                 self.geometry_names[g_handle] = name
-                self.geometry_handles[name] = g_handle
-                self.geometry_sizes[name] = pos.shape[0] * pos.shape[1]
             else:
                 msg = "Surface setup failed."
                 self._logger.error(msg)
@@ -4291,7 +4328,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
 
-        if not name in self.geometry_handles:
+        if not name in self.geometry_data:
             msg = "Surface %s does not exists yet, use set_surface() instead." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -4347,9 +4384,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Update surface %s, size (%d, %d)...", name, size_uv[1], size_uv[0])
             g_handle = self._optix.update_psurface(name, size_uv[1], size_uv[0], pos_ptr, n_ptr, c_const_ptr, c_ptr)
 
-            if (g_handle > 0) and (g_handle == self.geometry_handles[name]):
+            if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
                 self._logger.info("...done, handle: %d", g_handle)
-                self.geometry_sizes[name] = size_uv[0] * size_uv[1]
+                self.geometry_data[name]._size = size_uv[0] * size_uv[1]
             else:
                 msg = "Geometry update failed."
                 self._logger.error(msg)
@@ -4421,7 +4458,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
 
-        if name in self.geometry_handles:
+        if name in self.geometry_data:
             msg = "Geometry %s already exists, use update_mesh() instead." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -4506,9 +4543,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_data[name] = GeometryMeta(name, g_handle, n_vertices)
                 self.geometry_names[g_handle] = name
-                self.geometry_handles[name] = g_handle
-                self.geometry_sizes[name] = n_vertices
             else:
                 msg = "Mesh setup failed."
                 self._logger.error(msg)
@@ -4564,7 +4600,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
 
-        if not name in self.geometry_handles:
+        if not name in self.geometry_data:
             msg = "Mesh %s does not exists yet, use set_mesh() instead." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -4662,9 +4698,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.info("Update mesh %s...", name)
             g_handle = self._optix.update_mesh(name, n_vertices, n_faces, n_normals, n_uv, pos_ptr, faces_ptr, c_const_ptr, c_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr)
 
-            if (g_handle > 0) and (g_handle == self.geometry_handles[name]):
+            if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
                 self._logger.info("...done, handle: %d", g_handle)
-                self.geometry_sizes[name] = m_vertices
+                self.geometry_data[name]._size = m_vertices
             else:
                 msg = "Mesh update failed."
                 self._logger.error(msg)
@@ -4719,7 +4755,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if not isinstance(parent, str): parent = str(parent)
 
-        if mesh_name in self.geometry_handles:
+        if mesh_name in self.geometry_data:
             msg = "Geometry %s already exists, use update_mesh() instead." % mesh_name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -4737,9 +4773,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if len(s) > 2:
                 meta = json.loads(s)
                 for key, value in meta.items():
-                    self.geometry_handles[key] = value["Handle"]
+                    self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"])
                     self.geometry_names[value["Handle"]] = key
-                    self.geometry_sizes[key] = value["Size"]
                     self._logger.info("...loaded: %s (%d vertices)", key, value["Size"])
             else:
                 msg = "Mesh loading failed."
@@ -4793,9 +4828,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if len(s) > 2:
                 meta = json.loads(s)
                 for key, value in meta.items():
-                    self.geometry_handles[key] = value["Handle"]
+                    self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"])
                     self.geometry_names[value["Handle"]] = key
-                    self.geometry_sizes[key] = value["Size"]
                     self._logger.info("...loaded: %s (%d vertices)", key, value["Size"])
             else:
                 msg = "Mesh loading failed."
@@ -4840,7 +4874,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if not isinstance(mesh_name, str): mesh_name = str(mesh_name)
 
-        if mesh_name in self.geometry_handles:
+        if mesh_name in self.geometry_data:
             msg = "Geometry %s already exists, use update_mesh() instead." % mesh_name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -4857,9 +4891,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_data[mesh_name] = GeometryMeta(mesh_name, g_handle, self._optix.get_geometry_size(mesh_name))
                 self.geometry_names[g_handle] = mesh_name
-                self.geometry_handles[mesh_name] = g_handle
-                self.geometry_sizes[mesh_name] = self._optix.get_geometry_size(mesh_name)
             else:
                 msg = "Mesh loading failed."
                 self._logger.error(msg)
@@ -4875,7 +4908,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def get_geometry_names(self) -> list:
         """Return list of geometries' names.
         """
-        return list(self.geometry_handles.keys())
+        return list(self.geometry_data.keys())
 
     def move_geometry(self, name: str, v: Tuple[float, float, float],
                       update: bool = True) -> None:
@@ -5108,11 +5141,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     if self._raise_on_error: raise RuntimeError(msg)
 
     def update_geom_buffers(self, name: str,
-                            mask: Union[GeomBuffer, str] = GeomBuffer.All) -> None:
+                            mask: Union[GeomBuffer, str] = GeomBuffer.All,
+                            forced: bool = False) -> None:
         """Update geometry buffers.
 
         Update geometry buffers in GPU after modifications made with
-        :meth:`plotoptix.NpOptiX.move_geometry` / :meth:`plotoptix.NpOptiX.move_primitive`
+        :meth:`plotoptix.NpOptiX.move_geometry`, :meth:`plotoptix.NpOptiX.move_primitive`,
         and similar methods.
 
         Parameters
@@ -5121,12 +5155,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Name of the geometry.
         mask : GeomBuffer or string, optional
             Which buffers to update. All buffers if not specified.
+        forced : bool, optional
+            Update even if the object was not tagged as outdated. Operations like rotations,
+            scaling, shifts, are setting "out of date" flag, but direct modifications of
+            buffers memory performed with :class:`plotoptix.geometry.PinnedBuffer` require
+            forced update.
         """
         if name is None: raise ValueError()
 
         if isinstance(mask, str): mask = GeomBuffer[mask]
 
-        if not self._optix.update_geom_buffers(name, mask.value):
+        if not self._optix.update_geom_buffers(name, mask.value, forced):
             msg = "Geometry buffers update failed."
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)

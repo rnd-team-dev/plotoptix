@@ -1,4 +1,8 @@
 """Enumerations and flags used by PlotOptiX raytracer.
+
+https://github.com/rnd-team-dev/plotoptix/blob/master/LICENSE.txt
+
+Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
 from enum import Enum, IntFlag
@@ -129,6 +133,17 @@ class TextureMapping(Enum):
     """Projection on a spherical surface.
     """
 
+class TextureAddressMode(Enum):
+    """Texture addressing mode on edge crossing.
+    """
+
+    Wrap = 0
+
+    Clamp = 1
+
+    Mirror = 2
+
+    Border = 3
 
 class Geometry(Enum):
     """Geometry shapes.
@@ -161,21 +176,22 @@ class Geometry(Enum):
     BezierChain = 6
     """Bezier line interpolating data points.
 
-    Line thickness and color can be provided for each data point.
-    Line is smoothed, use :attr:`plotoptix.enums.Geometry.SegmentChain`
+    Line thickness and color can be provided for each data point (curve node).
+
+    Curve is smoothed, use :attr:`plotoptix.enums.Geometry.SegmentChain`
     for a piecewise linear plot.
     """
 
     SegmentChain = 11
     """Linear segments connecting data points.
 
-    Line thickness and color can be provided for each data point.
+    Line thickness and color can be provided for each data point (node).
     """
 
     BSplineQuad = 12
     """Quadratic b-spline with nodes at data points.
 
-    Line thickness and color can be provided for each data point.
+    Line thickness and color can be provided for each data point (curve node).
     
     Note: b-spline is not interpolating data points; see examples
     how to pin start/end to a fixed position. Use
@@ -186,7 +202,7 @@ class Geometry(Enum):
     BSplineCubic = 13
     """Cubic b-spline with nodes at data points.
 
-    Line thickness and color can be provided for each data point.
+    Line thickness and color can be provided for each data point (curve node).
     
     Note: b-spline is not interpolating data points; see examples
     how to pin start/end to a fixed position. Use
@@ -216,7 +232,13 @@ class Geometry(Enum):
     Mesh = 10
     """Mesh.
 
-    Color and normal vectors can be provided for each data point.
+    Color and normal vectors can be provided for each data point (mesh vertex).
+    """
+
+    Graph = 14
+    """Graph or a wireframed mesh.
+
+    Color and radius can be provided for each data point (graph vertex).
     """
 
 class GeomBuffer(IntFlag):
@@ -230,6 +252,12 @@ class GeomBuffer(IntFlag):
     Positions = 1
     """Data point positions.
     """
+    Velocities = 2
+    """Velocities of data points / curve nodes / mesh vertices.
+
+    Used only on the host side, for the simulation support. Allocated on
+    the first access.
+    """
 
     Colors0 = 4
     """Bezier and line segments starting color.
@@ -242,6 +270,8 @@ class GeomBuffer(IntFlag):
     Colors = Colors0 | Colors1
     """Any geometry color, including start/end of bezier and line
     segments.
+
+    Allocated on the first demant (otherwise constant color is used).
     """
 
     Radii = 16
@@ -285,11 +315,24 @@ class GeomBuffer(IntFlag):
     """
 
     VertexIdx = 4096
-    """Mesh vertex indexes.
+    """Triplets of mesh face indexes (to be replaced with the ``FaceIdx`` name).
+    """
+    FaceIdx = 4096
+    """Triplets of mesh face indexes.
     """
 
     NormalIdx = 8192
     """Mesh normal indexes.
+    """
+
+    TextureMap = 16384
+    """Tecture UV coordinates.
+    """
+
+    EdgeIdx = 32768
+    """Doublets of mesh or graph edge indexes.
+
+    Allocated on the first access in meshes.
     """
 
     All = 0xFFFFFFFF

@@ -34,10 +34,10 @@ class TestOutput(TestCase):
         TestOutput.scene.set_param(min_accumulation_step=2, max_accumulation_frames=6)
 
         TestOutput.scene.load_mesh_obj("tests/data/two_mesh.obj", parent="Cube", c=0.9)
-        n_obj = len(TestOutput.scene.geometry_handles)
+        n_obj = len(TestOutput.scene.geometry_data)
         self.assertTrue(n_obj == 2, msg="Expected 2 objects, %d loaded." % n_obj)
-        self.assertTrue("Cube" in TestOutput.scene.geometry_handles, msg="Cube not loaded.")
-        self.assertTrue("Cone" in TestOutput.scene.geometry_handles, msg="Cone not loaded.")
+        self.assertTrue("Cube" in TestOutput.scene.geometry_data, msg="Cube not loaded.")
+        self.assertTrue("Cone" in TestOutput.scene.geometry_data, msg="Cone not loaded.")
 
         TestOutput.scene.setup_camera("cam1")
         TestOutput.scene.setup_light("light1", color=10, radius=3)
@@ -73,21 +73,21 @@ class TestOutput(TestCase):
 
         TestOutput.scene.set_scene(d)
 
-        self.assertTrue("Cube" in TestOutput.scene.geometry_handles, msg="Cube not found in geometries.")
-        self.assertTrue("Cone" not in TestOutput.scene.geometry_handles, msg="Cone is found while it sould be removed.")
+        self.assertTrue("Cube" in TestOutput.scene.geometry_data, msg="Cube not found in geometries.")
+        self.assertTrue("Cone" not in TestOutput.scene.geometry_data, msg="Cone is found while it sould be removed.")
 
         TestOutput.scene.load_scene("scene_1.json")
 
-        self.assertTrue("Cube" in TestOutput.scene.geometry_handles, msg="Cube not found in geometries.")
-        self.assertTrue("Cone" in TestOutput.scene.geometry_handles, msg="Cone not found in geometries.")
+        self.assertTrue("Cube" in TestOutput.scene.geometry_data, msg="Cube not found in geometries.")
+        self.assertTrue("Cone" in TestOutput.scene.geometry_data, msg="Cone not found in geometries.")
 
         TestOutput.scene.load_scene("scene_3.json")
 
-        self.assertTrue(len(TestOutput.scene.geometry_handles) == 0, msg="Scene 3 should have no geometries.")
+        self.assertTrue(len(TestOutput.scene.geometry_data) == 0, msg="Scene 3 should have no geometries.")
 
         TestOutput.scene.load_merged_mesh_obj("tests/data/two_mesh.obj", "meshes", c=0.9)
 
-        self.assertTrue("meshes" in TestOutput.scene.geometry_handles, msg="Meshes not found in geometries.")
+        self.assertTrue("meshes" in TestOutput.scene.geometry_data, msg="Meshes not found in geometries.")
 
     def test999_close(self):
         self.assertTrue(TestOutput.scene is not None and TestOutput.is_alive, msg="Wrong state of the test class.")

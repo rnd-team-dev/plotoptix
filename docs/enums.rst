@@ -24,6 +24,8 @@ Geometry
     :members:
 .. autoclass:: plotoptix.enums.TextureMapping
     :members:
+.. autoclass:: plotoptix.enums.TextureAddressMode
+    :members:
 .. autoclass:: plotoptix.enums.DisplacementMapping
     :members:
 

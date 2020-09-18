@@ -23,7 +23,13 @@ Direct modifications of data
 
 These methods allow making changes to properties of data points
 stored internally in the raytracer, without re-sending whole data
-arrays from Python code.
+arrays from the Python code.
+
+:class:`plotoptix.geometry.PinnedBuffer` functionality should be
+considered *experimental*, although it seems to be extremely useful
+in simulation use cases.
+
+.. autoclass:: plotoptix.geometry.PinnedBuffer
 
 .. automethod:: plotoptix.NpOptiX.move_geometry
 .. automethod:: plotoptix.NpOptiX.move_primitive
