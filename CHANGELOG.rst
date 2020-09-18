@@ -1,6 +1,16 @@
 Release history
 ===============
 
+v0.11.0 - unreleased
+--------------------
+
+Added
+~~~~~
+
+- direct access to the internal geometry buffers (memory shared with ndarrays on the python side)
+- graph / mesh wireframe geometry
+
+
 `v0.10.1`_ - 2020-08-30
 -----------------------
 

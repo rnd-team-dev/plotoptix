@@ -2,9 +2,9 @@
 3D ray tracing package for Python. Based on NVIDIA OptiX 7 framework,
 wrapped in RnD.SharpOptiX C#/C++/CUDA libraries by R&D Team.
 
-Copyright (C) 2019 R&D Team. All Rights Reserved.
+https://github.com/rnd-team-dev/plotoptix/blob/master/LICENSE.txt
 
-Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix
+Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 Documentation: https://plotoptix.rnd.team
 """
 
@@ -12,8 +12,8 @@ __all__ = ["enums", "materials", "utils", "npoptix", "tkoptix"]
 
 __author__  = "Robert Sulej, R&D Team <dev@rnd.team>"
 __status__  = "beta"
-__version__ = "0.10.1"
-__date__    = "30 August 2020"
+__version__ = "0.11.0"
+__date__    = "18 September 2020"
 
 import logging
 
