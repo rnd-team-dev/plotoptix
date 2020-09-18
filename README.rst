@@ -17,9 +17,9 @@ PlotOptiX
 - Join us on `Patreon <https://www.patreon.com/rndteam?fan_landing=true>`__ for news, release plans and hi-res content.
 
 PlotOptiX is a 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
-of large datasets (and small as well). Data features can be represented on plots as a position, size/thickness and color of markers
-of several basic shapes, or projected onto the surfaces of objects in form of a color textures and displacement maps. Triangular meshes,
-generated in the code or loaded from a file, are supported as well. All finished with a photorealistic lighting and depth of field.
+of large datasets (and small as well). Data features can be represented in images as a position, size/thickness and color of primitives
+of several basic shapes, or projected onto surfaces of objects in form of a color textures and displacement maps. Triangular meshes,
+generated in the code or loaded from a file, are supported as well. All is finished with a photorealistic lighting, depth of field, and many other physically based effects simulated with a high quality.
 
 No need to write shaders, intersection algorithms, handle 3D scene technicalities. Basic usage is even more simple than with
 `matplotlib <https://matplotlib.org/gallery/mplot3d/scatter3d.html>`__:
@@ -57,8 +57,8 @@ Features
 --------
 
 - progressive path tracing with explicit light sampling
-- *cameras*: orthogonal, pinhole, thin-lens and fisheye with depth of field and chromatic aberration simulation, panoramic camera for making 360 deg environment maps, user-defined projection for shooting rays at any angle
-- *geometries*: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines; *meshes*: automatically generated from a parametric surface or f(x,y) data, or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__, or loaded from a Wavefront .obj file
+- *cameras*: orthographic, pinhole, thin-lens and fisheye with depth of field and chromatic aberration simulation, panoramic camera for making 360 deg environment maps, user-defined projection for shooting rays at any angle
+- *geometries*: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines; *meshes*: automatically generated from a parametric surface or f(x,y) data, or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__, or loaded from a file, e.g. supported by `trimesh <https://github.com/mikedh/trimesh>`__, or loaded from a Wavefront .obj file with a native loader
 - *materials*: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
 - *light sources*: spherical and parallelogram, light emission in volumes, uniform environmental light or environment map
 - *post-processing*: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
@@ -67,7 +67,7 @@ Features
 - zero-copy access to GPU buffers wrapped in ndarrays: 8/32bps image, hit and object info, albedo, normals
 - GPU acceleration using RT Cores and everything else what comes with `OptiX 7.1 <https://developer.nvidia.com/optix>`__
 - hardware accelerated video output to MP4 file format using `NVENC 9.0 <https://developer.nvidia.com/nvidia-video-codec-sdk>`__
-- Tkinter based simple GUI window or headless raytracer
+- Tkinter based simple GUI window or a headless raytracer
 - configurable multi-GPU support
 
 System Requirements
