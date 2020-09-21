@@ -63,6 +63,27 @@ def HandlePrerequisites(command_subclass):
         if os.path.isfile(dst): os.remove(dst)
         if not removing and os.path.isfile(src): os.symlink(src, dst)
 
+    def clearOptixCacheLinux(self):
+        import getpass
+        folder = os.path.join('/var/tmp/OptixCache_' + getpass.getuser())
+        if os.path.isdir(folder):
+            print("Clear OptiX compilation chache...", folder)
+            import shutil
+            shutil.rmtree(folder)
+        else:
+            folder = os.path.join('/tmp/OptixCache_' + getpass.getuser())
+            if os.path.isdir(folder):
+                print("Clear OptiX compilation chache...", folder)
+                import shutil
+                shutil.rmtree(folder)
+
+    def clearOptixCacheWindows(self):
+        folder = os.path.join(os.environ['LOCALAPPDATA'], 'NVIDIA', 'OptixCache')
+        if os.path.isdir(folder):
+            print("Clear OptiX compilation chache...", folder)
+            import shutil
+            shutil.rmtree(folder)
+
     def subclass_run(self):
 
         #print(self.user_options)
@@ -79,8 +100,10 @@ def HandlePrerequisites(command_subclass):
         #cuda_major, cuda_minor = findCuda(self, p, removing)
 
         if p == "Windows":
+            if not removing: clearOptixCacheWindows(self)
             base_run(self)
         elif p == "Linux":
+            if not removing: clearOptixCacheLinux(self)
             base_run(self)
         else:
             raise NotImplementedError
