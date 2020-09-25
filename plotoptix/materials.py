@@ -243,3 +243,14 @@ Ideal for the soap-like bubbles. Reflection amount depends on the refraction ind
 no refraction on crossing the surface. Reflections can be textured or colorized with the primitive
 colors, and the color values range is ``<0; inf)``.
 """
+
+m_shadow_catcher = {
+      "RadianceProgram": "materials7.ptx::__closesthit__radiance__shadow_catcher",
+      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "VarUInt": { "flags": 2 },
+      "VarFloat": { "base_roughness": 0 }
+    }
+"""
+Diffuse material, transparent except shadowed regions. Colors, textures, roughness can be set
+as for other diffuse materials. Useful for preparation of packshot style images. 
+"""

@@ -244,13 +244,18 @@ class Geometry(Enum):
 class GeomBuffer(IntFlag):
     """Geometry buffer flags.
     
-    Flags are used for selection of buffers which should be updated
-    in GPU (update geometry() method) after geometry modifications
-    made with move_geometry()/move_primitive() and similar functions.
+    Flags are used for:
+
+    - selection of buffers which should be updated on GPU side with
+      :meth:`plotoptix.NpOptiX.update_geom_buffers` method after geometry
+      modifications made with move_geometry()/move_primitive() and similar
+      functions;
+    - selection of internal memory buffer for direct data access with
+      :class:`plotoptix.geometry.PinnedBuffer`.
     """
 
     Positions = 1
-    """Data point positions.
+    """Data points positions.
     """
     Velocities = 2
     """Velocities of data points / curve nodes / mesh vertices.
@@ -260,18 +265,18 @@ class GeomBuffer(IntFlag):
     """
 
     Colors0 = 4
-    """Bezier and line segments starting color.
+    """Bezier segments starting color.
     """
 
     Colors1 = 8
-    """Bezier and line segments end color.
+    """Bezier segments end color.
     """
 
     Colors = Colors0 | Colors1
     """Any geometry color, including start/end of bezier and line
     segments.
 
-    Allocated on the first demant (otherwise constant color is used).
+    Allocated on the first access (otherwise constant color is used).
     """
 
     Radii = 16
@@ -295,7 +300,7 @@ class GeomBuffer(IntFlag):
     """
 
     V0 = 256
-    """Start node of bezier and line segments.
+    """Start node of bezier segments.
     """
 
     V1 = 512
@@ -307,7 +312,7 @@ class GeomBuffer(IntFlag):
     """
 
     V3 = 2048
-    """End node of bezier and line segments.
+    """End node of bezier segments.
     """
 
     VNodes = V0 | V1 | V2 | V3

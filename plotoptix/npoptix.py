@@ -3513,8 +3513,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def set_data(self, name: str, pos: Any,
-                 c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                  r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
+                 c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                  u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None,
                  geom: Union[Geometry, str] = Geometry.ParticleSet,
                  geom_attr: Union[GeomAttributeProgram, str] = GeomAttributeProgram.Default,
@@ -3950,12 +3950,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def set_data_2d(self, name: str, pos: Any,
+                    r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
                     c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                     normals: Optional[Any] = None,
                     range_x: Optional[Tuple[float, float]] = None,
                     range_z: Optional[Tuple[float, float]] = None,
                     floor_y: Optional[float] = None,
                     floor_c: Optional[Any] = None,
+                    geom: Union[Geometry, str] = Geometry.Mesh,
                     mat: str = "diffuse",
                     make_normals: bool = False) -> None:
         """Create new surface geometry for the 2D dataset.
@@ -3964,7 +3966,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         where ``n`` and ``m`` are at least 2. Additional data features can be
         visualized with color (array of RGB values, shape ``(n, m, 3)``).
         
-        Currently, convention of vertical Y and horizontal XZ plane is adopted.
+        Convention of vertical Y and horizontal XZ plane is adopted.
 
         Parameters
         ----------
@@ -3972,6 +3974,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Name of the new surface geometry.
         pos : array_like
             Z values of data points.
+        r : Any, optional
+            Radii of vertices for the :attr:`plotoptix.enums.Geometry.Graph` geometry,
+            interpolated along the wireframe edges. Single value sets constant radius
+            for all vertices.
         c : Any, optional
             Colors of data points. Single value means a constant gray level.
             3-component array means a constant RGB color. Array of the shape
@@ -3992,6 +3998,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             only is created if ``floor_y`` is not provided.
         floor_c: Any, optional
             Color of the base volume. Single value or array_like RGB color values.
+        geom : Geometry enum or string, optional
+            Geometry of the surface, only :attr:`plotoptix.enums.Geometry.Mesh` or
+            :attr:`plotoptix.enums.Geometry.Graph` are supported.
         mat : string, optional
             Material name.
         make_normals : bool, optional
@@ -4007,11 +4016,37 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
+        if isinstance(geom, str): geom = Geometry[geom]
+        if not geom in [Geometry.Mesh, Geometry.Graph]:
+            msg = "Geometry type %s not supported by the surface plot." % geom.name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
         if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
         assert len(pos.shape) == 2 and pos.shape[0] > 1 and pos.shape[1] > 1, "Required vertex data shape is (z,x), where z >= 2 and x >= 2."
         if pos.dtype != np.float32: pos = np.ascontiguousarray(pos, dtype=np.float32)
         if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
         pos_ptr = pos.ctypes.data
+
+        if r is not None and geom == Geometry.Graph:
+            if not isinstance(r, np.ndarray): r = np.ascontiguousarray(r, dtype=np.float32)
+            if r.dtype != np.float32: r = np.ascontiguousarray(r, dtype=np.float32)
+            if len(r.shape) > 1 or r.shape[0] > 1:
+                assert r.shape == pos.shape[:2], "Radii shape must be (v,u), with u and v matching the surface points shape."
+            if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+        if r is not None and geom == Geometry.Graph:
+            if r.shape[0] == 1:
+                r = np.full(pos.shape[:2], r[0], dtype=np.float32)
+                if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+            if r.shape != pos.shape[:2]:
+                msg = "Radii (r) shape does not match the shape of preceding data arguments."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            radii_ptr = r.ctypes.data
+        else: radii_ptr = 0
+
 
         n_ptr = 0
         if normals is not None:
@@ -4061,7 +4096,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Setup surface %s...", name)
-            g_handle = self._optix.setup_surface(name, mat, pos.shape[1], pos.shape[0], pos_ptr, n_ptr, c_ptr, cl_ptr,
+            g_handle = self._optix.setup_surface(geom.value, name, mat, pos.shape[1], pos.shape[0], pos_ptr, radii_ptr, n_ptr, c_ptr, cl_ptr,
                                                  range_x[0], range_x[1], range_z[0], range_z[1], floor_y, make_normals)
 
             if g_handle > 0:
@@ -4081,6 +4116,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def update_data_2d(self, name: str,
                        pos: Optional[Any] = None,
+                       r: Optional[Any] = None,
                        c: Optional[Any] = None,
                        normals: Optional[Any] = None,
                        range_x: Optional[Tuple[float, float]] = None,
@@ -4095,6 +4131,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Name of the surface geometry.
         pos : array_like, optional
             Z values of data points.
+        r : Any, optional
+            Radii of vertices for the :attr:`plotoptix.enums.Geometry.Graph` geometry,
+            interpolated along the wireframe edges. Single value sets constant radius
+            for all vertices.
         c : Any, optional
             Colors of data points. Single value means a constant gray level.
             3-component array means a constant RGB color. Array of the shape
@@ -4142,6 +4182,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             size_xz = pos.shape
             pos_ptr = pos.ctypes.data
 
+        if size_changed and r is None:
+            r = np.ascontiguousarray([0.05], dtype=np.float32)
+        if r is not None:
+            if not isinstance(r, np.ndarray): r = np.ascontiguousarray(r, dtype=np.float32)
+            if r.dtype != np.float32: r = np.ascontiguousarray(r, dtype=np.float32)
+            if len(r.shape) > 1 or r.shape[0] > 1:
+                assert r.shape == size_xz, "Radii shape must be (x,z), with x and z matching the data points shape."
+            if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+        radii_ptr = 0
+        if r is not None:
+            if r.shape[0] == 1:
+                r = np.full(size_xz, r[0], dtype=np.float32)
+                if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+            if size_xz != r.shape:
+                msg = "Radii (r) shape does not match the number of data points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            radii_ptr = r.ctypes.data
+
         c_ptr = 0
         c_const = None
         if size_changed and c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
@@ -4186,7 +4246,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.acquire()
             self._logger.info("Update surface %s, size (%d, %d)...", name, size_xz[1], size_xz[0])
             g_handle = self._optix.update_surface(name, size_xz[1], size_xz[0],
-                                                  pos_ptr, n_ptr, c_ptr, cl_ptr,
+                                                  pos_ptr, radii_ptr, n_ptr, c_ptr, cl_ptr,
                                                   range_x[0], range_x[1], range_z[0], range_z[1],
                                                   floor_y)
 
@@ -4206,8 +4266,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def set_surface(self, name: str, pos: Any,
+                    r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
                     c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                     normals: Optional[Any] = None,
+                    geom: Union[Geometry, str] = Geometry.Mesh,
                     mat: str = "diffuse",
                     wrap_u: bool = False,
                     wrap_v: bool = False,
@@ -4216,7 +4278,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         Data is provided as 2D array of :math:`[x, y, z] = f(u, v)` values, with the shape
         ``(n, m, 3)``, where ``n`` and ``m`` are at least 2. Additional data features can be
-        visualized with color (array of RGB values, shape ``(n, m, 3)``).
+        visualized with color (array of RGB values, shape ``(n, m, 3)``) or wireframe thickness
+        if the :attr:`plotoptix.enums.Geometry.Graph` geometry is used.
         
         Parameters
         ----------
@@ -4224,6 +4287,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Name of the new surface geometry.
         pos : array_like
             XYZ values of surface points.
+        r : Any, optional
+            Radii of vertices for the :attr:`plotoptix.enums.Geometry.Graph` geometry,
+            interpolated along the wireframe edges. Single value sets constant radius
+            for all vertices.
         c : Any, optional
             Colors of surface points. Single value means a constant gray level.
             3-component array means a constant RGB color. Array of the shape
@@ -4233,6 +4300,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         normals : array_like, optional
             Normal vectors at provided surface points. Array shape has to be ``(n, m, 3)``,
             with ``n`` and ``m`` the same as in the surface points shape.
+        geom : Geometry enum or string, optional
+            Geometry of the surface, only :attr:`plotoptix.enums.Geometry.Mesh` or
+            :attr:`plotoptix.enums.Geometry.Graph` are supported.
         mat : string, optional
             Material name.
         wrap_u : bool, optional
@@ -4246,6 +4316,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
 
+        if isinstance(geom, str): geom = Geometry[geom]
+        if not geom in [Geometry.Mesh, Geometry.Graph]:
+            msg = "Geometry type %s not supported by the parametric surface." % geom.name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
         if name in self.geometry_data:
             msg = "Geometry %s already exists, use update_surface() instead." % name
             self._logger.error(msg)
@@ -4258,8 +4335,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
         pos_ptr = pos.ctypes.data
 
+        if r is not None and geom == Geometry.Graph:
+            if not isinstance(r, np.ndarray): r = np.ascontiguousarray(r, dtype=np.float32)
+            if r.dtype != np.float32: r = np.ascontiguousarray(r, dtype=np.float32)
+            if len(r.shape) > 1 or r.shape[0] > 1:
+                assert r.shape == pos.shape[:2], "Radii shape must be (v,u), with u and v matching the surface points shape."
+            if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+        if r is not None and geom == Geometry.Graph:
+            if r.shape[0] == 1:
+                r = np.full(pos.shape[:2], r[0], dtype=np.float32)
+                if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+            if r.shape != pos.shape[:2]:
+                msg = "Radii (r) shape does not match the shape of preceding data arguments."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            radii_ptr = r.ctypes.data
+        else: radii_ptr = 0
+
         n_ptr = 0
-        if normals is not None:
+        if normals is not None and geom == Geometry.Mesh:
             if not isinstance(normals, np.ndarray): normals = np.ascontiguousarray(normals, dtype=np.float32)
             assert normals.shape == pos.shape, "Normals shape must be (v,u,3), with u and v matching the surface points shape."
             if normals.dtype != np.float32: normals = np.ascontiguousarray(normals, dtype=np.float32)
@@ -4286,7 +4381,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Setup surface %s...", name)
-            g_handle = self._optix.setup_psurface(name, mat, pos.shape[1], pos.shape[0], pos_ptr, n_ptr, c_const_ptr, c_ptr, wrap_u, wrap_v, make_normals)
+            g_handle = self._optix.setup_psurface(geom.value, name, mat, pos.shape[1], pos.shape[0], pos_ptr, radii_ptr, n_ptr, c_const_ptr, c_ptr, wrap_u, wrap_v, make_normals)
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
@@ -4305,6 +4400,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def update_surface(self, name: str,
                        pos: Optional[Any] = None,
+                       r: Optional[Any] = None,
                        c: Optional[Any] = None,
                        normals: Optional[Any] = None) -> None:
         """Update surface geometry data or properties.
@@ -4315,6 +4411,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Name of the surface geometry.
         pos : array_like, optional
             XYZ values of surface points.
+        r : Any, optional
+            Radii of vertices for the :attr:`plotoptix.enums.Geometry.Graph` geometry,
+            interpolated along the edges. Single value sets constant radius for all vertices.
         c : Any, optional
             Colors of surface points. Single value means a constant gray level.
             3-component array means a constant RGB color. Array of the shape
@@ -4341,7 +4440,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
             return
-        size_uv = (s_v.value, s_u.value, 3)
+        size_uv3 = (s_v.value, s_u.value, 3)
+        size_uv1 = (s_v.value, s_u.value)
         size_changed = False
 
         pos_ptr = 0
@@ -4350,9 +4450,29 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             assert len(pos.shape) == 3 and pos.shape[0] > 1 and pos.shape[1] > 1 and pos.shape[2] == 3, "Required vertex data shape is (v,u,3), where u >= 2 and v >= 2."
             if pos.dtype != np.float32: pos = np.ascontiguousarray(pos, dtype=np.float32)
             if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
-            if pos.shape != size_uv: size_changed = True
-            size_uv = pos.shape
+            if pos.shape != size_uv3: size_changed = True
+            size_uv3 = pos.shape
             pos_ptr = pos.ctypes.data
+
+        if size_changed and r is None:
+            r = np.ascontiguousarray([0.05], dtype=np.float32)
+        if r is not None:
+            if not isinstance(r, np.ndarray): r = np.ascontiguousarray(r, dtype=np.float32)
+            if r.dtype != np.float32: r = np.ascontiguousarray(r, dtype=np.float32)
+            if len(r.shape) > 1 or r.shape[0] > 1:
+                assert r.shape == size_uv1, "Radii shape must be (v,u), with u and v matching the surface points shape."
+            if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+        radii_ptr = 0
+        if r is not None:
+            if r.shape[0] == 1:
+                r = np.full(size_uv1, r[0], dtype=np.float32)
+                if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+            if size_uv1 != r.shape:
+                msg = "Radii (r) shape does not match the number of surface points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            radii_ptr = r.ctypes.data
 
         c_ptr = 0
         c_const_ptr = 0
@@ -4364,7 +4484,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
             if c.shape == (3,):
                 c_const_ptr = c.ctypes.data
-            elif c.shape == size_uv:
+            elif c.shape == size_uv3:
                 c_ptr = c.ctypes.data
             else:
                 msg = "Colors shape must be (3,) or (v,u,3), with u and v matching the surface points shape."
@@ -4374,24 +4494,256 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         n_ptr = 0
         if normals is not None:
             if not isinstance(normals, np.ndarray): normals = np.ascontiguousarray(normals, dtype=np.float32)
-            assert normals.shape == size_uv, "Normals shape must be (v,u,3), with u and v matching the surface points shape."
+            assert normals.shape == size_uv3, "Normals shape must be (v,u,3), with u and v matching the surface points shape."
             if normals.dtype != np.float32: normals = np.ascontiguousarray(normals, dtype=np.float32)
             if not normals.flags['C_CONTIGUOUS']: normals = np.ascontiguousarray(normals, dtype=np.float32)
             n_ptr = normals.ctypes.data
 
         try:
             self._padlock.acquire()
-            self._logger.info("Update surface %s, size (%d, %d)...", name, size_uv[1], size_uv[0])
-            g_handle = self._optix.update_psurface(name, size_uv[1], size_uv[0], pos_ptr, n_ptr, c_const_ptr, c_ptr)
+            self._logger.info("Update surface %s, size (%d, %d)...", name, size_uv1[1], size_uv1[0])
+            g_handle = self._optix.update_psurface(name, size_uv1[1], size_uv1[0], pos_ptr, radii_ptr, n_ptr, c_const_ptr, c_ptr)
 
             if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
                 self._logger.info("...done, handle: %d", g_handle)
-                self.geometry_data[name]._size = size_uv[0] * size_uv[1]
+                self.geometry_data[name]._size = size_uv1[0] * size_uv1[1]
             else:
                 msg = "Geometry update failed."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+        finally:
+            self._padlock.release()
+
+    def set_graph(self, name: str, pos: Any, edges: Any,
+                  r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
+                  c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
+                  mat: str = "diffuse") -> None:
+        """Create new graph (mesh wireframe) geometry.
+
+        Data is provided as vertices :math:`[x, y, z]`, with the shape ``(n, 3)``, and edges
+        (doublets of vertex indices), with the shape ``(n, 2)`` or ``(m)`` where :math:`m = 2*n`.
+        Data features can be visualized with colors (array of RGB values assigned to the graph
+        vertices, shape ``(n, 3)``) and/or vertex radii.
+
+        Parameters
+        ----------
+        name : string
+            Name of the new graph geometry.
+        pos : array_like
+            XYZ values of the graph vertices.
+        edges : array_like
+            Graph edges as indices (doublets) to vertices in the ``pos`` array.
+        r : Any, optional
+            Radii of vertices, interpolated along the edges. Single value sets constant
+            radius for all vertices.
+        c : Any, optional
+            Colors of the graph vertices. Single value means a constant gray level.
+            3-component array means a constant RGB color. Array of the shape
+            ``(n, 3)`` will set individual color for each vertex, interpolated along
+            the edges; ``n`` has to be equal to the vertex number in ``pos`` array.
+        mat : string, optional
+            Material name.
+        """
+
+        if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if name in self.geometry_data:
+            msg = "Geometry %s already exists, use update_graph() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
+        assert len(pos.shape) == 2 and pos.shape[0] > 1 and pos.shape[1] == 3, "Required vertex data shape is (n,3), where n >= 2."
+        if pos.dtype != np.float32: pos = np.ascontiguousarray(pos, dtype=np.float32)
+        if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
+        pos_ptr = pos.ctypes.data
+        n_vertices = pos.shape[0]
+
+        if not isinstance(edges, np.ndarray): edges = np.ascontiguousarray(edges, dtype=np.int32)
+        if edges.dtype != np.int32: edges = np.ascontiguousarray(edges, dtype=np.int32)
+        if not edges.flags['C_CONTIGUOUS']: edges = np.ascontiguousarray(edges, dtype=np.int32)
+        assert (len(edges.shape) == 2 and edges.shape[1] == 2) or (len(edges.shape) == 1 and (edges.shape[0] % 2 == 0)), "Required index shape is (n,2) or (m), where m is a multiple of 2."
+        edges_ptr = edges.ctypes.data
+        n_edges = edges.size // 2
+
+        if r is not None:
+            if not isinstance(r, np.ndarray): r = np.ascontiguousarray(r, dtype=np.float32)
+            if r.dtype != np.float32: r = np.ascontiguousarray(r, dtype=np.float32)
+            if len(r.shape) > 1: r = r.flatten()
+            if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+        if r is not None:
+            if r.shape[0] == 1:
+                if n_vertices > 0: r = np.full(n_vertices, r[0], dtype=np.float32)
+                else:
+                    msg = "Cannot resolve proper radii (r) shape from preceding data arguments."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+                if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+            if (n_vertices > 0) and (n_vertices != r.shape[0]):
+                msg = "Radii (r) shape does not match the shape of preceding data arguments."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            radii_ptr = r.ctypes.data
+        else: radii_ptr = 0
+
+        c = np.ascontiguousarray(c, dtype=np.float32)
+        if c.shape == (1,):
+            c = np.ascontiguousarray([c[0], c[0], c[0]], dtype=np.float32)
+            col_const_ptr = c.ctypes.data
+            col_ptr = 0
+        elif c.shape == (3,):
+            col_const_ptr = c.ctypes.data
+            col_ptr = 0
+        else:
+            c = _make_contiguous_3d(c, n=n_vertices, extend_scalars=True)
+            assert c.shape == pos.shape,  "Colors shape must be (n,3), with n matching the number of graph vertices."
+            if c is not None: col_ptr = c.ctypes.data
+            else: col_ptr = 0
+            col_const_ptr = 0
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Setup graph %s...", name)
+            g_handle = self._optix.setup_graph(name, mat, n_vertices, n_edges, pos_ptr, radii_ptr, edges_ptr, col_const_ptr, col_ptr)
+
+            if g_handle > 0:
+                self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_data[name] = GeometryMeta(name, g_handle, n_vertices)
+                self.geometry_names[g_handle] = name
+            else:
+                msg = "Graph setup failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
+
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+        finally:
+            self._padlock.release()
+
+    def update_graph(self, name: str,
+                     pos: Optional[Any] = None,
+                     edges: Optional[Any] = None,
+                     r: Optional[Any] = None,
+                     c: Optional[Any] = None) -> None:
+        """Update data of an existing graph (mesh wireframe) geometry.
+
+        All data or only selected arrays may be uptated. If vertices and edges are left
+        unchanged then ``color`` and ``r`` array sizes should match the size of the graph,
+        i.e. existing ``pos`` shape.
+        
+        Parameters
+        ----------
+        name : string
+            Name of the graph geometry.
+        pos : array_like, optional
+            XYZ values of the graph vertices.
+        edges : array_like, optional
+            Graph edges as indices (doublets) to the ``pos`` array.
+        r : Any, optional
+            Radii of vertices, interpolated along the edges. Single value sets
+            constant radius for all vertices.
+        c : Any, optional
+            Colors of graph vertices. Single value means a constant gray level.
+            3-component array means a constant RGB color. Array of the shape
+            ``(n, 3)`` will set individual color for each vertex,
+            interpolated along edges; ``n`` has to be equal to the vertex
+            number in ``pos`` array.
+        """
+
+        if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if not name in self.geometry_data:
+            msg = "Graph %s does not exists yet, use set_graph() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        m_vertices = self._optix.get_geometry_size(name)
+        #m_edges = self._optix.get_edges_count(name)
+        size_changed = False
+
+        pos_ptr = 0
+        n_vertices = 0
+        if pos is not None:
+            if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
+            assert len(pos.shape) == 2 and pos.shape[0] > 1 and pos.shape[1] == 3, "Required vertex data shape is (n,3), where n >= 2."
+            if pos.dtype != np.float32: pos = np.ascontiguousarray(pos, dtype=np.float32)
+            if not pos.flags['C_CONTIGUOUS']: pos = np.ascontiguousarray(pos, dtype=np.float32)
+            if pos.shape[0] != m_vertices: size_changed = True
+            pos_ptr = pos.ctypes.data
+            n_vertices = pos.shape[0]
+            m_vertices = n_vertices
+
+        edges_ptr = 0
+        n_edges = 0
+        if edges is not None:
+            if not isinstance(edges, np.ndarray): edges = np.ascontiguousarray(edges, dtype=np.int32)
+            if edges.dtype != np.int32: edges = np.ascontiguousarray(edges, dtype=np.int32)
+            if not edges.flags['C_CONTIGUOUS']: edges = np.ascontiguousarray(edges, dtype=np.int32)
+            assert (len(edges.shape) == 2 and edges.shape[1] == 3) or (len(edges.shape) == 1 and (edges.shape[0] % 2 == 0)), "Required index shape is (n,3) or (m), where m is a multiple of 2."
+            edges_ptr = edges.ctypes.data
+            n_edges = edges.size // 2
+            #m_edges = n_edges
+
+        if size_changed and r is None:
+            r = np.ascontiguousarray([0.05], dtype=np.float32)
+        if r is not None:
+            if not isinstance(r, np.ndarray): r = np.ascontiguousarray(r, dtype=np.float32)
+            if r.dtype != np.float32: r = np.ascontiguousarray(r, dtype=np.float32)
+            if len(r.shape) > 1: r = r.flatten()
+            if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+        radii_ptr = 0
+        if r is not None:
+            if r.shape[0] == 1:
+                r = np.full(m_vertices, r[0], dtype=np.float32)
+                if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
+            if m_vertices != r.shape[0]:
+                msg = "Radii (r) shape does not match the number of graph vertices."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            radii_ptr = r.ctypes.data
+
+        c_ptr = 0
+        c_const_ptr = 0
+        if size_changed and c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
+        if c is not None:
+            if isinstance(c, float) or isinstance(c, int): c = np.full(3, c, dtype=np.float32)
+            if not isinstance(c, np.ndarray): c = np.ascontiguousarray(c, dtype=np.float32)
+            if c.dtype != np.float32: c = np.ascontiguousarray(c, dtype=np.float32)
+            if not c.flags['C_CONTIGUOUS']: c = np.ascontiguousarray(c, dtype=np.float32)
+            if c.shape == (3,):
+                c_const_ptr = c.ctypes.data
+            elif c.shape == (m_vertices, 3):
+                c_ptr = c.ctypes.data
+            else:
+                msg = "Colors shape must be (n,3), with n matching the number of graph vertices."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Update graph %s...", name)
+            g_handle = self._optix.update_graph(name, m_vertices, n_edges, pos_ptr, radii_ptr, edges_ptr, c_const_ptr, c_ptr)
+
+            if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
+                self._logger.info("...done, handle: %d", g_handle)
+                self.geometry_data[name]._size = m_vertices
+            else:
+                msg = "Graph update failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
+
         except Exception as e:
             self._logger.error(str(e))
             if self._raise_on_error: raise
@@ -4429,7 +4781,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Name of the new surface geometry.
+            Name of the new mesh geometry.
         pos : array_like
             XYZ values of the mesh vertices.
         faces : array_like
@@ -4575,7 +4927,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         Parameters
         ----------
         name : string
-            Name of the new surface geometry.
+            Name of the mesh geometry.
         pos : array_like, optional
             XYZ values of the mesh vertices.
         faces : array_like, optional

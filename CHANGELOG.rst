@@ -7,9 +7,15 @@ v0.11.0 - unreleased
 Added
 ~~~~~
 
-- direct access to the internal geometry buffers (memory shared with ndarrays on the python side)
-- graph / mesh wireframe geometry
+- direct access to internal geometry buffers (memory shared with ndarrays on the python side)
+- graph / mesh wireframe geometry, available also for all surface plots
+- m_shadow_catcher, material useful for preparation of packshot style images
 
+Fixed
+~~~~~
+
+- clear shader compilation cache on installing (incompatible code was surviving updates)
+- several fixes in b-splines geometry
 
 `v0.10.1`_ - 2020-08-30
 -----------------------

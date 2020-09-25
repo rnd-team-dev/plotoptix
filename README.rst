@@ -58,7 +58,7 @@ Features
 
 - progressive path tracing with explicit light sampling
 - *cameras*: orthographic, pinhole, thin-lens and fisheye with depth of field and chromatic aberration simulation, panoramic camera for making 360 deg environment maps, user-defined projection for shooting rays at any angle
-- *geometries*: particle (sphere), parallelepiped, parallelogram, tetrahedron, linear segments, bezier curve, b-splines; *meshes*: automatically generated from a parametric surface or f(x,y) data, or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__, or loaded from a file, e.g. supported by `trimesh <https://github.com/mikedh/trimesh>`__, or loaded from a Wavefront .obj file with a native loader
+- *geometries*: particles (spheres), parallelepipeds, parallelograms, tetrahedrons, linear segments, bezier curves, b-splines; *meshes*: shaded surface or wireframe, automatically generated from a parametric surface or f(x,y) data, or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__, or loaded from a file, e.g. supported by `trimesh <https://github.com/mikedh/trimesh>`__, or loaded from a Wavefront .obj file with a native loader
 - *materials*: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness, subsurface scattering, and nested volumes
 - *light sources*: spherical and parallelogram, light emission in volumes, uniform environmental light or environment map
 - *post-processing*: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
