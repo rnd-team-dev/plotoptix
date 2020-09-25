@@ -65,17 +65,23 @@ def HandlePrerequisites(command_subclass):
 
     def clearOptixCacheLinux(self):
         import getpass
-        folder = os.path.join('/var/tmp/OptixCache_' + getpass.getuser())
+        if 'SUDO_UID' in os.environ:
+            uname = os.environ['SUDO_USER']
+        else:
+            uname = getpass.getuser()
+        folder = os.path.join('/var/tmp/OptixCache_' + uname)
         if os.path.isdir(folder):
             print("Clear OptiX compilation chache...", folder)
             import shutil
             shutil.rmtree(folder)
         else:
-            folder = os.path.join('/tmp/OptixCache_' + getpass.getuser())
+            folder = os.path.join('/tmp/OptixCache_' + uname)
             if os.path.isdir(folder):
                 print("Clear OptiX compilation chache...", folder)
                 import shutil
                 shutil.rmtree(folder)
+            else:
+                print("OptiX compilation chache not found yet.")
 
     def clearOptixCacheWindows(self):
         folder = os.path.join(os.environ['LOCALAPPDATA'], 'NVIDIA', 'OptixCache')
@@ -83,6 +89,8 @@ def HandlePrerequisites(command_subclass):
             print("Clear OptiX compilation chache...", folder)
             import shutil
             shutil.rmtree(folder)
+        else:
+            print("OptiX compilation chache not found yet.")
 
     def subclass_run(self):
 
