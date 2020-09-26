@@ -1,5 +1,5 @@
 """
-Create simple mesh in code.
+Create simple mesh and graph (wireframe) in the code.
 """
 
 import numpy as np
@@ -25,6 +25,15 @@ def main():
         [0, 2, 3]
     ]
 
+    edges = [
+        [0, 1],
+        [1, 2],
+        [2, 0],
+        [0, 3],
+        [1, 3],
+        [2, 3]
+    ]
+
     # colors assigned to vertices
     colors = [
         [0.7, 0, 0],
@@ -42,6 +51,9 @@ def main():
 
     # add mesh geometry to the scene
     rt.set_mesh("m", points, faces, c=colors)
+
+    # add graph (wireframe) geometry to the scene
+    rt.set_graph("g", 1.2*np.asarray(points), edges, r=0.02, c=colors)
 
     rt.start()
 

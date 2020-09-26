@@ -296,7 +296,7 @@ class GeomBuffer(IntFlag):
     """
 
     Vectors = U | V | W
-    """All vectors of parallelograms, parallelepipeds and tetrahedrons.
+    """All vectors of parallelograms, parallelepipeds and tetrahedrons; normal vectors of meshes.
     """
 
     V0 = 256

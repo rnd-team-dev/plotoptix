@@ -57,7 +57,7 @@ def main():
     rt.set_ambient(0.15)
 
     rt.set_surface("surface", S, c=0.94,
-                   #wrap_u=True, wrap_v=True,        # use wrapping if a visible gap appear with a low value of n
+                   #wrap_u=True, wrap_v=True,        # use wrapping to close a gap that can appear on u or v edges
                    make_normals=True, mat="plastic")
 
     rt.set_data("plane", geom="Parallelograms",
