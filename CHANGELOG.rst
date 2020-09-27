@@ -1,8 +1,8 @@
 Release history
 ===============
 
-v0.11.0 - unreleased
---------------------
+`v0.11.0` - 2020-09-27
+----------------------
 
 Added
 ~~~~~
@@ -14,7 +14,7 @@ Added
 Fixed
 ~~~~~
 
-- clear shader compilation cache on installing (incompatible code was surviving updates)
+- clear the shader compilation cache on installing (incompatible code was surviving updates)
 - several fixes in b-splines geometry
 
 `v0.10.1`_ - 2020-08-30
@@ -419,6 +419,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.11.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.11.0
 .. _`v0.10.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.10.1
 .. _`v0.10.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.10.0
 .. _`v0.9.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.9.0
