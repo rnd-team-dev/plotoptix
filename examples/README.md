@@ -4,7 +4,7 @@ Note, some fresh examples may use features available in the repository head, but
 
 	python -m plotoptix.install examples
 
-### 1. Basic plot making
+### 1. Basics
 
 Collection of short and simple scripts to get started.
 

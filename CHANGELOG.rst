@@ -1,6 +1,17 @@
 Release history
 ===============
 
+`v0.11.1` - 2020-10-10
+----------------------
+
+Code updated to OptiX 7.2. This is a minor step, preparing for the new features of the low
+level library.
+
+Fixed
+~~~~~
+
+- bug when new geometry families were added dynamically, e.g. b-splines to the scene with meshes only
+
 `v0.11.0` - 2020-09-27
 ----------------------
 
