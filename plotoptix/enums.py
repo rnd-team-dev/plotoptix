@@ -834,3 +834,7 @@ class GpuArchitecture(Enum):
     Compute_75 = 750
     """Turing.
     """
+
+    Compute_86 = 860
+    """Ampere.
+    """

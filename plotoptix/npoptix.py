@@ -320,7 +320,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.info("RT loop ready.")
 
         super().start()
-        if self._started_event.wait(30):
+        if self._started_event.wait(600):
             self._logger.info("Raytracing started.")
             self._is_started = True
         else:
