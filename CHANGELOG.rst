@@ -1,7 +1,7 @@
 Release history
 ===============
 
-`v0.11.1` - 2020-10-10
+`v0.11.1` - 2020-10-21
 ----------------------
 
 Code updated to OptiX 7.2. This is a minor step, preparing for the new features of the low
@@ -11,6 +11,7 @@ Fixed
 ~~~~~
 
 - bug when new geometry families were added dynamically, e.g. b-splines to the scene with meshes only
+- bug in deserialization of bezier and bspline geometries
 
 `v0.11.0` - 2020-09-27
 ----------------------
@@ -430,6 +431,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.11.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.11.1
 .. _`v0.11.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.11.0
 .. _`v0.10.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.10.1
 .. _`v0.10.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.10.0
