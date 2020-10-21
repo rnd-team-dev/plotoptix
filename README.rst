@@ -73,8 +73,8 @@ Features
 System Requirements
 -------------------
 
-- a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Turing);
-   - **for the release 0.11.1:** NVIDIA driver >= v456.71 (Windows) or >= v455.28 (Linux);
+- a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Ampere);
+   - for the release **0.11.1:** NVIDIA driver >= v456.71 (Windows) or >= v455.28 (Linux);
    - for the release v0.11.0: NVIDIA driver >= v450 (Windows/Linux)
 - **Python 3 64-bit**
 - Windows:
