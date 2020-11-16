@@ -22,13 +22,16 @@ def main():
     print("Reading:", fname)
 
     # create and configure, show the window later
-    optix = TkOptiX()
+    rt = TkOptiX()
 
-    optix.set_background_mode("TextureEnvironment")
+    rt.set_background_mode("TextureEnvironment")
 
-    optix.set_background(fname)
+    rt.set_background(fname)
 
-    optix.start()    
+    rt.start()
+
+    rt.set_camera_glock(True)
+
     print("done")
 
 

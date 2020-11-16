@@ -1,18 +1,217 @@
-"""PlotOptiX predefined materials.
+"""Set of basic configurations and an utility method :meth:`plotoptix.materials.make_material` to create user defined materials.
 """
 
 import os
 
-from plotoptix.enums import RtFormat
+from typing import Any, Union
+
+from plotoptix.enums import MaterialType
 
 __pkg_dir__ = os.path.dirname(__file__)
+
+def make_material(shader: Union[MaterialType, str],
+                  color: Any = [1.0, 1.0, 1.0, 1.0],
+                  color_tex: Union[list, str] = [],
+                  roughness: float = 0.0,
+                  roughness_tex: Union[list, str] = [],
+                  metalness: float = 0.0,
+                  metalness_tex: Union[list, str] = [],
+                  normal_tex: Union[list, str] = [],
+                  normaltilt_iar: float = 1.0,
+                  specular: float = 0.0,
+                  albedo_color: Any = [1.0, 1.0, 1.0],
+                  subsurface_color: Any = [1.0, 1.0, 1.0],
+                  radiation_length: float = 0.0,
+                  light_emission: float = 0.0,
+                  refraction_index: Any = [1.41, 1.41, 1.41]) -> dict:
+    """Create a dictionary of material parameters.
+
+    Resulting dictionary should be used as an input to :meth:`plotoptix.NpOptiX.setup_material`.
+
+    Parameters
+    ----------
+    shader : MaterialType or string
+        Name of the material type, selects the shader programs and material capabilities, see
+        :class:`plotoptix.enums.MaterialType`.
+
+        Dictionary parameter names: ``RadianceProgram`` and ``flags``.
+    color : Any, optional
+        Base color of the material, modulated by an optional texture and geometry primitive color.
+        Single value means a constant gray level. 3(4)-component array means constant RGB(RGBA) color.
+
+        Dictionary parameter name: ``base_color``.
+    color_tex: list or string, optional
+        List of color texture names or a single texture name. Each texture should be RGBA, and uploaded
+        with :meth:`plotoptix.NpOptiX.set_texture_2d` or :meth:`plotoptix.NpOptiX.load_texture` before
+        using :meth:`plotoptix.NpOptiX.setup_material`.
+
+        Dictionary parameter name: ``ColorTextures``.
+    roughness: float, optional
+        Base roughness value, modulated by an optional texture.
+
+        Dictionary parameter name: ``base_roughness``.
+    roughness_tex: list or string, optional
+        List of roughness texture names or a single texture name. Each texture should be grayscale, and
+        uploaded with :meth:`plotoptix.NpOptiX.set_texture_2d` or :meth:`plotoptix.NpOptiX.load_texture`
+        before using :meth:`plotoptix.NpOptiX.setup_material`.
+
+        Dictionary parameter name: ``RoughnessTextures``.
+    metalness: float, optional
+        Base metalness value, modulated by an optional texture.
+
+        Dictionary parameter name: ``reflectivity_index``.
+    metalness_tex: list or string, optional
+        List of metalness texture names or a single texture name. Each texture should be grayscale, and
+        uploaded with :meth:`plotoptix.NpOptiX.set_texture_2d` or :meth:`plotoptix.NpOptiX.load_texture`
+        before using :meth:`plotoptix.NpOptiX.setup_material`.
+
+        Dictionary parameter name: ``MetalnessTextures``.
+    normal_tex: list or string, optional
+        List of normal texture names or a single texture name. Each texture should be :attr:`plotoptix.enums.RtFormat.Float2`,
+        encoding UV normal tilt in the tangent space, and uploaded with :meth:`plotoptix.NpOptiX.set_texture_2d`
+        before using :meth:`plotoptix.NpOptiX.setup_material`.
+
+        Dictionary parameter name: ``NormalTextures``.
+    normaltilt_iar: float, optional
+        Inverse aspect ratio of the normal texture, :math:`height / width`.
+
+        Dictionary parameter name: ``normaltilt_iar``.
+    specular: float, optional
+        Amount of specular reflection.
+
+        Dictionary parameter name: ``reflectivity_range``.
+    albedo_color: Any, optional
+        Surface albedo color, modulates the reflected rays color. Single value means a gray level.
+        3-component array means an RGB color.
+
+        Dictionary parameter name: ``surface_albedo``.
+    subsurface_color: Any, optional
+        Sub-surface scattering color, modulates color of rays scattered inside the volume. Single value means
+        a gray level. 3-component array means an RGB color.
+
+        Dictionary parameter name: ``subsurface_color``.
+    radiation_length: float, optional
+        Mean free path length for the sub-surface scattering (free path length has an exponential distribution).
+
+        Dictionary parameter name: ``radiation_length``.
+    light_emission: float, optional
+        Amount of light emission from the diffuse scattering on surfaces or in the sub-surface scattering for
+        transmissive materials.
+
+        Dictionary parameter name: ``light_emission``.
+    refraction_index: Any, optional
+        Refraction index for transmissive materials. Single value means an uniform refraction of all colors.
+        3-component array allows for dispersion simulation (individual refraction index values fror each RGB
+        component).
+
+        Dictionary parameter name: ``refraction_index``.
+
+    Returns
+    -------
+    out : Dictionary of parameters, ready to use with :meth:`plotoptix.NpOptiX.setup_material`.
+    """
+    if isinstance(shader, str): shader = MaterialType[shader]
+
+    if shader == MaterialType.Flat:
+        radianceProgram = "materials7.ptx::__closesthit__radiance__flat"
+        flags = 0
+    elif shader == MaterialType.Cosine:
+        radianceProgram = "materials7.ptx::__closesthit__radiance__cos"
+        flags = 0
+    elif shader == MaterialType.Diffuse:
+        radianceProgram = "materials7.ptx::__closesthit__radiance__diffuse"
+        flags = 2
+    elif shader == MaterialType.TransparentDiffuse:
+        radianceProgram = "materials7.ptx::__closesthit__radiance__diffuse_masked"
+        flags = 2
+    elif shader == MaterialType.Reflective:
+        radianceProgram = "materials7.ptx::__closesthit__radiance__reflective"
+        flags = 6
+    elif shader == MaterialType.TransparentReflective:
+        radianceProgram = "materials7.ptx::__closesthit__radiance__reflective_masked"
+        flags = 6
+    elif shader == MaterialType.Transmissive:
+        radianceProgram = "materials7.ptx::__closesthit__radiance__glass"
+        flags = 12
+    elif shader == MaterialType.ThinWalled:
+        radianceProgram = "materials7.ptx::__closesthit__radiance__glass"
+        flags = 44
+    elif shader == MaterialType.ShadowCatcher:
+        radianceProgram = "materials7.ptx::__closesthit__radiance__shadow_catcher"
+        flags = 2
+    else:
+        radianceProgram = "materials7.ptx::__closesthit__radiance__diffuse"
+        flags = 2
+
+    occlusionProgram = "materials7.ptx::__closesthit__occlusion"
+
+    c = [0.0, 0.0, 0.0, 1.0]
+    if isinstance(color, float) or isinstance(color, int):
+        c[0] = c[1] = c[2] = float(color)
+    else:
+        c[0] = float(color[0])
+        c[1] = float(color[1])
+        c[2] = float(color[2])
+        if len(color) == 4:
+            c[3] = float(color[3])
+
+    if isinstance(albedo_color, float) or isinstance(albedo_color, int):
+        a = [float(albedo_color), float(albedo_color), float(albedo_color)]
+    else:
+        a = [float(albedo_color[0]), float(albedo_color[1]), float(albedo_color[2])]
+
+    if isinstance(subsurface_color, float) or isinstance(subsurface_color, int):
+        s = [float(subsurface_color), float(subsurface_color), float(subsurface_color)]
+    else:
+        s = [float(subsurface_color[0]), float(subsurface_color[1]), float(subsurface_color[2])]
+
+    if isinstance(refraction_index, float) or isinstance(refraction_index, int):
+        r = [float(refraction_index), float(refraction_index), float(refraction_index)]
+    else:
+        r = [float(refraction_index[0]), float(refraction_index[1]), float(refraction_index[2])]
+
+    if isinstance(color_tex, str): color_tex = [color_tex,]
+    if isinstance(roughness_tex, str): roughness_tex = [roughness_tex,]
+    if isinstance(metalness_tex, str): metalness_tex = [metalness_tex,]
+    if isinstance(normal_tex, str): normal_tex = [normal_tex,]
+
+    m_params = {
+        "RadianceProgram": radianceProgram,
+        "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+        "VarUInt": {
+            "flags": flags
+            },
+        "VarFloat": {
+            "base_roughness": float(roughness),
+            "reflectivity_index": float(metalness),
+            "reflectivity_range": float(specular),
+            "radiation_length": float(radiation_length),
+            "light_emission": float(light_emission),
+            "normaltilt_iar": float(normaltilt_iar)
+            },
+        "VarFloat3": {
+            "surface_albedo": a,
+            "subsurface_color": s,
+            "refraction_index": r
+            },
+        "VarFloat4": {
+            "base_color": c
+            },
+        "ColorTextures": color_tex,
+        "RoughnessTextures": roughness_tex,
+        "MetalnessTextures": metalness_tex,
+        "NormalTextures": normal_tex
+    }
+
+    return m_params
+
 
 m_flat = {
       "RadianceProgram": "materials7.ptx::__closesthit__radiance__flat",
       "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
     }
 """
-Super-fast material, color is not shaded anyhow. Use color components range ``<0; 1>``.
+Super-fast material, color is just flat. Use color components range ``<0; 1>``.
 """
 
 m_eye_normal_cos = {

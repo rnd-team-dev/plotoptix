@@ -145,6 +145,57 @@ class TextureAddressMode(Enum):
 
     Border = 3
 
+class MaterialType(Enum):
+    """Type of the material shader.
+
+    Used to select the shader program when creating
+    a dictionary for the new material parameters.
+    """
+
+    Flat = 0
+    """Simple and fast flat color shading.
+    """
+
+    Cosine = 1
+    """Shaded transparency with cos(eye-hit-normal), fast.
+    """
+
+    Diffuse = 2
+    """Lambertian and Oren-Nayar diffuse materials, no specular reflections, no
+    transmission, no transparency, therefore a bit faster than other, more
+    complex materials.
+    """
+
+    TransparentDiffuse = 3
+    """Diffuse material, similar to :attr:`plotoptix.enums.MaterialType.Diffuse`,
+    but with the transparency support.
+    """
+
+    Reflective = 4
+    """Supports all surfaces with specular reflections (also mixed with diffuse
+    behavior), including metallic surface, with no transmission and no transparency support.
+    """
+
+    TransparentReflective = 5
+    """Reflective material, similar to :attr:`plotoptix.enums.MaterialType.Reflective`,
+    but with the transparency support.
+    """
+
+    Transmissive = 6
+    """Glass-like, transmissive material with the light refraction and
+    dispersion support; includes also volumetric scattering and emission.
+    """
+
+    ThinWalled = 7
+    """Bubble-like, transmissive material with no refraction on the walls;
+    includes volumetric scattering and emission.
+    """
+
+    ShadowCatcher = 8
+    """Shadow catcher, a diffuse material, transparent except shadowed regions.
+    Useful for preparation of packshot style images. 
+    """
+
 class Geometry(Enum):
     """Geometry shapes.
     """

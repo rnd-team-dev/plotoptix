@@ -1,6 +1,15 @@
 Release history
 ===============
 
+v0.12.0 - not released
+----------------------
+
+Added
+~~~~~
+
+- make_material method for easy configuration of material shaders
+- metalness and metalness texture support
+
 `v0.11.1` - 2020-10-21
 ----------------------
 
