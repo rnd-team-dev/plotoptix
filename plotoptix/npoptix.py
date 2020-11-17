@@ -3816,6 +3816,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def update_data(self, name: str,
+                    mat: Optional[str] = None,
                     pos: Optional[Any] = None, c: Optional[Any] = None, r: Optional[Any] = None,
                     u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None) -> None:
         """Update data of an existing geometry.
@@ -3827,7 +3828,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         name : string
             Name of the geometry.
-        pos : array_like
+        mat : string, optional
+            Material name.
+        pos : array_like, optional
             Positions of data points.
         c : Any, optional
             Colors of the primitives. Single value means a constant gray level.
@@ -3848,8 +3851,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             value for all primitives.
         """
         if name is None: raise ValueError()
-
         if not isinstance(name, str): name = str(name)
+
+        if mat is None: mat = ""
 
         if not name in self.geometry_data:
             msg = "Geometry %s does not exists yet, use set_data() instead." % name
@@ -3930,7 +3934,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Update %s, %d primitives...", name, n_primitives)
-            g_handle = self._optix.update_geometry(name, n_primitives,
+            g_handle = self._optix.update_geometry(name, mat, n_primitives,
                                                    pos_ptr, col_const_ptr, col_ptr, radii_ptr,
                                                    u_ptr, v_ptr, w_ptr)
 
@@ -4115,6 +4119,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
     def update_data_2d(self, name: str,
+                       mat: Optional[str] = None,
                        pos: Optional[Any] = None,
                        r: Optional[Any] = None,
                        c: Optional[Any] = None,
@@ -4129,6 +4134,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         name : string
             Name of the surface geometry.
+        mat : string, optional
+            Material name.
         pos : array_like, optional
             Z values of data points.
         r : Any, optional
@@ -4155,6 +4162,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
+
+        if mat is None: mat = ""
 
         if not name in self.geometry_data:
             msg = "Surface %s does not exists yet, use set_data_2d() instead." % name
@@ -4245,7 +4254,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Update surface %s, size (%d, %d)...", name, size_xz[1], size_xz[0])
-            g_handle = self._optix.update_surface(name, size_xz[1], size_xz[0],
+            g_handle = self._optix.update_surface(name, mat, size_xz[1], size_xz[0],
                                                   pos_ptr, radii_ptr, n_ptr, c_ptr, cl_ptr,
                                                   range_x[0], range_x[1], range_z[0], range_z[1],
                                                   floor_y)
@@ -4399,6 +4408,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
     def update_surface(self, name: str,
+                       mat: Optional[str] = None,
                        pos: Optional[Any] = None,
                        r: Optional[Any] = None,
                        c: Optional[Any] = None,
@@ -4409,6 +4419,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         name : string
             Name of the surface geometry.
+        mat : string, optional
+            Material name.
         pos : array_like, optional
             XYZ values of surface points.
         r : Any, optional
@@ -4426,6 +4438,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
+
+        if mat is None: mat = ""
 
         if not name in self.geometry_data:
             msg = "Surface %s does not exists yet, use set_surface() instead." % name
@@ -4502,7 +4516,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Update surface %s, size (%d, %d)...", name, size_uv1[1], size_uv1[0])
-            g_handle = self._optix.update_psurface(name, size_uv1[1], size_uv1[0], pos_ptr, radii_ptr, n_ptr, c_const_ptr, c_ptr)
+            g_handle = self._optix.update_psurface(name, mat, size_uv1[1], size_uv1[0], pos_ptr, radii_ptr, n_ptr, c_const_ptr, c_ptr)
 
             if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
                 self._logger.info("...done, handle: %d", g_handle)
@@ -4630,6 +4644,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
     def update_graph(self, name: str,
+                     mat: Optional[str] = None,
                      pos: Optional[Any] = None,
                      edges: Optional[Any] = None,
                      r: Optional[Any] = None,
@@ -4644,6 +4659,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         name : string
             Name of the graph geometry.
+        mat : string, optional
+            Material name.
         pos : array_like, optional
             XYZ values of the graph vertices.
         edges : array_like, optional
@@ -4661,6 +4678,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
+
+        if mat is None: mat = ""
 
         if not name in self.geometry_data:
             msg = "Graph %s does not exists yet, use set_graph() instead." % name
@@ -4734,7 +4753,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Update graph %s...", name)
-            g_handle = self._optix.update_graph(name, m_vertices, n_edges, pos_ptr, radii_ptr, edges_ptr, c_const_ptr, c_ptr)
+            g_handle = self._optix.update_graph(name, mat, m_vertices, n_edges, pos_ptr, radii_ptr, edges_ptr, c_const_ptr, c_ptr)
 
             if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
                 self._logger.info("...done, handle: %d", g_handle)
@@ -4909,6 +4928,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
     def update_mesh(self, name: str,
+                    mat: Optional[str] = None,
                     pos: Optional[Any] = None,
                     faces: Optional[Any] = None,
                     c: Optional[Any] = None,
@@ -4928,6 +4948,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         name : string
             Name of the mesh geometry.
+        mat : string, optional
+            Material name.
         pos : array_like, optional
             XYZ values of the mesh vertices.
         faces : array_like, optional
@@ -4951,6 +4973,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
 
+        if mat is None: mat = ""
 
         if not name in self.geometry_data:
             msg = "Mesh %s does not exists yet, use set_mesh() instead." % name
@@ -5048,7 +5071,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Update mesh %s...", name)
-            g_handle = self._optix.update_mesh(name, n_vertices, n_faces, n_normals, n_uv, pos_ptr, faces_ptr, c_const_ptr, c_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr)
+            g_handle = self._optix.update_mesh(name, mat, n_vertices, n_faces, n_normals, n_uv, pos_ptr, faces_ptr, c_const_ptr, c_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr)
 
             if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
                 self._logger.info("...done, handle: %d", g_handle)

@@ -9,6 +9,7 @@ Added
 
 - make_material method for easy configuration of material shaders
 - metalness and metalness texture support
+- enable changes of material in geometry update methods (why it was not possible before...?)
 
 `v0.11.1` - 2020-10-21
 ----------------------

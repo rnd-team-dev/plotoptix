@@ -170,7 +170,7 @@ def _load_optix_win():
     optix.setup_geometry.argtypes = [c_int, c_int, c_wchar_p, c_wchar_p, c_bool, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.setup_geometry.restype = c_uint
 
-    optix.update_geometry.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.update_geometry.argtypes = [c_wchar_p, c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_geometry.restype = c_uint
 
     optix.get_geometry_size.argtypes = [c_wchar_p]
@@ -182,13 +182,13 @@ def _load_optix_win():
     optix.get_surface_size.argtypes = [c_wchar_p, POINTER(c_uint), POINTER(c_uint)]
     optix.get_surface_size.restype = c_bool
 
-    optix.update_surface.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float]
+    optix.update_surface.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float]
     optix.update_surface.restype = c_uint
 
     optix.setup_surface.argtypes = [c_int, c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_bool]
     optix.setup_surface.restype = c_uint
 
-    optix.update_psurface.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.update_psurface.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_psurface.restype = c_uint
 
     optix.setup_psurface.argtypes = [c_int, c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_bool, c_bool, c_bool]
@@ -197,13 +197,13 @@ def _load_optix_win():
     optix.setup_graph.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.setup_graph.restype = c_uint
 
-    optix.update_graph.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.update_graph.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_graph.restype = c_uint
 
     optix.setup_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_bool]
     optix.setup_mesh.restype = c_uint
 
-    optix.update_mesh.argtypes = [c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
+    optix.update_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_mesh.restype = c_uint
 
     optix.load_mesh_obj.argtypes = [c_wchar_p, c_wchar_p, c_wchar_p, c_wchar_p, c_void_p, c_bool]
@@ -740,8 +740,8 @@ class _ClrOptiX:
                                               IntPtr.__overloads__[Int64](v),
                                               IntPtr.__overloads__[Int64](w))
 
-    def update_geometry(self, name, n_primitives, pos, cconst, c, r, u, v, w):
-        return self._optix.update_geometry_ptr(name, n_primitives,
+    def update_geometry(self, name, material, n_primitives, pos, cconst, c, r, u, v, w):
+        return self._optix.update_geometry_ptr(name, material, n_primitives,
                                                IntPtr.__overloads__[Int64](pos),
                                                IntPtr.__overloads__[Int64](cconst),
                                                IntPtr.__overloads__[Int64](c),
@@ -759,8 +759,8 @@ class _ClrOptiX:
                                                 IntPtr.__overloads__[Int64](cast(x_ref, c_void_p).value),
                                                 IntPtr.__overloads__[Int64](cast(z_ref, c_void_p).value))
 
-    def update_surface(self, name, x_size, z_size, pos, radii, norm, csurf, cfloor, x_min, x_max, z_min, z_max, floor_level):
-        return self._optix.update_surface_ptr(name, x_size, z_size,
+    def update_surface(self, name, material, x_size, z_size, pos, radii, norm, csurf, cfloor, x_min, x_max, z_min, z_max, floor_level):
+        return self._optix.update_surface_ptr(name, material, x_size, z_size,
                                               IntPtr.__overloads__[Int64](pos),
                                               IntPtr.__overloads__[Int64](radii),
                                               IntPtr.__overloads__[Int64](norm),
@@ -777,8 +777,8 @@ class _ClrOptiX:
                                              IntPtr.__overloads__[Int64](cfloor),
                                              x_min, x_max, z_min, z_max, floor_level, make_normals)
 
-    def update_psurface(self, name, u_size, v_size, pos, radii, norm, cconst, c):
-        return self._optix.update_psurface_ptr(name, u_size, v_size,
+    def update_psurface(self, name, material, u_size, v_size, pos, radii, norm, cconst, c):
+        return self._optix.update_psurface_ptr(name, material, u_size, v_size,
                                                IntPtr.__overloads__[Int64](pos),
                                                IntPtr.__overloads__[Int64](radii),
                                                IntPtr.__overloads__[Int64](norm),
@@ -802,8 +802,8 @@ class _ClrOptiX:
                                            IntPtr.__overloads__[Int64](cconst),
                                            IntPtr.__overloads__[Int64](c))
 
-    def update_graph(self, name, n_vtx, n_edges, pos, radii, edges, cconst, c):
-        return self._optix.update_mesh_ptr(name, n_vtx, n_tri, n_norm, n_uv,
+    def update_graph(self, name, material, n_vtx, n_edges, pos, radii, edges, cconst, c):
+        return self._optix.update_graph_ptr(name, material, n_vtx, n_tri, n_norm, n_uv,
                                            IntPtr.__overloads__[Int64](pos),
                                            IntPtr.__overloads__[Int64](radii),
                                            IntPtr.__overloads__[Int64](edges),
@@ -822,8 +822,8 @@ class _ClrOptiX:
                                           IntPtr.__overloads__[Int64](uvidx),
                                           make_normals)
 
-    def update_mesh(self, name, n_vtx, n_tri, n_norm, n_uv, pos, vidx, cconst, c, norm, nidx, uvmap, uvidx):
-        return self._optix.update_mesh_ptr(name, n_vtx, n_tri, n_norm, n_uv,
+    def update_mesh(self, name, material, n_vtx, n_tri, n_norm, n_uv, pos, vidx, cconst, c, norm, nidx, uvmap, uvidx):
+        return self._optix.update_mesh_ptr(name, material, n_vtx, n_tri, n_norm, n_uv,
                                            IntPtr.__overloads__[Int64](pos),
                                            IntPtr.__overloads__[Int64](vidx),
                                            IntPtr.__overloads__[Int64](cconst),
