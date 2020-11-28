@@ -1418,7 +1418,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._logger.info("Set displacement map for %s: %d x %d.", name, data.shape[1], data.shape[0])
         if not self._optix.set_displacement(name, data.ctypes.data, data.shape[1], data.shape[0],
-                                            addr_mode, keep_on_host, refresh):
+                                            addr_mode.value, keep_on_host, refresh):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1455,7 +1455,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
 
         self._logger.info("Set displacement map for %s using %s.", name, file_name)
-        if not self._optix.load_displacement(name, file_name, prescale, baseline, addr_mode, refresh):
+        if not self._optix.load_displacement(name, file_name, prescale, baseline, addr_mode.value, refresh):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
