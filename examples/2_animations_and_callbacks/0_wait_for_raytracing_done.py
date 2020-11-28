@@ -1,3 +1,12 @@
+"""
+Simple synchronization example. The code is launching ray tracing and waiting
+until the image is completed.
+
+Ray tracing is running on GPU, in the separate thread. Callback functions allow
+to execute code synchronized with the GPU computations or signal when they are
+finished.
+"""
+
 import numpy as np
 from plotoptix import NpOptiX
 
@@ -27,11 +36,18 @@ def main():
 
     print("working...")
 
+    # Here you can run code using CPU. It will run in parallel
+    # to the GPU calculations.
+
     # Wait for a signal from the callback function.
     if params.done.wait(10):
         print("frame 1 done")
     else:
         print("timeout")
+
+    # Now the ray tracing is finished and access to all the internal buffers is safe.
+    # It is a basic synchronization pattern. See animation examples for a code based
+    # etirely on callbacks.
 
     rt.save_image("frame_1.jpg")
 
