@@ -443,6 +443,18 @@ class Camera(Enum):
     also focuses on a sphere rather than on a plane like thin lens camera.
     """
 
+    CustomProjXYZ = 97
+    """Custom projection camera.
+
+    Rays are defined with a 4D texture ``[height, width, 4]`` composed of target points
+    and maximum range ``[x, y, z, r]``. Range value set to ``0.0`` is converted to distance
+    from the camera position to ``[x, y, z]``; negative range values are replaced with
+    the infinite range.
+
+    Exact values from the texture are used if the render size and texture size are the
+    same. Otherwise ray angles are interpolated.
+    """
+
     CustomProj = 98
     """Custom projection camera.
 

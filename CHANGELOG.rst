@@ -1,6 +1,17 @@
 Release history
 ===============
 
+v0.13.0 - unreleased
+--------------------
+
+Added
+~~~~~
+
+- improved memory model: some buffers are not allocated until needed, and will use host
+  memory if no space on device
+- custom projection camera with ray target positions provided in a texture
+- minimum ray tracing size can be even 1 pixel now
+
 `v0.12.0` - 2020-11-17
 ----------------------
 
