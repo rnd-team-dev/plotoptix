@@ -1636,7 +1636,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                                            prescale, baseline, exposure, gamma,
                                            rt_format.value,
                                            TextureAddressMode.Mirror.value,
-                                           refresh):
+                                           False):
+                if not self._optix.set_bg_texture(bg_name, refresh):
+                    msg = "Background texture %s not set." % bg_name
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
+
                 self._logger.info("Background texture loaded from file.")
             else:
                 msg = "Failed on reading background texture."
@@ -1706,6 +1711,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     msg = "Background texture %s not set." % bg_name
                     self._logger.error(msg)
                     if self._raise_on_error: raise RuntimeError(msg)
+
+                self._logger.info("Background texture %s updated." % bg_name)
 
                 return
 
