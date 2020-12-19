@@ -119,6 +119,9 @@ def _load_optix_win():
     optix.set_float3.argtypes = [c_wchar_p, c_float, c_float, c_float, c_bool]
     optix.set_float3.restype = c_bool
 
+    optix.set_bg_texture.argtypes = [c_wchar_p, c_bool]
+    optix.set_bg_texture.restype = c_bool
+
     optix.set_texture_1d.argtypes = [c_wchar_p, c_void_p, c_int, c_uint, c_int, c_bool, c_bool]
     optix.set_texture_1d.restype = c_bool
 
@@ -633,6 +636,8 @@ class _ClrOptiX:
                                           IntPtr.__overloads__[Int64](cast(z_ref, c_void_p).value))
 
     def set_float3(self, name, x, y, z, refresh): return self._optix.set_float3(name, x, y, z, refresh)
+
+    def set_bg_texture(self, name, refresh): return self._optix.set_bg_texture(name, refresh)
 
     def set_texture_1d(self, name, data_ptr, length, tformat, addr_mode, keep_on_host, refresh):
         return self._optix.set_texture_1d_ptr(name,

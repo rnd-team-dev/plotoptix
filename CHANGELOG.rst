@@ -7,8 +7,9 @@ v0.13.0 - unreleased
 Added
 ~~~~~
 
-- improved memory model: some buffers are not allocated until needed, and will use host
+- improved memory model: some buffers are not allocated until needed, use host
   memory if no space on device
+- support for 8 bit per channel textures (previously all textures converted to 32 bit fp)
 - custom projection camera with ray target positions provided in a texture
 - minimum ray tracing size can be even 1 pixel now
 

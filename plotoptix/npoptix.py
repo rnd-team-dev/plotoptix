@@ -1127,8 +1127,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                        refresh: bool = False) -> None:
         """Set texture data.
 
-        Set texture ``name`` data. Texture format (float, float2 or float4) and
-        length are deduced from the ``data`` array shape. Use ``keep_on_host=True``
+        Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
+        and length are deduced from the ``data`` array shape and dtype. Use ``keep_on_host=True``
         to make a copy of data in the host memory (in addition to GPU memory), this
         option is required when (small) textures are going to be saved to JSON description
         of the scene.
@@ -1147,28 +1147,50 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Set to ``True`` if the image should be re-computed.
         """
         if not isinstance(name, str): name = str(name)
-        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
 
-        if len(data.shape) == 1:     rt_format = RtFormat.Float
-        elif len(data.shape) == 2:
-            if data.shape[1] == 1:   rt_format = RtFormat.Float
-            elif data.shape[1] == 2: rt_format = RtFormat.Float2
-            elif data.shape[1] == 4: rt_format = RtFormat.Float4
+        if data.dtype != np.uint8: # everything not explicitly given as uin8 upload as float32
+
+            if len(data.shape) == 1:     rt_format = RtFormat.Float
+            elif len(data.shape) == 2:
+                if data.shape[1] == 1:   rt_format = RtFormat.Float
+                elif data.shape[1] == 2: rt_format = RtFormat.Float2
+                elif data.shape[1] == 4: rt_format = RtFormat.Float4
+                else:
+                    msg = "Texture 1D shape should be (length,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
             else:
-                msg = "Texture 1D shape should be (length,n), where n=1,2,4."
+                msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 return
-        else:
-            msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
-            self._logger.error(msg)
-            if self._raise_on_error: raise ValueError(msg)
-            return
             
-        if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
-        if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+            if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
+            if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        else:
+
+            if len(data.shape) == 1:     rt_format = RtFormat.UByte
+            elif len(data.shape) == 2:
+                if data.shape[1] == 1:   rt_format = RtFormat.UByte
+                elif data.shape[1] == 2: rt_format = RtFormat.UByte2
+                elif data.shape[1] == 4: rt_format = RtFormat.UByte4
+                else:
+                    msg = "Texture 1D shape should be (length,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            else:
+                msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            
+            if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.uint8)
 
         self._logger.info("Set texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
         if not self._optix.set_texture_1d(name, data.ctypes.data, data.shape[0], rt_format.value, addr_mode.value, keep_on_host, refresh):
@@ -1182,8 +1204,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                        refresh: bool = False) -> None:
         """Set texture data.
 
-        Set texture ``name`` data. Texture format (float, float2 or float4) and
-        width/height are deduced from the ``data`` array shape. Use ``keep_on_host=True``
+        Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
+        and width/height are deduced from the ``data`` array shape and dtype. Use ``keep_on_host=True``
         to make a copy of data in the host memory (in addition to GPU memory), this
         option is required when (small) textures are going to be saved to JSON description
         of the scene.
@@ -1202,28 +1224,50 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Set to ``True`` if the image should be re-computed.
         """
         if not isinstance(name, str): name = str(name)
-        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
 
-        if len(data.shape) == 2:     rt_format = RtFormat.Float
-        elif len(data.shape) == 3:
-            if data.shape[2] == 1:   rt_format = RtFormat.Float
-            elif data.shape[2] == 2: rt_format = RtFormat.Float2
-            elif data.shape[2] == 4: rt_format = RtFormat.Float4
+        if data.dtype != np.uint8: # everything not explicitly given as uin8 upload as float32
+
+            if len(data.shape) == 2:     rt_format = RtFormat.Float
+            elif len(data.shape) == 3:
+                if data.shape[2] == 1:   rt_format = RtFormat.Float
+                elif data.shape[2] == 2: rt_format = RtFormat.Float2
+                elif data.shape[2] == 4: rt_format = RtFormat.Float4
+                else:
+                    msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
             else:
-                msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
+                msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 return
-        else:
-            msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
-            self._logger.error(msg)
-            if self._raise_on_error: raise ValueError(msg)
-            return
 
-        if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
-        if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+            if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
+            if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        else: # uint8
+
+            if len(data.shape) == 2:     rt_format = RtFormat.UByte
+            elif len(data.shape) == 3:
+                if data.shape[2] == 1:   rt_format = RtFormat.UByte
+                elif data.shape[2] == 2: rt_format = RtFormat.UByte2
+                elif data.shape[2] == 4: rt_format = RtFormat.UByte4
+                else:
+                    msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            else:
+                msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+
+            if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.uint8)
 
         self._logger.info("Set texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
         if not self._optix.set_texture_2d(name, data.ctypes.data, data.shape[1], data.shape[0], rt_format.value, addr_mode.value, keep_on_host, refresh):
@@ -1521,6 +1565,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         return self.get_float3("bg_color")
 
     def set_background(self, bg: Any,
+                       rt_format: Union[RtFormat, str] = RtFormat.Float4,
                        prescale: float = 1.0,
                        baseline: float = 0.0,
                        exposure: float = 1.0,
@@ -1529,11 +1574,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                        refresh: bool = False) -> None:
         """Set background color.
 
-        Set background color or texture (shader variable ``bg_color`` or
-        texture ``bg_texture``). Raytrace the whole scene if refresh is set
-        to ``True``. Texture should be provided as an array of shape ``(height, width, n)``,
-        where ``n`` is 3 or 4. 3-component RGB arrays are extended to 4-component
-        RGBA mode (alpha channel is reserved for future implementation).
+        Set background color or texture (shader variable ``bg_color``, texture
+        ``bg_texture`` or ``bg_texture8`` depending on the ``rt_format``). Raytrace
+        the whole scene if refresh is set to ``True``. Texture should be provided as
+        an array of shape ``(height, width, n)``, where ``n`` is 3 or 4. 3-component
+        RGB arrays are extended to 4-component RGBA shape (alpha channel is reserved
+        for future implementations).
+
         Function attempts to load texture from file if ``bg`` is a string.
 
         Color values are corrected to account for the postprocessing tone
@@ -1552,6 +1599,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             RGB color components can be provided as an array-like values, texture
             is provided as an array of shape ``(height, width, n)`` or string
             with the source image file path.
+        rt_format: RtFormat, optional
+            Target format of the texture.
         prescale : float, optional
             Scaling factor for color values.
         baseline : float, optional
@@ -1571,10 +1620,21 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         >>> optix.set_background(0.5) # set gray background
         >>> optix.set_background([0.5, 0.7, 0.9]) # set light bluish background
         """
+        if isinstance(rt_format, str): rt_format = RtFormat[rt_format]
+
+        if rt_format == RtFormat.Float4:
+            bg_name = "bg_texture"
+        elif rt_format == RtFormat.UByte4:
+            bg_name = "bg_texture8"
+        else:
+            msg = "Background texture format should be Float4 or UByte4."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+
         if isinstance(bg, str):
-            if self._optix.load_texture_2d("bg_texture",
-                                           bg, prescale, baseline, exposure, gamma,
-                                           RtFormat.Float4.value,
+            if self._optix.load_texture_2d(bg_name, bg,
+                                           prescale, baseline, exposure, gamma,
+                                           rt_format.value,
                                            TextureAddressMode.Mirror.value,
                                            refresh):
                 self._logger.info("Background texture loaded from file.")
@@ -1599,7 +1659,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return
 
         if not isinstance(bg, np.ndarray):
-            bg = np.ascontiguousarray(bg, dtype=np.float32)
+            bg = np.ascontiguousarray(bg)
 
         if (len(bg.shape) == 1) and (bg.shape[0] == 3):
             x = e * np.power(bg[0], gamma)
@@ -1615,14 +1675,38 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if len(bg.shape) == 3:
             if bg.shape[-1] == 3:
-                b = np.zeros((bg.shape[0], bg.shape[1], 4), dtype=np.float32)
+                b = np.zeros((bg.shape[0], bg.shape[1], 4), dtype=bg.dtype)
                 b[...,:-1] = bg
                 bg = b
 
             if bg.shape[-1] == 4:
-                if gamma != 1: bg = np.power(bg, gamma)
-                if e != 1: bg = e * bg
-                self.set_texture_2d("bg_texture", bg, addr_mode=TextureAddressMode.Mirror, keep_on_host=keep_on_host, refresh=refresh)
+                if gamma != 1:
+                    if bg.dtype != np.float32 and bg.dtype != np.float64:
+                        bg = bg.astype(dtype=np.float32)
+                        bg *= 1.0/255.0
+                    bg = np.power(bg, gamma)
+
+                if e != 1:
+                    if bg.dtype != np.float32 and bg.dtype != np.float64:
+                        bg = bg.astype(dtype=np.float32)
+                        bg *= 1.0/255.0
+                    bg *= e
+
+                if rt_format == RtFormat.Float4 and bg.dtype != np.float32:
+                    bg = bg.astype(dtype=np.float32)
+                elif rt_format == RtFormat.UByte4 and bg.dtype != np.uint8:
+                    if bg.dtype == np.float32 or bg.dtype == np.float64:
+                        bg *= 255.0
+                        np.clip(bg, 0.0, 255.0, out=bg)
+                    bg = bg.astype(dtype=np.uint8)
+
+                self.set_texture_2d(bg_name, bg, addr_mode=TextureAddressMode.Mirror, keep_on_host=keep_on_host, refresh=False)
+
+                if not self._optix.set_bg_texture(bg_name, refresh):
+                    msg = "Background texture %s not set." % bg_name
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise RuntimeError(msg)
+
                 return
 
         msg = "Background should be a single gray level or [r,g,b] array_like or 2D array_like of [r,g,b]/[r,g,b,a] values."

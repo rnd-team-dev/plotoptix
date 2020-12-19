@@ -452,7 +452,7 @@ class Camera(Enum):
     the infinite range.
 
     Exact values from the texture are used if the render size and texture size are the
-    same. Otherwise ray angles are interpolated.
+    same. Otherwise target points are interpolated.
     """
 
     CustomProj = 98
@@ -769,6 +769,18 @@ class RtFormat(Enum):
 
     Float4 = 0x104
     """32 bit single precision (x, y, z, w) vectors.
+    """
+
+    UByte = 0x109
+    """8 bit unsigned integer scalars.
+    """
+
+    UByte2 = 0x10A
+    """8 bit unsigned integer 2D vectors.
+    """
+
+    UByte4 = 0x10C
+    """8 bit unsigned integer (x, y, z, w) vectors.
     """
 
 class NvEncProfile(Enum):
