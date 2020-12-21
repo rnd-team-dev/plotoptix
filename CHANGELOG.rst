@@ -1,6 +1,11 @@
 Release history
 ===============
 
+v0.13.1 - 2020-12-21
+--------------------
+
+This is PyPI-only release that fixes bug in binaries packaging.
+
 `v0.13.0` - 2020-12-21
 ----------------------
 
