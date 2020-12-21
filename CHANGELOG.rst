@@ -1,14 +1,14 @@
 Release history
 ===============
 
-v0.13.0 - unreleased
---------------------
+`v0.13.0` - 2020-12-21
+----------------------
 
 Added
 ~~~~~
 
-- improved memory model: some buffers are not allocated until needed, use host
-  memory if no space on device
+- improved memory model: some buffers are not allocated until needed, host memory is
+  used if no space on device
 - support for 8 bit per channel textures (previously all textures converted to 32 bit fp)
 - custom projection camera with ray target positions provided in a texture
 - minimum ray tracing size can be even 1 pixel now
@@ -453,6 +453,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.13.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.13.0
 .. _`v0.12.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.12.0
 .. _`v0.11.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.11.0
 .. _`v0.10.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.10.1
