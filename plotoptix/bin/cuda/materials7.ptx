@@ -11,7 +11,7 @@
 .address_size 64
 
 	// .globl	__closesthit__occlusion
-.const .align 8 .b8 params[280];
+.const .align 8 .b8 params[288];
 
 .visible .entry __closesthit__occlusion(
 
@@ -1004,9 +1004,9 @@ BB4_32:
 	ld.f32 	%f221, [%rd22+136];
 	fma.rn.ftz.f32 	%f222, %f51, %f221, %f220;
 	abs.ftz.f32 	%f223, %f222;
-	ld.const.f32 	%f224, [params+260];
+	ld.const.f32 	%f224, [params+268];
 	sub.ftz.f32 	%f225, %f224, %f279;
-	ld.const.v2.f32 	{%f226, %f227}, [params+264];
+	ld.const.v2.f32 	{%f226, %f227}, [params+272];
 	sub.ftz.f32 	%f230, %f226, %f278;
 	sub.ftz.f32 	%f231, %f227, %f277;
 	fma.rn.ftz.f32 	%f52, %f223, %f225, %f279;
@@ -2443,7 +2443,7 @@ BB6_69:
 	bra.uni 	BB6_70;
 
 BB6_70:
-	ld.const.u64 	%rd30, [params+272];
+	ld.const.u64 	%rd30, [params+280];
 	ld.v4.f32 	{%f676, %f677, %f678, %f679}, [%rd24];
 	sub.ftz.f32 	%f169, %f752, %f86;
 	mov.f32 	%f758, %f86;
@@ -3444,7 +3444,7 @@ BB7_65:
 	bra.uni 	BB7_66;
 
 BB7_66:
-	ld.const.u64 	%rd30, [params+272];
+	ld.const.u64 	%rd30, [params+280];
 	ld.v4.f32 	{%f648, %f649, %f650, %f651}, [%rd24];
 	sub.ftz.f32 	%f158, %f717, %f75;
 	mov.f32 	%f723, %f75;
@@ -5999,7 +5999,7 @@ BB9_118:
 	bra.uni 	BB9_119;
 
 BB9_119:
-	ld.const.u64 	%rd38, [params+272];
+	ld.const.u64 	%rd38, [params+280];
 	ld.v4.f32 	{%f1156, %f1157, %f1158, %f1159}, [%rd25];
 	sub.ftz.f32 	%f270, %f1256, %f96;
 	mov.f32 	%f1262, %f96;
@@ -6311,7 +6311,7 @@ BB9_82:
 	bra.uni 	BB9_83;
 
 BB9_83:
-	ld.const.u64 	%rd32, [params+272];
+	ld.const.u64 	%rd32, [params+280];
 	ld.v4.f32 	{%f832, %f833, %f834, %f835}, [%rd25];
 	sub.ftz.f32 	%f184, %f1238, %f96;
 	mov.f32 	%f1244, %f96;
@@ -7630,7 +7630,7 @@ BB10_114:
 	bra.uni 	BB10_115;
 
 BB10_115:
-	ld.const.u64 	%rd38, [params+272];
+	ld.const.u64 	%rd38, [params+280];
 	ld.v4.f32 	{%f1128, %f1129, %f1130, %f1131}, [%rd25];
 	sub.ftz.f32 	%f259, %f1221, %f85;
 	mov.f32 	%f1227, %f85;
@@ -7942,7 +7942,7 @@ BB10_78:
 	bra.uni 	BB10_79;
 
 BB10_79:
-	ld.const.u64 	%rd32, [params+272];
+	ld.const.u64 	%rd32, [params+280];
 	ld.v4.f32 	{%f804, %f805, %f806, %f807}, [%rd25];
 	sub.ftz.f32 	%f173, %f1203, %f85;
 	mov.f32 	%f1209, %f85;
@@ -9504,7 +9504,7 @@ BB13_46:
 	bra.uni 	BB13_49;
 
 BB13_49:
-	ld.const.u64 	%rd30, [params+272];
+	ld.const.u64 	%rd30, [params+280];
 	ld.v4.f32 	{%f425, %f426, %f427, %f428}, [%rd23+-12];
 	ld.const.f32 	%f126, [params+76];
 	sub.ftz.f32 	%f127, %f628, %f126;

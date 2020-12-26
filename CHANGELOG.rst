@@ -1,6 +1,14 @@
 Release history
 ===============
 
+v0.13.2 - unreleased
+--------------------
+
+Added
+~~~~~
+
+- camera projection modes with ray origins and ray directions/targets defined with textures
+
 v0.13.1 - 2020-12-21
 --------------------
 

@@ -2438,11 +2438,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Name of the new camera.
         eye : array_like, optional
             Eye 3D position. Best fit for the current scene is computed if
-            argument is not provided.
+            argument is not provided. Ignored in camera modes with ray origins
+            stored in a texture.
         target : array_like, optional
             Target 3D position. Center of all geometries if argument not provided.
+            Ignored in camera modes with ray targets or directions stored in a texture.
         up : array_like, optional
-            Up (vertical) direction. Y axis if argument not provided.
+            Up (vertical) direction. Y axis if argument not provided. Ignored in camera
+            modes with ray origins stored in a texture.
         cam_type : Camera enum or string, optional
             Type (pinhole, depth of field, ...), see :class:`plotoptix.enums.Camera`.
             Cannot be changed after construction.
@@ -5258,7 +5261,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Load meshesh from Wavefront .obj file, assign materials from dictrionary.
 
         Note: this method can read files with named objects only. Use :meth:`plotoptix.NpOptiX.load_merged_mesh_obj`
-        for reading files with raw, unnamed mesh.
+        for reading files with a raw, unnamed mesh.
 
         Parameters
         ----------

@@ -443,6 +443,30 @@ class Camera(Enum):
     also focuses on a sphere rather than on a plane like thin lens camera.
     """
 
+    CustomProjXYZtoDir = 95
+    """Custom projection camera.
+
+    Rays are defined with two 4D textures ``[height, width, 4]``. First one is composed
+    of origin points ``[x, y, z, 0]``. Second texture contains ray directions and maximum
+    ranges ``[cosx, cosy, cosz, r]``. All values are in the world space. Negative range
+    values are replaced with the infinite range.
+
+    Exact values from the texture are used if the render size and texture size are the
+    same, otherwise values are interpolated. Textures can have different sizes.
+    """
+
+    CustomProjXYZtoXYZ = 96
+    """Custom projection camera.
+
+    Rays are defined with two 4D textures ``[height, width, 4]``. First one is composed
+    of origin points ``[x, y, z, 0]``. Second texture contains ray target points and maximum
+    ranges ``[x, y, z, r]``. All values are in the world space. Negative range values are
+    replaced with the infinite range.
+
+    Exact values from the texture are used if the render size and texture size are the
+    same, otherwise values are interpolated. Textures can have different sizes.
+    """
+
     CustomProjXYZ = 97
     """Custom projection camera.
 

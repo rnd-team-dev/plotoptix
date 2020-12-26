@@ -11,7 +11,7 @@
 .address_size 64
 
 	// .globl	__intersection__particles
-.const .align 8 .b8 params[280];
+.const .align 8 .b8 params[288];
 
 .visible .entry __intersection__particles(
 
