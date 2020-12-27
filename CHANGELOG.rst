@@ -1,8 +1,8 @@
 Release history
 ===============
 
-v0.13.2 - unreleased
---------------------
+`v0.13.2` - 2020-12-21
+----------------------
 
 Added
 ~~~~~
@@ -466,6 +466,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.13.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.13.2
 .. _`v0.13.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.13.0
 .. _`v0.12.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.12.0
 .. _`v0.11.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.11.0
