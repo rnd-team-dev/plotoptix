@@ -446,6 +446,16 @@ def _load_optix_win():
     optix.set_rt_timeout.argtypes = [c_int]
     optix.set_rt_timeout.restype = c_bool
 
+    optix.get_save_albedo.restype = c_bool
+
+    optix.set_save_albedo.argtypes = [c_bool]
+    optix.set_save_albedo.restype = c_bool
+
+    optix.get_save_normals.restype = c_bool
+
+    optix.set_save_normals.argtypes = [c_bool]
+    optix.set_save_normals.restype = c_bool
+
     optix.get_min_accumulation_step.restype = c_int
 
     optix.set_min_accumulation_step.argtypes = [c_int]
@@ -1056,6 +1066,14 @@ class _ClrOptiX:
     def get_rt_timeout(self): return self._optix.get_rt_timeout()
 
     def set_rt_timeout(self, n): return self._optix.set_rt_timeout(n)
+
+    def get_save_albedo(self): return self._optix.get_save_albedo()
+
+    def set_save_albedo(self, n): return self._optix.set_save_albedo(n)
+
+    def get_save_normals(self): return self._optix.get_save_normals()
+
+    def set_save_normals(self, n): return self._optix.set_save_normals(n)
 
     def get_min_accumulation_step(self): return self._optix.get_min_accumulation_step()
 

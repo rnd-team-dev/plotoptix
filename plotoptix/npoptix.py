@@ -1782,6 +1782,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         - ``max_accumulation_frames``
         - ``min_accumulation_step``
         - ``rt_timeout``
+        - ``save_albedo``
+        - ``save_normals``
 
         Parameters
         ----------
@@ -1816,6 +1818,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 v = self._optix.get_compute_timeout()
             elif name == "rt_timeout":
                 v = self._optix.get_rt_timeout()
+            elif name == "save_albedo":
+                v = self._optix.get_save_albedo()
+            elif name == "save_normals":
+                v = self._optix.get_save_normals()
             else:
                 msg = "Unknown parameter " + name
                 self._logger.error(msg)
@@ -1863,6 +1869,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
           Ray tracing timeout. Default value is 30000 (30s).
 
+        - ``save_albedo``
+
+          Allocate buffer and collect albedo information if set to `True`.
+          If set to `False` then buffer is allocated only if denoiser requires it.
+
+        - ``save_normals``
+
+          Allocate buffer and collect normals if set to `True`. If set to `False`
+          then buffer is allocated only if denoiser requires it.
+
         Parameters
         ----------
         kwargs : Any
@@ -1901,6 +1917,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 elif key == "rt_timeout":
                     self._optix.set_rt_timeout(int(value))
+
+                elif key == "save_albedo":
+                    self._optix.set_save_albedo(bool(value))
+
+                elif key == "save_normals":
+                    self._optix.set_save_normals(bool(value))
 
                 else:
                     msg = "Unknown parameter " + key
