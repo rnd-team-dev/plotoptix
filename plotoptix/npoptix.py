@@ -93,8 +93,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     _hit_pos = None
     """Hit position.
 
-    Shape: ``(height, width, 4)``, ``dtype = np.float32``, contains XYZD data, where
-    XYZ is the hit 3D position and D channel is the hit distance to camera plane.
+    Shape: ``(height, width, 4)``, ``dtype = np.float32``, contains ``[X, Y, Z, D]`` data, where
+    ``XYZ`` is the hit 3D position and ``D`` is the hit distance to the camera plane.
     """
 
     _geo_id = None

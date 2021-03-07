@@ -264,9 +264,9 @@ class TkOptiX(NpOptiX):
     def _gui_get_object_at(self, x, y):
         c_handle = c_uint()
         c_index = c_uint()
-        c_face = c_uint()
-        if self._optix.get_object_at(x, y, byref(c_handle), byref(c_index), byref(c_face)):
-            return c_handle.value, c_index.value, c_face.value
+        c_prim = c_uint()
+        if self._optix.get_object_at(x, y, byref(c_handle), byref(c_index), byref(c_prim)):
+            return c_handle.value, c_index.value, c_prim.value
         else:
             return None, None
 
@@ -274,12 +274,12 @@ class TkOptiX(NpOptiX):
         if not (self._any_mouse or self._any_key):
             x, y = self._get_image_xy(event.x, event.y)
 
-            handle, index, face = self._gui_get_object_at(x, y)
+            handle, index, prim = self._gui_get_object_at(x, y)
             if (handle != 0x3FFFFFFF):
                 hx, hy, hz, hd = self._get_hit_at(x, y)
                 if handle in self.geometry_names:
-                    if (face != 0xFFFFFFFF):
-                        self._status_action_text.set("%s[f:%d; vtx:%d]: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (self.geometry_names[handle], face, index, x, y, hx, hy, hz, hd))
+                    if (prim != 0xFFFFFFFF):
+                        self._status_action_text.set("%s[prim:%d; vtx:%d]: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (self.geometry_names[handle], prim, index, x, y, hx, hy, hz, hd))
                     else:
                         self._status_action_text.set("%s[%d]: 2D (%d %d), 3D (%f %f %f), at dist.: %f" % (self.geometry_names[handle], index, x, y, hx, hy, hz, hd))
                 else:

@@ -1,6 +1,18 @@
 Release history
 ===============
 
+v0.13.3 - unreleased
+--------------------
+
+Added
+~~~~~
+
+- option to save abedo and normal buffers also when they are not required by the denoiser
+- edge id and edge vertex id for graphs encoded in hit_info in the same was as face id and vertex id for meshes
+- improved speed of selecting unique edges in the mesh
+- specialized support for the coverage estimation in mobile communications
+- improved docs (todo before release!)
+
 `v0.13.2` - 2020-12-21
 ----------------------
 
