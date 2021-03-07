@@ -4124,7 +4124,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         mat : string, optional
             Material name.
         make_normals : bool, optional
-            Calculate normals for data points, if not provided with ``normals``
+            Calculate normals for data points, only if not provided with ``normals``
             argument. Normals of all triangles attached to the point are averaged.
         """
         if name is None: raise ValueError()
@@ -4435,7 +4435,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         wrap_v : bool, optional
             Stitch surface edges making V axis continuous.
         make_normals : bool, optional
-            Calculate normals for surface points, if not provided with ``normals``
+            Calculate normals for surface points, only if not provided with ``normals``
             argument. Normals of all triangles attached to the point are averaged.
         """
         if name is None: raise ValueError()
@@ -4938,7 +4938,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         mat : string, optional
             Material name.
         make_normals : bool, optional
-            Calculate smooth shading of the mesh, if ``normals`` are not provided.
+            Calculate smooth shading of the mesh, only if ``normals`` are not provided.
             Normals of all triangles attached to the mesh vertex are averaged.
         """
 
@@ -5229,10 +5229,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         mat : string, optional
             Material name.
         make_normals : bool, optional
-            Calculate new normal for each vertex by averaging normals of connected
-            mesh triangles. If set to ``False`` (default) then original normals from
-            the .obj file are preserved or normals are not used (mesh triangles
-            define normals).
+            If set to ``True`` and .obj file does not contain normals then normals
+            are calculated for each vertex by averaging normals of connected
+            triangles. If set to ``False`` (default) then normals from the .obj file
+            are used or precalculated normals are not used (normals are calculated
+            from the mesh triangles during ray tracing).
         """
         if file_name is None: raise ValueError()
 
@@ -5354,10 +5355,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         mat : string, optional
             Material name.
         make_normals : bool, optional
-            Calculate new normal for each vertex by averaging normals of connected
-            mesh triangles. If set to ``False`` (default) then original normals from
-            the .obj file are preserved or normals are not used (mesh triangles
-            define normals).
+            If set to ``True`` and .obj file does not contain normals then normals
+            are calculated for each vertex by averaging normals of connected
+            triangles. If set to ``False`` (default) then normals from the .obj file
+            are used or precalculated normals are not used (normals are calculated
+            from the mesh triangles during ray tracing).
         """
         if file_name is None or mesh_name is None: raise ValueError()
 
