@@ -34,6 +34,58 @@ Scene configuration
 Raytracer configuration
 -----------------------
 
+Ray tracing algorithms are controlled via variables allocated in
+the host memory and on the GPU. Host variables can be modified with
+:meth:`plotoptix.NpOptiX.set_param` method and are described there.
+Values of host variables are available through the :meth:`plotoptix.NpOptiX.get_param`
+method. Most of GPU variables controll postprocessing algorithms (see 
+description in :py:mod:`plotoptix.enums.Postprocessing`). These variables
+are accessed via :meth:`plotoptix.NpOptiX.set_int` / :meth:`plotoptix.NpOptiX.get_int`
+and similar methods.
+
+GPU variables related to the raytracer general configuraton are documented below:
+
+- **Number of the ray segments**
+  
+  Name: *path_seg_range*
+
+  Type: ``uint2``
+
+  Default value: ``[2, 6]``
+
+  Description: ``[min, max]`` range of the ray segments; if the ray is scattered, reflected
+  or refracted more than ``min`` times it may be terminated with the Russian Roulette algorithm
+  but the number of segments never exceeds ``max``. Use higher values in scenes with multiple
+  transparent and/or reflective objects and if you need the high quality of diffuse lights.
+  Use lower values to increase performance.
+
+  Example:
+
+  .. code-block:: python
+
+     rt = TkOptiX()
+     rt.set_uint("path_seg_range", 4, 16)
+
+- **Ray tracing precision**
+
+  Name: *scene_epsilon*
+
+  Type: ``float``
+
+  Default value: ``0.002``
+
+  Description: epsilon value used whenever a geometrical computation threshold is needed, e.g.
+  as a minimum distance between hits or displacement of the ray next segment in the normal
+  direction. You may need to set a lower value if your scene dimensions are tiny, or increase
+  the value to avoid artifacts (e.g. in scenes with huge amounts of very small primitives).
+
+  Example:
+
+  .. code-block:: python
+
+     rt = TkOptiX()
+     rt.set_float("scene_epsilon", 1.0e-04)
+
 .. automethod:: plotoptix.NpOptiX.set_param
 .. automethod:: plotoptix.NpOptiX.get_param
 .. automethod:: plotoptix.NpOptiX.set_int
