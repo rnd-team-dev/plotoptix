@@ -1,6 +1,15 @@
 Release history
 ===============
 
+v0.14.0 - unreleased
+--------------------
+
+Changed
+~~~~~~~
+
+- all set_xxx methods available for geometries, cameras, lights, materials now can update also
+  properties of existing objects; properties possible to update are listed in docs
+
 `v0.13.3` - 2021-03-08
 ----------------------
 

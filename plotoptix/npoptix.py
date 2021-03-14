@@ -3628,7 +3628,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise RuntimeError(msg)
 
 
-    def set_data(self, name: str, pos: Any,
+    def set_data(self, name: str, pos: Any = None,
                  r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
                  c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                  u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None,
@@ -3636,16 +3636,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                  geom_attr: Union[GeomAttributeProgram, str] = GeomAttributeProgram.Default,
                  mat: str = "diffuse",
                  rnd: bool = True) -> None:
-        """Create new geometry for the dataset.
+        """Create new or update existing geometry for the dataset.
 
         Data is provided as an array of 3D positions of data points, with the shape ``(n, 3)``.
         Additional features can be visualized as a color and size/thickness of the primitives.
+
+        Note: not all arguments are used to update existing geeometry. Update is available for:
+        ``mat``, ``pos``, ``c``, ``r``, ``u``, ``v``, and ``w`` data.
 
         Parameters
         ----------
         name : string
             Name of the geometry.
-        pos : array_like
+        pos : array_like, optional
             Positions of data points.
         c : Any, optional
             Colors of the primitives. Single value means a constant gray level.
@@ -3679,6 +3682,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         See Also
         --------
+        :meth:`plotoptix.NpOptiX.update_data`
         :class:`plotoptix.enums.Geometry`
         """
         if name is None: raise ValueError()
@@ -3688,9 +3692,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(geom_attr, str): geom_attr = GeomAttributeProgram[geom_attr]
 
         if name in self.geometry_data:
-            msg = "Geometry %s already exists, use update_data() instead." % name
-            self._logger.error(msg)
-            if self._raise_on_error: raise ValueError(msg)
+            self.update_data(name, mat=mat, pos=pos, c=c, r=r, u=u, v=v, w=w)
             return
 
         n_primitives = -1
@@ -4069,7 +4071,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
-    def set_data_2d(self, name: str, pos: Any,
+    def set_data_2d(self, name: str, pos: Any = None,
                     r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
                     c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                     normals: Optional[Any] = None,
@@ -4088,11 +4090,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         
         Convention of vertical Y and horizontal XZ plane is adopted.
 
+        Note: not all arguments are used to update existing geeometry. Update is available for:
+        ``mat``, ``pos``, ``c``, ``r``, ``normals``, ``range_x``, ``range_z``, ``floor_y``,
+        and ``floor_c`` data.
+
         Parameters
         ----------
         name : string
             Name of the new surface geometry.
-        pos : array_like
+        pos : array_like, optional
             Z values of data points.
         r : Any, optional
             Radii of vertices for the :attr:`plotoptix.enums.Geometry.Graph` geometry,
@@ -4126,14 +4132,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         make_normals : bool, optional
             Calculate normals for data points, only if not provided with ``normals``
             argument. Normals of all triangles attached to the point are averaged.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.update_data_2d`
         """
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
 
         if name in self.geometry_data:
-            msg = "Geometry %s already exists, use update_data_2d() instead." % name
-            self._logger.error(msg)
-            if self._raise_on_error: raise ValueError(msg)
+            self.update_data_2d(name,
+                       mat=mat, pos=pos, r=r, c=c, normals=normals,
+                       range_x=range_x, range_z=range_x,
+                       floor_y=floor_y, floor_c=floor_c)
             return
 
         if isinstance(geom, str): geom = Geometry[geom]
@@ -4390,7 +4401,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
-    def set_surface(self, name: str, pos: Any,
+    def set_surface(self, name: str, pos: Any = None,
                     r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
                     c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                     normals: Optional[Any] = None,
@@ -4405,6 +4416,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ``(n, m, 3)``, where ``n`` and ``m`` are at least 2. Additional data features can be
         visualized with color (array of RGB values, shape ``(n, m, 3)``) or wireframe thickness
         if the :attr:`plotoptix.enums.Geometry.Graph` geometry is used.
+
+        Note: not all arguments are used to update existing geeometry. Update is available for:
+        ``mat``, ``pos``, ``c``, ``r``, and ``normals`` data.
         
         Parameters
         ----------
@@ -4437,19 +4451,21 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         make_normals : bool, optional
             Calculate normals for surface points, only if not provided with ``normals``
             argument. Normals of all triangles attached to the point are averaged.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.update_surface`
         """
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
 
+        if name in self.geometry_data:
+            self.update_surface(name, mat=mat, pos=pos, r=r, c=c, normals=normals)
+            return
+
         if isinstance(geom, str): geom = Geometry[geom]
         if not geom in [Geometry.Mesh, Geometry.Graph]:
             msg = "Geometry type %s not supported by the parametric surface." % geom.name
-            self._logger.error(msg)
-            if self._raise_on_error: raise ValueError(msg)
-            return
-
-        if name in self.geometry_data:
-            msg = "Geometry %s already exists, use update_surface() instead." % name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
             return
