@@ -3629,12 +3629,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def set_data(self, name: str, pos: Any = None,
-                 r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
-                 c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
+                 r: Optional[Any] = None, c: Optional[Any] = None,
                  u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None,
                  geom: Union[Geometry, str] = Geometry.ParticleSet,
                  geom_attr: Union[GeomAttributeProgram, str] = GeomAttributeProgram.Default,
-                 mat: str = "diffuse",
+                 mat: Optional[str] = None,
                  rnd: bool = True) -> None:
         """Create new or update existing geometry for the dataset.
 
@@ -3694,6 +3693,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name in self.geometry_data:
             self.update_data(name, mat=mat, pos=pos, c=c, r=r, u=u, v=v, w=w)
             return
+
+        if pos is None:
+            msg = "pos argument required for new geometries."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if r is None: r = np.ascontiguousarray([0.05], dtype=np.float32)
+        if c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
+        if mat is None: mat = "diffuse"
 
         n_primitives = -1
 
@@ -4072,15 +4081,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
 
     def set_data_2d(self, name: str, pos: Any = None,
-                    r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
-                    c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
+                    r: Optional[Any] = None, c: Optional[Any] = None,
                     normals: Optional[Any] = None,
                     range_x: Optional[Tuple[float, float]] = None,
                     range_z: Optional[Tuple[float, float]] = None,
                     floor_y: Optional[float] = None,
                     floor_c: Optional[Any] = None,
                     geom: Union[Geometry, str] = Geometry.Mesh,
-                    mat: str = "diffuse",
+                    mat: Optional[str] = None,
                     make_normals: bool = False) -> None:
         """Create new surface geometry for the 2D dataset.
 
@@ -4146,6 +4154,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                        range_x=range_x, range_z=range_x,
                        floor_y=floor_y, floor_c=floor_c)
             return
+
+        if pos is None:
+            msg = "pos argument required for new geometries."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if r is None: r = np.ascontiguousarray([0.05], dtype=np.float32)
+        if c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
+        if mat is None: mat = "diffuse"
 
         if isinstance(geom, str): geom = Geometry[geom]
         if not geom in [Geometry.Mesh, Geometry.Graph]:
@@ -4401,12 +4419,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
-    def set_surface(self, name: str, pos: Any = None,
-                    r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
-                    c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
+    def set_surface(self, name: str, pos: Optional[Any] = None,
+                    r: Optional[Any] = None, c: Optional[Any] = None,
                     normals: Optional[Any] = None,
                     geom: Union[Geometry, str] = Geometry.Mesh,
-                    mat: str = "diffuse",
+                    mat: Optional[str] = None,
                     wrap_u: bool = False,
                     wrap_v: bool = False,
                     make_normals: bool = False) -> None:
@@ -4462,6 +4479,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if name in self.geometry_data:
             self.update_surface(name, mat=mat, pos=pos, r=r, c=c, normals=normals)
             return
+
+        if pos is None:
+            msg = "pos argument required for new geometries."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if r is None: r = np.ascontiguousarray([0.05], dtype=np.float32)
+        if c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
+        if mat is None: mat = "diffuse"
 
         if isinstance(geom, str): geom = Geometry[geom]
         if not geom in [Geometry.Mesh, Geometry.Graph]:
@@ -4664,10 +4691,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         finally:
             self._padlock.release()
 
-    def set_graph(self, name: str, pos: Any, edges: Any,
-                  r: Any = np.ascontiguousarray([0.05], dtype=np.float32),
-                  c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
-                  mat: str = "diffuse") -> None:
+    def set_graph(self, name: str,
+                  pos: Optional[Any] = None, edges: Optional[Any] = None,
+                  r: Optional[Any] = None, c: Optional[Any] = None,
+                  mat: Optional[str] = None) -> None:
         """Create new graph (mesh wireframe) geometry.
 
         Data is provided as vertices :math:`[x, y, z]`, with the shape ``(n, 3)``, and edges
@@ -4679,9 +4706,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         name : string
             Name of the new graph geometry.
-        pos : array_like
+        pos : array_like, optional
             XYZ values of the graph vertices.
-        edges : array_like
+        edges : array_like, optional
             Graph edges as indices (doublets) to vertices in the ``pos`` array.
         r : Any, optional
             Radii of vertices, interpolated along the edges. Single value sets constant
@@ -4699,10 +4726,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name in self.geometry_data:
-            msg = "Geometry %s already exists, use update_graph() instead." % name
+            self.update_graph(name, mat=mat, pos=pos, edges=edges, r=r, c=c)
+            return
+
+        if pos is None or edges is None:
+            msg = "pos and edges arguments required for new geometries."
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
             return
+
+        if r is None: r = np.ascontiguousarray([0.05], dtype=np.float32)
+        if c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
+        if mat is None: mat = "diffuse"
 
         if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
         assert len(pos.shape) == 2 and pos.shape[0] > 1 and pos.shape[1] == 3, "Required vertex data shape is (n,3), where n >= 2."
