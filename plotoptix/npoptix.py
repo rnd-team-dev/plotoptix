@@ -2440,19 +2440,23 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def setup_camera(self, name: str,
                      eye: Optional[Any] = None,
                      target: Optional[Any] = None,
-                     up: Any = np.ascontiguousarray([0, 1, 0], dtype=np.float32),
+                     up: Optional[Any] = None,
                      cam_type: Union[Camera, str] = Camera.Pinhole,
-                     aperture_radius: float = 0.1,
+                     aperture_radius: float = -1,
                      aperture_fract: float = 0.15,
-                     focal_scale: float = 1.0,
+                     focal_scale: float = -1,
                      chroma_l: float = 0.05,
                      chroma_t: float = 0.01,
-                     fov: float = 35.0,
+                     fov: float = -1,
                      blur: float = 1,
                      glock: bool = False,
                      textures: Optional[Any] = None,
                      make_current: bool = True) -> None:
-        """Setup new camera with given name.
+        """Setup new or update existing camera.
+
+        Note, parameters possible to update with this method are:
+        ``eye``, ``target``, ``up``, ``aperture_radius``,
+        ``focal_scale``, and ``fov``.
 
         Parameters
         ----------
@@ -2505,10 +2509,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(cam_type, str): cam_type = Camera[cam_type]
 
         if name in self.camera_handles:
-            msg = "Camera %s already exists." % name
-            self._logger.error(msg)
-            if self._raise_on_error: raise ValueError(msg)
+            self.update_camera(name=name, eye=eye, target=target, up=up,
+                      aperture_radius=aperture_radius,
+                      focal_scale=focal_scale,
+                      fov=fov)
             return
+
+        if up is None: up = np.ascontiguousarray([0, 1, 0], dtype=np.float32)
+        if aperture_radius <= 0: aperture_radius = 0.1
+        if focal_scale <= 0: focal_scale = 1.0
+        if fov <= 0: fov = 35.0
 
         eye_ptr = 0
         eye = _make_contiguous_vector(eye, 3)
@@ -3012,9 +3022,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def setup_spherical_light(self, name: str, pos: Optional[Any] = None,
                               autofit_camera: Optional[str] = None,
-                              color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),
-                              radius: float = 1.0, in_geometry: bool = True) -> None:
-        """Setup new spherical light.
+                              color:  Optional[Any] = None,
+                              radius:  float = -1,
+                              in_geometry: bool = True) -> None:
+        """Setup new or update existing spherical light.
+
+        Updating an existing light with this method will not change its visibility.
+        Only ``pos``, ``color``, and ``radius`` values can be updated.
 
         Parameters
         ----------
@@ -3038,10 +3052,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name in self.light_handles:
-            msg = "Light %s already exists." % name
-            self._logger.error(msg)
-            if self._raise_on_error: raise ValueError(msg)
+            self.update_light(name, pos=pos, color=color, radius=radius)
             return
+
+        if color is None: color = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32)
+        if radius <= 0: radius = 1.0
 
         autofit = False
         pos = _make_contiguous_vector(pos, 3)
@@ -3079,13 +3094,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def setup_parallelogram_light(self, name: str, pos: Optional[Any] = None,
                                   autofit_camera: Optional[str] = None,
-                                  color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),
-                                  u: Any = np.ascontiguousarray([0, 1, 0], dtype=np.float32),
-                                  v: Any = np.ascontiguousarray([-1, 0, 0], dtype=np.float32),
+                                  color: Optional[Any] = None,
+                                  u: Optional[Any] = None,
+                                  v: Optional[Any] = None,
                                   in_geometry: bool = True) -> None:
-        """Setup new parallelogram light.
+        """Setup new or update existing parallelogram light.
 
         Note, the light direction is UxV, the back side is black.
+
+        Properties that can be updated: ``pos``, ``color``, ``u``, ``v``.
 
         Parameters
         ----------
@@ -3111,10 +3128,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name in self.light_handles:
-            msg = "Light %s already exists." % name
-            self._logger.error(msg)
-            if self._raise_on_error: raise ValueError(msg)
+            self.update_light(name, pos=pos, color=color, u=u, v=v)
             return
+
+        if color is None: color = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32)
+        if u is None: u = np.ascontiguousarray([0, 1, 0], dtype=np.float32)
+        if v is None: v = np.ascontiguousarray([-1, 0, 0], dtype=np.float32)
 
         autofit = False
         pos = _make_contiguous_vector(pos, 3)
@@ -3164,10 +3183,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
-    def setup_area_light(self, name: str, center: Any, target: Any, u: float, v: float,
-                         color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),
+    def setup_area_light(self, name: str,
+                         center: Optional[Any] = None, target: Optional[Any] = None,
+                         u: Optional[float] = None, v: Optional[float] = None,
+                         color: Optional[Any] = None,
                          in_geometry: bool = True) -> None:
-        """Setup new area (parallelogram) light.
+        """Setup new or update existing area (parallelogram) light.
 
         Convenience method to setup parallelogram light with ``center`` and ``target`` 3D points,
         and scalar lengths of sides ``u`` and ``v``.
@@ -3191,6 +3212,19 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         in_geometry: bool, optional
             Visible in the scene if set to ``True``.
         """
+        if name in self.light_handles:
+            self.update_area_light(name, center, target, u, v, color)
+            return
+
+        if center is None or target is None or u is None or v is None:
+            msg = "Need ceter, target, u, and v for the new light."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if color is None:
+            color = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32)
+
         center = _make_contiguous_vector(center, 3)
         target = _make_contiguous_vector(target, 3)
 
@@ -3214,13 +3248,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     light_type: Union[Light, str] = Light.Spherical,
                     pos: Optional[Any] = None,
                     autofit_camera: Optional[str] = None,
-                    color: Any = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32),
-                    u: Any = np.ascontiguousarray([0, 1, 0], dtype=np.float32),
-                    v: Any = np.ascontiguousarray([-1, 0, 0], dtype=np.float32),
-                    radius: float = 1.0, in_geometry: bool = True) -> None:
-        """Setup new light.
+                    color: Optional[Any] = None,
+                    u: Optional[Any] = None,
+                    v: Optional[Any] = None,
+                    radius: float = -1,
+                    in_geometry: bool = True) -> None:
+        """Setup a new light or update an existing light.
 
         Note, the parallelogram light direction is UxV, the back side is black.
+
+        Updating an existing light with this method will not change the type of light,
+        nor its visibility. Only ``pos``, ``color``, ``radius``, ``u``, and ``v`` values
+        can be updated.
 
         Parameters
         ----------
@@ -3246,6 +3285,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Visible in the scene if set to ``True``.
         """
         if name is None: raise ValueError()
+
+        if name in self.light_handles:
+            self.update_light(name, pos=pos, color=color,
+                              radius=radius, u=u, v=v)
+            return
+
+        if color is None: color = 10 * np.ascontiguousarray([1, 1, 1], dtype=np.float32)
+        if u is None: u = np.ascontiguousarray([0, 1, 0], dtype=np.float32)
+        if v is None: v = np.ascontiguousarray([-1, 0, 0], dtype=np.float32)
+        if radius <= 0: radius = 1.0
 
         if isinstance(light_type, str): light_type = Light[light_type]
 
@@ -3326,7 +3375,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                           center: Optional[Any] = None, target: Optional[Any] = None,
                           u: Optional[float] = None, v: Optional[float] = None,
                           color: Optional[Any] = None) -> None:
-        """Setup new area (parallelogram) light.
+        """Update area (parallelogram) light.
 
         Convenience method to update parallelogram light with ``center`` and ``target`` 3D points,
         and scalar lengths of sides ``u`` and ``v``.
@@ -3457,7 +3506,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return None
 
     def setup_material(self, name: str, data: dict) -> None:
-        """Setup new material.
+        """Setup new or update existing material.
 
         Note: for maximum performance, setup only those materials
         you need in the scene.
@@ -3628,7 +3677,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise RuntimeError(msg)
 
 
-    def set_data(self, name: str, pos: Any = None,
+    def set_data(self, name: str, pos: Optional[Any] = None,
                  r: Optional[Any] = None, c: Optional[Any] = None,
                  u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None,
                  geom: Union[Geometry, str] = Geometry.ParticleSet,
@@ -4080,7 +4129,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
-    def set_data_2d(self, name: str, pos: Any = None,
+    def set_data_2d(self, name: str, pos: Optional[Any] = None,
                     r: Optional[Any] = None, c: Optional[Any] = None,
                     normals: Optional[Any] = None,
                     range_x: Optional[Tuple[float, float]] = None,
@@ -4090,7 +4139,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     geom: Union[Geometry, str] = Geometry.Mesh,
                     mat: Optional[str] = None,
                     make_normals: bool = False) -> None:
-        """Create new surface geometry for the 2D dataset.
+        """Create new or update existing surface geometry for the 2D dataset.
 
         Data is provided as 2D array of :math:`z = f(x, y)` values, with the shape ``(n, m)``,
         where ``n`` and ``m`` are at least 2. Additional data features can be
@@ -4427,7 +4476,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     wrap_u: bool = False,
                     wrap_v: bool = False,
                     make_normals: bool = False) -> None:
-        """Create new (parametric) surface geometry.
+        """Create new or update existing parametric surface geometry.
 
         Data is provided as 2D array of :math:`[x, y, z] = f(u, v)` values, with the shape
         ``(n, m, 3)``, where ``n`` and ``m`` are at least 2. Additional data features can be
@@ -4441,7 +4490,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         ----------
         name : string
             Name of the new surface geometry.
-        pos : array_like
+        pos : array_like, optional
             XYZ values of surface points.
         r : Any, optional
             Radii of vertices for the :attr:`plotoptix.enums.Geometry.Graph` geometry,
@@ -4695,12 +4744,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                   pos: Optional[Any] = None, edges: Optional[Any] = None,
                   r: Optional[Any] = None, c: Optional[Any] = None,
                   mat: Optional[str] = None) -> None:
-        """Create new graph (mesh wireframe) geometry.
+        """Create new or update existing graph (mesh wireframe) geometry.
 
         Data is provided as vertices :math:`[x, y, z]`, with the shape ``(n, 3)``, and edges
         (doublets of vertex indices), with the shape ``(n, 2)`` or ``(m)`` where :math:`m = 2*n`.
         Data features can be visualized with colors (array of RGB values assigned to the graph
         vertices, shape ``(n, 3)``) and/or vertex radii.
+
+        Note: not all arguments are used to update existing geeometry. Update is available for:
+        ``mat``, ``pos``, ``edges``, ``r``, and ``c`` data.
 
         Parameters
         ----------
@@ -4937,7 +4989,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._padlock.release()
 
 
-    def set_mesh(self, name: str, pos: Any, faces: Any,
+    def set_mesh(self, name: str, pos: Optional[Any] = None, faces: Optional[Any] = None,
                  c: Any = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32),
                  normals: Optional[Any] = None,
                  nidx: Optional[Any] = None,
@@ -4945,7 +4997,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                  uvidx: Optional[Any] = None,
                  mat: str = "diffuse",
                  make_normals: bool = False) -> None:
-        """Create new mesh geometry.
+        """Create new or update existing mesh geometry.
 
         Data is provided as vertices :math:`[x, y, z]`, with the shape ``(n, 3)``, and faces
         (triplets of vertex indices), with the shape ``(n, 3)`` or ``(m)`` where :math:`m = 3*n`.
@@ -4963,14 +5015,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         UV coordinates to faces can be provided as an array of ``uvidx`` indexes. If mapping
         is not provided then face vertex data is used (requires same number of vertices
         and UV points).
+
+        Note: not all arguments are used to update existing geeometry. Update is available for:
+        ``mat``, ``pos``, ``faces``, ``c``, ``normals``, ``nidx``, ``uvmap`` and ``uvidx`` data.
        
         Parameters
         ----------
         name : string
             Name of the new mesh geometry.
-        pos : array_like
+        pos : array_like, optional
             XYZ values of the mesh vertices.
-        faces : array_like
+        faces : array_like, optional
             Mesh faces as indices (triplets) to the ``pos`` array.
         c : Any, optional
             Colors of mesh vertices. Single value means a constant gray level.
@@ -4997,10 +5052,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
 
         if name in self.geometry_data:
-            msg = "Geometry %s already exists, use update_mesh() instead." % name
+            self.update_mesh(name, mat=mat, pos=pos, faces=faces,
+                             c=c, normals=normals, nidx=nidx, uvmap=uvmap,
+                             uvidx=uvidx)
+            return
+
+        if pos is None or faces is None:
+            msg = "pos and faces arguments required for new geometries."
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
-            return
 
         if not isinstance(pos, np.ndarray): pos = np.ascontiguousarray(pos, dtype=np.float32)
         assert len(pos.shape) == 2 and pos.shape[0] > 2 and pos.shape[1] == 3, "Required vertex data shape is (n,3), where n >= 3."
