@@ -403,9 +403,9 @@ def read_image(file_name: str, normalized: bool = False) -> Optional[np.ndarray]
     return img
 
 def simplex(pos: Any, noise: Optional[np.ndarray] = None) -> np.ndarray:
-    """Generate simplex noise.
+    """Generate OpenSimplex noise.
 
-    Generate noise using open simplex algorithm. 2D, 3D or 4D algorithm is
+    Generate noise using OpenSimplex algorithm. 2D, 3D or 4D algorithm is
     used depending on the ``pos.shape[-1]`` value. Output array shape is
     ``pos.shape[:-1]``. Noise can be generated 'in place' if optional
     ``noise`` array is provided (``pos.shape`` has to match ``pos.shape[:-1]``).
