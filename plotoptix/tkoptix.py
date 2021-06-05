@@ -268,7 +268,7 @@ class TkOptiX(NpOptiX):
         if self._optix.get_object_at(x, y, byref(c_handle), byref(c_index), byref(c_prim)):
             return c_handle.value, c_index.value, c_prim.value
         else:
-            return None, None
+            return None, None, None
 
     def _gui_motion(self, event):
         if not (self._any_mouse or self._any_key):
