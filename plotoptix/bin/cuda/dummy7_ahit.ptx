@@ -10,32 +10,10 @@
 .target sm_50
 .address_size 64
 
-	// .globl	__closesthit__dummy
+	// .globl	__anyhit__dummy
 .const .align 8 .b8 params[288];
 
-.visible .entry __closesthit__dummy(
-
-)
-{
-
-
-
-	ret;
-}
-
-	// .globl	__anyhit__dummy
 .visible .entry __anyhit__dummy(
-
-)
-{
-
-
-
-	ret;
-}
-
-	// .globl	__intersection__dummy
-.visible .entry __intersection__dummy(
 
 )
 {

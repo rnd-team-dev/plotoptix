@@ -196,6 +196,26 @@ class MaterialType(Enum):
     Useful for preparation of packshot style images. 
     """
 
+class MaterialFlag(IntFlag):
+    """Material flags to modify shaders behavior.
+
+    Some properties of material shaders can be modified passing these flags.
+    Collection will grow as more shader variants are enabled.
+
+    See Also
+    --------
+    :meth:`plotoptix.materials.make_material`
+    """
+
+    Neutral = 0
+    """No modifications.
+    """
+
+    ColorByPrimitive = 0x00000040
+    """Reserved for the future implmentation. Use colors by face index (meshes)
+    or segment index (curves) instead of default indexing by vertices.
+    """
+
 class Geometry(Enum):
     """Geometry shapes.
     """

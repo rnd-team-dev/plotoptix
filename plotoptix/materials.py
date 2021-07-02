@@ -5,7 +5,7 @@ import os
 
 from typing import Any, Union
 
-from plotoptix.enums import MaterialType
+from plotoptix.enums import MaterialType, MaterialFlag
 
 __pkg_dir__ = os.path.dirname(__file__)
 
@@ -23,7 +23,8 @@ def make_material(shader: Union[MaterialType, str],
                   subsurface_color: Any = [1.0, 1.0, 1.0],
                   radiation_length: float = 0.0,
                   light_emission: float = 0.0,
-                  refraction_index: Any = [1.41, 1.41, 1.41]) -> dict:
+                  refraction_index: Any = [1.41, 1.41, 1.41],
+                  flags: Union[MaterialFlag, str] = MaterialFlag.Neutral) -> dict:
     """Create a dictionary of material parameters.
 
     Resulting dictionary should be used as an input to :meth:`plotoptix.NpOptiX.setup_material`.
@@ -105,45 +106,56 @@ def make_material(shader: Union[MaterialType, str],
         component).
 
         Dictionary parameter name: ``refraction_index``.
+    flags : MaterialFlag or string
+        Name of the material flag, modifies the material shader behavior, see
+        :class:`plotoptix.enums.MaterialFlag`.
+
+        Dictionary parameter names: ``flags``.
 
     Returns
     -------
     out : Dictionary of parameters, ready to use with :meth:`plotoptix.NpOptiX.setup_material`.
     """
     if isinstance(shader, str): shader = MaterialType[shader]
+    if isinstance(flags, str): flags = MaterialFlag[flags]
+    flags_override = flags
+
+    occlusionProgram = "chit7_occlusion.ptx::__closesthit__occlusion"
 
     if shader == MaterialType.Flat:
-        radianceProgram = "materials7.ptx::__closesthit__radiance__flat"
+        radianceProgram = "materials7_radiance__flat.ptx::__closesthit__radiance__flat"
         flags = 0
     elif shader == MaterialType.Cosine:
-        radianceProgram = "materials7.ptx::__closesthit__radiance__cos"
+        radianceProgram = "materials7_radiance__cos.ptx::__closesthit__radiance__cos"
         flags = 0
     elif shader == MaterialType.Diffuse:
-        radianceProgram = "materials7.ptx::__closesthit__radiance__diffuse"
+        radianceProgram = "materials7_radiance__diffuse.ptx::__closesthit__radiance__diffuse"
         flags = 2
     elif shader == MaterialType.TransparentDiffuse:
-        radianceProgram = "materials7.ptx::__closesthit__radiance__diffuse_masked"
+        radianceProgram = "materials7_radiance__diffuse_masked.ptx::__closesthit__radiance__diffuse_masked"
+        occlusionProgram = "chit7_occlusion_transp.ptx::__closesthit__occlusion_transparency"
         flags = 2
     elif shader == MaterialType.Reflective:
-        radianceProgram = "materials7.ptx::__closesthit__radiance__reflective"
+        radianceProgram = "materials7_radiance__reflective.ptx::__closesthit__radiance__reflective"
         flags = 6
     elif shader == MaterialType.TransparentReflective:
-        radianceProgram = "materials7.ptx::__closesthit__radiance__reflective_masked"
+        radianceProgram = "materials7_radiance__reflective_masked.ptx::__closesthit__radiance__reflective_masked"
+        occlusionProgram = "chit7_occlusion_transp.ptx::__closesthit__occlusion_transparency"
         flags = 6
     elif shader == MaterialType.Transmissive:
-        radianceProgram = "materials7.ptx::__closesthit__radiance__glass"
+        radianceProgram = "materials7_radiance__glass.ptx::__closesthit__radiance__glass"
         flags = 12
     elif shader == MaterialType.ThinWalled:
-        radianceProgram = "materials7.ptx::__closesthit__radiance__glass"
+        radianceProgram = "materials7_radiance__glass.ptx::__closesthit__radiance__glass"
         flags = 44
     elif shader == MaterialType.ShadowCatcher:
-        radianceProgram = "materials7.ptx::__closesthit__radiance__shadow_catcher"
+        radianceProgram = "materials7_radiance__shadow_catcher.ptx::__closesthit__radiance__shadow_catcher"
         flags = 2
     else:
-        radianceProgram = "materials7.ptx::__closesthit__radiance__diffuse"
+        radianceProgram = "materials7_radiance__diffuse.ptx::__closesthit__radiance__diffuse"
         flags = 2
 
-    occlusionProgram = "materials7.ptx::__closesthit__occlusion"
+    flags |= flags_override.value
 
     c = [0.0, 0.0, 0.0, 1.0]
     if isinstance(color, float) or isinstance(color, int):
@@ -177,7 +189,7 @@ def make_material(shader: Union[MaterialType, str],
 
     m_params = {
         "RadianceProgram": radianceProgram,
-        "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+        "OcclusionProgram": occlusionProgram,
         "VarUInt": {
             "flags": flags
             },
@@ -207,16 +219,16 @@ def make_material(shader: Union[MaterialType, str],
 
 
 m_flat = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__flat",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__flat.ptx::__closesthit__radiance__flat",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
     }
 """
 Super-fast material, color is just flat. Use color components range ``<0; 1>``.
 """
 
 m_eye_normal_cos = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__cos",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__cos.ptx::__closesthit__radiance__cos",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
     }
 """
 Fast material, color is shaded by the cos(eye-hit-normal). Use color components range
@@ -224,8 +236,8 @@ Fast material, color is shaded by the cos(eye-hit-normal). Use color components 
 """
 
 m_diffuse = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__diffuse",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__diffuse.ptx::__closesthit__radiance__diffuse",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 2 }
     }
 """
@@ -234,8 +246,8 @@ Use color components range ``<0; 1>``.
 """
 
 m_matt_diffuse = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__diffuse",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__diffuse.ptx::__closesthit__radiance__diffuse",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 2 },
       "VarFloat": { "base_roughness": 1 }
     }
@@ -245,8 +257,8 @@ the Lambertian "diffuse" material.
 """
 
 m_transparent_diffuse = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__diffuse_masked",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion_transparency",
+      "RadianceProgram": "materials7_radiance__diffuse_masked.ptx::__closesthit__radiance__diffuse_masked",
+      "OcclusionProgram": "chit7_occlusion_transp.ptx::__closesthit__occlusion_transparency",
       "VarUInt": { "flags": 2 },
       "VarFloat": { "base_roughness": 0 }
     }
@@ -256,8 +268,8 @@ Roughness can be set to Lambertian or Oren-Nayar with ``base_roughness`` paramet
 """
 
 m_mirror = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__reflective.ptx::__closesthit__radiance__reflective",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 6 },
       "VarFloat3": {
         "surface_albedo": [ 1.0, 1.0, 1.0 ]
@@ -271,8 +283,8 @@ range ``<0; 1>``), which results with colorized reflections.
 """
 
 m_metallic = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__reflective.ptx::__closesthit__radiance__reflective",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 6 },
       "VarFloat": { "base_roughness": 0.002 },
 }
@@ -284,8 +296,8 @@ Roughness of the surface should be usually small.
 """
 
 m_transparent_metallic = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective_masked",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion_transparency",
+      "RadianceProgram": "materials7_radiance__reflective_masked.ptx::__closesthit__radiance__reflective_masked",
+      "OcclusionProgram": "chit7_occlusion_transp.ptx::__closesthit__occlusion_transparency",
       "VarUInt": { "flags": 6 },
       "VarFloat": { "base_roughness": 0.002 },
 }
@@ -295,8 +307,8 @@ Strongly reflective, metallic material with transparency set according to alpha 
 """
 
 m_plastic = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__reflective.ptx::__closesthit__radiance__reflective",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 6 },
       "VarFloat": {
         "reflectivity_index": 0.0,
@@ -314,8 +326,8 @@ reflectivity_range value (down to 0). Higher refraction_index gives a more gloss
 """
 
 m_matt_plastic = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__reflective.ptx::__closesthit__radiance__reflective",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 6 },
       "VarFloat": {
         "reflectivity_index": 0.0,
@@ -332,8 +344,8 @@ Similar to :attr:`plotoptix.materials.m_plastic` but slightly rough surface.
 """
 
 m_transparent_plastic = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__reflective_masked",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion_transparency",
+      "RadianceProgram": "materials7_radiance__reflective_masked.ptx::__closesthit__radiance__reflective_masked",
+      "OcclusionProgram": "chit7_occlusion_transp.ptx::__closesthit__occlusion_transparency",
       "VarUInt": { "flags": 6 },
       "VarFloat": {
         "reflectivity_index": 0.0,
@@ -352,8 +364,8 @@ for details.
 """
 
 m_clear_glass = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__glass",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__glass.ptx::__closesthit__radiance__glass",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 12 },
       "VarFloat": {
         "radiation_length": 0.0,
@@ -376,8 +388,8 @@ if ``light_emission > 0``.
 """
 
 m_matt_glass = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__glass",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__glass.ptx::__closesthit__radiance__glass",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 12 },
       "VarFloat": {
         "radiation_length": 0.0,
@@ -401,8 +413,8 @@ if ``light_emission > 0``.
 """
 
 m_dispersive_glass = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__glass",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__glass.ptx::__closesthit__radiance__glass",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 12 },
       "VarFloat": {
         "radiation_length": 0.0,
@@ -426,8 +438,8 @@ if ``light_emission > 0``.
 """
 
 m_thin_walled = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__glass",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__glass.ptx::__closesthit__radiance__glass",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 44 },
       "VarFloat": {
         "radiation_length": 0.0,
@@ -444,8 +456,8 @@ colors, and the color values range is ``<0; inf)``.
 """
 
 m_shadow_catcher = {
-      "RadianceProgram": "materials7.ptx::__closesthit__radiance__shadow_catcher",
-      "OcclusionProgram": "materials7.ptx::__closesthit__occlusion",
+      "RadianceProgram": "materials7_radiance__shadow_catcher.ptx::__closesthit__radiance__shadow_catcher",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
       "VarUInt": { "flags": 2 },
       "VarFloat": { "base_roughness": 0 }
     }

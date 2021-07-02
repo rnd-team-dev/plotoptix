@@ -203,7 +203,7 @@ def _load_optix_win():
     optix.update_graph.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_graph.restype = c_uint
 
-    optix.setup_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_bool]
+    optix.setup_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_bool]
     optix.setup_mesh.restype = c_uint
 
     optix.update_mesh.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
@@ -825,8 +825,8 @@ class _ClrOptiX:
                                            IntPtr.__overloads__[Int64](cconst),
                                            IntPtr.__overloads__[Int64](c))
 
-    def setup_mesh(self, name, material, n_vtx, n_tri, n_norm, n_uv, pos, cconst, c, vidx, norm, nidx, uvmap, uvidx, make_normals):
-        return self._optix.setup_mesh_ptr(name, material, n_vtx, n_tri, n_norm, n_uv,
+    def setup_mesh(self, name, material, n_vtx, n_tri, n_col, n_norm, n_uv, pos, cconst, c, vidx, norm, nidx, uvmap, uvidx, make_normals):
+        return self._optix.setup_mesh_ptr(name, material, n_vtx, n_tri, n_col, n_norm, n_uv,
                                           IntPtr.__overloads__[Int64](pos),
                                           IntPtr.__overloads__[Int64](cconst),
                                           IntPtr.__overloads__[Int64](c),

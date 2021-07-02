@@ -2017,6 +2017,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         with self._padlock:
             self._logger.info("Loading new scene from dictionary.")
             if self._optix.load_scene_from_json(s) and self._init_scene_metadata():
+                self.update_device_buffers()
                 self._logger.info("New scene ready.")
             else:
                 msg = "Scene loading failed."
@@ -2052,6 +2053,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         with self._padlock:
             self._logger.info("Loading new scene from file %s.", file_name)
             if self._optix.load_scene_from_file(f) and self._init_scene_metadata():
+                self.update_device_buffers()
                 self._logger.info("New scene ready.")
             else:
                 msg = "Scene loading failed."
@@ -5076,6 +5078,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         faces_ptr = faces.ctypes.data
         n_faces = faces.size // 3
 
+        n_colors = 0
         c = np.ascontiguousarray(c, dtype=np.float32)
         if c.shape == (1,):
             c = np.ascontiguousarray([c[0], c[0], c[0]], dtype=np.float32)
@@ -5086,7 +5089,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             col_ptr = 0            
         else:
             c = _make_contiguous_3d(c, n=n_vertices, extend_scalars=True)
-            assert c.shape == pos.shape,  "Colors shape must be (n,3), with n matching the number of mesh vertices."
+            n_colors = c.shape[0]
+            assert n_colors == n_vertices or n_colors == n_faces,  "Colors shape must be (n,3), with n matching the number of mesh vertices or faces."
             if c is not None: col_ptr = c.ctypes.data
             else: col_ptr = 0
             col_const_ptr = 0
@@ -5137,7 +5141,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Setup mesh %s...", name)
-            g_handle = self._optix.setup_mesh(name, mat, n_vertices, n_faces, n_normals, n_uv, pos_ptr, faces_ptr, col_const_ptr, col_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr, make_normals)
+            g_handle = self._optix.setup_mesh(name, mat, n_vertices, n_faces, n_colors, n_normals, n_uv, pos_ptr, faces_ptr, col_const_ptr, col_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr, make_normals)
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
@@ -5773,6 +5777,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             msg = "Geometry buffers update failed."
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
+
+    def delete_geometry(self, name: str) -> None:
+        """Remove geometry from the scene.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        """
+        pass
 
     def set_coordinates(self, mode: Union[Coordinates, str] = Coordinates.Box, thickness: float = 1.0) -> None:
         """Set style of the coordinate system geometry (or hide it).
