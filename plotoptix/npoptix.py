@@ -5774,7 +5774,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(mask, str): mask = GeomBuffer[mask]
 
         if not self._optix.update_geom_buffers(name, mask.value, forced):
-            msg = "Geometry buffers update failed."
+            msg = "Geometry %s buffers update failed." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
@@ -5786,7 +5786,23 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         name : string
             Name of the geometry.
         """
-        pass
+        if name is None: raise ValueError()
+
+        if not name in self.geometry_data:
+            msg = "Geometry %s not found." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+            return
+
+        if not self._optix.delete_geometry(name):
+            msg = "Geometry %s not removed." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+            return
+
+        handle = self.geometry_data[name]._handle
+        del self.geometry_names[handle]
+        del self.geometry_data[name]
 
     def set_coordinates(self, mode: Union[Coordinates, str] = Coordinates.Box, thickness: float = 1.0) -> None:
         """Set style of the coordinate system geometry (or hide it).

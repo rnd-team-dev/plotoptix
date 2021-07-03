@@ -275,6 +275,9 @@ def _load_optix_win():
     optix.update_geom_buffers.argtypes = [c_wchar_p, c_uint, c_bool]
     optix.update_geom_buffers.restype = c_bool
 
+    optix.delete_geometry.argtypes = [c_wchar_p]
+    optix.delete_geometry.restype = c_bool
+
     optix.set_coordinates_geom.argtypes = [c_int, c_float]
     optix.set_coordinates_geom.restype = c_bool
 
@@ -900,6 +903,8 @@ class _ClrOptiX:
     def scale_primitive_xyz_c(self, name, idx, x, y, z, cx, cy, cz, update): return self._optix.scale_primitive_xyz_c(name, idx, x, y, z, cx, cy, cz, update)
 
     def update_geom_buffers(self, name, mask, forced): return self._optix.update_geom_buffers(name, mask, forced)
+
+    def delete_geometry(self, name): return self._optix.delete_geometry(name)
 
     def set_coordinates_geom(self, mode, thickness): return self._optix.set_coordinates_geom(mode, thickness)
 

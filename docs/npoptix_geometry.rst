@@ -1,8 +1,8 @@
 Plot geometry
 =============
 
-Create, load, update plot
--------------------------
+Create, load, update, and remove a plot
+---------------------------------------
 
 .. automethod:: plotoptix.NpOptiX.get_geometry_names
 .. automethod:: plotoptix.NpOptiX.set_data
@@ -17,6 +17,7 @@ Create, load, update plot
 .. automethod:: plotoptix.NpOptiX.load_merged_mesh_obj
 .. automethod:: plotoptix.NpOptiX.set_displacement
 .. automethod:: plotoptix.NpOptiX.load_displacement
+.. automethod:: plotoptix.NpOptiX.delete_geometry
 
 Direct modifications of data
 ----------------------------
