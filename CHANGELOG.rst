@@ -14,6 +14,7 @@ Changed
 
 - all set_xxx methods available for geometries, cameras, lights, materials now can update also
   properties of existing objects; properties possible to update are listed in docs
+- improved triangulation of faces of uploaded mesh: all polygons without holes are handled
 
 Fixed
 ~~~~~
