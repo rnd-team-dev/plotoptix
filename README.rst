@@ -16,8 +16,6 @@ PlotOptiX
 - Check what we are doing with PlotOptiX on `Behance <https://www.behance.net/RnDTeam>`__, `Facebook <https://www.facebook.com/rndteam>`__, and `Instagram <https://www.instagram.com/rnd.team.studio/>`__.
 - Join us on `Patreon <https://www.patreon.com/rndteam?fan_landing=true>`__ for news, release plans and hi-res content.
 
-*NOTE: NVIDIA driver update to 471.11 causes problems (see* `issue <https://github.com/rnd-team-dev/plotoptix/issues/22>`__). *The fix is coming, but for a while, please, wait with the driver updates.*
-
 PlotOptiX is a 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented in images as a position, size/thickness and color of primitives
 of several basic shapes, or projected onto surfaces of objects in form of a color textures and displacement maps. Triangular meshes,
