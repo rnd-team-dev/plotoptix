@@ -695,7 +695,7 @@ class _ClrOptiX:
                                             IntPtr.__overloads__[Int64](cast(normal_ptr_ref, c_void_p).value),
                                             IntPtr.__overloads__[Int64](cast(normal_size_ref, c_void_p).value))
 
-    def get_device_buffers(self, width, height,
+    def get_device_buffers(self,
                      img_ptr_ref, img_size_ref,
                      raw_ptr_ref, raw_size_ref,
                      hit_ptr_ref, hit_size_ref,
