@@ -1,6 +1,6 @@
 Short, non-binding summary: PlotOptiX is free for non-commercial use.
 
-Submit an issue or send email to contact@rnd.team if you need a commercial license. We can launch an inexpensive monthly tier on Patreon for licensing.
+License for the commercial use available at https://rnd.team/plotoptix. Write us at contact@rnd.team for custom code / features.
 
 Full legal terms:
 
@@ -37,8 +37,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 2. The Software may not be used for commercial purposes of any kind.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Contact R&D Team <contact@rnd.team> if you need a license allowing commercial use of the Software.
 
 Section III: OptiX™
 -------------------
