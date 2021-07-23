@@ -117,9 +117,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     Shape: ``(height, width, 4)``, ``dtype = np.float32``, contains RGBA data
     (alpha channel is now constant, ``0.0``).
 
-    Available only when the denoiser is enabled (:attr:`plotoptix.enums.Postprocessing.Denoiser`),
+    Available when denoiser is enabled (:attr:`plotoptix.enums.Postprocessing.Denoiser`),
     and set to :attr:`plotoptix.enums.DenoiserKind.RgbAlbedo`
-    or :attr:`plotoptix.enums.DenoiserKind.RgbAlbedoNormal` mode.
+    or :attr:`plotoptix.enums.DenoiserKind.RgbAlbedoNormal` mode, or when ``save_albedo``
+    parameter is set to ``True`` (see :meth:`plotoptix.NpOptiX.set_param`).
     """
 
     _normal = None
@@ -130,7 +131,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     Surface normal vector in camera space. Available only when the denoiser is enabled
     (:attr:`plotoptix.enums.Postprocessing.Denoiser`), and set to
-    :attr:`plotoptix.enums.DenoiserKind.RgbAlbedoNormal` mode.
+    :attr:`plotoptix.enums.DenoiserKind.RgbAlbedoNormal` mode, or when ``save_normals``
+    parameter is set to ``True`` (see :meth:`plotoptix.NpOptiX.set_param`).
     """
 
     def __init__(self,

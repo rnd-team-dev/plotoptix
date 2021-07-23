@@ -739,27 +739,40 @@ class Postprocessing(Enum):
 
     Examples
     --------
-    >>> optix = TkOptiX()
+    >>> rt = TkOptiX()
     >>>
-    >>> optix.set_float("denoiser_blend", 0.5)
-    >>> optix.set_int("denoiser_kind", DenoiserKind.Rgb.value)
-    >>> optix.add_postproc("Denoiser")
+    >>> rt.set_float("denoiser_blend", 0.5)
+    >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
+    >>> rt.add_postproc("Denoiser")
     """
 
-class DenoiserKind(Enum):
-    """Inputs provided to the denoiser.
+class DenoiserKind(IntFlag):
+    """Buffers used by the denoiser.
     """
 
-    Rgb = 0x2301
+    Rgb = 0x01
     """Only raw RGB values are used. Use this mode to save memory or
     if denoising in other modes is not satisfactory.
     """
 
-    RgbAlbedo = 0x2302
+    Albedo = 0x02
+    """Albedo buffer, must be used together with :attr:`plotoptix.enums.DenoiserKind.Rgb`.
+    """
+
+    Normal = 0x04
+    """Normal buffer, must be used together with :attr:`plotoptix.enums.DenoiserKind.Rgb`
+    and :attr:`plotoptix.enums.DenoiserKind.Albedo`.
+    """
+
+    Prev = 0x08
+    """Previous temporal frame - reserved for the future use.
+    """
+
+    RgbAlbedo = Rgb | Albedo
     """Default mode. Raw RGB values and surface albedo are used.
     """
 
-    RgbAlbedoNormal = 0x2303
+    RgbAlbedoNormal = RgbAlbedo | Normal
     """Raw RGB values, surface albedo and normals are used. Use this
     mode for scenes with fine details of surface structures.
     """

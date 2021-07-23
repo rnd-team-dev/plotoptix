@@ -41,7 +41,7 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
 
 Check `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__ for practical code samples and `documentation pages <https://plotoptix.rnd.team>`__ for a complete API reference.
 
-PlotOptiX is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. PlotOptiX is based on `NVIDIA OptiX 7.2 <https://developer.nvidia.com/optix>`_ framework and makes use of RTX-capable GPU's.
+PlotOptiX is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. PlotOptiX is based on `NVIDIA OptiX 7.3 <https://developer.nvidia.com/optix>`_ framework and makes use of RTX-capable GPU's.
 
 You can quickly display data in a simple plot:
 
@@ -65,7 +65,7 @@ Features
 - *callbacks*: at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - 8/16/32bps(hdr) image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
 - zero-copy access to GPU buffers wrapped in ndarrays: 8/32bps image, hit and object info, albedo, normals
-- GPU acceleration using RT Cores and everything else what comes with `OptiX 7.2 <https://developer.nvidia.com/optix>`__
+- GPU acceleration using RT Cores and everything else what comes with `OptiX <https://developer.nvidia.com/optix>`__
 - hardware accelerated video output to MP4 file format using `NVENC 9.0 <https://developer.nvidia.com/nvidia-video-codec-sdk>`__
 - Tkinter based simple GUI window or a headless raytracer
 - configurable multi-GPU support
@@ -74,7 +74,7 @@ System Requirements
 -------------------
 
 - a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Ampere);
-   - NVIDIA driver >= v456.71 (Windows) or >= v455.28 (Linux);
+   - NVIDIA driver >= r465;
 - **Python 3 64-bit**
 - Windows:
    - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
