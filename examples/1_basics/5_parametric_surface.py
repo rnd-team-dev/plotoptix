@@ -67,7 +67,7 @@ def main():
     rt.setup_camera("cam1", cam_type="DoF",
                     eye=[-50, -7, -15], target=[0, 0, -1], up=[0, 1, 0],
                     aperture_radius=0.4, aperture_fract=0.2,
-                    focal_scale=0.92, fov=35)
+                    focal_scale=0.92, fov=35, glock=True)
 
     rt.setup_light("light1", pos=[-15, 20, 15], color=5, radius=6)
 

@@ -14,33 +14,31 @@ from plotoptix import TkOptiX
 def main():
 
     # a mesh from pygmsh example:
-    geom = pygmsh.built_in.Geometry()
+    with pygmsh.geo.Geometry() as geom:
 
-    # Draw a cross.
-    poly = geom.add_polygon([
-        [ 0.0,  0.5, 0.0],
-        [-0.1,  0.1, 0.0],
-        [-0.5,  0.0, 0.0],
-        [-0.1, -0.1, 0.0],
-        [ 0.0, -0.5, 0.0],
-        [ 0.1, -0.1, 0.0],
-        [ 0.5,  0.0, 0.0],
-        [ 0.1,  0.1, 0.0]
-        ],
-        lcar=0.05
-    )
+        poly = geom.add_polygon(
+            [
+                [+0.0, +0.5],
+                [-0.1, +0.1],
+                [-0.5, +0.0],
+                [-0.1, -0.1],
+                [+0.0, -0.5],
+                [+0.1, -0.1],
+                [+0.5, +0.0],
+                [+0.1, +0.1],
+            ],
+            mesh_size=0.05,
+        )
 
-    axis = [0, 0, 1]
+        geom.twist(
+            poly,
+            translation_axis=[0, 0, 1],
+            rotation_axis=[0, 0, 1],
+            point_on_axis=[0, 0, 0],
+            angle=np.pi / 3,
+        )
 
-    geom.extrude(
-        poly,
-        translation_axis=axis,
-        rotation_axis=axis,
-        point_on_axis=[0, 0, 0],
-        angle=2.0 / 6.0 * np.pi
-    )
-
-    mesh = pygmsh.generate_mesh(geom)
+        mesh = geom.generate_mesh()
 
     rt = TkOptiX() # create and configure, show the window later
 
