@@ -11,7 +11,7 @@ PlotOptiX
    :target: https://www.patreon.com/bePatron?u=33442314
    :alt: Become a Patron!
 
-**Data visualisation in Python based on NVIDIA OptiX ray tracing framework.**
+**Data visualisation and ray tracing in Python based on NVIDIA OptiX framework.**
 
 - Check what we are doing with PlotOptiX on `Behance <https://www.behance.net/RnDTeam>`__, `Facebook <https://www.facebook.com/rndteam>`__, and `Instagram <https://www.instagram.com/rnd.team.studio/>`__.
 - Join us on `Patreon <https://www.patreon.com/rndteam?fan_landing=true>`__ for news, release plans and hi-res content.
