@@ -1,6 +1,14 @@
 Release history
 ===============
 
+`v0.14.2` - 2021-10-10
+----------------------
+
+Changed
+~~~~~~~
+
+- fix crashes on pipeline compilation config changes
+
 `v0.14.1` - 2021-07-23
 ----------------------
 
