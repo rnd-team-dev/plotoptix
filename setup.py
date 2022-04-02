@@ -187,7 +187,8 @@ setup(name='plotoptix',
           'numpy>=1.0',
           'Pillow>=5.3',
           'python-dateutil>=2.7',
-          'matplotlib>=2.0'
+          'matplotlib>=2.0',
+          'requests>=2.25'
       ],
       long_description=open('README.rst').read(),
       include_package_data=True,
