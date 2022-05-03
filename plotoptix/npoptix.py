@@ -5767,9 +5767,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Which buffers to update. All buffers if not specified.
         forced : bool, optional
             Update even if the object was not tagged as outdated. Operations like rotations,
-            scaling, shifts, are setting "out of date" flag, but direct modifications of
-            buffers memory performed with :class:`plotoptix.geometry.PinnedBuffer` require
-            forced update.
+            scaling, shifts, are setting "out of date" flag automatically, but you'll need
+            forced update after direct modifications of memory buffers accessed with via
+            :class:`plotoptix.geometry.PinnedBuffer`.
         """
         if name is None: raise ValueError()
 
