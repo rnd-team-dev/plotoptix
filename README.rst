@@ -80,7 +80,7 @@ System Requirements
    - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
 - Linux:
    - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2
-   - `pythonnet <http://pythonnet.github.io>`__ >= 2.5.1
+   - `pythonnet <http://pythonnet.github.io>`__ == 2.5.1 (before 3.0 is released, this is the only supported pythonnet version, thus requires **Python <= 3.8**)
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
 
 What's Included
@@ -132,6 +132,8 @@ Check if / which Mono release is present in your system::
 If ``mono`` command is not available, or the reported version is < 5.2, visit `Mono download page <https://www.mono-project.com/download/stable/#download-lin>`__ and follow instructions related to your Linux distribution. You want to install **mono-complete** package.
 
 *pythonnet:*
+
+Note, current pythonnet release supports Python up to 3.8.
 
 The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however, some prerequisities are needed. Instuctions below are based on APT, replace ``apt`` with ``yum`` depending on your OS::
 
