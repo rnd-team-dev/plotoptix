@@ -80,7 +80,7 @@ System Requirements
    - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
 - Linux:
    - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2
-   - `pythonnet <http://pythonnet.github.io>`__ >= 2.5.1
+   - `pythonnet <http://pythonnet.github.io>`__ 2.5.1 or 2.5.2 (before 3.0 is released, these are the only supported pythonnet versions, thus require **Python <= 3.8**)
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
 
 What's Included
@@ -133,6 +133,8 @@ If ``mono`` command is not available, or the reported version is < 5.2, visit `M
 
 *pythonnet:*
 
+Note, current pythonnet release supports Python up to 3.8.
+
 The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however, some prerequisities are needed. Instuctions below are based on APT, replace ``apt`` with ``yum`` depending on your OS::
 
    apt update
@@ -149,7 +151,7 @@ or in CentOS::
 Then, update required packages and install ``pythonnet``::
 
    pip install -U setuptools wheel pycparser
-   pip install -U pythonnet --egg
+   pip install -U pythonnet
    
 After successful installation you should be able to do python's import:
 
