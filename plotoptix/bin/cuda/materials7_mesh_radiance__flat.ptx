@@ -7,7 +7,7 @@
 //
 
 .version 7.4
-.target sm_50
+.target sm_60
 .address_size 64
 
 	// .globl	__closesthit__mesh_radiance__flat
