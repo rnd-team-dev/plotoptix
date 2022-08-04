@@ -29,7 +29,7 @@ sudo apt -y install clang libglib2.0-dev python-dev
 
 sudo apt -y install python3-pip
 sudo pip3 install -U setuptools wheel pycparser
-sudo pip3 install -U pythonnet --egg
+sudo pip3 install -U pythonnet
 
 # install Tk
 sudo apt-get -y install python3-tk
