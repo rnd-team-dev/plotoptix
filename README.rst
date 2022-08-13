@@ -41,7 +41,7 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
 
 Check `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__ for practical code samples and `documentation pages <https://plotoptix.rnd.team>`__ for a complete API reference.
 
-PlotOptiX is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. PlotOptiX is based on `NVIDIA OptiX 7.3 <https://developer.nvidia.com/optix>`_ framework and makes use of RTX-capable GPU's.
+PlotOptiX is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. PlotOptiX is based on `NVIDIA OptiX 7.5 <https://developer.nvidia.com/optix>`_ framework and makes use of RTX-capable GPU's.
 
 You can quickly display data in a simple plot:
 
@@ -74,7 +74,7 @@ System Requirements
 -------------------
 
 - a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Ampere);
-   - NVIDIA driver >= r465;
+   - NVIDIA driver >= r515;
 - **Python 3 64-bit**
 - Windows:
    - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
@@ -93,7 +93,7 @@ What's Included
 Installation
 ============
 
-**Note**, at this point, PlotOptiX binaries are tested in: Windows 10, Ubuntu 18.04, CentOS 7.
+**Note**, at this point, PlotOptiX binaries are tested in: Windows 10/11, Ubuntu 18.04, CentOS 7.
 
 PlotOptiX was also successfully tested on the `Google Cloud Platform <https://cloud.google.com/>`__, using Compute Engine instance with 2x V100 GPU's and Ubuntu 18.04 image.
 Here are the `installation steps <https://github.com/rnd-team-dev/plotoptix/blob/master/gcp_install_gpu.txt>`__ so you can save some precious seconds (FFmpeg not included).
