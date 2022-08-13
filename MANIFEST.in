@@ -8,4 +8,4 @@ include plotoptix/bin/*.so
 include plotoptix/bin/*.dll
 include plotoptix/bin/*.xml
 include plotoptix/bin/*.config
-include plotoptix/bin/cuda/*.ptx
+include plotoptix/bin/cuda/*.ir

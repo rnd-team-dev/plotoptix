@@ -1,6 +1,18 @@
 Release history
 ===============
 
+`v0.14.3` - 2022-08-13
+----------------------
+
+**NOTE:** NVIDIA driver r515 or above is required.
+
+Changed
+~~~~~~~
+
+- updated to use OptiX 7.5 (performance improvements are in, new features in the next release),
+- PTX replaced with IR format, generated with CUDA 11.7
+- several multi-gpu improvements and fixes
+
 `v0.14.2` - 2021-10-10
 ----------------------
 
