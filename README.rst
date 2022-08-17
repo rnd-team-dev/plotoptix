@@ -77,9 +77,9 @@ System Requirements
    - NVIDIA driver >= r515;
 - **Python 3 64-bit**
 - Windows:
-   - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in normally updated Windows)
+   - Framework .NET >= 4.8 (present in all modern Windows)
 - Linux:
-   - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2
+   - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 6.6
    - `pythonnet <http://pythonnet.github.io>`__ 2.5.1 or 2.5.2 (before 3.0 is released, these are the only supported pythonnet versions, thus require **Python <= 3.8**)
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
 
