@@ -110,9 +110,9 @@ Most likely you already got the right version with your Windows installation. Ju
    C:\>reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full" /v version
    
    HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full
-       version    REG_SZ    4.7.03056
+       version    REG_SZ    4.8.04084
 
-If the number in your output is < 4.6.1, visit `download page <https://dotnet.microsoft.com/download/dotnet-framework>`__ and
+If the number in your output is < 4.8, visit `download page <https://dotnet.microsoft.com/download/dotnet-framework>`__ and
 install the most recent release.
 
 Linux prerequisites
@@ -129,7 +129,7 @@ Check if / which Mono release is present in your system::
 	   TLS:           __thread
       ... (output cropped for clarity) ...
 
-If ``mono`` command is not available, or the reported version is < 5.2, visit `Mono download page <https://www.mono-project.com/download/stable/#download-lin>`__ and follow instructions related to your Linux distribution. You want to install **mono-complete** package.
+If ``mono`` command is not available, or the reported version is < 6.6, visit `Mono download page <https://www.mono-project.com/download/stable/#download-lin>`__ and follow instructions related to your Linux distribution. You want to install **mono-complete** package.
 
 *pythonnet:*
 
