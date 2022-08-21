@@ -2122,6 +2122,21 @@
             This tag is optionally provided for defining exact affine transformations between raster and model space. Used in interchangeable GeoTIFF files.
             </summary>
         </member>
+        <member name="F:BitMiracle.LibTiff.Classic.TiffTag.GEOTIFF_GEOKEYDIRECTORYTAG">
+            <summary>
+            This tag may be used to store the GeoKey Directory, which defines and references the "GeoKeys". Used in interchangeable GeoTIFF files.
+            </summary>
+        </member>
+        <member name="F:BitMiracle.LibTiff.Classic.TiffTag.GEOTIFF_GEODOUBLEPARAMSTAG">
+            <summary>
+            This tag is used to store all of the DOUBLE valued GeoKeys, referenced by the GeoKeyDirectoryTag. Used in interchangeable GeoTIFF files.
+            </summary>
+        </member>
+        <member name="F:BitMiracle.LibTiff.Classic.TiffTag.GEOTIFF_GEOASCIIPARAMSTAG">
+            <summary>
+            This tag is used to store all of the ASCII valued GeoKeys, referenced by the GeoKeyDirectoryTag. Used in interchangeable GeoTIFF files.
+            </summary>
+        </member>
         <member name="T:BitMiracle.LibTiff.Classic.TiffType">
             <summary>
             Tag data type.
@@ -4105,6 +4120,7 @@
             <summary>
             Writes the contents of the current directory to the specified file.
             </summary>
+            <param name="done">call PostEncode() first, and FreeDirectory() after writing</param>
             <remarks>This routine doesn't handle overwriting a directory with
             auxiliary storage that's been changed.</remarks>
         </member>
@@ -8161,11 +8177,6 @@
             Bitreading state saved across MCUs
             </summary>
         </member>
-        <member name="T:BitMiracle.LibJpeg.Classic.Internal.bitread_working_state">
-            <summary>
-            Bitreading working state within an MCU
-            </summary>
-        </member>
         <member name="T:BitMiracle.LibJpeg.Classic.Internal.ComponentBuffer">
             <summary>
             Encapsulates buffer of image samples for one color component
@@ -8218,11 +8229,6 @@
             MCU decoding for DC successive approximation refinement scan.
             Note: we assume such scans can be multi-component,
             although the spec is not very clear on the point.
-            </summary>
-        </member>
-        <member name="M:BitMiracle.LibJpeg.Classic.Internal.huff_entropy_decoder.undo_decode_mcu_AC_refine(BitMiracle.LibJpeg.Classic.JBLOCK[],System.Int32[],System.Int32)">
-            <summary>
-            MCU decoding for AC successive approximation refinement scan.
             </summary>
         </member>
         <member name="M:BitMiracle.LibJpeg.Classic.Internal.huff_entropy_decoder.process_restart">
@@ -9423,13 +9429,6 @@
             shows that the values given below are the most effective.
             </summary>
         </member>
-        <member name="M:BitMiracle.LibJpeg.Classic.Internal.jpeg_inverse_dct.SLOW_INTEGER_DEQUANTIZE(System.Int32,System.Int32)">
-            <summary>
-            Dequantize a coefficient by multiplying it by the multiplier-table
-            entry; produce an int result.  In this module, both inputs and result
-            are 16 bits or less, so either int or short multiply will work.
-            </summary>
-        </member>
         <member name="M:BitMiracle.LibJpeg.Classic.Internal.jpeg_inverse_dct.jpeg_idct_ifast(System.Int32,System.Int16[],System.Int32,System.Int32)">
             <summary>
             Perform dequantization and inverse DCT on one block of coefficients.
@@ -10472,7 +10471,7 @@
             These components will not be referenced by color conversion.
             </summary>
         </member>
-        <member name="M:BitMiracle.LibJpeg.Classic.Internal.my_upsampler.fullsize_upsample(BitMiracle.LibJpeg.Classic.Internal.ComponentBuffer@)">
+        <member name="M:BitMiracle.LibJpeg.Classic.Internal.my_upsampler.fullsize_upsample(BitMiracle.LibJpeg.Classic.Internal.ComponentBuffer)">
             <summary>
             For full-size components, we just make color_buf[ci] point at the
             input buffer, and thus avoid copying any data.  Note that this is
@@ -10480,19 +10479,19 @@
             "consumed" until we are done color converting and emitting it.
             </summary>
         </member>
-        <member name="M:BitMiracle.LibJpeg.Classic.Internal.my_upsampler.h2v1_upsample(BitMiracle.LibJpeg.Classic.Internal.ComponentBuffer@)">
+        <member name="M:BitMiracle.LibJpeg.Classic.Internal.my_upsampler.h2v1_upsample(BitMiracle.LibJpeg.Classic.Internal.ComponentBuffer)">
             <summary>
             Fast processing for the common case of 2:1 horizontal and 1:1 vertical.
             It's still a box filter.
             </summary>
         </member>
-        <member name="M:BitMiracle.LibJpeg.Classic.Internal.my_upsampler.h2v2_upsample(BitMiracle.LibJpeg.Classic.Internal.ComponentBuffer@)">
+        <member name="M:BitMiracle.LibJpeg.Classic.Internal.my_upsampler.h2v2_upsample(BitMiracle.LibJpeg.Classic.Internal.ComponentBuffer)">
             <summary>
             Fast processing for the common case of 2:1 horizontal and 2:1 vertical.
             It's still a box filter.
             </summary>
         </member>
-        <member name="M:BitMiracle.LibJpeg.Classic.Internal.my_upsampler.int_upsample(BitMiracle.LibJpeg.Classic.Internal.ComponentBuffer@)">
+        <member name="M:BitMiracle.LibJpeg.Classic.Internal.my_upsampler.int_upsample(BitMiracle.LibJpeg.Classic.Internal.ComponentBuffer)">
             <summary>
             This version handles any integral sampling ratios.
             This is not used for typical JPEG files, so it need not be fast.
