@@ -80,7 +80,7 @@ System Requirements
    - Framework .NET >= 4.8 (present in all modern Windows)
 - Linux:
    - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 6.6
-   - `pythonnet <http://pythonnet.github.io>`__ 2.5.1 or 2.5.2 (before 3.0 is released, these are the only supported pythonnet versions, thus require **Python <= 3.8**)
+   - `pythonnet <http://pythonnet.github.io>`__
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
 
 What's Included
@@ -133,9 +133,7 @@ If ``mono`` command is not available, or the reported version is < 6.6, visit `M
 
 *pythonnet:*
 
-Note, current pythonnet release supports Python up to 3.8.
-
-The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however, some prerequisities are needed. Instuctions below are based on APT, replace ``apt`` with ``yum`` depending on your OS::
+The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however, you might need some prerequisities. Instuctions below are based on APT, replace ``apt`` with ``yum`` depending on your OS::
 
    apt update
    apt install clang libglib2.0-dev python-dev

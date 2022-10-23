@@ -8,6 +8,7 @@ Changed
 ~~~~~~~
 
 - packages updated to VS 2022, DllExport changed to the one by 3F
+- code updated to support pythonnet 3.0, thus compatible with all pythons up to 3.10
 
 `v0.14.3` - 2022-08-13
 ----------------------
