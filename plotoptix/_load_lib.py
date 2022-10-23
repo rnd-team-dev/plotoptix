@@ -512,8 +512,8 @@ def _load_optix_win():
 
     return optix
 
-class _ClrOptiX:
-    """Pythonnet wrapper for RnD.SharpOptiX library; provides identical interface
+class _ClrOptiX_v2:
+    """Pythonnet wrapper (for pythonnet < 3.0) for RnD.SharpOptiX library; provides identical interface
     as RnD.SharpOptiX library loaded in Windows with ctypes.
     """
 
@@ -821,7 +821,7 @@ class _ClrOptiX:
                                            IntPtr.__overloads__[Int64](c))
 
     def update_graph(self, name, material, n_vtx, n_edges, pos, radii, edges, cconst, c):
-        return self._optix.update_graph_ptr(name, material, n_vtx, n_tri, n_norm, n_uv,
+        return self._optix.update_graph_ptr(name, material, n_vtx, n_edges,
                                            IntPtr.__overloads__[Int64](pos),
                                            IntPtr.__overloads__[Int64](radii),
                                            IntPtr.__overloads__[Int64](edges),
@@ -1143,6 +1143,778 @@ class _ClrOptiX:
 
     def test_library(self, x): return self._optix.test_library(x)
 
+class _ClrOptiX_v3:
+    """Pythonnet wrapper (for pythonnet >= 3.0) for RnD.SharpOptiX library; provides identical interface
+    as RnD.SharpOptiX library loaded in Windows with ctypes.
+    """
+
+    def __init__(self):
+
+        try:
+            c_encoder = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpEncoder.so"))
+            self._encoder_available = True
+        except:
+            print(82 * "*"); print(82 * "*")
+            print("Video encoding library initialization failed, encoding features are not available.")
+            print(82 * "*"); print(82 * "*")
+            self._encoder_available = False
+
+        try:
+            c_rnd = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpOptiX7.so"))
+        except:
+            print(80 * "*"); print(80 * "*")
+            print("Low level ray tracing libraries initialization failed, cannot continue.")
+            print(80 * "*"); print(80 * "*")
+            raise ImportError
+
+        json_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "Newtonsoft.Json.dll")
+        tiff_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "BitMiracle.LibTiff.NET.dll")
+        rnd_name = os.path.join(os.path.dirname(__file__), BIN_PATH, "RnD.SharpOptiX.dll")
+
+        head, tail = os.path.split(rnd_name)
+        sys.path.append(head)
+
+        try:
+            from System import Reflection
+            json_assembly = Reflection.Assembly.LoadFile(json_name)
+            tiff_assembly = Reflection.Assembly.LoadFile(tiff_name)
+            rnd_assembly = Reflection.Assembly.LoadFile(rnd_name)
+
+        except:
+            print(80 * "*"); print(80 * "*")
+            print(".NET ray tracing libraries initialization failed, cannot continue.")
+            print(80 * "*"); print(80 * "*")
+            raise ImportError
+
+        clr.AddReference(os.path.splitext(tail)[0])
+
+        self._optix = rnd_assembly.CreateInstance("RnD.SharpOptiX.Py.PyOptiX7")
+
+    def refresh_scene(self): self._optix.refresh_scene()
+
+    def destroy_scene(self): self._optix.destroy_scene()
+
+    def create_empty_scene(self, width, height, dev_ptr, dev_size, log_level):
+        return self._optix.create_empty_scene_ptr(width, height,
+                                                  IntPtr(dev_ptr), dev_size,
+                                                  log_level)
+
+    def get_miss_program(self): return self._optix.get_miss_program()
+    def set_miss_program(self, algorithm, refresh): return self._optix.set_miss_program(algorithm, refresh)
+
+    def create_scene_from_json(self, jstr, width, height, dev_ptr, dev_size):
+        return self._optix.create_scene_from_json_ptr(jstr, width, height,
+                                                      IntPtr(dev_ptr), dev_size)
+
+    def create_scene_from_file(self, jstr, width, height, dev_ptr, dev_size):
+        return self._optix.create_scene_from_file_ptr(jstr, width, height,
+                                                      IntPtr(dev_ptr), dev_size)
+
+    def load_scene_from_json(self, jstr): return self._optix.load_scene_from_json(jstr)
+
+    def load_scene_from_file(self, fname): return self._optix.load_scene_from_file(fname)
+
+    def get_scene_metadata(self): return self._optix.get_scene_metadata()
+
+    def save_scene_to_json(self): return self._optix.save_scene_to_json()
+
+    def save_scene_to_file(self, fname): return self._optix.save_scene_to_file(fname)
+
+    def save_image_to_file(self, fname): return self._optix.save_image_to_file(fname)
+
+    def save_image_to_file_16bps(self, fname): return self._optix.save_image_to_file_16bps(fname)
+
+    def save_image_to_file_32bps(self, fname): return self._optix.save_image_to_file_32bps(fname)
+
+    def get_output(self, buf_ptr, buf_size, depth, channels):
+        return self._optix.get_output_ptr(IntPtr(buf_ptr), buf_size, depth, channels)
+
+
+    def get_fps(self): return self._optix.get_fps()
+
+    def start_rt(self): return self._optix.start_rt()
+    def stop_rt(self): return self._optix.stop_rt()
+
+    def break_launch(self): return self._optix.break_launch()
+
+    def set_compute_paused(self, state): return self._optix.set_compute_paused(state)
+
+    def is_defined(self, name): return self._optix.is_defined(name)
+
+    def has_texture(self, name): return self._optix.has_texture(name)
+
+    def get_int(self, name, x_ref):
+        return self._optix.get_int_ptr(name,
+                                       IntPtr(cast(x_ref, c_void_p).value))
+
+    def set_int(self, name, x, refresh): return self._optix.set_int(name, x, refresh)
+
+    def get_uint(self, name, x_ref):
+        return self._optix.get_uint_ptr(name,
+                                        IntPtr(cast(x_ref, c_void_p).value))
+
+    def set_uint(self, name, x, refresh): return self._optix.set_uint(name, x, refresh)
+
+    def get_uint2(self, name, x_ref, y_ref):
+        return self._optix.get_uint2_ptr(name,
+                                         IntPtr(cast(x_ref, c_void_p).value),
+                                         IntPtr(cast(y_ref, c_void_p).value))
+
+    def set_uint2(self, name, x, y, refresh): return self._optix.set_uint2(name, x, y, refresh)
+
+    def get_float(self, name, x_ref):
+        return self._optix.get_float_ptr(name,
+                                         IntPtr(cast(x_ref, c_void_p).value))
+
+    def set_float(self, name, x, refresh):
+        return self._optix.set_float(name,
+                                     float(x),
+                                     refresh)
+
+    def get_float2(self, name, x_ref, y_ref):
+        return self._optix.get_float2_ptr(name,
+                                          IntPtr(cast(x_ref, c_void_p).value),
+                                          IntPtr(cast(y_ref, c_void_p).value))
+
+    def set_float2(self, name, x, y, refresh):
+        return self._optix.set_float2(name,
+                                      float(x),
+                                      float(y),
+                                      refresh)
+
+    def get_float3(self, name, x_ref, y_ref, z_ref):
+        return self._optix.get_float3_ptr(name,
+                                          IntPtr(cast(x_ref, c_void_p).value),
+                                          IntPtr(cast(y_ref, c_void_p).value),
+                                          IntPtr(cast(z_ref, c_void_p).value))
+
+    def set_float3(self, name, x, y, z, refresh): return self._optix.set_float3(name,
+                                          float(x),
+                                          float(y),
+                                          float(z),
+                                          refresh)
+
+    def set_bg_texture(self, name, refresh): return self._optix.set_bg_texture(name, refresh)
+
+    def set_texture_1d(self, name, data_ptr, length, tformat, addr_mode, keep_on_host, refresh):
+        return self._optix.set_texture_1d_ptr(name,
+                                              IntPtr(data_ptr),
+                                              length, tformat, addr_mode, keep_on_host, refresh)
+
+    def set_texture_2d(self, name, data_ptr, width, height, tformat, addr_mode, keep_on_host, refresh):
+        return self._optix.set_texture_2d_ptr(name,
+                                              IntPtr(data_ptr),
+                                              width, height, tformat, addr_mode, keep_on_host, refresh)
+
+    def load_texture_2d(self, tex_name, file_name, prescale, baseline, exposure, gamma, tformat, addr_mode, refresh):
+        return self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, tformat, addr_mode, refresh)
+
+    def set_displacement(self, obj_name, data_ptr, width, height, addr_mode, keep_on_host, refresh):
+        return self._optix.set_displacement_ptr(obj_name,
+                                                IntPtr(data_ptr),
+                                                width, height, addr_mode, keep_on_host, refresh)
+
+    def load_displacement(self, obj_name, file_name, prescale, baseline, addr_mode, refresh):
+        return self._optix.load_displacement(obj_name, file_name, prescale, baseline, addr_mode, refresh)
+
+
+    def resize_scene(self, width, height,
+                     img_ptr_ref, img_size_ref,
+                     raw_ptr_ref, raw_size_ref,
+                     hit_ptr_ref, hit_size_ref,
+                     geo_ptr_ref, geo_size_ref,
+                     albedo_ptr_ref, albedo_size_ref,
+                     normal_ptr_ref, normal_size_ref):
+        return self._optix.resize_scene_ptr(width, height,
+                                            IntPtr(cast(img_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(img_size_ref, c_void_p).value),
+                                            IntPtr(cast(raw_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(raw_size_ref, c_void_p).value),
+                                            IntPtr(cast(hit_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(hit_size_ref, c_void_p).value),
+                                            IntPtr(cast(geo_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(geo_size_ref, c_void_p).value),
+                                            IntPtr(cast(albedo_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(albedo_size_ref, c_void_p).value),
+                                            IntPtr(cast(normal_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(normal_size_ref, c_void_p).value))
+
+    def get_device_buffers(self,
+                     img_ptr_ref, img_size_ref,
+                     raw_ptr_ref, raw_size_ref,
+                     hit_ptr_ref, hit_size_ref,
+                     geo_ptr_ref, geo_size_ref,
+                     albedo_ptr_ref, albedo_size_ref,
+                     normal_ptr_ref, normal_size_ref):
+        return self._optix.get_device_buffers_ptr(
+                                            IntPtr(cast(img_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(img_size_ref, c_void_p).value),
+                                            IntPtr(cast(raw_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(raw_size_ref, c_void_p).value),
+                                            IntPtr(cast(hit_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(hit_size_ref, c_void_p).value),
+                                            IntPtr(cast(geo_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(geo_size_ref, c_void_p).value),
+                                            IntPtr(cast(albedo_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(albedo_size_ref, c_void_p).value),
+                                            IntPtr(cast(normal_ptr_ref, c_void_p).value),
+                                            IntPtr(cast(normal_size_ref, c_void_p).value))
+
+    def get_device_buf(self, buf_ptr_ref, gpu_size_ref):
+        return self._optix.get_device_buf_ptr(IntPtr(cast(buf_ptr_ref, c_void_p).value),
+                                              IntPtr(cast(gpu_size_ref, c_void_p).value))
+
+    def pin_geometry_buffer(self, name, kind, buf_ptr_ref, shape_ptr_ref, shape_size_ref, data_type_ref):
+        return self._optix.pin_geometry_buffer_ptr(name, kind,
+                                                   IntPtr(cast(buf_ptr_ref, c_void_p).value),
+                                                   IntPtr(cast(shape_ptr_ref, c_void_p).value),
+                                                   IntPtr(cast(shape_size_ref, c_void_p).value),
+                                                   IntPtr(cast(data_type_ref, c_void_p).value))
+
+    def unpin_geometry_buffer(self, name, kind): return self._optix.unpin_geometry_buffer(name, kind)
+
+    def get_material(self, name): return self._optix.get_material(name)
+
+    def setup_material(self, name, jstr): return self._optix.setup_material(name, jstr)
+
+    def set_normal_tilt(self, mat_name, data_ptr, width, height, mapping, addr_mode, keep_on_host, refresh):
+        return self._optix.set_normal_tilt_ptr(mat_name,
+                                               IntPtr(data_ptr),
+                                               width, height, mapping, addr_mode, keep_on_host, refresh)
+
+    def load_normal_tilt(self, mat_name, file_name, mapping, addr_mode, prescale, baseline, refresh):
+        return self._optix.load_normal_tilt(mat_name, file_name, mapping, addr_mode, prescale, baseline, refresh)
+
+
+    def set_correction_curve(self, data_ptr, n_ctrl_points, n_curve_points, channel, vrange, refresh):
+        return self._optix.set_correction_curve_ptr(IntPtr(data_ptr),
+                                                    n_ctrl_points, n_curve_points, channel, float(vrange), refresh)
+
+    def add_postproc(self, algorithm, refresh): return self._optix.add_postproc(algorithm, refresh)
+
+    def setup_geometry(self, geomType, attrProg, name, material, rnd_missing, n_primitives, pos, cconst, c, r, u, v, w):
+        return self._optix.setup_geometry_ptr(geomType, attrProg, name, material, rnd_missing, n_primitives,
+                                              IntPtr(pos),
+                                              IntPtr(cconst),
+                                              IntPtr(c),
+                                              IntPtr(r),
+                                              IntPtr(u),
+                                              IntPtr(v),
+                                              IntPtr(w))
+
+    def update_geometry(self, name, material, n_primitives, pos, cconst, c, r, u, v, w):
+        return self._optix.update_geometry_ptr(name, material, n_primitives,
+                                               IntPtr(pos),
+                                               IntPtr(cconst),
+                                               IntPtr(c),
+                                               IntPtr(r),
+                                               IntPtr(u),
+                                               IntPtr(v),
+                                               IntPtr(w))
+
+    def get_geometry_size(self, name): return self._optix.get_geometry_size(name)
+
+    def get_faces_count(self, name): return self._optix.get_faces_count(name)
+
+    def get_surface_size(self, name, x_ref, z_ref):
+        return self._optix.get_surface_size_ptr(name,
+                                                IntPtr(cast(x_ref, c_void_p).value),
+                                                IntPtr(cast(z_ref, c_void_p).value))
+
+    def update_surface(self, name, material, x_size, z_size, pos, radii, norm, csurf, cfloor, x_min, x_max, z_min, z_max, floor_level):
+        return self._optix.update_surface_ptr(name, material, x_size, z_size,
+                                              IntPtr(pos),
+                                              IntPtr(radii),
+                                              IntPtr(norm),
+                                              IntPtr(csurf),
+                                              IntPtr(cfloor),
+                                              float(x_min),
+                                              float(x_max),
+                                              float(z_min),
+                                              float(z_max),
+                                              float(floor_level))
+
+    def setup_surface(self, geomType, name, material, x_size, z_size, pos, radii, norm, csurf, cfloor, x_min, x_max, z_min, z_max, floor_level, make_normals):
+        return self._optix.setup_surface_ptr(geomType, name, material, x_size, z_size,
+                                             IntPtr(pos),
+                                             IntPtr(radii),
+                                             IntPtr(norm),
+                                             IntPtr(csurf),
+                                             IntPtr(cfloor),
+                                             float(x_min),
+                                             float(x_max),
+                                             float(z_min),
+                                             float(z_max),
+                                             float(floor_level),
+                                             make_normals)
+
+    def update_psurface(self, name, material, u_size, v_size, pos, radii, norm, cconst, c):
+        return self._optix.update_psurface_ptr(name, material, u_size, v_size,
+                                               IntPtr(pos),
+                                               IntPtr(radii),
+                                               IntPtr(norm),
+                                               IntPtr(cconst),
+                                               IntPtr(c))
+
+    def setup_psurface(self, geomType, name, material, u_size, v_size, pos, radii, norm, cconst, c, wrap_u, wrap_v, make_normals):
+        return self._optix.setup_psurface_ptr(geomType, name, material, u_size, v_size,
+                                              IntPtr(pos),
+                                              IntPtr(radii),
+                                              IntPtr(norm),
+                                              IntPtr(cconst),
+                                              IntPtr(c),
+                                              wrap_u, wrap_v, make_normals)
+
+    def setup_graph(self, name, material, n_vtx, n_edges, pos, radii, edges, cconst, c):
+        return self._optix.setup_graph_ptr(name, material, n_vtx, n_edges,
+                                           IntPtr(pos),
+                                           IntPtr(radii),
+                                           IntPtr(edges),
+                                           IntPtr(cconst),
+                                           IntPtr(c))
+
+    def update_graph(self, name, material, n_vtx, n_edges, pos, radii, edges, cconst, c):
+        return self._optix.update_graph_ptr(name, material, n_vtx, n_edges,
+                                           IntPtr(pos),
+                                           IntPtr(radii),
+                                           IntPtr(edges),
+                                           IntPtr(cconst),
+                                           IntPtr(c))
+
+    def setup_mesh(self, name, material, n_vtx, n_tri, n_col, n_norm, n_uv, pos, cconst, c, vidx, norm, nidx, uvmap, uvidx, make_normals):
+        return self._optix.setup_mesh_ptr(name, material, n_vtx, n_tri, n_col, n_norm, n_uv,
+                                          IntPtr(pos),
+                                          IntPtr(cconst),
+                                          IntPtr(c),
+                                          IntPtr(vidx),
+                                          IntPtr(norm),
+                                          IntPtr(nidx),
+                                          IntPtr(uvmap),
+                                          IntPtr(uvidx),
+                                          make_normals)
+
+    def update_mesh(self, name, material, n_vtx, n_tri, n_norm, n_uv, pos, vidx, cconst, c, norm, nidx, uvmap, uvidx):
+        return self._optix.update_mesh_ptr(name, material, n_vtx, n_tri, n_norm, n_uv,
+                                           IntPtr(pos),
+                                           IntPtr(vidx),
+                                           IntPtr(cconst),
+                                           IntPtr(c),
+                                           IntPtr(norm),
+                                           IntPtr(nidx),
+                                           IntPtr(uvmap),
+                                           IntPtr(uvidx))
+
+    def load_mesh_obj(self, file_name, mesh_name, material, parent, color, make_normals):
+        return self._optix.load_mesh_obj_ptr(file_name, mesh_name, material, parent,
+                                             IntPtr(color),
+                                             make_normals)
+
+    def load_multiple_mesh_obj(self, file_name, materials, default_mat, parent):
+        return self._optix.load_multiple_mesh_obj_ptr(file_name, materials, default_mat, parent)
+
+    def load_merged_mesh_obj(self, file_name, mesh_name, material, color, make_normals):
+        return self._optix.load_merged_mesh_obj_ptr(file_name, mesh_name, material,
+                                                    IntPtr(color),
+                                                    make_normals)
+
+    def move_geometry(self, name, x, y, z, update):
+        return self._optix.move_geometry(name,
+                                         float(x),
+                                         float(y),
+                                         float(z),
+                                         update)
+
+    def move_primitive(self, name, idx, x, y, z, update):
+        return self._optix.move_primitive(name, idx,
+                                          float(x),
+                                          float(y),
+                                          float(z),
+                                          update)
+
+    def move_geometry_in_view(self, name, x, y, z, update):
+        return self._optix.move_geometry_in_view(name,
+                                                 float(x),
+                                                 float(y),
+                                                 float(z),
+                                                 update)
+
+    def move_primitive_in_view(self, name, idx, x, y, z, update):
+        return self._optix.move_primitive_in_view(name, idx,
+                                                  float(x),
+                                                  float(y),
+                                                  float(z),
+                                                  update)
+
+    def rotate_geometry(self, name, x, y, z, update):
+        return self._optix.rotate_geometry(name,
+                                           float(x),
+                                           float(y),
+                                           float(z),
+                                           update)
+
+    def rotate_primitive(self, name, idx, x, y, z, update):
+        return self._optix.rotate_primitive(name, idx,
+                                            float(x),
+                                            float(y),
+                                            float(z),
+                                            update)
+
+    def rotate_geometry_in_view(self, name, x, y, z, update):
+        return self._optix.rotate_geometry_in_view(name,
+                                                   float(x),
+                                                   float(y),
+                                                   float(z),
+                                                   update)
+
+    def rotate_primitive_in_view(self, name, idx, x, y, z, update):
+        return self._optix.rotate_primitive_in_view(name, idx,
+                                                    float(x),
+                                                    float(y),
+                                                    float(z),
+                                                    update)
+
+    def rotate_geometry_about(self, name, x, y, z, cx, cy, cz, update):
+        return self._optix.rotate_geometry_about(name,
+                                                 float(x),
+                                                 float(y),
+                                                 float(z),
+                                                 float(cx),
+                                                 float(cy),
+                                                 float(cz),
+                                                 update)
+
+    def rotate_primitive_about(self, name, idx, x, y, z, cx, cy, cz, update):
+        return self._optix.rotate_primitive_about(name, idx,
+                                                  float(x),
+                                                  float(y),
+                                                  float(z),
+                                                  float(cx),
+                                                  float(cy),
+                                                  float(cz),
+                                                  update)
+
+    def scale_geometry(self, name, s, update):
+        return self._optix.scale_geometry(name,
+                                          float(s),
+                                          update)
+
+    def scale_primitive(self, name, idx, s, update):
+        return self._optix.scale_primitive(name, idx,
+                                           float(s),
+                                           update)
+
+    def scale_geometry_c(self, name, s, cx, cy, cz, update):
+        return self._optix.scale_geometry_c(name,
+                                            float(s),
+                                            float(cx),
+                                            float(cy),
+                                            float(cz),
+                                            update)
+
+    def scale_primitive_c(self, name, idx, s, cx, cy, cz, update):
+        return self._optix.scale_primitive_c(name, idx,
+                                             float(s),
+                                             float(cx),
+                                             float(cy),
+                                             float(cz),
+                                             update)
+
+    def scale_geometry_xyz(self, name, x, y, z, update):
+        return self._optix.scale_geometry_xyz(name,
+                                              float(x),
+                                              float(y),
+                                              float(z),
+                                              update)
+
+    def scale_primitive_xyz(self, name, idx, x, y, z, update):
+        return self._optix.scale_primitive_xyz(name, idx,
+                                               float(x),
+                                               float(y),
+                                               float(z),
+                                               update)
+
+    def scale_geometry_xyz_c(self, name, x, y, z, cx, cy, cz, update):
+        return self._optix.scale_geometry_xyz_c(name,
+                                                float(x),
+                                                float(y),
+                                                float(z),
+                                                float(cx),
+                                                float(cy),
+                                                float(cz),
+                                                update)
+
+    def scale_primitive_xyz_c(self, name, idx, x, y, z, cx, cy, cz, update):
+        return self._optix.scale_primitive_xyz_c(name, idx,
+                                                 float(x),
+                                                 float(y),
+                                                 float(z),
+                                                 float(cx),
+                                                 float(cy),
+                                                 float(cz),
+                                                 update)
+
+    def update_geom_buffers(self, name, mask, forced): return self._optix.update_geom_buffers(name, mask, forced)
+
+    def delete_geometry(self, name): return self._optix.delete_geometry(name)
+
+    def set_coordinates_geom(self, mode, thickness): return self._optix.set_coordinates_geom(mode, float(thickness))
+
+    def setup_camera(self, name, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, blur, glock, textures, make_current):
+        return self._optix.setup_camera_ptr(name, camera_type,
+                                            IntPtr(eye),
+                                            IntPtr(target),
+                                            IntPtr(up),
+                                            float(aperture_r),
+                                            float(aperture_fract),
+                                            float(focal_scale),
+                                            float(chroma_l),
+                                            float(chroma_t),
+                                            float(fov),
+                                            float(blur),
+                                            glock, textures, make_current)
+
+    def update_camera(self, name, eye, target, up, aperture_r, focal_scale, fov):
+        return self._optix.update_camera_ptr(name,
+                                             IntPtr(eye),
+                                             IntPtr(target),
+                                             IntPtr(up),
+                                             float(aperture_r),
+                                             float(focal_scale),
+                                             float(fov))
+
+    def fit_camera(self, handle, geo_name, scale): return self._optix.fit_camera(handle, geo_name, float(scale))
+
+    def get_current_camera(self): return self._optix.get_current_camera()
+
+    def set_current_camera(self, name): return self._optix.set_current_camera(name)
+
+    def move_camera_by(self, dx, dy, dz):
+        return self._optix.move_camera_by(float(dx), float(dy), float(dz))
+
+    def move_camera_by_local(self, dx, dy, dz):
+        return self._optix.move_camera_by_local(float(dx), float(dy), float(dz))
+
+    def rotate_camera_by(self, rx, ry, rz, cx, cy, cz):
+        return self._optix.rotate_camera_by(float(rx), float(ry), float(rz),
+                                            float(cx), float(cy), float(cz))
+
+    def rotate_camera_by_local(self, rx, ry, rz, cx, cy, cz):
+        return self._optix.rotate_camera_by_local(float(rx), float(ry), float(rz),
+                                                  float(cx), float(cy), float(cz))
+
+    def rotate_camera_eye(self, from_x, from_y, to_x, to_y):
+        return self._optix.rotate_camera_eye(from_x, from_y, to_x, to_y)
+
+    def rotate_camera_eye_by(self, rx, ry, rz):
+        return self._optix.rotate_camera_eye_by(float(rx), float(ry), float(rz))
+
+    def rotate_camera_eye_by_local(self, rx, ry, rz):
+        return self._optix.rotate_camera_eye_by_local(float(rx), float(ry), float(rz))
+
+    def rotate_camera_tgt(self, from_x, from_y, to_x, to_y):
+        return self._optix.rotate_camera_tgt(from_x, from_y, to_x, to_y)
+
+    def rotate_camera_tgt_by(self, rx, ry, rz):
+        return self._optix.rotate_camera_tgt_by(float(rx), float(ry), float(rz))
+
+    def rotate_camera_tgt_by_local(self, rx, ry, rz):
+        return self._optix.rotate_camera_tgt_by_local(float(rx), float(ry), float(rz))
+
+    def get_camera_focal_scale(self, handle): return self._optix.get_camera_focal_scale(handle)
+
+    def set_camera_focal_scale(self, dist): return self._optix.set_camera_focal_scale(float(dist))
+
+    def set_camera_focal_length(self, dist): return self._optix.set_camera_focal_length(float(dist))
+
+    def get_camera_fov(self, handle): return self._optix.get_camera_fov(handle)
+
+    def set_camera_fov(self, fov): return self._optix.set_camera_fov(float(fov))
+
+    def get_camera_aperture(self, handle): return self._optix.get_camera_aperture(handle)
+
+    def set_camera_aperture(self, radius): return self._optix.set_camera_aperture(float(radius))
+
+    def get_camera_eye(self, handle, eye):
+        return self._optix.get_camera_eye_ptr(handle, IntPtr(eye))
+
+    def set_camera_eye(self, eye):
+        return self._optix.set_camera_eye_ptr(IntPtr(eye))
+
+    def get_camera_target(self, handle, target):
+        return self._optix.get_camera_target_ptr(handle, IntPtr(target))
+
+    def set_camera_target(self, target):
+        return self._optix.set_camera_target_ptr(IntPtr(target))
+
+    def get_camera_glock(self, handle): return self._optix.get_camera_glock(handle)
+
+    def set_camera_glock(self, state): return self._optix.set_camera_glock(state)
+
+
+    def get_camera(self, handle): return self._optix.get_camera(handle)
+
+    def get_light_shading(self): return self._optix.get_light_shading()
+
+    def set_light_shading(self, mode): return self._optix.set_light_shading(mode)
+
+    def get_light_handle(self, handle, primitive): return self._optix.get_light_handle(handle, primitive)
+
+    def get_light_pos(self, name, pos):
+        return self._optix.get_light_pos_ptr(name, IntPtr(pos))
+
+    def get_light_color(self, name, color):
+        return self._optix.get_light_color_ptr(name, IntPtr(color))
+
+    def get_light_u(self, name, u):
+        return self._optix.get_light_u_ptr(name, IntPtr(u))
+
+    def get_light_v(self, name, v):
+        return self._optix.get_light_v_ptr(name, IntPtr(v))
+
+    def get_light_r(self, name): return self._optix.get_light_r(name)
+
+    def get_light(self, name): return self._optix.get_light(name)
+
+    def setup_spherical_light(self, name, pos, color, r, in_geometry):
+        return self._optix.setup_spherical_light_ptr(name,
+                                                     IntPtr(pos),
+                                                     IntPtr(color),
+                                                     float(r), in_geometry)
+
+    def setup_parallelogram_light(self, name, pos, color, u, v, in_geometry):
+        return self._optix.setup_parallelogram_light_ptr(name,
+                                                         IntPtr(pos),
+                                                         IntPtr(color),
+                                                         IntPtr(u),
+                                                         IntPtr(v),
+                                                         in_geometry)
+
+    def update_light(self, name, pos, color, r, u, v):
+        return self._optix.update_light_ptr(name,
+                                            IntPtr(pos),
+                                            IntPtr(color),
+                                            float(r),
+                                            IntPtr(u),
+                                            IntPtr(v))
+
+    def fit_light(self, name, cam_handle, horizontal_rot, vertical_rot, dist_scale):
+        return self._optix.fit_light(name, cam_handle, float(horizontal_rot), float(vertical_rot), float(dist_scale))
+
+    def dolly_light(self, name, x): return self._optix.dolly_light(name, float(x))
+
+    def move_light_in_view(self, name, x, y, z): return self._optix.move_light_in_view(name, float(x), float(y), float(z))
+
+    def rotate_light_in_view(self, name, x, y, z): return self._optix.rotate_light_in_view(name, float(x), float(y), float(z))
+
+    def scale_light(self, name, s): return self._optix.scale_light(name, float(s))
+
+    def get_object_at(self, x, y, h_ref, idx_ref, face_ref):
+        return self._optix.get_object_at_ptr(x, y,
+                                             IntPtr(cast(h_ref, c_void_p).value),
+                                             IntPtr(cast(idx_ref, c_void_p).value),
+                                             IntPtr(cast(face_ref, c_void_p).value))
+
+    def get_hit_at(self, x, y, px_ref, py_ref, pz_ref, d_ref):
+        return self._optix.get_hit_at_ptr(x, y,
+                                          IntPtr(cast(px_ref, c_void_p).value),
+                                          IntPtr(cast(py_ref, c_void_p).value),
+                                          IntPtr(cast(pz_ref, c_void_p).value),
+                                          IntPtr(cast(d_ref, c_void_p).value))
+
+    def register_launch_finished_callback(self, ptr):
+        return self._optix.register_launch_finished_callback_ptr(IntPtr(cast(ptr, c_void_p).value))
+
+    def register_accum_done_callback(self, ptr):
+        return self._optix.register_accum_done_callback_ptr(IntPtr(cast(ptr, c_void_p).value))
+
+    def register_scene_rt_starting_callback(self, ptr):
+        return self._optix.register_scene_rt_starting_callback_ptr(IntPtr(cast(ptr, c_void_p).value))
+
+    def register_start_scene_compute_callback(self, ptr):
+        return self._optix.register_start_scene_compute_callback_ptr(IntPtr(cast(ptr, c_void_p).value))
+
+    def register_scene_rt_completed_callback(self, ptr):
+        return self._optix.register_scene_rt_completed_callback_ptr(IntPtr(cast(ptr, c_void_p).value))
+
+    def get_compute_timeout(self): return self._optix.get_compute_timeout()
+
+    def set_compute_timeout(self, n): return self._optix.set_compute_timeout(n)
+
+    def get_rt_timeout(self): return self._optix.get_rt_timeout()
+
+    def set_rt_timeout(self, n): return self._optix.set_rt_timeout(n)
+
+    def get_save_albedo(self): return self._optix.get_save_albedo()
+
+    def set_save_albedo(self, n): return self._optix.set_save_albedo(n)
+
+    def get_save_normals(self): return self._optix.get_save_normals()
+
+    def set_save_normals(self, n): return self._optix.set_save_normals(n)
+
+    def get_min_accumulation_step(self): return self._optix.get_min_accumulation_step()
+
+    def set_min_accumulation_step(self, n): return self._optix.set_min_accumulation_step(n)
+
+    def get_max_accumulation_frames(self): return self._optix.get_max_accumulation_frames()
+
+    def set_max_accumulation_frames(self, n): return self._optix.set_max_accumulation_frames(n)
+
+    def encoder_create(self, fps, bit_rate, idr_rate, profile, preset):
+        if self._encoder_available:
+            return self._optix.encoder_create(fps, bit_rate, idr_rate, profile, preset)
+        else: return False
+
+    def encoder_start(self, output_name, n_frames): return self._optix.encoder_start(output_name, n_frames)
+
+    def encoder_stop(self): return self._optix.encoder_stop()
+
+    def encoder_is_open(self): return self._optix.encoder_is_open()
+
+    def encoded_frames(self): return self._optix.encoded_frames()
+
+    def encoding_frames(self): return self._optix.encoding_frames()
+
+    def open_simplex_2d(self, noise_ptr, inputs_ptr, length):
+        return self._optix.open_simplex_2d_ptr(IntPtr(noise_ptr), IntPtr(inputs_ptr), int(length))
+
+    def open_simplex_3d(self, noise_ptr, inputs_ptr, length):
+        return self._optix.open_simplex_3d_ptr(IntPtr(noise_ptr), IntPtr(inputs_ptr), int(length))
+
+    def open_simplex_4d(self, noise_ptr, inputs_ptr, length):
+        return self._optix.open_simplex_4d_ptr(IntPtr(noise_ptr), IntPtr(inputs_ptr), int(length))
+
+    def get_image_meta(self, name, width_ref, height_ref, spp_ref, bps_ref):
+        return self._optix.get_image_meta_ptr(name,
+                                      IntPtr(cast(width_ref, c_void_p).value),
+                                      IntPtr(cast(height_ref, c_void_p).value),
+                                      IntPtr(cast(spp_ref, c_void_p).value),
+                                      IntPtr(cast(bps_ref, c_void_p).value))
+
+    def read_image(self, name, data_ptr, width, height, spp, bps):
+        return self._optix.read_image_ptr(name,
+                                      IntPtr(cast(data_ptr, c_void_p).value),
+                                      width, height, spp, bps)
+
+    def read_image_normalized(self, name, data_ptr, width, height, spp):
+        return self._optix.read_image_normalized_ptr(name,
+                                      IntPtr(cast(data_ptr, c_void_p).value),
+                                      width, height, spp)
+
+
+    def get_gpu_architecture(self): return self._optix.get_gpu_architecture()
+    def set_gpu_architecture(self, arch): self._optix.set_gpu_architecture(arch)
+
+    def get_n_gpu_architecture(self, ordinal): return self._optix.get_n_gpu_architecture(ordinal)
+
+    def set_library_dir(self, path): self._optix.set_library_dir(path)
+
+    def set_include_dir(self, path): self._optix.set_include_dir(path)
+
+    def get_display_scaling(self): return self._optix.get_display_scaling()
+
+    def test_library(self, x): return self._optix.test_library(x)
+
 
 def load_optix():
     """Load RnD.SharpOptiX library, setup CUDA lib and include folders.
@@ -1153,7 +1925,10 @@ def load_optix():
     if PLATFORM == "Windows":
         optix = _load_optix_win()
     elif PLATFORM == "Linux":
-        optix = _ClrOptiX()
+        if int(clr.__version__.split('.')[0]) < 3:
+            optix = _ClrOptiX_v2()
+        else:
+            optix = _ClrOptiX_v3()
     else:
         raise NotImplementedError
 
