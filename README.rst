@@ -93,7 +93,7 @@ What's Included
 Installation
 ============
 
-**Note**, at this point, PlotOptiX binaries are tested in: Windows 10/11, Ubuntu 18.04, CentOS 7.
+**Note**, at this point, PlotOptiX binaries are tested in: Windows 10/11 (any Python 3), and Linux (Python 3.8 recommended): Ubuntu 18.04, CentOS 7.
 
 PlotOptiX was also successfully tested on the `Google Cloud Platform <https://cloud.google.com/>`__, using Compute Engine instance with 2x V100 GPU's and Ubuntu 18.04 image.
 Here are the `installation steps <https://github.com/rnd-team-dev/plotoptix/blob/master/gcp_install_gpu.txt>`__ so you can save some precious seconds (FFmpeg not included).
@@ -105,7 +105,7 @@ Windows prerequisites
 
 *.NET Framework:*
 
-Most likely you already got the right version with your Windows installation. Just in case, here is the command verifying this::
+Most likely you already got the right version with your Windows installation. Just in case of doubts, here is the command verifying this::
 
    C:\>reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full" /v version
    
