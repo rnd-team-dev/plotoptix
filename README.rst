@@ -77,10 +77,10 @@ System Requirements
    - NVIDIA driver >= r515;
 - **Python 3 64-bit**
 - Windows:
-   - `.NET Framework <https://dotnet.microsoft.com/download/dotnet-framework>`__ >= 4.6.1 (present in all modern Windows)
+   - Framework .NET >= 4.8 (present in all modern Windows)
 - Linux:
-   - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 5.2
-   - `pythonnet <http://pythonnet.github.io>`__ 2.5.1 or 2.5.2 (before 3.0 is released, these are the only supported pythonnet versions, thus require **Python <= 3.8**)
+   - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 6.6
+   - `pythonnet <http://pythonnet.github.io>`__
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
 
 What's Included
@@ -110,9 +110,9 @@ Most likely you already got the right version with your Windows installation. Ju
    C:\>reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full" /v version
    
    HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full
-       version    REG_SZ    4.7.03056
+       version    REG_SZ    4.8.04084
 
-If the number in your output is < 4.6.1, visit `download page <https://dotnet.microsoft.com/download/dotnet-framework>`__ and
+If the number in your output is < 4.8, visit `download page <https://dotnet.microsoft.com/download/dotnet-framework>`__ and
 install the most recent release.
 
 Linux prerequisites
@@ -129,13 +129,11 @@ Check if / which Mono release is present in your system::
 	   TLS:           __thread
       ... (output cropped for clarity) ...
 
-If ``mono`` command is not available, or the reported version is < 5.2, visit `Mono download page <https://www.mono-project.com/download/stable/#download-lin>`__ and follow instructions related to your Linux distribution. You want to install **mono-complete** package.
+If ``mono`` command is not available, or the reported version is < 6.6, visit `Mono download page <https://www.mono-project.com/download/stable/#download-lin>`__ and follow instructions related to your Linux distribution. You want to install **mono-complete** package.
 
 *pythonnet:*
 
-Note, current pythonnet release supports Python up to 3.8.
-
-The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however, some prerequisities are needed. Instuctions below are based on APT, replace ``apt`` with ``yum`` depending on your OS::
+The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however, you might need some prerequisities. Instuctions below are based on APT, replace ``apt`` with ``yum`` depending on your OS::
 
    apt update
    apt install clang libglib2.0-dev python-dev
