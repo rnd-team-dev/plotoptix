@@ -30,7 +30,9 @@ Fig. 1. PlotOptiX computations flow. Details of the OptiX tast are ommited for c
 .. image:: images/flow_2.png
    :alt: PlotOptiX compute flow
 
-Fig. 2. Timeline of tasks and callbacks.
+Fig. 2. Timeline of tasks and callbacks. Note, ray tracing work and ``on_scene_compute`` are launched in parallel threads and ``on_rt_completed``
+is executed when all other task finished.
+
 
 API reference
 -------------
