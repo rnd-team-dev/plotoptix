@@ -13,6 +13,8 @@ PlotOptiX
 
 **Data visualisation and ray tracing in Python based on NVIDIA OptiX framework.**
 
+`Docs <https://plotoptix.rnd.team>`__
+
 - Check what we are doing with PlotOptiX on `Behance <https://www.behance.net/RnDTeam>`__, `Facebook <https://www.facebook.com/rndteam>`__, and `Instagram <https://www.instagram.com/rnd.team.studio/>`__.
 - Join us on `Patreon <https://www.patreon.com/rndteam?fan_landing=true>`__ for news, release plans and hi-res content.
 
