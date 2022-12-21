@@ -70,6 +70,7 @@ def main():
     #optix.set_int("denoiser_kind", DenoiserKind.RgbAlbedoNormal.value)
 
     optix.add_postproc("Denoiser")
+    #optix.add_postproc("DenoiserHDR")
 
     # Postprocessing stages are applied after AI denoiser (even if configured
     # in a different order).

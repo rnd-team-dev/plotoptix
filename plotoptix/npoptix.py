@@ -890,7 +890,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None
 
-    def get_float2(self, name: str) -> (Optional[float], Optional[float]):
+    def get_float2(self, name: str) -> Tuple[Optional[float], Optional[float]]:
         """Get shader ``float2`` variable with given ``name``.
 
         Parameters
@@ -916,7 +916,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None, None
 
-    def get_float3(self, name: str) -> (Optional[float], Optional[float], Optional[float]):
+    def get_float3(self, name: str) -> Tuple[Optional[float], Optional[float], Optional[float]]:
         """Get shader ``float3`` variable with given ``name``.
 
         Parameters
@@ -1012,7 +1012,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None
 
-    def get_uint2(self, name: str) -> (Optional[int], Optional[int]):
+    def get_uint2(self, name: str) -> Tuple[Optional[int], Optional[int]]:
         """Get shader ``uint2`` variable with given ``name``.
 
         Parameters
@@ -1553,7 +1553,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
-    def get_background(self) -> (float, float, float):
+    def get_background(self) -> Tuple[float, float, float]:
         """Get background color.
 
         **Note**, currently returns constant background color also in texture
@@ -1722,7 +1722,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.error(msg)
         if self._raise_on_error: raise ValueError(msg)
 
-    def get_ambient(self) -> (float, float, float):
+    def get_ambient(self) -> Tuple[float, float, float]:
         """Get ambient color.
 
         Returns
@@ -2294,7 +2294,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         return list(self.camera_handles.keys())
 
-    def get_camera_name_handle(self, name: Optional[str] = None) -> (Optional[str], Optional[int]):
+    def get_camera_name_handle(self, name: Optional[str] = None) -> Tuple[Optional[str], Optional[int]]:
         """Get camera name and handle.
 
          Mostly for the internal use.
