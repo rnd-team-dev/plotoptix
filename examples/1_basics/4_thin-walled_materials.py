@@ -7,7 +7,6 @@ import numpy as np
 from plotoptix import TkOptiX
 from plotoptix.materials import m_clear_glass, m_thin_walled
 from plotoptix.utils import map_to_colors, make_color_2d, read_image
-from plotoptix.enums import RtFormat
 
 def main():
 
