@@ -63,7 +63,7 @@ Features
 - *geometries*: particles (spheres), parallelepipeds, parallelograms, tetrahedrons, linear segments, bezier curves, b-splines; *meshes*: shaded surface or wireframe, automatically generated from a parametric surface or f(x,y) data, or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__, or loaded from a file, e.g. supported by `trimesh <https://github.com/mikedh/trimesh>`__, or loaded from a Wavefront .obj file with a native loader
 - *materials*: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness and metalness, volume scattering, and nested volumes
 - *light sources*: spherical and parallelogram, light emission in volumes, uniform environmental light or environment map
-- *post-processing*: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser
+- *post-processing*: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser and upsampler
 - *callbacks*: at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - 8/16/32bps(hdr) image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
 - zero-copy access to GPU buffers wrapped in ndarrays: 8/32bps image, hit and object info, albedo, normals
