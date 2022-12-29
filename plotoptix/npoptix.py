@@ -3965,6 +3965,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
+        elif geom == Geometry.CatmullRom:
+            if n_primitives < 4:
+                msg = "CatmullRom requires at least 4 data points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if c is None:
+                msg = "CatmullRom setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if r is None:
+                msg = "CatmullRom setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
         else:
             msg = "Unknown geometry"
             self._logger.error(msg)

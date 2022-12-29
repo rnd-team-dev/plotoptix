@@ -245,9 +245,9 @@ class Geometry(Enum):
     #BezierCurves = 5
 
     BezierChain = 6
-    """Bezier line interpolating data points.
+    """Bezier curve interpolating data points.
 
-    Line thickness and color can be provided for each data point (curve node).
+    Curve thickness and color can be provided for each data point (curve node).
 
     Curve is smoothed, use :attr:`plotoptix.enums.Geometry.SegmentChain`
     for a piecewise linear plot.
@@ -262,7 +262,7 @@ class Geometry(Enum):
     BSplineQuad = 12
     """Quadratic b-spline with nodes at data points.
 
-    Line thickness and color can be provided for each data point (curve node).
+    Curve thickness and color can be provided for each data point (curve node).
     
     Note: b-spline is not interpolating data points; see examples
     how to pin start/end to a fixed position. Use
@@ -273,12 +273,19 @@ class Geometry(Enum):
     BSplineCubic = 13
     """Cubic b-spline with nodes at data points.
 
-    Line thickness and color can be provided for each data point (curve node).
+    Curve thickness and color can be provided for each data point (curve node).
     
     Note: b-spline is not interpolating data points; see examples
     how to pin start/end to a fixed position. Use
     :attr:`plotoptix.enums.Geometry.BezierChain` for a smooth curve
     interpolating all data points.
+    """
+
+    CatmullRom = 15
+    """Catmull-Rom spline with nodes at data points.
+
+    Curve thickness and color can be provided for each data point (curve node).
+    Curve interpolates its data points (nodes) exactly.
     """
 
     Parallelograms = 7

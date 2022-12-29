@@ -46,7 +46,7 @@ def main():
     rt.set_ambient(0.2)     # dim ambient light
 
     # add plot: BezierChain geometry makes a smooth line interpolating data points
-    rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="BezierChain")
+    #rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="BezierChain")
 
     # or use SegmentChain for a piecewise-linear plot
     #rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="SegmentChain")
@@ -54,6 +54,7 @@ def main():
     # or use b-spline geometry (approximating data points, flat end caps)
     #rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="BSplineQuad")
     #rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="BSplineCubic")
+    rt.set_data("curve", pos=xyz, r=r, c=0.9, geom="CatmullRom")
 
     # show the UI window here - this method is calling some default
     # initialization for us, e.g. creates camera, so any modification
