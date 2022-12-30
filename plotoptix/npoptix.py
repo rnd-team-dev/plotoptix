@@ -189,8 +189,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         
         self._width = 0
         self._height = 0
-        if width < 1: width = 1
-        if height < 1: height = 1
+        if width < 2: width = 2
+        if height < 2: height = 2
 
         self.resize(width, height)
 
