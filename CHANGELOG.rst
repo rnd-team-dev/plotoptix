@@ -553,7 +553,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
-.. _`v0.14.4`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.15.0
+.. _`v0.15.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.15.0
 .. _`v0.14.4`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.14.4
 .. _`v0.14.3`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.14.3
 .. _`v0.14.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.14.2
