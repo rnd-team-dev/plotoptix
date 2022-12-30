@@ -95,6 +95,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     Shape: ``(height, width, 4)``, ``dtype = np.float32``, contains ``[X, Y, Z, D]`` data, where
     ``XYZ`` is the hit 3D position and ``D`` is the hit distance to the camera plane.
+    Note, this buffer height and width are 2x smaller than rt output if AI upscaler is used.
     """
 
     _geo_id = None
@@ -109,6 +110,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
          (values are ``0``, ``1``, ``2``);
        - ``_geo_id[h, w, 1] = prim_idx``, where ``prim_idx`` is the primitive index in
          a data set, or face index of a mesh.
+    Note, this buffer height and width are 2x smaller than rt output if AI upscaler is used.
     """
 
     _albedo = None
@@ -121,6 +123,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     and set to :attr:`plotoptix.enums.DenoiserKind.RgbAlbedo`
     or :attr:`plotoptix.enums.DenoiserKind.RgbAlbedoNormal` mode, or when ``save_albedo``
     parameter is set to ``True`` (see :meth:`plotoptix.NpOptiX.set_param`).
+    Note, this buffer height and width are 2x smaller than rt output if AI upscaler is used.
     """
 
     _normal = None
@@ -133,6 +136,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     (:attr:`plotoptix.enums.Postprocessing.Denoiser`), and set to
     :attr:`plotoptix.enums.DenoiserKind.RgbAlbedoNormal` mode, or when ``save_normals``
     parameter is set to ``True`` (see :meth:`plotoptix.NpOptiX.set_param`).
+    Note, this buffer height and width are 2x smaller than rt output if AI upscaler is used.
     """
 
     def __init__(self,
@@ -185,8 +189,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         
         self._width = 0
         self._height = 0
-        if width < 1: width = 1
-        if height < 1: height = 1
+        if width < 2: width = 2
+        if height < 2: height = 2
 
         self.resize(width, height)
 
@@ -412,16 +416,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._img_rgba = np.ctypeslib.as_array(buf)
             buf = (((c_float * 4) * self._width) * self._height).from_address(r_buf.value)
             self._raw_rgba = np.ctypeslib.as_array(buf)
-            buf = (((c_float * 4) * self._width) * self._height).from_address(h_buf.value)
+
+            w = self._width
+            h = self._height
+            # take into account 4x smaller buffers when AI upscaler is used
+            # TODO: read buffer width and height directly from the engine
+            if h_len.value == 4 * 4 * (w // 2) * (h // 2):
+                w = w // 2
+                h = h // 2
+
+            buf = (((c_float * 4) * w) * h).from_address(h_buf.value)
             self._hit_pos = np.ctypeslib.as_array(buf)
-            buf = (((c_uint * 2) * self._width) * self._height).from_address(g_buf.value)
+            buf = (((c_uint * 2) * w) * h).from_address(g_buf.value)
             self._geo_id = np.ctypeslib.as_array(buf)
             if a_len.value > 0:
-                buf = (((c_float * 4) * self._width) * self._height).from_address(a_buf.value)
+                buf = (((c_float * 4) * w) * h).from_address(a_buf.value)
                 self._albedo = np.ctypeslib.as_array(buf)
             else: self._albedo = None
             if n_len.value > 0:
-                buf = (((c_float * 4) * self._width) * self._height).from_address(n_buf.value)
+                buf = (((c_float * 4) * w) * h).from_address(n_buf.value)
                 self._normal = np.ctypeslib.as_array(buf)
             else: self._normal = None
         else:
@@ -623,16 +636,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 buf = (((c_float * 4) * self._width) * self._height).from_address(r_buf.value)
                 self._raw_rgba = np.ctypeslib.as_array(buf)
-                buf = (((c_float * 4) * self._width) * self._height).from_address(h_buf.value)
+
+                w = self._width
+                h = self._height
+                # take into account 4x smaller buffers when AI upscaler is used
+                # TODO: read buffer width and height directly from the engine
+                if h_len.value == 4 * 4 * (w // 2) * (h // 2):
+                    w = w // 2
+                    h = h // 2
+
+                buf = (((c_float * 4) * w) * h).from_address(h_buf.value)
                 self._hit_pos = np.ctypeslib.as_array(buf)
-                buf = (((c_uint * 2) * self._width) * self._height).from_address(g_buf.value)
+                buf = (((c_uint * 2) * w) * h).from_address(g_buf.value)
                 self._geo_id = np.ctypeslib.as_array(buf)
                 if a_len.value > 0:
-                    buf = (((c_float * 4) * self._width) * self._height).from_address(a_buf.value)
+                    buf = (((c_float * 4) * w) * h).from_address(a_buf.value)
                     self._albedo = np.ctypeslib.as_array(buf)
                 else: self._albedo = None
                 if n_len.value > 0:
-                    buf = (((c_float * 4) * self._width) * self._height).from_address(n_buf.value)
+                    buf = (((c_float * 4) * w) * h).from_address(n_buf.value)
                     self._normal = np.ctypeslib.as_array(buf)
                 else: self._normal = None
             else:
@@ -890,7 +912,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None
 
-    def get_float2(self, name: str) -> (Optional[float], Optional[float]):
+    def get_float2(self, name: str) -> Tuple[Optional[float], Optional[float]]:
         """Get shader ``float2`` variable with given ``name``.
 
         Parameters
@@ -916,7 +938,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None, None
 
-    def get_float3(self, name: str) -> (Optional[float], Optional[float], Optional[float]):
+    def get_float3(self, name: str) -> Tuple[Optional[float], Optional[float], Optional[float]]:
         """Get shader ``float3`` variable with given ``name``.
 
         Parameters
@@ -1012,7 +1034,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None
 
-    def get_uint2(self, name: str) -> (Optional[int], Optional[int]):
+    def get_uint2(self, name: str) -> Tuple[Optional[int], Optional[int]]:
         """Get shader ``uint2`` variable with given ``name``.
 
         Parameters
@@ -1553,7 +1575,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
-    def get_background(self) -> (float, float, float):
+    def get_background(self) -> Tuple[float, float, float]:
         """Get background color.
 
         **Note**, currently returns constant background color also in texture
@@ -1722,7 +1744,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._logger.error(msg)
         if self._raise_on_error: raise ValueError(msg)
 
-    def get_ambient(self) -> (float, float, float):
+    def get_ambient(self) -> Tuple[float, float, float]:
         """Get ambient color.
 
         Returns
@@ -2294,7 +2316,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         return list(self.camera_handles.keys())
 
-    def get_camera_name_handle(self, name: Optional[str] = None) -> (Optional[str], Optional[int]):
+    def get_camera_name_handle(self, name: Optional[str] = None) -> Tuple[Optional[str], Optional[int]]:
         """Get camera name and handle.
 
          Mostly for the internal use.
@@ -3961,6 +3983,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if r is None:
                 msg = "BSplineCubic setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+        elif geom == Geometry.CatmullRom:
+            if n_primitives < 4:
+                msg = "CatmullRom requires at least 4 data points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if c is None:
+                msg = "CatmullRom setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if r is None:
+                msg = "CatmullRom setup failed, radii data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False

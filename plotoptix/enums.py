@@ -245,9 +245,9 @@ class Geometry(Enum):
     #BezierCurves = 5
 
     BezierChain = 6
-    """Bezier line interpolating data points.
+    """Bezier curve interpolating data points.
 
-    Line thickness and color can be provided for each data point (curve node).
+    Curve thickness and color can be provided for each data point (curve node).
 
     Curve is smoothed, use :attr:`plotoptix.enums.Geometry.SegmentChain`
     for a piecewise linear plot.
@@ -262,7 +262,7 @@ class Geometry(Enum):
     BSplineQuad = 12
     """Quadratic b-spline with nodes at data points.
 
-    Line thickness and color can be provided for each data point (curve node).
+    Curve thickness and color can be provided for each data point (curve node).
     
     Note: b-spline is not interpolating data points; see examples
     how to pin start/end to a fixed position. Use
@@ -273,12 +273,19 @@ class Geometry(Enum):
     BSplineCubic = 13
     """Cubic b-spline with nodes at data points.
 
-    Line thickness and color can be provided for each data point (curve node).
+    Curve thickness and color can be provided for each data point (curve node).
     
     Note: b-spline is not interpolating data points; see examples
     how to pin start/end to a fixed position. Use
     :attr:`plotoptix.enums.Geometry.BezierChain` for a smooth curve
     interpolating all data points.
+    """
+
+    CatmullRom = 15
+    """Catmull-Rom spline with nodes at data points.
+
+    Curve thickness and color can be provided for each data point (curve node).
+    Curve interpolates its data points (nodes) exactly.
     """
 
     Parallelograms = 7
@@ -727,7 +734,11 @@ class Postprocessing(Enum):
     """
 
     Denoiser = 7
-    """AI denoiser.
+    """AI denoiser, LDR model.
+
+    This model is applied to the image after tone mapping. Image values are clamped
+    to the ``<0, 1>`` range at the denoiser input. Use appropriate exposure to scale the
+    image into that range; the gamma value should be about ``2.2`` (see :attr:`plotoptix.enums.Postprocessing.Gamma`).
 
     Variables to configure:
     
@@ -744,6 +755,53 @@ class Postprocessing(Enum):
     >>> rt.set_float("denoiser_blend", 0.5)
     >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
     >>> rt.add_postproc("Denoiser")
+    """
+
+    DenoiserHDR = 8
+    """AI denoiser, HDR model.
+
+    This model is applied to the raw hdr image, before any other postprocessing.
+
+    Variables to configure:
+    
+    - denoiser_blend, float, amount of original image mixed with denoiser output
+      range: 0 (only denoiser output) to 1 (only original raytracing output)
+
+    - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
+      which buffers are used as denoiser inputs
+
+    Examples
+    --------
+    >>> rt = TkOptiX()
+    >>>
+    >>> rt.set_float("denoiser_blend", 0.5)
+    >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
+    >>> rt.add_postproc("DenoiserHDR")
+    """
+
+    DenoiserUp2x = 9
+    """AI denoiser, HDR model with upscaling x2.
+
+    This model is applied to the raw hdr image, before any other postprocessing.
+    It is simultaneously upsizing the image by the factor of 2. When this denoiser
+    is included in the postprocessing, all ray tracing happens in the resolution
+    2x lower than ``width`` and ``height`` set in :class:`plotoptix.NpOptiX` object.
+
+    Variables to configure:
+    
+    - denoiser_blend, float, amount of original image mixed with denoiser output
+      range: 0 (only denoiser output) to 1 (only original raytracing output)
+
+    - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
+      which buffers are used as denoiser inputs
+
+    Examples
+    --------
+    >>> rt = TkOptiX()
+    >>>
+    >>> rt.set_float("denoiser_blend", 0.5)
+    >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
+    >>> rt.add_postproc("DenoiserHDR")
     """
 
 class DenoiserKind(IntFlag):

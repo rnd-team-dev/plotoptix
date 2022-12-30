@@ -1,6 +1,23 @@
 Release history
 ===============
 
+`v0.15.0` - 2022-12-30
+----------------------
+
+**NOTE:** NVIDIA driver r520 or above is required.
+
+Added
+~~~~~
+
+- AI upsampler and HDR denoiser
+- Catmull-Rom curve primitive
+
+Changed
+~~~~~~~
+
+- binaries updated to OptiX 7.6
+- raytracing and callbacks workflow explained in the docs 
+
 `v0.14.4` - 2022-10-27
 ----------------------
 
@@ -536,6 +553,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.15.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.15.0
 .. _`v0.14.4`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.14.4
 .. _`v0.14.3`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.14.3
 .. _`v0.14.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.14.2
