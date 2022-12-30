@@ -110,6 +110,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
          (values are ``0``, ``1``, ``2``);
        - ``_geo_id[h, w, 1] = prim_idx``, where ``prim_idx`` is the primitive index in
          a data set, or face index of a mesh.
+
     Note, this buffer height and width are 2x smaller than rt output if AI upscaler is used.
     """
 

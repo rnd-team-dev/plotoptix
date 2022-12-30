@@ -799,9 +799,9 @@ class Postprocessing(Enum):
     --------
     >>> rt = TkOptiX()
     >>>
-    >>> rt.set_float("denoiser_blend", 0.5)
+    >>> rt.set_float("denoiser_blend", 0.0)
     >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
-    >>> rt.add_postproc("DenoiserHDR")
+    >>> rt.add_postproc("DenoiserUp2x")
     """
 
 class DenoiserKind(IntFlag):
