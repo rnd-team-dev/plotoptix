@@ -59,8 +59,11 @@ def main():
 
     # Denoiser blend allows for different mixing with the raw image. Its value
     # can be modified also during the ray tracing.
-    # Note: denoising is applied when > 4 accumulation frames are completed.
     rt.set_float("denoiser_blend", 0.0)
+
+    # Denoising is applied by default after the 4th accumulation frames is completed.
+    # You can change the starting frame with the following variable:
+    rt.set_uint("denoiser_start", 12)
 
     # Denoiser can use various inputs. By default it is raw RGB and surface
     # albedo, but not always it results with the optimal output quality.
