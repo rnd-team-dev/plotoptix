@@ -101,7 +101,7 @@ class TkOptiX(NpOptiX):
             devices=devices,
             log_level=log_level)
 
-        # save initial values to set size of Tk window on startup 
+        # save initial values to set size of Tk window on startup
         self._ini_width = width
         self._ini_height = height
 
@@ -439,6 +439,10 @@ class TkOptiX(NpOptiX):
         -------
         out : tuple (int, int)
             Output image size or ``None`` if set auto-fit mode.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.get_size`
         """
         return self._fixed_size
 

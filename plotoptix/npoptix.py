@@ -581,6 +581,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         return a
 
 
+    def get_size(self) -> Tuple[int, int]:
+        """Get size of the ray-tracing output image.
+
+        Get current dimensions of the output image.
+
+        Returns
+        -------
+        out : tuple (int, int)
+            Output image size, ``(width, height)``.
+        """
+        return self._width, self._height
+
     def resize(self, width: Optional[int] = None, height: Optional[int] = None) -> None:
         """Change dimensions of the raytracing output.
         
@@ -2475,6 +2487,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                      chroma_l: float = 0.05,
                      chroma_t: float = 0.01,
                      fov: float = -1,
+                     camera_matrix: Optional[Any] = None,
+                     #distort_coeffs: Optional[Any] = None,
+                     sensor_height: float = -1,
                      blur: float = 1,
                      glock: bool = False,
                      textures: Optional[Any] = None,
@@ -2503,12 +2518,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Type (pinhole, depth of field, ...), see :class:`plotoptix.enums.Camera`.
             Cannot be changed after construction.
         aperture_radius : float, optional
-            Aperture radius (increases focus blur for depth of field cameras).
+            Aperture radius (increases focus blur for depth of field cameras). Default
+            `-1` is internally reset to `0.1`.
         aperture_fract : float, optional
             Fraction of blind central spot of the aperture (results with ring-like
             bokeh if > 0). Cannot be changed after construction.
         focal_scale : float, optional
-            Focusing distance, relative to ``eye - target`` length.
+            Focusing distance, relative to ``eye - target`` length. Default `-1` is internally
+            reset to `1.0`, that is focus is set at the target point.
         chroma_l : float, optional
             Longitudinal chromatic aberration strength, relative variation of the focusing
             distance for different wavelengths. Use be a small positive value << 1.0. Default
@@ -2518,7 +2535,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             magnification for different wavelengths. Use be a small positive value << 1.0.
             Default is ``0.01``, use ``0.0`` for no aberration.
         fov : float, optional
-            Field of view in degrees.
+            Field of view in degrees. Default `-1` is internally reset to `35.0` (corresponding
+            to a ~70mm lens in a typical 35mm frame camera).
+        camera_matrix : array_like, optional
+            Camera intrinsic matrix in OpenCV convention: `[[fx, 0, cx], [0, fy, cy], [0, 0, 1]]`.
+            Only `fs`, `fy`, `cx`, `cy` values are used,unit is [mm]; values at positions of constant
+            `0`s and `1` are ignored. **Note**: camera matrix parameters override `fov` and require
+            `sensor_height` argument.
+        # distort_coeffs : array_like, optional
+        #    Camera distortion coefficients in OpenCV convention: `[k1, k2, p1, p2, k3]`
+        sensor_height : float, optional
+            Height of the sensor, [mm]. Used only if `camera_matrix` is provided.
+            Default `-1` is internally reset to `24.0` (35mm camera film size).
         blur : float, optional
             Weight of the new frame in averaging with already accumulated frames.
             Range is (0; 1>, lower values result with a higher motion blur, value
@@ -2539,13 +2567,42 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self.update_camera(name=name, eye=eye, target=target, up=up,
                       aperture_radius=aperture_radius,
                       focal_scale=focal_scale,
-                      fov=fov)
+                      fov=fov,
+                      camera_matrix=camera_matrix,
+                      #distort_coeffs=distort_coeffs,
+                      sensor_height=sensor_height
+            )
             return
 
         if up is None: up = np.ascontiguousarray([0, 1, 0], dtype=np.float32)
         if aperture_radius <= 0: aperture_radius = 0.1
         if focal_scale <= 0: focal_scale = 1.0
         if fov <= 0: fov = 35.0
+
+        if sensor_height <= 0: sensor_height = 24.0
+        if camera_matrix is not None:
+            camera_matrix = np.asarray(camera_matrix, dtype=np.float32)
+            if camera_matrix.shape != (3, 3):
+                msg = "Need 3x3 camera matrix in OpenCV convention."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            fx = max(0.001, camera_matrix[0, 0])
+            fy = max(0.001, camera_matrix[1, 1])
+            fov = 180 * 2*np.arctan(sensor_height/(2*fy)) / np.pi
+            rxy = fx / fy
+
+            sensor_width = sensor_height * self._width / self._height
+            cx = 0.5 - camera_matrix[0, 2] / sensor_width
+            cy = 0.5 + camera_matrix[1, 2] / sensor_height
+        else:
+            rxy = 1.0
+            cx = 0.5
+            cy = 0.5
+
+        #distort_coeffs_ptr = 0
+        #distort_coeffs = _make_contiguous_vector(eye, 5)
+        #if distort_coeffs is not None: distort_coeffs_ptr = distort_coeffs.ctypes.data
 
         eye_ptr = 0
         eye = _make_contiguous_vector(eye, 3)
@@ -2569,8 +2626,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                                      eye_ptr, target_ptr, up.ctypes.data,
                                      aperture_radius, aperture_fract,
                                      focal_scale, chroma_l, chroma_t,
-                                     fov, blur, glock,
-                                     tex_list, make_current)
+                                     fov, rxy, cx, cy, sensor_height, blur, glock,
+                                     tex_list, make_current
+        )
         if h > 0:
             self._logger.info("Camera %s handle: %d.", name, h)
             self.camera_handles[name] = h
@@ -2586,7 +2644,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                       up: Optional[Any] = None,
                       aperture_radius: float = -1.0,
                       focal_scale: float = -1.0,
-                      fov: float = -1.0) -> None:
+                      fov: float = -1.0,
+                      camera_matrix: Optional[Any] = None,
+                      #distort_coeffs: Optional[Any] = None,
+                      sensor_height: float = -1) -> None:
         """Update camera parameters.
 
         Parameters
@@ -2621,8 +2682,35 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if up is not None: up_ptr = up.ctypes.data
         else:              up_ptr = 0
 
+        if camera_matrix is not None:
+            if sensor_height <= 0: sensor_height = self._optix.get_camera_sensor_h(cam_handle)
+            camera_matrix = np.asarray(camera_matrix, dtype=np.float32)
+            if camera_matrix.shape != (3, 3):
+                msg = "Need 3x3 camera matrix in OpenCV convention."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            fx = max(0.001, camera_matrix[0, 0])
+            fy = max(0.001, camera_matrix[1, 1])
+
+            fov = 180 * 2*np.arctan(sensor_height/(2*fy)) / np.pi
+            rxy = fx / fy
+
+            sensor_width = sensor_height * self._width / self._height
+            cx = 0.5 - camera_matrix[0, 2] / sensor_width
+            cy = 0.5 + camera_matrix[1, 2] / sensor_height
+        else:
+            rxy = -1.0
+            cx = 0.5
+            cy = 0.5
+
+        #distort_coeffs = _make_contiguous_vector(eye, 5)
+        #if distort_coeffs is not None: distort_coeffs_ptr = distort_coeffs.ctypes.data
+        #else:                          distort_coeffs_ptr = 0
+
         if self._optix.update_camera(name, eye_ptr, target_ptr, up_ptr,
-                                     aperture_radius, focal_scale, fov):
+                                     aperture_radius, focal_scale, fov, rxy, cx, cy,
+                                     sensor_height):
             self._logger.info("Camera %s updated.", name)
         else:
             msg = "Camera %s update failed." % name

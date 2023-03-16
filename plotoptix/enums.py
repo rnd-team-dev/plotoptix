@@ -745,6 +745,9 @@ class Postprocessing(Enum):
     - denoiser_blend, float, amount of original image mixed with denoiser output
       range: 0 (only denoiser output) to 1 (only original raytracing output)
 
+    - denoiser_start, uint, number of the accumulation frame after which denoiser is applied;
+      default velue is 4.
+
     - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
       which buffers are used as denoiser inputs
 
@@ -753,6 +756,7 @@ class Postprocessing(Enum):
     >>> rt = TkOptiX()
     >>>
     >>> rt.set_float("denoiser_blend", 0.5)
+    >>> rt.set_uint("denoiser_start", 12)
     >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
     >>> rt.add_postproc("Denoiser")
     """
@@ -767,6 +771,9 @@ class Postprocessing(Enum):
     - denoiser_blend, float, amount of original image mixed with denoiser output
       range: 0 (only denoiser output) to 1 (only original raytracing output)
 
+    - denoiser_start, uint, number of the accumulation frame after which denoiser is applied;
+      default velue is 4.
+
     - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
       which buffers are used as denoiser inputs
 
@@ -775,6 +782,7 @@ class Postprocessing(Enum):
     >>> rt = TkOptiX()
     >>>
     >>> rt.set_float("denoiser_blend", 0.5)
+    >>> rt.set_uint("denoiser_start", 12)
     >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
     >>> rt.add_postproc("DenoiserHDR")
     """
@@ -792,6 +800,9 @@ class Postprocessing(Enum):
     - denoiser_blend, float, amount of original image mixed with denoiser output
       range: 0 (only denoiser output) to 1 (only original raytracing output)
 
+    - denoiser_start, uint, number of the accumulation frame after which denoiser is applied;
+      default velue is 4.
+
     - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
       which buffers are used as denoiser inputs
 
@@ -800,6 +811,7 @@ class Postprocessing(Enum):
     >>> rt = TkOptiX()
     >>>
     >>> rt.set_float("denoiser_blend", 0.0)
+    >>> rt.set_uint("denoiser_start", 12)
     >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
     >>> rt.add_postproc("DenoiserUp2x")
     """

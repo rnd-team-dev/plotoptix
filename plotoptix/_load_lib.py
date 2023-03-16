@@ -281,10 +281,10 @@ def _load_optix_win():
     optix.set_coordinates_geom.argtypes = [c_int, c_float]
     optix.set_coordinates_geom.restype = c_bool
 
-    optix.setup_camera.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_bool, c_wchar_p, c_bool]
+    optix.setup_camera.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_bool, c_wchar_p, c_bool]
     optix.setup_camera.restype = c_int
 
-    optix.update_camera.argtypes = [c_wchar_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float]
+    optix.update_camera.argtypes = [c_wchar_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_float, c_float]
     optix.update_camera.restype = c_bool
 
     optix.fit_camera.argtypes = [c_uint, c_wchar_p, c_float]
@@ -339,6 +339,12 @@ def _load_optix_win():
 
     optix.set_camera_fov.argtypes = [c_float]
     optix.set_camera_fov.restype = c_bool
+
+    optix.get_camera_sensor_h.argtypes = [c_uint]
+    optix.get_camera_sensor_h.restype = c_float
+
+    optix.set_camera_sensor_h.argtypes = [c_float]
+    optix.set_camera_sensor_h.restype = c_bool
 
     optix.get_camera_aperture.argtypes = [c_uint]
     optix.get_camera_aperture.restype = c_float
@@ -908,19 +914,19 @@ class _ClrOptiX_v2:
 
     def set_coordinates_geom(self, mode, thickness): return self._optix.set_coordinates_geom(mode, thickness)
 
-    def setup_camera(self, name, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, blur, glock, textures, make_current):
+    def setup_camera(self, name, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, rxy, cx, cy, sensor_height, blur, glock, textures, make_current):
         return self._optix.setup_camera_ptr(name, camera_type,
                                             IntPtr.__overloads__[Int64](eye),
                                             IntPtr.__overloads__[Int64](target),
                                             IntPtr.__overloads__[Int64](up),
-                                            aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, blur, glock, textures, make_current)
+                                            aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, rxy, cx, cy, sensor_height, blur, glock, textures, make_current)
 
-    def update_camera(self, name, eye, target, up, aperture_r, focal_scale, fov):
+    def update_camera(self, name, eye, target, up, aperture_r, focal_scale, fov, rxy, cx, cy, sensor_height):
         return self._optix.update_camera_ptr(name,
                                              IntPtr.__overloads__[Int64](eye),
                                              IntPtr.__overloads__[Int64](target),
                                              IntPtr.__overloads__[Int64](up),
-                                             aperture_r, focal_scale, fov)
+                                             aperture_r, focal_scale, fov, rxy, cx, cy, sensor_height)
 
     def fit_camera(self, handle, geo_name, scale): return self._optix.fit_camera(handle, geo_name, scale)
 
@@ -957,6 +963,10 @@ class _ClrOptiX_v2:
     def get_camera_fov(self, handle): return self._optix.get_camera_fov(handle)
 
     def set_camera_fov(self, fov): return self._optix.set_camera_fov(fov)
+
+    def get_camera_sensor_h(self, handle): return self._optix.get_camera_sensor_h(handle)
+
+    def set_camera_sensor_h(self, height): return self._optix.set_camera_sensor_h(height)
 
     def get_camera_aperture(self, handle): return self._optix.get_camera_aperture(handle)
 
@@ -1659,7 +1669,7 @@ class _ClrOptiX_v3:
 
     def set_coordinates_geom(self, mode, thickness): return self._optix.set_coordinates_geom(mode, float(thickness))
 
-    def setup_camera(self, name, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, blur, glock, textures, make_current):
+    def setup_camera(self, name, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, rxy, cx, cy, sensor_height, blur, glock, textures, make_current):
         return self._optix.setup_camera_ptr(name, camera_type,
                                             IntPtr(eye),
                                             IntPtr(target),
@@ -1670,17 +1680,25 @@ class _ClrOptiX_v3:
                                             float(chroma_l),
                                             float(chroma_t),
                                             float(fov),
+                                            float(rxy),
+                                            float(cx),
+                                            float(cy),
+                                            float(sensor_height),
                                             float(blur),
                                             glock, textures, make_current)
 
-    def update_camera(self, name, eye, target, up, aperture_r, focal_scale, fov):
+    def update_camera(self, name, eye, target, up, aperture_r, focal_scale, fov, rxy, cx, cy, sensor_height):
         return self._optix.update_camera_ptr(name,
                                              IntPtr(eye),
                                              IntPtr(target),
                                              IntPtr(up),
                                              float(aperture_r),
                                              float(focal_scale),
-                                             float(fov))
+                                             float(fov),
+                                             float(rxy),
+                                             float(cx),
+                                             float(cy),
+                                             float(sensor_height))
 
     def fit_camera(self, handle, geo_name, scale): return self._optix.fit_camera(handle, geo_name, float(scale))
 
@@ -1729,6 +1747,10 @@ class _ClrOptiX_v3:
     def get_camera_fov(self, handle): return self._optix.get_camera_fov(handle)
 
     def set_camera_fov(self, fov): return self._optix.set_camera_fov(float(fov))
+
+    def get_camera_sensor_h(self, handle): return self._optix.get_camera_sensor_h(handle)
+
+    def set_camera_sensor_h(self, height): return self._optix.set_camera_sensor_h(float(height))
 
     def get_camera_aperture(self, handle): return self._optix.get_camera_aperture(handle)
 

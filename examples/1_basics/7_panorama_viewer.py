@@ -7,7 +7,6 @@ can find plenty of free images.
 import sys
 import numpy as np
 from plotoptix import TkOptiX
-from plotoptix.materials import m_plastic
 
 def main():
 
