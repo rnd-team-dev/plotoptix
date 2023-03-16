@@ -2539,11 +2539,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             to a ~70mm lens in a typical 35mm frame camera).
         camera_matrix : array_like, optional
             Camera intrinsic matrix in OpenCV convention: `[[fx, 0, cx], [0, fy, cy], [0, 0, 1]]`.
-            Only `fs`, `fy`, `cx`, `cy` values are used,unit is [mm]; values at positions of constant
+            Only `fs`, `fy`, `cx`, `cy` values are used, unit is [mm]; values at positions of constant
             `0`s and `1` are ignored. **Note**: camera matrix parameters override `fov` and require
             `sensor_height` argument.
-        # distort_coeffs : array_like, optional
-        #    Camera distortion coefficients in OpenCV convention: `[k1, k2, p1, p2, k3]`
         sensor_height : float, optional
             Height of the sensor, [mm]. Used only if `camera_matrix` is provided.
             Default `-1` is internally reset to `24.0` (35mm camera film size).
@@ -2666,6 +2664,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Focus distance / (eye - target).length.
         fov : float, optional
             Field of view in degrees.
+        camera_matrix : array_like, optional
+            Camera intrinsic matrix in OpenCV convention: `[[fx, 0, cx], [0, fy, cy], [0, 0, 1]]`.
+            Only `fs`, `fy`, `cx`, `cy` values are used, unit is [mm]; values at positions of constant
+            `0`s and `1` are ignored. **Note**: camera matrix parameters override `fov` and require
+            `sensor_height` value (if `sensor_height` is not provided then the previously set value
+            is used).
+        sensor_height : float, optional
+            Height of the sensor, [mm]. Used only if `camera_matrix` is provided.
+            Value set previously is not updated if default `-1` is used.
         """
         name, cam_handle = self.get_camera_name_handle(name)
         if (name is None) or (cam_handle == 0): return
