@@ -86,6 +86,35 @@ GPU variables related to the raytracer general configuraton are documented below
      rt = TkOptiX()
      rt.set_float("scene_epsilon", 1.0e-04)
 
+- **Denoiser start frame**
+
+  Name: *denoiser_start*
+
+  Type: ``uint``
+
+  Default value: ``4``
+
+  AI denoiser is applied to output image after accumulating ``denoiser_start`` frames. Use default
+  value for interactive work. Use higher values for final rendering, when noisy intermediate results
+  are acceptable. In such cases the optimal configuration is to set ``denoiser_start`` value equal
+  to ``max_accumulation_frames`` (see :meth:`plotoptix.NpOptiX.set_param`), then denoiser is applied
+  only once, at the end of ray tracing.
+
+  Example:
+
+  .. code-block:: python
+
+     rt = TkOptiX()
+     rt.set_param(min_accumulation_step=8,     # update image every 8 frames
+                  max_accumulation_frames=128, # accumulate 128 frames in total
+                 )
+     rt.set_uint("denoiser_start", 128)        # denoise when the accumulation is finished
+
+     rt.set_float("tonemap_exposure", 0.9)
+     rt.set_float("tonemap_gamma", 2.2)
+     rt.add_postproc("Denoiser")               # setup denoiser postprocessing
+
+
 .. automethod:: plotoptix.NpOptiX.set_param
 .. automethod:: plotoptix.NpOptiX.get_param
 .. automethod:: plotoptix.NpOptiX.set_int

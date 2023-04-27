@@ -746,7 +746,7 @@ class Postprocessing(Enum):
       range: 0 (only denoiser output) to 1 (only original raytracing output)
 
     - denoiser_start, uint, number of the accumulation frame after which denoiser is applied;
-      default velue is 4.
+      default velue is 4; see also denoiser_start in `raytracer configuration <npoptix_config.html#raytracer-configuration>`_
 
     - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
       which buffers are used as denoiser inputs
@@ -772,7 +772,7 @@ class Postprocessing(Enum):
       range: 0 (only denoiser output) to 1 (only original raytracing output)
 
     - denoiser_start, uint, number of the accumulation frame after which denoiser is applied;
-      default velue is 4.
+      default velue is 4; see also denoiser_start in `raytracer configuration <npoptix_config.html#raytracer-configuration>`_
 
     - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
       which buffers are used as denoiser inputs
@@ -801,7 +801,7 @@ class Postprocessing(Enum):
       range: 0 (only denoiser output) to 1 (only original raytracing output)
 
     - denoiser_start, uint, number of the accumulation frame after which denoiser is applied;
-      default velue is 4.
+      default velue is 4;  see also denoiser_start in `raytracer configuration <npoptix_config.html#raytracer-configuration>`_
 
     - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
       which buffers are used as denoiser inputs
