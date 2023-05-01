@@ -49,16 +49,18 @@ def main():
         on_rt_completed=update_data
     )
     rt.set_param(min_accumulation_step=1)
-    rt.enable_torch()
-
-    rt.setup_camera("cam1", eye=[0, 0, 3], target=[0, 0, 0], fov=35, glock=True)
-
     rt.set_background(0)
     rt.set_ambient(0)
+
+    # NOTE: pytorch features are not enabled by default. You need
+    # to call this method before using anything related to pytorch.
+    rt.enable_torch()
 
     rt.set_torch_texture_2d("tex2d", params.tex2D, addr_mode="Clamp")
     m_flat["ColorTextures"] = [ "tex2d" ]
     rt.setup_material("flat", m_flat)
+
+    rt.setup_camera("cam1", eye=[0, 0, 3], target=[0, 0, 0], fov=35, glock=True)
 
     rt.set_data("plane", geom="Parallelograms", mat="flat",
                 pos=[-1, -1, 0], u=[2, 0, 0], v=[0, 2, 0], c=0.9
