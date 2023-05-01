@@ -25,7 +25,7 @@ basic rules are:
 .. image:: images/flow_1.png
    :alt: PlotOptiX compute flow
 
-Fig. 1. PlotOptiX computations flow. Details of the OptiX tast are ommited for clarity (i.e. scene compilation and multi-gpu management).
+Fig. 1. PlotOptiX computations flow. Details of the OptiX task are ommited for clarity (i.e. scene compilation and multi-gpu management).
 
 .. image:: images/flow_2.png
    :alt: PlotOptiX compute flow
