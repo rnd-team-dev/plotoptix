@@ -1,6 +1,14 @@
 Release history
 ===============
 
+v0.16.0 - unreleased
+--------------------
+
+Added
+~~~~~
+
+- set texture data from pytorch tensors
+
 `v0.15.1` - 2023-03-16
 ----------------------
 

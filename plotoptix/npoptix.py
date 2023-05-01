@@ -157,6 +157,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         super().__init__()
 
+        self._torch = None
+
         self._raise_on_error = False
         self._logger = logging.getLogger(__name__ + "-NpOptiX")
         self._logger.setLevel(log_level)
@@ -273,6 +275,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if self._is_scene_created and not self._is_closed:
             if self._is_started: self.close()
             else: self._optix.destroy_scene()
+
+    def enable_torch(self):
+        import importlib
+        try:
+            self._torch = importlib.import_module("torch")
+        except:
+            self._logger.error("Torch is not available.")
+            self._torch = None
 
     def get_gpu_architecture(self, ordinal: int) -> Optional[GpuArchitecture]:
         """Get SM architecture of selected GPU.
@@ -1158,6 +1168,94 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.set_int(name, x, refresh)
 
 
+    def set_torch_texture_1d(self, name: str, data: Any,
+                             addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
+                             keep_on_host: bool = False,
+                             refresh: bool = False) -> None:
+        """Set texture data from pytorch tensor.
+
+        Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
+        and length are deduced from the ``data`` tensor shape and dtype. Tensor can reside in
+        the GPU or CPU memory. Use ``keep_on_host=True`` to make a copy of data in the host memory
+        (in addition to GPU memory), this option is required when (small) textures are going to be
+        saved to JSON description of the scene.
+
+        Parameters
+        ----------
+        name : string
+            Texture name.
+        data : torch.Tensor
+            Texture data.
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+        if self._torch is None:
+            self._logger.error("Torch features are not enabled, use rt.enable_torch() first.")
+            return
+
+        if not self._torch.is_tensor(data):
+            msg = "Use this function with torch tensore only."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if not isinstance(name, str): name = str(name)
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+
+        if data.dtype != self._torch.uint8: # everything not explicitly given as uin8 upload as float32
+            if data.dtype != self._torch.float32:
+                data = data.type(self._torch.float32)
+
+            if len(data.shape) == 1:     rt_format = RtFormat.Float
+            elif len(data.shape) == 2:
+                if data.shape[1] == 1:   rt_format = RtFormat.Float
+                elif data.shape[1] == 2: rt_format = RtFormat.Float2
+                elif data.shape[1] == 4: rt_format = RtFormat.Float4
+                else:
+                    msg = "Texture 1D shape should be (length,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            else:
+                msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            
+        else:
+            if len(data.shape) == 1:     rt_format = RtFormat.UByte
+            elif len(data.shape) == 2:
+                if data.shape[1] == 1:   rt_format = RtFormat.UByte
+                elif data.shape[1] == 2: rt_format = RtFormat.UByte2
+                elif data.shape[1] == 4: rt_format = RtFormat.UByte4
+                else:
+                    msg = "Texture 1D shape should be (length,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            else:
+                msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+
+        self._logger.info("Set torch texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
+
+        if not self._optix.set_texture_1d(name,
+                                          data.contiguous().data_ptr(), data.is_cuda,
+                                          data.shape[0], rt_format.value,
+                                          addr_mode.value, keep_on_host,
+                                          refresh
+                                         ):
+            msg = "Torch texture 1D %s not uploaded." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+
     def set_texture_1d(self, name: str, data: Any,
                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
                        keep_on_host: bool = False,
@@ -1183,6 +1281,14 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
         """
+        if self._torch is not None and self._torch.is_tensor(data):
+            self.set_torch_texture_1d(
+                name=name, data=data,
+                addr_mode=addr_mode,
+                keep_on_host=keep_on_host,
+                refresh=refresh
+            )
+
         if not isinstance(name, str): name = str(name)
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
 
@@ -1230,10 +1336,102 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.uint8)
 
         self._logger.info("Set texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
-        if not self._optix.set_texture_1d(name, data.ctypes.data, data.shape[0], rt_format.value, addr_mode.value, keep_on_host, refresh):
+        if not self._optix.set_texture_1d(name,
+                                          data.ctypes.data, False,
+                                          data.shape[0], rt_format.value,
+                                          addr_mode.value, keep_on_host,
+                                          refresh
+                                         ):
             msg = "Texture 1D %s not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
+
+    def set_torch_texture_2d(self, name: str, data: Any,
+                             addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                             keep_on_host: bool = False,
+                             refresh: bool = False) -> None:
+        """Set texture data from pytorch tensor.
+
+        Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
+        and width/height are deduced from the ``data`` tensor shape and dtype. Tensor can reside in
+        the GPU or CPU memory. Use ``keep_on_host=True`` to make a copy of data in the host memory
+        (in addition to GPU memory), this option is required when (small) textures are going to be
+        saved to JSON description of the scene.
+
+        Parameters
+        ----------
+        name : string
+            Texture name.
+        data : torch.Tensor
+            Texture data.
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+
+        if self._torch is None:
+            self._logger.error("Torch features are not enabled, use rt.enable_torch() first.")
+            return
+
+        if not self._torch.is_tensor(data):
+            msg = "Use this function with torch tensore only."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if not isinstance(name, str): name = str(name)
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+
+        if data.dtype != self._torch.uint8: # everything not explicitly given as uin8 upload as float32
+            if data.dtype != self._torch.float32:
+                data = data.type(self._torch.float32)
+
+            if len(data.shape) == 2:     rt_format = RtFormat.Float
+            elif len(data.shape) == 3:
+                if data.shape[2] == 1:   rt_format = RtFormat.Float
+                elif data.shape[2] == 2: rt_format = RtFormat.Float2
+                elif data.shape[2] == 4: rt_format = RtFormat.Float4
+                else:
+                    msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            else:
+                msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+
+        else:
+            if len(data.shape) == 2:     rt_format = RtFormat.UByte
+            elif len(data.shape) == 3:
+                if data.shape[2] == 1:   rt_format = RtFormat.UByte
+                elif data.shape[2] == 2: rt_format = RtFormat.UByte2
+                elif data.shape[2] == 4: rt_format = RtFormat.UByte4
+                else:
+                    msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            else:
+                msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+
+        self._logger.info("Set torch texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
+
+        if not self._optix.set_texture_2d(name,
+                                          data.contiguous().data_ptr(), data.is_cuda, data.shape[1], data.shape[0],
+                                          rt_format.value, addr_mode.value, keep_on_host, refresh
+                                         ):
+            msg = "Torch texture 2D %s not set." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
 
     def set_texture_2d(self, name: str, data: Any,
                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
@@ -1260,10 +1458,18 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
         """
-        if not isinstance(name, str): name = str(name)
-        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
+        if self._torch is not None and self._torch.is_tensor(data):
+            self.set_torch_texture_2d(
+                name=name, data=data,
+                addr_mode=addr_mode,
+                keep_on_host=keep_on_host,
+                refresh=refresh
+            ) 
 
+        if not isinstance(name, str): name = str(name)
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
 
         if data.dtype != np.uint8: # everything not explicitly given as uin8 upload as float32
 
@@ -1307,7 +1513,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.uint8)
 
         self._logger.info("Set texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
-        if not self._optix.set_texture_2d(name, data.ctypes.data, data.shape[1], data.shape[0], rt_format.value, addr_mode.value, keep_on_host, refresh):
+        if not self._optix.set_texture_2d(name,
+                                          data.ctypes.data, False,
+                                          data.shape[1], data.shape[0], rt_format.value,
+                                          addr_mode.value, keep_on_host, refresh
+                                         ):
             msg = "Texture 2D %s not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1498,8 +1708,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
 
         self._logger.info("Set displacement map for %s: %d x %d.", name, data.shape[1], data.shape[0])
-        if not self._optix.set_displacement(name, data.ctypes.data, data.shape[1], data.shape[0],
-                                            addr_mode.value, keep_on_host, refresh):
+        if not self._optix.set_displacement(name,
+                                            data.ctypes.data, False,
+                                            data.shape[1], data.shape[0],
+                                            addr_mode.value, keep_on_host,
+                                            refresh
+                                           ):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
