@@ -277,6 +277,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             else: self._optix.destroy_scene()
 
     def enable_torch(self):
+        """Enable pytorch features.
+        """
         import importlib
         try:
             self._torch = importlib.import_module("torch")
