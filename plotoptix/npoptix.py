@@ -1172,6 +1172,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def set_torch_texture_1d(self, name: str, data: Any,
                              addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
+                             filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                              keep_on_host: bool = False,
                              refresh: bool = False) -> None:
         """Set texture data from pytorch tensor.
@@ -1190,6 +1191,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Texture data.
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1207,6 +1210,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if not isinstance(name, str): name = str(name)
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if data.dtype != self._torch.uint8: # everything not explicitly given as uin8 upload as float32
             if data.dtype != self._torch.float32:
@@ -1250,8 +1254,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not self._optix.set_texture_1d(name,
                                           data.contiguous().data_ptr(), data.is_cuda,
                                           data.shape[0], rt_format.value,
-                                          addr_mode.value, keep_on_host,
-                                          refresh
+                                          addr_mode.value, filter_mode.value,
+                                          keep_on_host, refresh
                                          ):
             msg = "Torch texture 1D %s not uploaded." % name
             self._logger.error(msg)
@@ -1260,6 +1264,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def set_texture_1d(self, name: str, data: Any,
                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
+                       filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                        keep_on_host: bool = False,
                        refresh: bool = False) -> None:
         """Set texture data.
@@ -1278,6 +1283,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Texture data.
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1295,6 +1302,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if data.dtype != np.uint8: # everything not explicitly given as uin8 upload as float32
 
@@ -1341,8 +1349,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not self._optix.set_texture_1d(name,
                                           data.ctypes.data, False,
                                           data.shape[0], rt_format.value,
-                                          addr_mode.value, keep_on_host,
-                                          refresh
+                                          addr_mode.value, filter_mode.value,
+                                          keep_on_host, refresh
                                          ):
             msg = "Texture 1D %s not uploaded." % name
             self._logger.error(msg)
@@ -1350,6 +1358,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def set_torch_texture_2d(self, name: str, data: Any,
                              addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                             filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                              keep_on_host: bool = False,
                              refresh: bool = False) -> None:
         """Set texture data from pytorch tensor.
@@ -1368,6 +1377,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Texture data.
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1386,6 +1397,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if not isinstance(name, str): name = str(name)
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if data.dtype != self._torch.uint8: # everything not explicitly given as uin8 upload as float32
             if data.dtype != self._torch.float32:
@@ -1428,7 +1440,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if not self._optix.set_texture_2d(name,
                                           data.contiguous().data_ptr(), data.is_cuda, data.shape[1], data.shape[0],
-                                          rt_format.value, addr_mode.value, keep_on_host, refresh
+                                          rt_format.value, addr_mode.value, filter_mode.value, keep_on_host, refresh
                                          ):
             msg = "Torch texture 2D %s not set." % name
             self._logger.error(msg)
@@ -1437,6 +1449,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def set_texture_2d(self, name: str, data: Any,
                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                       filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                        keep_on_host: bool = False,
                        refresh: bool = False) -> None:
         """Set texture data.
@@ -1455,6 +1468,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Texture data.
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1470,6 +1485,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         if not isinstance(name, str): name = str(name)
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
 
@@ -1518,7 +1534,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not self._optix.set_texture_2d(name,
                                           data.ctypes.data, False,
                                           data.shape[1], data.shape[0], rt_format.value,
-                                          addr_mode.value, keep_on_host, refresh
+                                          addr_mode.value, filter_mode.value,
+                                          keep_on_host, refresh
                                          ):
             msg = "Texture 2D %s not uploaded." % name
             self._logger.error(msg)
@@ -1531,6 +1548,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                      exposure: float = 1.0,
                      gamma: float = 1.0,
                      addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                     filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                      keep_on_host: bool = False,
                      refresh: bool = False) -> None:
         """Load texture from file.
@@ -1553,6 +1571,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Gamma value used in the postprocessing.
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1566,8 +1586,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(rt_format, str): rt_format = RtFormat[rt_format]
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
-        if not self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, rt_format.value, addr_mode.value, refresh):
+        if not self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, rt_format.value, addr_mode.value, filter_mode.value, refresh):
             msg = "Failed on reading texture from file %s." % file_name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -1575,6 +1596,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_normal_tilt(self, name: str, data: Any,
                         mapping: Union[TextureMapping, str] = TextureMapping.Flat,
                         addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                        filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                         keep_on_host: bool = False,
                         refresh: bool = False) -> None:
         """Set normal tilt data.
@@ -1597,6 +1619,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Mapping mode (see :class:`plotoptix.enums.TextureMapping`).
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1608,6 +1632,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(mapping, str): mapping = TextureMapping[mapping]
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if len(data.shape) != 2:
             msg = "Data shape should be (height,width)."
@@ -1620,7 +1645,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._logger.info("Set shading normal tilt map for %s: %d x %d.", name, data.shape[1], data.shape[0])
         if not self._optix.set_normal_tilt(name, data.ctypes.data, data.shape[1], data.shape[0],
-                                           mapping.value, addr_mode.value, keep_on_host, refresh):
+                                           mapping.value, addr_mode.value, filter_mode.value,
+                                           keep_on_host, refresh):
             msg = "%s normal tilt map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1628,6 +1654,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def load_normal_tilt(self, name: str, file_name: str,
                          mapping: Union[TextureMapping, str] = TextureMapping.Flat,
                          addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                         filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                          prescale: float = 1.0,
                          baseline: float = 0.0,
                          refresh: bool = False) -> None:
@@ -1648,6 +1675,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Mapping mode (see :class:`plotoptix.enums.TextureMapping`).
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         prescale : float, optional
             Scaling factor for displacement values.
         baseline : float, optional
@@ -1661,15 +1690,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(mapping, str): mapping = TextureMapping[mapping]
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         self._logger.info("Set shading normal tilt map for %s using %s.", name, file_name)
-        if not self._optix.load_normal_tilt(name, file_name, mapping.value, addr_mode.value, prescale, baseline, refresh):
+        if not self._optix.load_normal_tilt(name, file_name, mapping.value, addr_mode.value, filter_mode.value, prescale, baseline, refresh):
             msg = "%s normal tilt map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
     def set_displacement(self, name: str, data: Any,
                          addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                         filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                          keep_on_host: bool = False,
                          refresh: bool = False) -> None:
         """Set surface displacement data.
@@ -1699,6 +1730,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if len(data.shape) != 2:
             msg = "Data shape should be (height,width)."
@@ -1713,8 +1745,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not self._optix.set_displacement(name,
                                             data.ctypes.data, False,
                                             data.shape[1], data.shape[0],
-                                            addr_mode.value, keep_on_host,
-                                            refresh
+                                            addr_mode.value, filter_mode.value,
+                                            keep_on_host, refresh
                                            ):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
@@ -1724,6 +1756,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                           prescale: float = 1.0,
                           baseline: float = 0.0,
                           addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                          filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                           refresh: bool = False) -> None:
         """Load surface displacement data from file.
 
@@ -1750,9 +1783,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(file_name, str): name = str(file_name)
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         self._logger.info("Set displacement map for %s using %s.", name, file_name)
-        if not self._optix.load_displacement(name, file_name, prescale, baseline, addr_mode.value, refresh):
+        if not self._optix.load_displacement(name, file_name, prescale, baseline, addr_mode.value, filter_mode.value, refresh):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1889,6 +1923,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                                            prescale, baseline, exposure, gamma,
                                            rt_format.value,
                                            TextureAddressMode.Mirror.value,
+                                           TextureFilterMode.Trilinear.value,
                                            False):
                 if not self._optix.set_bg_texture(bg_name, refresh):
                     msg = "Background texture %s not set." % bg_name
@@ -1958,7 +1993,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                         np.clip(bg, 0.0, 255.0, out=bg)
                     bg = bg.astype(dtype=np.uint8)
 
-                self.set_texture_2d(bg_name, bg, addr_mode=TextureAddressMode.Mirror, keep_on_host=keep_on_host, refresh=False)
+                self.set_texture_2d(bg_name, bg,
+                                    addr_mode=TextureAddressMode.Mirror,
+                                    filter_mode=TextureFilterMode.Trilinear,
+                                    keep_on_host=keep_on_host,
+                                    refresh=False
+                )
 
                 if not self._optix.set_bg_texture(bg_name, refresh):
                     msg = "Background texture %s not set." % bg_name

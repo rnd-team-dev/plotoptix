@@ -122,19 +122,19 @@ def _load_optix_win():
     optix.set_bg_texture.argtypes = [c_wchar_p, c_bool]
     optix.set_bg_texture.restype = c_bool
 
-    optix.set_texture_1d.argtypes = [c_wchar_p, c_void_p, c_bool, c_int, c_uint, c_int, c_bool, c_bool]
+    optix.set_texture_1d.argtypes = [c_wchar_p, c_void_p, c_bool, c_int, c_uint, c_int, c_int, c_bool, c_bool]
     optix.set_texture_1d.restype = c_bool
 
-    optix.set_texture_2d.argtypes = [c_wchar_p, c_void_p, c_bool, c_int, c_int, c_uint, c_int, c_bool, c_bool]
+    optix.set_texture_2d.argtypes = [c_wchar_p, c_void_p, c_bool, c_int, c_int, c_uint, c_int, c_int, c_bool, c_bool]
     optix.set_texture_2d.restype = c_bool
 
-    optix.load_texture_2d.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_float, c_float, c_uint, c_int, c_bool]
+    optix.load_texture_2d.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_float, c_float, c_uint, c_int, c_int, c_bool]
     optix.load_texture_2d.restype = c_bool
 
-    optix.set_displacement.argtypes = [c_wchar_p, c_void_p, c_bool, c_int, c_int, c_int, c_bool, c_bool]
+    optix.set_displacement.argtypes = [c_wchar_p, c_void_p, c_bool, c_int, c_int, c_int, c_int, c_bool, c_bool]
     optix.set_displacement.restype = c_bool
 
-    optix.load_displacement.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_int, c_bool]
+    optix.load_displacement.argtypes = [c_wchar_p, c_wchar_p, c_float, c_float, c_int, c_int, c_bool]
     optix.load_displacement.restype = c_bool
 
     optix.resize_scene.argtypes = [c_int, c_int, POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int), POINTER(c_longlong), POINTER(c_int)]
@@ -158,10 +158,10 @@ def _load_optix_win():
     optix.setup_material.argtypes = [c_wchar_p, c_wchar_p]
     optix.setup_material.restype = c_bool
 
-    optix.set_normal_tilt.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_int, c_int, c_bool, c_bool]
+    optix.set_normal_tilt.argtypes = [c_wchar_p, c_void_p, c_int, c_int, c_int, c_int, c_int, c_bool, c_bool]
     optix.set_normal_tilt.restype = c_bool
 
-    optix.load_normal_tilt.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_float, c_float, c_bool]
+    optix.load_normal_tilt.argtypes = [c_wchar_p, c_wchar_p, c_int, c_int, c_int, c_float, c_float, c_bool]
     optix.load_normal_tilt.restype = c_bool
 
     optix.set_correction_curve.argtypes = [c_void_p, c_int, c_int, c_int, c_float, c_bool]
@@ -658,26 +658,26 @@ class _ClrOptiX_v2:
 
     def set_bg_texture(self, name, refresh): return self._optix.set_bg_texture(name, refresh)
 
-    def set_texture_1d(self, name, data_ptr, is_gpu, length, tformat, addr_mode, keep_on_host, refresh):
+    def set_texture_1d(self, name, data_ptr, is_gpu, length, tformat, addr_mode, filter_mode, keep_on_host, refresh):
         return self._optix.set_texture_1d_ptr(name,
                                               IntPtr.__overloads__[Int64](data_ptr), is_gpu,
-                                              length, tformat, addr_mode, keep_on_host, refresh)
+                                              length, tformat, addr_mode, filter_mode, keep_on_host, refresh)
 
-    def set_texture_2d(self, name, data_ptr, is_gpu, width, height, tformat, addr_mode, keep_on_host, refresh):
+    def set_texture_2d(self, name, data_ptr, is_gpu, width, height, tformat, addr_mode, filter_mode, keep_on_host, refresh):
         return self._optix.set_texture_2d_ptr(name,
                                               IntPtr.__overloads__[Int64](data_ptr), is_gpu,
-                                              width, height, tformat, addr_mode, keep_on_host, refresh)
+                                              width, height, tformat, addr_mode, filter_mode, keep_on_host, refresh)
 
-    def load_texture_2d(self, tex_name, file_name, prescale, baseline, exposure, gamma, tformat, addr_mode, refresh):
-        return self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, tformat, addr_mode, refresh)
+    def load_texture_2d(self, tex_name, file_name, prescale, baseline, exposure, gamma, tformat, addr_mode, filter_mode, refresh):
+        return self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, tformat, addr_mode, filter_mode, refresh)
 
-    def set_displacement(self, obj_name, data_ptr, is_gpu, width, height, addr_mode, keep_on_host, refresh):
+    def set_displacement(self, obj_name, data_ptr, is_gpu, width, height, addr_mode, filter_mode, keep_on_host, refresh):
         return self._optix.set_displacement_ptr(obj_name,
                                                 IntPtr.__overloads__[Int64](data_ptr), is_gpu,
-                                                width, height, addr_mode, keep_on_host, refresh)
+                                                width, height, addr_mode, filter_mode, keep_on_host, refresh)
 
-    def load_displacement(self, obj_name, file_name, prescale, baseline, addr_mode, refresh):
-        return self._optix.load_displacement(obj_name, file_name, prescale, baseline, addr_mode, refresh)
+    def load_displacement(self, obj_name, file_name, prescale, baseline, addr_mode, filter_mode, refresh):
+        return self._optix.load_displacement(obj_name, file_name, prescale, baseline, addr_mode, filter_mode, refresh)
 
 
     def resize_scene(self, width, height,
@@ -739,13 +739,13 @@ class _ClrOptiX_v2:
 
     def setup_material(self, name, jstr): return self._optix.setup_material(name, jstr)
 
-    def set_normal_tilt(self, mat_name, data_ptr, width, height, mapping, addr_mode, keep_on_host, refresh):
+    def set_normal_tilt(self, mat_name, data_ptr, width, height, mapping, addr_mode, filter_mode, keep_on_host, refresh):
         return self._optix.set_normal_tilt_ptr(mat_name,
                                                IntPtr.__overloads__[Int64](data_ptr),
-                                               width, height, mapping, addr_mode, keep_on_host, refresh)
+                                               width, height, mapping, addr_mode, filter_mode, keep_on_host, refresh)
 
-    def load_normal_tilt(self, mat_name, file_name, mapping, addr_mode, prescale, baseline, refresh):
-        return self._optix.load_normal_tilt(mat_name, file_name, mapping, addr_mode, prescale, baseline, refresh)
+    def load_normal_tilt(self, mat_name, file_name, mapping, addr_mode, filter_mode, prescale, baseline, refresh):
+        return self._optix.load_normal_tilt(mat_name, file_name, mapping, addr_mode, filter_mode, prescale, baseline, refresh)
 
 
     def set_correction_curve(self, data_ptr, n_ctrl_points, n_curve_points, channel, vrange, refresh):
@@ -1306,26 +1306,26 @@ class _ClrOptiX_v3:
 
     def set_bg_texture(self, name, refresh): return self._optix.set_bg_texture(name, refresh)
 
-    def set_texture_1d(self, name, data_ptr, is_gpu, length, tformat, addr_mode, keep_on_host, refresh):
+    def set_texture_1d(self, name, data_ptr, is_gpu, length, tformat, addr_mode, filter_mode, keep_on_host, refresh):
         return self._optix.set_texture_1d_ptr(name,
                                               IntPtr(data_ptr), is_gpu,
-                                              length, tformat, addr_mode, keep_on_host, refresh)
+                                              length, tformat, addr_mode, filter_mode, keep_on_host, refresh)
 
-    def set_texture_2d(self, name, data_ptr, is_gpu, width, height, tformat, addr_mode, keep_on_host, refresh):
+    def set_texture_2d(self, name, data_ptr, is_gpu, width, height, tformat, addr_mode, filter_mode, keep_on_host, refresh):
         return self._optix.set_texture_2d_ptr(name,
                                               IntPtr(data_ptr), is_gpu,
-                                              width, height, tformat, addr_mode, keep_on_host, refresh)
+                                              width, height, tformat, addr_mode, filter_mode, keep_on_host, refresh)
 
-    def load_texture_2d(self, tex_name, file_name, prescale, baseline, exposure, gamma, tformat, addr_mode, refresh):
-        return self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, tformat, addr_mode, refresh)
+    def load_texture_2d(self, tex_name, file_name, prescale, baseline, exposure, gamma, tformat, addr_mode, filter_mode, refresh):
+        return self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, tformat, addr_mode, filter_mode, refresh)
 
-    def set_displacement(self, obj_name, data_ptr, is_gpu, width, height, addr_mode, keep_on_host, refresh):
+    def set_displacement(self, obj_name, data_ptr, is_gpu, width, height, addr_mode, filter_mode, keep_on_host, refresh):
         return self._optix.set_displacement_ptr(obj_name,
                                                 IntPtr(data_ptr), is_gpu,
-                                                width, height, addr_mode, keep_on_host, refresh)
+                                                width, height, addr_mode, filter_mode, keep_on_host, refresh)
 
-    def load_displacement(self, obj_name, file_name, prescale, baseline, addr_mode, refresh):
-        return self._optix.load_displacement(obj_name, file_name, prescale, baseline, addr_mode, refresh)
+    def load_displacement(self, obj_name, file_name, prescale, baseline, addr_mode, filter_mode, refresh):
+        return self._optix.load_displacement(obj_name, file_name, prescale, baseline, addr_mode, filter_mode, refresh)
 
 
     def resize_scene(self, width, height,
@@ -1387,13 +1387,13 @@ class _ClrOptiX_v3:
 
     def setup_material(self, name, jstr): return self._optix.setup_material(name, jstr)
 
-    def set_normal_tilt(self, mat_name, data_ptr, width, height, mapping, addr_mode, keep_on_host, refresh):
+    def set_normal_tilt(self, mat_name, data_ptr, width, height, mapping, addr_mode, filter_mode, keep_on_host, refresh):
         return self._optix.set_normal_tilt_ptr(mat_name,
                                                IntPtr(data_ptr),
-                                               width, height, mapping, addr_mode, keep_on_host, refresh)
+                                               width, height, mapping, addr_mode, filter_mode, keep_on_host, refresh)
 
-    def load_normal_tilt(self, mat_name, file_name, mapping, addr_mode, prescale, baseline, refresh):
-        return self._optix.load_normal_tilt(mat_name, file_name, mapping, addr_mode, prescale, baseline, refresh)
+    def load_normal_tilt(self, mat_name, file_name, mapping, addr_mode, filter_mode, prescale, baseline, refresh):
+        return self._optix.load_normal_tilt(mat_name, file_name, mapping, addr_mode, filter_mode, prescale, baseline, refresh)
 
 
     def set_correction_curve(self, data_ptr, n_ctrl_points, n_curve_points, channel, vrange, refresh):

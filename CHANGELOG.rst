@@ -8,6 +8,7 @@ Added
 ~~~~~
 
 - set texture data from pytorch tensors
+- texture filter modes enabled, default is *trilinear*, optionally can be changed to *nearest*
 
 `v0.15.1` - 2023-03-16
 ----------------------

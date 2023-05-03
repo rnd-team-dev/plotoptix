@@ -20,7 +20,7 @@ class params():
         [[[[1.0,1.0,1.0], [1.0,0.0,1.0], [1.0,1.0,1.0]]]],
         dtype=dtype, device=device, requires_grad=False
     )
-    cells = torch.rand((1,1,200,200), dtype=dtype, device=device, requires_grad=False)
+    cells = torch.rand((1,1,128,128), dtype=dtype, device=device, requires_grad=False)
     cells[cells > 0.995] = 1.0
     cells[cells < 1.0] = 0.0
     tex2D = torch.unsqueeze(cells[0, 0].type(torch.float32), -1).expand(-1, -1, 4).contiguous()
@@ -56,7 +56,7 @@ def main():
     # to call this method before using anything related to pytorch.
     rt.enable_torch()
 
-    rt.set_torch_texture_2d("tex2d", params.tex2D, addr_mode="Clamp")
+    rt.set_torch_texture_2d("tex2d", params.tex2D, addr_mode="Clamp", filter_mode="Nearest")
     m_flat["ColorTextures"] = [ "tex2d" ]
     rt.setup_material("flat", m_flat)
 

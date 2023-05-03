@@ -145,6 +145,14 @@ class TextureAddressMode(Enum):
 
     Border = 3
 
+class TextureFilterMode(Enum):
+    """Texture sampling mode.
+    """
+
+    Nearest = 0
+
+    Trilinear = 1
+
 class MaterialType(Enum):
     """Type of the material shader.
 
