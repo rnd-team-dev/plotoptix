@@ -15,13 +15,14 @@ PlotOptiX
 
 `Docs <https://plotoptix.rnd.team>`__
 
-- Check what we are doing with PlotOptiX on `Behance <https://www.behance.net/RnDTeam>`__, `Facebook <https://www.facebook.com/rndteam>`__, and `Instagram <https://www.instagram.com/rnd.team.studio/>`__.
+- Have a look what is possible with PlotOptiX: `Behance <https://www.behance.net/RnDTeam>`__, `Instagram <https://www.instagram.com/rnd.team.studio/>`__, and `Facebook <https://www.facebook.com/rndteam>`__.
 - Join us on `Patreon <https://www.patreon.com/rndteam?fan_landing=true>`__ for news, release plans and hi-res content.
 
 PlotOptiX is a 3D `ray tracing <https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>`__ package for Python, aimed at easy and aesthetic visualization
 of large datasets (and small as well). Data features can be represented in images as a position, size/thickness and color of primitives
 of several basic shapes, or projected onto surfaces of objects in form of a color textures and displacement maps. Triangular meshes,
-generated in the code or loaded from a file, are supported as well. All is finished with a photorealistic lighting, depth of field, and many other physically based effects simulated with a high quality.
+generated in the code or loaded from a file, are supported as well. All is finished with a photorealistic lighting, depth of field, and many other
+physically based effects simulated with a high quality.
 
 No need to write shaders, intersection algorithms, handle 3D scene technicalities. Basic usage is even more simple than with
 `matplotlib <https://matplotlib.org/gallery/mplot3d/scatter3d.html>`__:
@@ -65,8 +66,9 @@ Features
 - *light sources*: spherical and parallelogram, light emission in volumes, uniform environmental light or environment map
 - *post-processing*: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser and upsampler
 - *callbacks*: at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
-- 8/16/32bps(hdr) image output to `numpy <http://www.numpy.org>`__ array, or save to popular image file formats
+- 8/16/32bps(hdr) image output to `numpy <https://numpy.org>`__ array, or save to popular image file formats
 - zero-copy access to GPU buffers wrapped in ndarrays: 8/32bpc image, hit and object info, albedo, normals
+- direct access to `PyTorch <https://pytorch.org>`__ tensors data stored on GPU (anc CPU as well) for texture and geometry updates
 - GPU acceleration using RT Cores and everything else what comes with `OptiX <https://developer.nvidia.com/optix>`__
 - hardware accelerated video output to MP4 file format using `NVENC 9.0 <https://developer.nvidia.com/nvidia-video-codec-sdk>`__
 - Tkinter based simple GUI window or a headless raytracer
@@ -107,15 +109,7 @@ Windows prerequisites
 
 *.NET Framework:*
 
-Most likely you already got the right version with your Windows installation. Just in case of doubts, here is the command verifying this::
-
-   C:\>reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full" /v version
-   
-   HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\full
-       version    REG_SZ    4.8.04084
-
-If the number in your output is < 4.8, visit `download page <https://dotnet.microsoft.com/download/dotnet-framework>`__ and
-install the most recent release.
+You have it built in your Windows. Go ahead and install PlotOptiX.
 
 Linux prerequisites
 -------------------

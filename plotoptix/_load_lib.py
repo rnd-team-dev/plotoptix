@@ -176,6 +176,12 @@ def _load_optix_win():
     optix.update_geometry.argtypes = [c_wchar_p, c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p]
     optix.update_geometry.restype = c_uint
 
+    optix.update_geometry_raw.argtypes = [c_wchar_p, c_int, c_void_p, c_bool, c_void_p, c_bool, c_void_p, c_bool, c_void_p, c_bool, c_void_p, c_bool, c_void_p, c_bool]
+    optix.update_geometry_raw.restype = c_uint
+
+    optix.sync_geometry_data.argtypes = [c_wchar_p]
+    optix.sync_geometry_data.restype = c_bool
+
     optix.get_geometry_size.argtypes = [c_wchar_p]
     optix.get_geometry_size.restype = c_int
 
@@ -773,6 +779,17 @@ class _ClrOptiX_v2:
                                                IntPtr.__overloads__[Int64](u),
                                                IntPtr.__overloads__[Int64](v),
                                                IntPtr.__overloads__[Int64](w))
+
+    def update_geometry_raw(self, name, n_primitives, pos, is_pos_gpu, c, is_c_gpu, r, is_r_gpu, u, is_u_gpu, v, is_v_gpu, w, is_w_gpu):
+        return self._optix.update_geometry_raw_ptr(name, n_primitives,
+                                               IntPtr.__overloads__[Int64](pos), is_pos_gpu,
+                                               IntPtr.__overloads__[Int64](c), is_c_gpu,
+                                               IntPtr.__overloads__[Int64](r), is_r_gpu,
+                                               IntPtr.__overloads__[Int64](u), is_u_gpu,
+                                               IntPtr.__overloads__[Int64](v), is_v_gpu,
+                                               IntPtr.__overloads__[Int64](w), is_w_gpu)
+
+    def sync_geometry_data(self, name): return self._optix.sync_geometry_data(name)
 
     def get_geometry_size(self, name): return self._optix.get_geometry_size(name)
 
@@ -1421,6 +1438,17 @@ class _ClrOptiX_v3:
                                                IntPtr(u),
                                                IntPtr(v),
                                                IntPtr(w))
+
+    def update_geometry_raw(self, name, n_primitives, pos, is_pos_gpu, c, is_c_gpu, r, is_r_gpu, u, is_u_gpu, v, is_v_gpu, w, is_w_gpu):
+        return self._optix.update_geometry_raw_ptr(name, n_primitives,
+                                               IntPtr(pos), is_pos_gpu,
+                                               IntPtr(c), is_c_gpu,
+                                               IntPtr(r), is_r_gpu,
+                                               IntPtr(u), is_u_gpu,
+                                               IntPtr(v), is_v_gpu,
+                                               IntPtr(w), is_w_gpu)
+
+    def sync_geometry_data(self, name): return self._optix.sync_geometry_data(name)
 
     def get_geometry_size(self, name): return self._optix.get_geometry_size(name)
 

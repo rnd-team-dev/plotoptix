@@ -1,5 +1,5 @@
-Plot geometry
-=============
+Geometry
+========
 
 Create, load, update, and remove a plot
 ---------------------------------------

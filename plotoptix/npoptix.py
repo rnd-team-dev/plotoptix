@@ -8,7 +8,7 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 import json, math, logging, os, threading, time
 import numpy as np
 
-from ctypes import byref, c_ubyte, c_float, c_uint, c_int, c_longlong
+from ctypes import byref, c_ubyte, c_float, c_uint, c_int, c_longlong, c_void_p
 from typing import List, Tuple, Callable, Optional, Union, Any
 
 from plotoptix.singleton import Singleton
@@ -1213,8 +1213,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if data.dtype != self._torch.uint8: # everything not explicitly given as uin8 upload as float32
-            if data.dtype != self._torch.float32:
-                data = data.type(self._torch.float32)
+            data = data.type(self._torch.float32) # no copy if already float32
 
             if len(data.shape) == 1:     rt_format = RtFormat.Float
             elif len(data.shape) == 2:
@@ -1400,8 +1399,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if data.dtype != self._torch.uint8: # everything not explicitly given as uin8 upload as float32
-            if data.dtype != self._torch.float32:
-                data = data.type(self._torch.float32)
+            data = data.type(self._torch.float32) # no copy if already float32
 
             if len(data.shape) == 2:     rt_format = RtFormat.Float
             elif len(data.shape) == 3:
@@ -4387,6 +4385,104 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             finally:
                 self._padlock.release()
 
+    def _get_contiguous_mem(self, data: Any, n: int, dim: int) -> Tuple[Any, c_void_p, bool]:
+
+        if data is None:
+            return None, 0, False
+
+        depth = 2 if dim > 1 else 1
+
+        if self._torch is not None and self._torch.is_tensor(data):
+            if (len(data.shape) == depth) and (data.shape[0] == n) and (dim == 1 or data.shape[1] == dim):
+                cdata = data.type(self._torch.float32).contiguous()
+                return cdata, cdata.data_ptr(), cdata.is_cuda
+            else:
+                msg = "Tensor should be an array of shape (n, 3)."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return None, 0, False
+
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if (len(data.shape) == depth) and (data.shape[0] == n) and (dim == 1 or data.shape[1] == dim):
+            return data, data.ctypes.data, False
+        else:
+            msg = "Array shape should be (n, 3)."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return None, 0, False
+
+    def update_raw_data(self, name: str,
+                        pos: Optional[Any] = None, c: Optional[Any] = None, r: Optional[Any] = None,
+                        u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None) -> None:
+        """Update raw data of an existing geometry.
+
+        Fast and direct copy of geometry data from the source array or tensor. CPU to GPU and GPU to GPU transfers are
+        supported.
+
+        Note: number of primitives of the geometry cannot be changed and not all properties are possible to update with
+        this function, use :meth:`plotoptix.NpOptiX.set_data` or :meth:`plotoptix.NpOptiX.update_data` for more generic
+        changes.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        pos : array_like, optional
+            Positions of data points.
+        c : array_like, optional
+            Colors of the primitives.
+        r : Any, optional
+            Radii of particles / bezier primitives.
+        u : array_like, optional
+            U vectors of parallelograms / parallelepipeds / tetrahedrons / textured particles.
+        v : array_like, optional
+            V vectors of parallelograms / parallelepipeds / tetrahedrons / textured particles.
+        w : array_like, optional
+            W vectors of parallelepipeds / tetrahedrons.
+        """
+        if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if not name in self.geometry_data:
+            msg = "Geometry %s does not exists yet, use set_data() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        n_primitives = self.geometry_data[name]._size
+
+        p, p_ptr, p_gpu = self._get_contiguous_mem(pos, n_primitives, 3)
+        c, c_ptr, c_gpu = self._get_contiguous_mem(c, n_primitives, 3)
+        r, r_ptr, r_gpu = self._get_contiguous_mem(r, n_primitives, 1)
+        u, u_ptr, u_gpu = self._get_contiguous_mem(u, n_primitives, 3)
+        v, v_ptr, v_gpu = self._get_contiguous_mem(v, n_primitives, 3)
+        w, w_ptr, w_gpu = self._get_contiguous_mem(w, n_primitives, 3)
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Update %s, %d primitives...", name, n_primitives)
+            g_handle = self._optix.update_geometry_raw(name, n_primitives,
+                                                       p_ptr, p_gpu, c_ptr, c_gpu, r_ptr, r_gpu,
+                                                       u_ptr, u_gpu, v_ptr, v_gpu, w_ptr, w_gpu
+            )
+
+            if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
+                self._logger.info("...done, handle: %d", g_handle)
+            else:
+                msg = "Raw data update failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
+                
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+        finally:
+            self._padlock.release()
 
     def update_data(self, name: str,
                     mat: Optional[str] = None,

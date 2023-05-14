@@ -623,6 +623,8 @@ class TkOptiX(NpOptiX):
         else:
             # manipulate selected ogject
             name = self.geometry_names[self._selection_handle]
+            if not self._optix.sync_geometry_data(name):
+                self._logger.error("CPU data not synced to GPU copies.")
             if self._left_mouse:
                 if not self._any_key:
                     rx = np.pi * (self._mouse_to_y - self._mouse_from_y) / self._height
