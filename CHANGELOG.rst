@@ -10,6 +10,11 @@ Added
 - set texture data from pytorch tensors
 - texture filter modes enabled, default is *trilinear*, optionally can be changed to *nearest*
 
+- set geometry data directly from numpy array or pytorch tensor (no host copy is mada)
+- synchronization method to update host copy with data from gpu: NpOptiX.sync_raw_data()
+
+- convenience method to get a copy of geometry data (more simple than PinnedBuffer, though returns a copy): NpOptiX.get_data()
+
 `v0.15.1` - 2023-03-16
 ----------------------
 

@@ -5,6 +5,7 @@ Create, load, update, and remove a plot
 ---------------------------------------
 
 .. automethod:: plotoptix.NpOptiX.get_geometry_names
+.. automethod:: plotoptix.NpOptiX.get_data
 .. automethod:: plotoptix.NpOptiX.set_data
 .. automethod:: plotoptix.NpOptiX.update_data
 .. automethod:: plotoptix.NpOptiX.set_data_2d
@@ -19,10 +20,17 @@ Create, load, update, and remove a plot
 .. automethod:: plotoptix.NpOptiX.load_displacement
 .. automethod:: plotoptix.NpOptiX.delete_geometry
 
-Direct modifications of data
-----------------------------
+Direct access and modifications of data
+---------------------------------------
 
-These methods allow making changes to properties of data points
+**Fast updates:**
+
+.. automethod:: plotoptix.NpOptiX.update_raw_data
+.. automethod:: plotoptix.NpOptiX.sync_raw_data
+
+**Geometry modifications:**
+
+Following methods allow making changes to properties of data points
 stored internally in the raytracer, without re-sending whole data
 arrays from the Python code.
 

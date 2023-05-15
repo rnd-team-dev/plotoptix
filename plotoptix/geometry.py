@@ -76,17 +76,27 @@ class GeometryMeta:
             msg = "Buffer not pinned."
             raise RuntimeError(msg)
 
-            return None
-
     def _release_buffer(self, buffer: GeomBuffer) -> None:
 
         if isinstance(buffer, str): buffer = GeomBuffer[buffer]
 
-
-
         if not self._optix.unpin_geometry_buffer(self._name, buffer.value):
             msg = "Buffer not released."
             raise RuntimeError(msg)
+
+    def copy_buffer(self, buffer: Union[GeomBuffer, str]) -> Optional[np.ndarray]:
+        """Return a copy of geometry buffer contents.
+        """
+
+        try:
+            b = self._pin_buffer(buffer)
+            data = np.ctypeslib.as_array(b).copy() if b is not None else None
+        except:
+            data = None
+        finally:
+            self._release_buffer(buffer)
+
+        return data
 
 class PinnedBuffer:
     """Pins an internal buffer memory and exposes it as an ``np.ndarray``.

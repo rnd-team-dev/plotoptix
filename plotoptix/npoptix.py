@@ -4416,34 +4416,86 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return None, 0, False
 
+    def sync_raw_data(self, name: str) -> None:
+        """Synchronize geometry raw data.
+
+        This method updates CPU geometry data buffers if GPU copies were modified directly with :meth:`plotoptix.NpOptiX.update_raw_data`.
+        """
+        if not self._optix.sync_geometry_data(name):
+            msg = "CPU data not synced to GPU copies."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+
+    def get_data(self, name: str, buffer: Union[GeomBuffer, str]) -> Optional[np.ndarray]:
+        """Clone geometry data and return as numpy array.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        buffer : GeomBuffer or string
+            Geometry data type that will be cloned.
+        """
+        if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if not name in self.geometry_data:
+            msg = "Geometry %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return None
+
+        self.sync_raw_data(name)
+
+        return self.geometry_data[name].copy_buffer(buffer)
+
+
     def update_raw_data(self, name: str,
                         pos: Optional[Any] = None, c: Optional[Any] = None, r: Optional[Any] = None,
                         u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None) -> None:
         """Update raw data of an existing geometry.
 
-        Fast and direct copy of geometry data from the source array or tensor. CPU to GPU and GPU to GPU transfers are
-        supported.
+        Fast and direct copy of geometry data from a source array or tensor. CPU to GPU and GPU to GPU transfers are
+        supported. Local CPU copy is not updated by this method, however data in modified buffers can be synchronized
+        with :meth:`plotoptix.NpOptiX.sync_raw_data`.
 
         Note: number of primitives of the geometry cannot be changed and not all properties are possible to update with
         this function, use :meth:`plotoptix.NpOptiX.set_data` or :meth:`plotoptix.NpOptiX.update_data` for more generic
         changes.
+
+        ParticleSet, Parallelogram, Parallepiped, and BSpline geometries: all data updates are supported.
+
+        Tetrahedrons: only colors can be updated.
+
+        BezierChain: updates are not implemented (geometry properties require preprocessing, and cannot update directly).
+        Use BSplines or CatmullRom instead.
+
+        Graph, surface and wireframe geometries also require preprocessing and are not supported now.
+
+        Mesh: only vertex, color and normal data updates are supported.
 
         Parameters
         ----------
         name : string
             Name of the geometry.
         pos : array_like, optional
-            Positions of data points.
+            Positions of data points or mesh vertices.
         c : array_like, optional
             Colors of the primitives.
         r : Any, optional
             Radii of particles / bezier primitives.
         u : array_like, optional
             U vectors of parallelograms / parallelepipeds / tetrahedrons / textured particles.
+            Normal vectors of meshes.
         v : array_like, optional
             V vectors of parallelograms / parallelepipeds / tetrahedrons / textured particles.
         w : array_like, optional
             W vectors of parallelepipeds / tetrahedrons.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.update_data`
+        :meth:`plotoptix.NpOptiX.get_data`
         """
         if name is None: raise ValueError()
         if not isinstance(name, str): name = str(name)
