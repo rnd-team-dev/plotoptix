@@ -68,7 +68,7 @@ Features
 - *callbacks*: at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - 8/16/32bps(hdr) image output to `numpy <https://numpy.org>`__ array, or save to popular image file formats
 - zero-copy access to GPU buffers wrapped in ndarrays: 8/32bpc image, hit and object info, albedo, normals
-- direct access to `PyTorch <https://pytorch.org>`__ tensors data stored on GPU (anc CPU as well) for texture and geometry updates
+- direct access to `PyTorch <https://pytorch.org>`__ tensors data stored on GPU (and CPU as well) for texture and geometry updates
 - GPU acceleration using RT Cores and everything else what comes with `OptiX <https://developer.nvidia.com/optix>`__
 - hardware accelerated video output to MP4 file format using `NVENC 9.0 <https://developer.nvidia.com/nvidia-video-codec-sdk>`__
 - Tkinter based simple GUI window or a headless raytracer
@@ -185,21 +185,14 @@ Then, try running code from the top of this readme, or one of the examples. You 
 Development path
 ================
 
-This is still an early version. There are some important features not available yet, eg. ticks and labels on plot axes.
+This is still an experimental version in many aspects.
 
 PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers
-much more functionality than it is now available through PlotOptiX. We'll progressively add more to PlotOptiX if there is interest in
-this project (download, star, and `become our Patron <https://www.patreon.com/rndteam>`__
-if you like it!).
+much more functionality than it is now available through PlotOptiX. We progressively add more to PlotOptiX based mostly on the interest
+of our patrons and applications that this project supports.
 
-The idea for development is:
-
-1. Binaries for Linux (done in v0.3.0).
-2. Migrate to OptiX 7.0 (done in v0.7.0).
-3. Complete the plot layout / cover more raytracing features.
-4. Convenience functions for various plot styles. Other GUI's.
-
-   *Here, the community input is possible and warmly welcome!*
+Download, star, and `become our Patron <https://www.patreon.com/rndteam>`__ if you like the project. Get in touch, share your use case,
+we are always happy to help and take part in exciting ideas of our users.
 
 Examples
 ========
