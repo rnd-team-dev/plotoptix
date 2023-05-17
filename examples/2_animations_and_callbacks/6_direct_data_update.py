@@ -25,12 +25,13 @@ class params():
     
 # Compute updated geometry data.
 def compute(rt, delta):
-    xn = simplex(params.data)
-    yn = simplex(params.data + np.array([0, 10, params.t]))
-    zn = simplex(params.data - np.array([params.t, 10, 0]))
+    row = np.ones((params.data.shape[0], 1))
+    xn = simplex(np.concatenate([params.data, params.t * row], axis=1))
+    yn = simplex(np.concatenate([params.data, (params.t + 20) * row], axis=1))
+    zn = simplex(np.concatenate([params.data, (params.t - 20) * row], axis=1))
     dv = np.stack([xn, yn, zn], axis=1)
     params.data += 0.02 * dv
-    params.t += 0.1
+    params.t += 0.05
     
 # Fast copy to geometry buffer on device, without making a host copy.
 def update_data(rt):
