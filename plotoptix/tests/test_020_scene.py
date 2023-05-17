@@ -195,7 +195,7 @@ class TestScene(TestCase):
 
         TestScene.scene.start()
         self.assertTrue(TestScene.scene.is_started(), msg="Scene did not flip to _is_started=True state.")
-        self.assertTrue(TestScene.scene.isAlive(), msg="Raytracing thread is not alive.")
+        self.assertTrue(TestScene.scene.is_alive(), msg="Raytracing thread is not alive.")
         TestScene.is_alive = True
 
     def test080_camera(self):
@@ -263,7 +263,7 @@ class TestScene(TestCase):
         TestScene.scene.close()
         TestScene.scene.join(10)
         self.assertTrue(TestScene.scene.is_closed(), msg="Scene did not flip to _is_closed=True state.")
-        self.assertFalse(TestScene.scene.isAlive(), msg="Raytracing thread closing timed out.")
+        self.assertFalse(TestScene.scene.is_alive(), msg="Raytracing thread closing timed out.")
         TestScene.is_alive = False
 
     @classmethod

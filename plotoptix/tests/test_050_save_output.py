@@ -53,7 +53,7 @@ class TestOutput(TestCase):
 
         TestOutput.scene.start()
         self.assertTrue(TestOutput.scene.is_started(), msg="Scene did not flip to _is_started=True state.")
-        self.assertTrue(TestOutput.scene.isAlive(), msg="Raytracing thread is not alive.")
+        self.assertTrue(TestOutput.scene.is_alive(), msg="Raytracing thread is not alive.")
         TestOutput.is_alive = True
 
         self.assertFalse(TestOutput.scene.encoder_is_open(), msg="Encoder is_open is True on startup.")
@@ -102,7 +102,7 @@ class TestOutput(TestCase):
         TestOutput.scene.close()
         TestOutput.scene.join(10)
         self.assertTrue(TestOutput.scene.is_closed(), msg="Scene did not flip to _is_closed=True state.")
-        self.assertFalse(TestOutput.scene.isAlive(), msg="Raytracing thread closing timed out.")
+        self.assertFalse(TestOutput.scene.is_alive(), msg="Raytracing thread closing timed out.")
         TestOutput.is_alive = False
 
     @classmethod
