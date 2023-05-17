@@ -278,6 +278,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
     def enable_torch(self):
         """Enable pytorch features.
+
+        Required before any call to PyTorch related methods:
+        :meth:`plotoptix.NpOptiX.set_torch_texture_1d`, :meth:`plotoptix.NpOptiX.set_torch_texture_2d`,
+        or :meth:`plotoptix.NpOptiX.update_raw_data` with torch tensor used.
+
         """
         import importlib
         try:
@@ -1197,6 +1202,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.enable_torch`
         """
         if self._torch is None:
             self._logger.error("Torch features are not enabled, use rt.enable_torch() first.")
@@ -1382,6 +1391,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.enable_torch`
         """
 
         if self._torch is None:
@@ -4494,6 +4507,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         See Also
         --------
+        :meth:`plotoptix.NpOptiX.enable_torch`
         :meth:`plotoptix.NpOptiX.update_data`
         :meth:`plotoptix.NpOptiX.get_data`
         """
