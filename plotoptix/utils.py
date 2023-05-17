@@ -51,7 +51,6 @@ def set_gpu_architecture(arch: Union[GpuArchitecture, str]) -> None:
     if isinstance(arch, str): arch = GpuArchitecture[arch]
     _optix.set_gpu_architecture(arch.value)
 
-
 def _make_contiguous_vector(a: Optional[Any], n_dim: int) -> Optional[np.ndarray]:
     if a is None: return None
 

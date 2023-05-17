@@ -85,7 +85,7 @@ class TestCallbacks(TestCase):
 
         TestCallbacks.scene.start()
         self.assertTrue(TestCallbacks.scene.is_started(), msg="Scene did not flip to _is_started=True state.")
-        self.assertTrue(TestCallbacks.scene.isAlive(), msg="Raytracing thread is not alive.")
+        self.assertTrue(TestCallbacks.scene.is_alive(), msg="Raytracing thread is not alive.")
         TestCallbacks.is_alive = True
 
         self.assertTrue(TestCallbacks.initialization_trigs == 1,
@@ -145,7 +145,7 @@ class TestCallbacks(TestCase):
         TestCallbacks.scene.close()
         TestCallbacks.scene.join(10)
         self.assertTrue(TestCallbacks.scene.is_closed(), msg="Scene did not flip to _is_closed=True state.")
-        self.assertFalse(TestCallbacks.scene.isAlive(), msg="Raytracing thread closing timed out.")
+        self.assertFalse(TestCallbacks.scene.is_alive(), msg="Raytracing thread closing timed out.")
         TestCallbacks.is_alive = False
 
     @classmethod

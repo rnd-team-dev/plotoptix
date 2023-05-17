@@ -8,7 +8,7 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 import json, math, logging, os, threading, time
 import numpy as np
 
-from ctypes import byref, c_ubyte, c_float, c_uint, c_int, c_longlong
+from ctypes import byref, c_ubyte, c_float, c_uint, c_int, c_longlong, c_void_p
 from typing import List, Tuple, Callable, Optional, Union, Any
 
 from plotoptix.singleton import Singleton
@@ -157,6 +157,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         super().__init__()
 
+        self._torch = None
+
         self._raise_on_error = False
         self._logger = logging.getLogger(__name__ + "-NpOptiX")
         self._logger.setLevel(log_level)
@@ -273,6 +275,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if self._is_scene_created and not self._is_closed:
             if self._is_started: self.close()
             else: self._optix.destroy_scene()
+
+    def enable_torch(self):
+        """Enable pytorch features.
+        """
+        import importlib
+        try:
+            self._torch = importlib.import_module("torch")
+        except:
+            self._logger.error("Torch is not available.")
+            self._torch = None
 
     def get_gpu_architecture(self, ordinal: int) -> Optional[GpuArchitecture]:
         """Get SM architecture of selected GPU.
@@ -1158,8 +1170,100 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self._optix.set_int(name, x, refresh)
 
 
+    def set_torch_texture_1d(self, name: str, data: Any,
+                             addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
+                             filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
+                             keep_on_host: bool = False,
+                             refresh: bool = False) -> None:
+        """Set texture data from pytorch tensor.
+
+        Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
+        and length are deduced from the ``data`` tensor shape and dtype. Tensor can reside in
+        the GPU or CPU memory. Use ``keep_on_host=True`` to make a copy of data in the host memory
+        (in addition to GPU memory), this option is required when (small) textures are going to be
+        saved to JSON description of the scene.
+
+        Parameters
+        ----------
+        name : string
+            Texture name.
+        data : torch.Tensor
+            Texture data.
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+        if self._torch is None:
+            self._logger.error("Torch features are not enabled, use rt.enable_torch() first.")
+            return
+
+        if not self._torch.is_tensor(data):
+            msg = "Use this function with torch tensore only."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if not isinstance(name, str): name = str(name)
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
+
+        if data.dtype != self._torch.uint8: # everything not explicitly given as uin8 upload as float32
+            data = data.type(self._torch.float32) # no copy if already float32
+
+            if len(data.shape) == 1:     rt_format = RtFormat.Float
+            elif len(data.shape) == 2:
+                if data.shape[1] == 1:   rt_format = RtFormat.Float
+                elif data.shape[1] == 2: rt_format = RtFormat.Float2
+                elif data.shape[1] == 4: rt_format = RtFormat.Float4
+                else:
+                    msg = "Texture 1D shape should be (length,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            else:
+                msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+            
+        else:
+            if len(data.shape) == 1:     rt_format = RtFormat.UByte
+            elif len(data.shape) == 2:
+                if data.shape[1] == 1:   rt_format = RtFormat.UByte
+                elif data.shape[1] == 2: rt_format = RtFormat.UByte2
+                elif data.shape[1] == 4: rt_format = RtFormat.UByte4
+                else:
+                    msg = "Texture 1D shape should be (length,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            else:
+                msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+
+        self._logger.info("Set torch texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
+
+        if not self._optix.set_texture_1d(name,
+                                          data.contiguous().data_ptr(), data.is_cuda,
+                                          data.shape[0], rt_format.value,
+                                          addr_mode.value, filter_mode.value,
+                                          keep_on_host, refresh
+                                         ):
+            msg = "Torch texture 1D %s not uploaded." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+
     def set_texture_1d(self, name: str, data: Any,
                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
+                       filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                        keep_on_host: bool = False,
                        refresh: bool = False) -> None:
         """Set texture data.
@@ -1178,15 +1282,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Texture data.
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
         """
+        if self._torch is not None and self._torch.is_tensor(data):
+            self.set_torch_texture_1d(
+                name=name, data=data,
+                addr_mode=addr_mode,
+                keep_on_host=keep_on_host,
+                refresh=refresh
+            )
+
         if not isinstance(name, str): name = str(name)
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if data.dtype != np.uint8: # everything not explicitly given as uin8 upload as float32
 
@@ -1230,13 +1345,109 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.uint8)
 
         self._logger.info("Set texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
-        if not self._optix.set_texture_1d(name, data.ctypes.data, data.shape[0], rt_format.value, addr_mode.value, keep_on_host, refresh):
+        if not self._optix.set_texture_1d(name,
+                                          data.ctypes.data, False,
+                                          data.shape[0], rt_format.value,
+                                          addr_mode.value, filter_mode.value,
+                                          keep_on_host, refresh
+                                         ):
             msg = "Texture 1D %s not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
+    def set_torch_texture_2d(self, name: str, data: Any,
+                             addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                             filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
+                             keep_on_host: bool = False,
+                             refresh: bool = False) -> None:
+        """Set texture data from pytorch tensor.
+
+        Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
+        and width/height are deduced from the ``data`` tensor shape and dtype. Tensor can reside in
+        the GPU or CPU memory. Use ``keep_on_host=True`` to make a copy of data in the host memory
+        (in addition to GPU memory), this option is required when (small) textures are going to be
+        saved to JSON description of the scene.
+
+        Parameters
+        ----------
+        name : string
+            Texture name.
+        data : torch.Tensor
+            Texture data.
+        addr_mode : TextureAddressMode or string, optional
+            Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
+        keep_on_host : bool, optional
+            Store texture data copy in the host memory.
+        refresh : bool, optional
+            Set to ``True`` if the image should be re-computed.
+        """
+
+        if self._torch is None:
+            self._logger.error("Torch features are not enabled, use rt.enable_torch() first.")
+            return
+
+        if not self._torch.is_tensor(data):
+            msg = "Use this function with torch tensore only."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        if not isinstance(name, str): name = str(name)
+        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
+
+        if data.dtype != self._torch.uint8: # everything not explicitly given as uin8 upload as float32
+            data = data.type(self._torch.float32) # no copy if already float32
+
+            if len(data.shape) == 2:     rt_format = RtFormat.Float
+            elif len(data.shape) == 3:
+                if data.shape[2] == 1:   rt_format = RtFormat.Float
+                elif data.shape[2] == 2: rt_format = RtFormat.Float2
+                elif data.shape[2] == 4: rt_format = RtFormat.Float4
+                else:
+                    msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            else:
+                msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+
+        else:
+            if len(data.shape) == 2:     rt_format = RtFormat.UByte
+            elif len(data.shape) == 3:
+                if data.shape[2] == 1:   rt_format = RtFormat.UByte
+                elif data.shape[2] == 2: rt_format = RtFormat.UByte2
+                elif data.shape[2] == 4: rt_format = RtFormat.UByte4
+                else:
+                    msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            else:
+                msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return
+
+        self._logger.info("Set torch texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
+
+        if not self._optix.set_texture_2d(name,
+                                          data.contiguous().data_ptr(), data.is_cuda, data.shape[1], data.shape[0],
+                                          rt_format.value, addr_mode.value, filter_mode.value, keep_on_host, refresh
+                                         ):
+            msg = "Torch texture 2D %s not set." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+
     def set_texture_2d(self, name: str, data: Any,
                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                       filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                        keep_on_host: bool = False,
                        refresh: bool = False) -> None:
         """Set texture data.
@@ -1255,15 +1466,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Texture data.
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
         """
-        if not isinstance(name, str): name = str(name)
-        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
+        if self._torch is not None and self._torch.is_tensor(data):
+            self.set_torch_texture_2d(
+                name=name, data=data,
+                addr_mode=addr_mode,
+                keep_on_host=keep_on_host,
+                refresh=refresh
+            ) 
 
+        if not isinstance(name, str): name = str(name)
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
+
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
 
         if data.dtype != np.uint8: # everything not explicitly given as uin8 upload as float32
 
@@ -1307,7 +1529,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.uint8)
 
         self._logger.info("Set texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
-        if not self._optix.set_texture_2d(name, data.ctypes.data, data.shape[1], data.shape[0], rt_format.value, addr_mode.value, keep_on_host, refresh):
+        if not self._optix.set_texture_2d(name,
+                                          data.ctypes.data, False,
+                                          data.shape[1], data.shape[0], rt_format.value,
+                                          addr_mode.value, filter_mode.value,
+                                          keep_on_host, refresh
+                                         ):
             msg = "Texture 2D %s not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1319,6 +1546,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                      exposure: float = 1.0,
                      gamma: float = 1.0,
                      addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                     filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                      keep_on_host: bool = False,
                      refresh: bool = False) -> None:
         """Load texture from file.
@@ -1341,6 +1569,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Gamma value used in the postprocessing.
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1354,8 +1584,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(rt_format, str): rt_format = RtFormat[rt_format]
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
-        if not self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, rt_format.value, addr_mode.value, refresh):
+        if not self._optix.load_texture_2d(tex_name, file_name, prescale, baseline, exposure, gamma, rt_format.value, addr_mode.value, filter_mode.value, refresh):
             msg = "Failed on reading texture from file %s." % file_name
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
@@ -1363,6 +1594,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def set_normal_tilt(self, name: str, data: Any,
                         mapping: Union[TextureMapping, str] = TextureMapping.Flat,
                         addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                        filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                         keep_on_host: bool = False,
                         refresh: bool = False) -> None:
         """Set normal tilt data.
@@ -1385,6 +1617,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Mapping mode (see :class:`plotoptix.enums.TextureMapping`).
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -1396,6 +1630,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(mapping, str): mapping = TextureMapping[mapping]
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if len(data.shape) != 2:
             msg = "Data shape should be (height,width)."
@@ -1408,7 +1643,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._logger.info("Set shading normal tilt map for %s: %d x %d.", name, data.shape[1], data.shape[0])
         if not self._optix.set_normal_tilt(name, data.ctypes.data, data.shape[1], data.shape[0],
-                                           mapping.value, addr_mode.value, keep_on_host, refresh):
+                                           mapping.value, addr_mode.value, filter_mode.value,
+                                           keep_on_host, refresh):
             msg = "%s normal tilt map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1416,6 +1652,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
     def load_normal_tilt(self, name: str, file_name: str,
                          mapping: Union[TextureMapping, str] = TextureMapping.Flat,
                          addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                         filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                          prescale: float = 1.0,
                          baseline: float = 0.0,
                          refresh: bool = False) -> None:
@@ -1436,6 +1673,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Mapping mode (see :class:`plotoptix.enums.TextureMapping`).
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
+        filter_mode : TextureFilterMode or string, optional
+            Texture interpolation mode: nearest neighbor or trilinear.
         prescale : float, optional
             Scaling factor for displacement values.
         baseline : float, optional
@@ -1449,15 +1688,17 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if isinstance(mapping, str): mapping = TextureMapping[mapping]
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         self._logger.info("Set shading normal tilt map for %s using %s.", name, file_name)
-        if not self._optix.load_normal_tilt(name, file_name, mapping.value, addr_mode.value, prescale, baseline, refresh):
+        if not self._optix.load_normal_tilt(name, file_name, mapping.value, addr_mode.value, filter_mode.value, prescale, baseline, refresh):
             msg = "%s normal tilt map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
 
     def set_displacement(self, name: str, data: Any,
                          addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                         filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                          keep_on_host: bool = False,
                          refresh: bool = False) -> None:
         """Set surface displacement data.
@@ -1487,6 +1728,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         if len(data.shape) != 2:
             msg = "Data shape should be (height,width)."
@@ -1498,8 +1740,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
 
         self._logger.info("Set displacement map for %s: %d x %d.", name, data.shape[1], data.shape[0])
-        if not self._optix.set_displacement(name, data.ctypes.data, data.shape[1], data.shape[0],
-                                            addr_mode.value, keep_on_host, refresh):
+        if not self._optix.set_displacement(name,
+                                            data.ctypes.data, False,
+                                            data.shape[1], data.shape[0],
+                                            addr_mode.value, filter_mode.value,
+                                            keep_on_host, refresh
+                                           ):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1508,6 +1754,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                           prescale: float = 1.0,
                           baseline: float = 0.0,
                           addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                          filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
                           refresh: bool = False) -> None:
         """Load surface displacement data from file.
 
@@ -1534,9 +1781,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(file_name, str): name = str(file_name)
 
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
+        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
         self._logger.info("Set displacement map for %s using %s.", name, file_name)
-        if not self._optix.load_displacement(name, file_name, prescale, baseline, addr_mode.value, refresh):
+        if not self._optix.load_displacement(name, file_name, prescale, baseline, addr_mode.value, filter_mode.value, refresh):
             msg = "%s displacement map not uploaded." % name
             self._logger.error(msg)
             if self._raise_on_error: raise RuntimeError(msg)
@@ -1673,6 +1921,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                                            prescale, baseline, exposure, gamma,
                                            rt_format.value,
                                            TextureAddressMode.Mirror.value,
+                                           TextureFilterMode.Trilinear.value,
                                            False):
                 if not self._optix.set_bg_texture(bg_name, refresh):
                     msg = "Background texture %s not set." % bg_name
@@ -1742,7 +1991,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                         np.clip(bg, 0.0, 255.0, out=bg)
                     bg = bg.astype(dtype=np.uint8)
 
-                self.set_texture_2d(bg_name, bg, addr_mode=TextureAddressMode.Mirror, keep_on_host=keep_on_host, refresh=False)
+                self.set_texture_2d(bg_name, bg,
+                                    addr_mode=TextureAddressMode.Mirror,
+                                    filter_mode=TextureFilterMode.Trilinear,
+                                    keep_on_host=keep_on_host,
+                                    refresh=False
+                )
 
                 if not self._optix.set_bg_texture(bg_name, refresh):
                     msg = "Background texture %s not set." % bg_name
@@ -4131,6 +4385,156 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             finally:
                 self._padlock.release()
 
+    def _get_contiguous_mem(self, data: Any, n: int, dim: int) -> Tuple[Any, c_void_p, bool]:
+
+        if data is None:
+            return None, 0, False
+
+        depth = 2 if dim > 1 else 1
+
+        if self._torch is not None and self._torch.is_tensor(data):
+            if (len(data.shape) == depth) and (data.shape[0] == n) and (dim == 1 or data.shape[1] == dim):
+                cdata = data.type(self._torch.float32).contiguous()
+                return cdata, cdata.data_ptr(), cdata.is_cuda
+            else:
+                msg = "Tensor should be an array of shape (n, 3)."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return None, 0, False
+
+        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+
+        if (len(data.shape) == depth) and (data.shape[0] == n) and (dim == 1 or data.shape[1] == dim):
+            return data, data.ctypes.data, False
+        else:
+            msg = "Array shape should be (n, 3)."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return None, 0, False
+
+    def sync_raw_data(self, name: str) -> None:
+        """Synchronize geometry raw data.
+
+        This method updates CPU geometry data buffers if GPU copies were modified directly with :meth:`plotoptix.NpOptiX.update_raw_data`.
+        """
+        if not self._optix.sync_geometry_data(name):
+            msg = "CPU data not synced to GPU copies."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+
+    def get_data(self, name: str, buffer: Union[GeomBuffer, str]) -> Optional[np.ndarray]:
+        """Clone geometry data and return as numpy array.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        buffer : GeomBuffer or string
+            Geometry data type that will be cloned.
+        """
+        if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if not name in self.geometry_data:
+            msg = "Geometry %s does not exists." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return None
+
+        self.sync_raw_data(name)
+
+        return self.geometry_data[name].copy_buffer(buffer)
+
+
+    def update_raw_data(self, name: str,
+                        pos: Optional[Any] = None, c: Optional[Any] = None, r: Optional[Any] = None,
+                        u: Optional[Any] = None, v: Optional[Any] = None, w: Optional[Any] = None) -> None:
+        """Update raw data of an existing geometry.
+
+        Fast and direct copy of geometry data from a source array or tensor. CPU to GPU and GPU to GPU transfers are
+        supported. Local CPU copy is not updated by this method, however data in modified buffers can be synchronized
+        with :meth:`plotoptix.NpOptiX.sync_raw_data`.
+
+        Note: number of primitives of the geometry cannot be changed and not all properties are possible to update with
+        this function, use :meth:`plotoptix.NpOptiX.set_data` or :meth:`plotoptix.NpOptiX.update_data` for more generic
+        changes.
+
+        ParticleSet, Parallelogram, Parallepiped, and BSpline geometries: all data updates are supported.
+
+        Tetrahedrons: only colors can be updated.
+
+        BezierChain: updates are not implemented (geometry properties require preprocessing, and cannot update directly).
+        Use BSplines or CatmullRom instead.
+
+        Graph, surface and wireframe geometries also require preprocessing and are not supported now.
+
+        Mesh: only vertex, color and normal data updates are supported.
+
+        Parameters
+        ----------
+        name : string
+            Name of the geometry.
+        pos : array_like, optional
+            Positions of data points or mesh vertices.
+        c : array_like, optional
+            Colors of the primitives.
+        r : Any, optional
+            Radii of particles / bezier primitives.
+        u : array_like, optional
+            U vectors of parallelograms / parallelepipeds / tetrahedrons / textured particles.
+            Normal vectors of meshes.
+        v : array_like, optional
+            V vectors of parallelograms / parallelepipeds / tetrahedrons / textured particles.
+        w : array_like, optional
+            W vectors of parallelepipeds / tetrahedrons.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.update_data`
+        :meth:`plotoptix.NpOptiX.get_data`
+        """
+        if name is None: raise ValueError()
+        if not isinstance(name, str): name = str(name)
+
+        if not name in self.geometry_data:
+            msg = "Geometry %s does not exists yet, use set_data() instead." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
+            return
+
+        n_primitives = self.geometry_data[name]._size
+
+        p, p_ptr, p_gpu = self._get_contiguous_mem(pos, n_primitives, 3)
+        c, c_ptr, c_gpu = self._get_contiguous_mem(c, n_primitives, 3)
+        r, r_ptr, r_gpu = self._get_contiguous_mem(r, n_primitives, 1)
+        u, u_ptr, u_gpu = self._get_contiguous_mem(u, n_primitives, 3)
+        v, v_ptr, v_gpu = self._get_contiguous_mem(v, n_primitives, 3)
+        w, w_ptr, w_gpu = self._get_contiguous_mem(w, n_primitives, 3)
+
+        try:
+            self._padlock.acquire()
+            self._logger.info("Update %s, %d primitives...", name, n_primitives)
+            g_handle = self._optix.update_geometry_raw(name, n_primitives,
+                                                       p_ptr, p_gpu, c_ptr, c_gpu, r_ptr, r_gpu,
+                                                       u_ptr, u_gpu, v_ptr, v_gpu, w_ptr, w_gpu
+            )
+
+            if (g_handle > 0) and (g_handle == self.geometry_data[name]._handle):
+                self._logger.info("...done, handle: %d", g_handle)
+            else:
+                msg = "Raw data update failed."
+                self._logger.error(msg)
+                if self._raise_on_error: raise RuntimeError(msg)
+                
+        except Exception as e:
+            self._logger.error(str(e))
+            if self._raise_on_error: raise
+        finally:
+            self._padlock.release()
 
     def update_data(self, name: str,
                     mat: Optional[str] = None,

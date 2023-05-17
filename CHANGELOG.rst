@@ -1,6 +1,20 @@
 Release history
 ===============
 
+`v0.16.0` - 2023-05-17
+----------------------
+
+Added
+~~~~~
+
+- set texture data from pytorch tensors
+- texture filter modes enabled, default is *trilinear*, optionally can be changed to *nearest*
+
+- set geometry data directly from numpy array or pytorch tensor (no host copy is mada)
+- synchronization method to update host copy with data from gpu: NpOptiX.sync_raw_data()
+
+- convenience method to get a copy of geometry data (more simple than PinnedBuffer, though returns a copy): NpOptiX.get_data()
+
 `v0.15.1` - 2023-03-16
 ----------------------
 
@@ -568,6 +582,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.16.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.16.0
 .. _`v0.15.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.15.1
 .. _`v0.15.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.15.0
 .. _`v0.14.4`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.14.4
