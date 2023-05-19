@@ -18,6 +18,7 @@ Start, configure, get output
 .. automethod:: plotoptix.NpOptiX._run_event_loop
 .. automethod:: plotoptix.NpOptiX.run
 .. automethod:: plotoptix.NpOptiX.get_gpu_architecture
+.. automethod:: plotoptix.NpOptiX.enable_cupy
 .. automethod:: plotoptix.NpOptiX.enable_torch
 
 Scene configuration
@@ -127,9 +128,7 @@ GPU variables related to the raytracer general configuraton are documented below
 .. automethod:: plotoptix.NpOptiX.get_float
 .. automethod:: plotoptix.NpOptiX.get_float2
 .. automethod:: plotoptix.NpOptiX.get_float3
-.. automethod:: plotoptix.NpOptiX.set_torch_texture_1d
 .. automethod:: plotoptix.NpOptiX.set_texture_1d
-.. automethod:: plotoptix.NpOptiX.set_torch_texture_2d
 .. automethod:: plotoptix.NpOptiX.set_texture_2d
 .. automethod:: plotoptix.NpOptiX.load_texture
 

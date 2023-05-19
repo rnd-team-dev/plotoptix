@@ -1,6 +1,21 @@
 Release history
 ===============
 
+`v0.16.1` - 2023-05-20
+----------------------
+
+Added
+~~~~~
+
+- CuPy support for texture and geometry data updates
+- configurable denoiser start frame
+
+Changed
+~~~~~~~
+
+- no dedicated PyTorch/CuPy/... methods, all types handled with single corresponding method
+
+
 `v0.16.0` - 2023-05-17
 ----------------------
 
@@ -582,6 +597,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.16.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.16.1
 .. _`v0.16.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.16.0
 .. _`v0.15.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.15.1
 .. _`v0.15.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.15.0
