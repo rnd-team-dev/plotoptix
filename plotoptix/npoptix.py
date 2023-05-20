@@ -1312,6 +1312,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         See Also
         --------
         :meth:`plotoptix.NpOptiX.enable_torch`
+        :meth:`plotoptix.NpOptiX.enable_cupy`
         """
 
         if not isinstance(name, str): name = str(name)
@@ -1395,7 +1396,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Set texture data.
 
         Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
-        and width/height are deduced from the ``data`` array shape and dtype. Use ``keep_on_host=True``
+        and width/height are deduced from the ``data`` array shape and dtype. CPU arrays (Numpy)
+        and GPU arrays/tensors (PyTorch, CuPy) are supported. Use ``keep_on_host=True``
         to make a copy of data in the host memory (in addition to GPU memory), this
         option is required when (small) textures are going to be saved to JSON description
         of the scene.
@@ -1414,6 +1416,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.enable_torch`
+        :meth:`plotoptix.NpOptiX.enable_cupy`
         """
 
         if not isinstance(name, str): name = str(name)
@@ -1738,7 +1745,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Get background color.
 
         **Note**, currently returns constant background color also in texture
-        based background modes.
+        based modes.
 
         Returns
         -------
@@ -1758,8 +1765,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Set background color.
 
         Set background color or texture (shader variable ``bg_color``, texture
-        ``bg_texture`` or ``bg_texture8`` depending on the ``rt_format``). Raytrace
-        the whole scene if refresh is set to ``True``. Texture should be provided as
+        ``bg_texture`` or ``bg_texture8``, depending on the ``rt_format`` value). Run
+        raytracing if refresh is set to ``True``. Texture should be provided as
         an array of shape ``(height, width, n)``, where ``n`` is 3 or 4. 3-component
         RGB arrays are extended to 4-component RGBA shape (alpha channel is reserved
         for future implementations).
@@ -1780,8 +1787,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         bg : Any
             New backgroud color or texture data; single value is a grayscale level,
             RGB color components can be provided as an array-like values, texture
-            is provided as an array of shape ``(height, width, n)`` or string
-            with the source image file path.
+            is provided as an array of shape ``(height, width, n)`` (Numpy, CuPy,
+            PyTorch) or string with the source image file path.
         rt_format: RtFormat, optional
             Target format of the texture.
         prescale : float, optional
@@ -1802,6 +1809,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         >>> optix = TkOptiX()
         >>> optix.set_background(0.5) # set gray background
         >>> optix.set_background([0.5, 0.7, 0.9]) # set light bluish background
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.enable_torch`
+        :meth:`plotoptix.NpOptiX.enable_cupy`
         """
         if isinstance(rt_format, str): rt_format = RtFormat[rt_format]
 
@@ -1814,6 +1826,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
 
+        # set bkg from file
         if isinstance(bg, str):
             if self._optix.load_texture_2d(bg_name, bg,
                                            prescale, baseline, exposure, gamma,
@@ -1833,8 +1846,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
             return
 
-        e = 1 / exposure
+        e = 1.0 / exposure
 
+        # set const grayscale bkg color
         if isinstance(bg, float) or isinstance(bg, int):
             x = float(bg); x = e * np.power(x, gamma)
             y = float(bg); y = e * np.power(y, gamma)
@@ -1847,13 +1861,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
             return
 
-        if not isinstance(bg, np.ndarray):
-            bg = np.ascontiguousarray(bg)
-
-        if (len(bg.shape) == 1) and (bg.shape[0] == 3):
-            x = e * np.power(bg[0], gamma)
-            y = e * np.power(bg[1], gamma)
-            z = e * np.power(bg[2], gamma)
+        # set const color bkg
+        if (isinstance(bg, (list, tuple)) and len(bg) == 3) or (hasattr(bg, "shape") and len(bg.shape) == 1 and (bg.shape[0] == 3)):
+            x = e * np.power(float(bg[0]), gamma)
+            y = e * np.power(float(bg[1]), gamma)
+            z = e * np.power(float(bg[2]), gamma)
             if self._optix.set_float3("bg_color", x, y, z, refresh):
                 self._logger.info("Background constant color updated.")
             else:
@@ -1862,33 +1874,115 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
             return
 
-        if len(bg.shape) == 3:
-            if bg.shape[-1] == 3:
-                b = np.zeros((bg.shape[0], bg.shape[1], 4), dtype=bg.dtype)
-                b[...,:-1] = bg
-                bg = b
+        # set texture bkg
 
-            if bg.shape[-1] == 4:
-                if gamma != 1:
-                    if bg.dtype != np.float32 and bg.dtype != np.float64:
-                        bg = bg.astype(dtype=np.float32)
-                        bg *= 1.0/255.0
-                    bg = np.power(bg, gamma)
+        # CuPy
+        if self._cupy is not None and isinstance(bg, self._cupy.ndarray):
+            if len(bg.shape) == 2:
+                bg = self._cupy.stack([bg, bg, bg], axis=-1)
 
-                if e != 1:
-                    if bg.dtype != np.float32 and bg.dtype != np.float64:
-                        bg = bg.astype(dtype=np.float32)
-                        bg *= 1.0/255.0
-                    bg *= e
+            if len(bg.shape) == 3:
+                if bg.shape[-1] == 1:
+                    bg = self._cupy.concatenate([bg, bg, bg], axis=-1)
 
-                if rt_format == RtFormat.Float4 and bg.dtype != np.float32:
+                if bg.shape[-1] == 3:
+                    b = self._cupy.zeros((bg.shape[0], bg.shape[1], 4), dtype=bg.dtype)
+                    b[...,:-1] = bg
+                    bg = b
+
+            if gamma != 1.0 or e != 1.0:
+                if bg.dtype == self._cupy.uint8:
+                    bg = bg.astype(self._cupy.float32)
+                    bg *= 1.0/255.0
+
+                if gamma != 1.0: bg[..., :3] = self._cupy.power(bg[..., :3], gamma)
+                if e != 1.0: bg[..., :3] *= e
+
+            if rt_format == RtFormat.Float4 and bg.dtype != self._cupy.float32:
+                if bg.dtype == self._cupy.uint8:
+                    bg = bg.astype(dtype=self._cupy.float32)
+                    bg *= 1.0/255.0
+                else:
+                    bg = bg.astype(dtype=self._cupy.float32)
+            elif rt_format == RtFormat.UByte4 and bg.dtype != self._cupy.uint8:
+                if bg.dtype in [self._cupy.float16, self._cupy.float32, self._cupy.float64]:
+                    bg *= 255.0
+                    self._cupy.clip(bg, 0.0, 255.0, out=bg)
+                bg = bg.astype(dtype=self._cupy.uint8)
+
+        # PyTorch
+        elif self._torch is not None and self._torch.is_tensor(bg):
+            if len(bg.shape) == 2:
+                bg = bg.unsqueeze(-1)
+
+            if len(bg.shape) == 3:
+                if bg.shape[-1] == 1:
+                    bg = self._torch.cat([bg, bg, bg], dim=-1)
+
+                if bg.shape[-1] == 3:
+                    b = self._torch.zeros((bg.shape[0], bg.shape[1], 4), dtype=bg.dtype)
+                    b[...,:-1] = bg
+                    bg = b
+
+            if gamma != 1.0 or e != 1.0:
+                if bg.dtype == self._torch.uint8:
+                    bg = bg.type(self._torch.float32)
+                    bg *= 1.0/255.0
+
+                if gamma != 1.0: bg[..., :3] = self._torch.pow(bg[..., :3], gamma)
+                if e != 1.0: bg[..., :3] *= e
+
+            if rt_format == RtFormat.Float4 and bg.dtype != self._torch.float32:
+                if bg.dtype == self._torch.uint8:
+                    bg = bg.type(self._torch.float32)
+                    bg *= 1.0/255.0
+                else:
+                    bg = bg.type(self._torch.float32)
+            elif rt_format == RtFormat.UByte4 and bg.dtype != self._torch.uint8:
+                if bg.dtype in [self._torch.float16, self._torch.float32, self._torch.float64]:
+                    bg *= 255.0
+                    self._torch.clip(bg, 0.0, 255.0, out=bg)
+                bg = bg.type(dtype=self._torch.uint8)
+
+        # Numpy
+        else:
+            if not isinstance(bg, np.ndarray):
+                bg = np.ascontiguousarray(bg)
+
+            if len(bg.shape) == 2:
+                bg = np.stack([bg, bg, bg], axis=-1)
+
+            if len(bg.shape) == 3:
+                if bg.shape[-1] == 1:
+                    bg = np.concatenate([bg, bg, bg], axis=-1)
+
+                if bg.shape[-1] == 3:
+                    b = np.zeros((bg.shape[0], bg.shape[1], 4), dtype=bg.dtype)
+                    b[...,:-1] = bg
+                    bg = b
+
+            if gamma != 1.0 or e != 1.0:
+                if bg.dtype == np.uint8:
+                    bg = bg.astype(np.float32)
+                    bg *= 1.0/255.0
+
+                if gamma != 1.0: bg[..., :3] = np.power(bg[..., :3], gamma)
+                if e != 1.0: bg[..., :3] *= e
+
+            if rt_format == RtFormat.Float4 and bg.dtype != np.float32:
+                if bg.dtype == np.uint8:
                     bg = bg.astype(dtype=np.float32)
-                elif rt_format == RtFormat.UByte4 and bg.dtype != np.uint8:
-                    if bg.dtype == np.float32 or bg.dtype == np.float64:
-                        bg *= 255.0
-                        np.clip(bg, 0.0, 255.0, out=bg)
-                    bg = bg.astype(dtype=np.uint8)
+                    bg *= 1.0/255.0
+                else:
+                    bg = bg.astype(dtype=np.float32)
+            elif rt_format == RtFormat.UByte4 and bg.dtype != np.uint8:
+                if bg.dtype in [np.float16, np.float32, np.float64]:
+                    bg *= 255.0
+                    np.clip(bg, 0.0, 255.0, out=bg)
+                bg = bg.astype(dtype=np.uint8)
 
+
+        if len(bg.shape) == 3 and bg.shape[-1] == 4:
                 self.set_texture_2d(bg_name, bg,
                                     addr_mode=TextureAddressMode.Mirror,
                                     filter_mode=TextureFilterMode.Trilinear,
@@ -1903,11 +1997,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 self._logger.info("Background texture %s updated." % bg_name)
 
-                return
-
-        msg = "Background should be a single gray level or [r,g,b] array_like or 2D array_like of [r,g,b]/[r,g,b,a] values."
-        self._logger.error(msg)
-        if self._raise_on_error: raise ValueError(msg)
+        else:
+            msg = "Background should be a single gray level or [r,g,b] array_like or 2D array_like of gray/[r,g,b]/[r,g,b,a] values."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
 
     def get_ambient(self) -> Tuple[float, float, float]:
         """Get ambient color.

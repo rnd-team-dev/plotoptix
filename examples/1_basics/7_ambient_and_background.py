@@ -26,19 +26,20 @@ def main():
     r = r0 * 0.5 * (1 + np.sin(np.linspace(0, 2*b*q*np.pi, b*n))) + 0.002
 
     # create and configure, show the window later
-    optix = TkOptiX()
+    rt = TkOptiX()
 
-    optix.set_param(min_accumulation_step=2, max_accumulation_frames=64)
-    optix.setup_material("plastic", m_plastic)
+    rt.set_param(min_accumulation_step=2, max_accumulation_frames=64)
+    rt.setup_material("plastic", m_plastic)
 
-    optix.setup_camera("dof_cam", cam_type="DoF",
-                       eye=[-4, 3, 4], target=[0, 0, 0], up=[0.21, 0.86, -0.46],
-                       focal_scale=0.75)
+    rt.setup_camera("dof_cam", cam_type="DoF",
+                    eye=[-4, 3, 4], target=[0, 0, 0], up=[0.21, 0.86, -0.46],
+                    focal_scale=0.75
+    )
 
     # some exposure and gamma adjutments
-    optix.set_float("tonemap_exposure", 0.9)
-    optix.set_float("tonemap_gamma", 1.4)
-    optix.add_postproc("Gamma")
+    rt.set_float("tonemap_exposure", 0.9)
+    rt.set_float("tonemap_gamma", 1.4)
+    rt.add_postproc("Gamma")
 
     ################################################################################
     # Try one of the background / lighting settings:
@@ -48,9 +49,9 @@ def main():
     #    background color and an omnidirectional light with the color independent
     #    from the background:
 
-    #optix.setup_light("l1", color=4*np.array([0.99, 0.95, 0.9]), radius=3)
-    #optix.set_background([0, 0.02, 0.1]) # ambient and background colors can be 
-    #optix.set_ambient(0.4)               # RGB array or a gray level
+    #rt.setup_light("l1", color=np.array([0.99, 0.95, 0.9]), radius=3)
+    #rt.set_background([0, 0.02, 0.1]) # ambient and background colors can be 
+    #rt.set_ambient(0.4)               # RGB array or a gray level
 
 
     # ------------------------------------------------------------------------------
@@ -58,9 +59,9 @@ def main():
     #    background color to paint the background and as the ambient light,
     #    so a brighter one is better looking here:
 
-    #optix.set_background_mode("Default")
-    #optix.setup_light("l1", color=np.array([0.99, 0.95, 0.9]), radius=3) # just a little light from the side
-    #optix.set_background(0.94)
+    #rt.set_background_mode("Default")
+    #rt.setup_light("l1", color=np.array([0.99, 0.95, 0.9]), radius=3) # just a little light from the side
+    #rt.set_background(0.94)
 
 
     # ------------------------------------------------------------------------------
@@ -73,15 +74,11 @@ def main():
     for i in range(10):
         b[i,0]=np.full(3, a[i])
         b[i,1]=np.full(3, a[i])
+    b[:,:] *= [0.8, 0.87, 1.0] # bluish tone
 
-    # extend to RGBA (RGB is fine to use with `set_background()`, but is converted to
-    # RGBA internally anyway)
-    bg = np.zeros((10, 2, 4), dtype=np.float32)
-    bg[:,:,:-1] = b
-
-    optix.set_background_mode("TextureEnvironment")
-    optix.setup_light("l1", color=np.array([0.99, 0.95, 0.9]), radius=3) # just a little light from the side
-    optix.set_background(bg)
+    rt.set_background_mode("TextureEnvironment")
+    rt.setup_light("l1", color=np.array([0.99, 0.95, 0.9]), radius=3) # just a little light from the side
+    rt.set_background(b)
 
 
     # ------------------------------------------------------------------------------
@@ -95,10 +92,10 @@ def main():
     #    b[i,0]=np.full(3, a[i])
     #    b[i,1]=np.full(3, a[i])
 
-    #optix.set_background_mode("TextureFixed")
-    #optix.setup_light("l1", color=4*np.array([0.99, 0.95, 0.9]), radius=3)
-    #optix.set_background(b)
-    #optix.set_ambient(0.4)
+    #rt.set_background_mode("TextureFixed")
+    #rt.setup_light("l1", color=4*np.array([0.99, 0.95, 0.9]), radius=3)
+    #rt.set_background(b)
+    #rt.set_ambient(0.4)
 
 
     # ------------------------------------------------------------------------------
@@ -107,14 +104,14 @@ def main():
     ################################################################################
 
     # create a plot of parametric curve calculated above, and open the window
-    optix.set_data("plot", pos=pos, r=r, c=0.94, geom="BezierChain", mat="plastic")
-    #optix.set_data("plot", pos=pos, r=r, c=0.94, geom="BSplineQuad", mat="plastic")
-    #optix.set_data("plot", pos=pos, r=r, c=0.94, geom="BSplineCubic", mat="plastic")
-    #optix.set_data("plot", pos=pos, r=r, c=0.94, geom="SegmentChain", mat="plastic")
+    rt.set_data("plot", pos=pos, r=r, c=0.94, geom="BezierChain", mat="plastic")
+    #rt.set_data("plot", pos=pos, r=r, c=0.94, geom="BSplineQuad", mat="plastic")
+    #rt.set_data("plot", pos=pos, r=r, c=0.94, geom="BSplineCubic", mat="plastic")
+    #rt.set_data("plot", pos=pos, r=r, c=0.94, geom="SegmentChain", mat="plastic")
 
-    optix.start()
+    rt.start()
 
-    print(optix.get_background_mode())
+    print(rt.get_background_mode())
     
     print("done")
 
