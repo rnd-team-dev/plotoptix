@@ -1,14 +1,15 @@
 Release history
 ===============
 
-`v0.16.1` - 2023-05-20
+`v0.16.1` - 2023-05-21
 ----------------------
+
+**NOTE:** Binaries recompiled with OptiX 7.7, NVIDIA driver r530 or above is required.
 
 Added
 ~~~~~
 
 - CuPy support for texture and geometry data updates
-- configurable denoiser start frame
 
 Changed
 ~~~~~~~
