@@ -256,9 +256,12 @@ class Geometry(Enum):
     """Bezier curve interpolating data points.
 
     Curve thickness and color can be provided for each data point (curve node).
+    You only need to provide data points. Bezier control points are calculated
+    internally to obtain a smooth continuous curve. This implementation is faster
+    than the OptiX native used in :attr:`plotoptix.enums.Geometry.RawBezier` though
+    some artifacts might occur if curve sections are long.
 
-    Curve is smoothed, use :attr:`plotoptix.enums.Geometry.SegmentChain`
-    for a piecewise linear plot.
+    For a piecewise linear plot use :attr:`plotoptix.enums.Geometry.SegmentChain`.
     """
 
     SegmentChain = 11
@@ -294,6 +297,18 @@ class Geometry(Enum):
 
     Curve thickness and color can be provided for each data point (curve node).
     Curve interpolates its data points (nodes) exactly.
+    """
+
+    Beziers = 16
+    """Bezier curves with data points used as **control points** for each independent segment (OptiX native implementation).
+
+    Curve thickness and color can be provided for each data point (curve node).
+    """
+
+    Ribbon = 17
+    """Flat quadratic b-spline with nodes at data points.
+
+    Width and color can be provided for each data point (ribbon node).
     """
 
     Parallelograms = 7

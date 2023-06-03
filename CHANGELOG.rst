@@ -1,7 +1,7 @@
 Release history
 ===============
 
-`v0.16.1` - 2023-05-21
+`v0.16.1` - 2023-06-04
 ----------------------
 
 **NOTE:** Binaries recompiled with OptiX 7.7, NVIDIA driver r530 or above is required.
@@ -10,6 +10,7 @@ Added
 ~~~~~
 
 - CuPy support for texture and geometry data updates
+- New curve geometries: Ribbon, Beziers
 
 Changed
 ~~~~~~~

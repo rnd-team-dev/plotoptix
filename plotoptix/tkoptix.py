@@ -32,6 +32,10 @@ class TkOptiX(NpOptiX):
     - focus at an object: hold ctrl + double-click left mouse button
     - select an object: double-click left mouse button (info on terminal output)
 
+    Keyboard:
+
+    - save image (no file dialog yet, saves to ``render_output.jpg`` now): F12
+
     Note: functions with the names ``_gui_*`` can be used from the
     GUI thread (Tk event loop) only.
 
@@ -409,6 +413,8 @@ class TkOptiX(NpOptiX):
         self._selection_handle = -1
         self._selection_index = -1
 
+    def _gui_save_image(self):
+        self.save_image("render_output.jpg")
 
     def _gui_key_pressed(self, event):
         if event.keysym == "Control_L":
@@ -420,6 +426,8 @@ class TkOptiX(NpOptiX):
             self._any_key = True
         else:
             self._any_key = False
+            if event.keysym == "F12":
+                self._gui_save_image()
 
     def _gui_key_released(self, event):
         if event.keysym == "Control_L":

@@ -4309,6 +4309,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
+        elif geom == Geometry.Ribbon:
+            if n_primitives < 3:
+                msg = "Ribbon requires at least 3 data points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if c is None:
+                msg = "Ribbon setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if r is None:
+                msg = "Ribbon setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
         elif geom == Geometry.BSplineCubic:
             if n_primitives < 4:
                 msg = "BSplineCubic requires at least 4 data points."
@@ -4324,6 +4343,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if r is None:
                 msg = "BSplineCubic setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+        elif geom == Geometry.Beziers:
+            if n_primitives < 4:
+                msg = "Bezier requires at least 4 data points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if c is None:
+                msg = "Bezier setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if r is None:
+                msg = "Bezier setup failed, radii data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False

@@ -9,8 +9,8 @@ from plotoptix.materials import m_plastic
 def main():
 
     # make some data first:
-    b = 4
     n = 200
+    b = 4
     k = 9.1
     l = 1.1
     m = 7.1
@@ -28,7 +28,7 @@ def main():
     # create and configure, show the window later
     rt = TkOptiX()
 
-    rt.set_param(min_accumulation_step=2, max_accumulation_frames=64)
+    rt.set_param(min_accumulation_step=4, max_accumulation_frames=64)
     rt.setup_material("plastic", m_plastic)
 
     rt.setup_camera("dof_cam", cam_type="DoF",
@@ -105,6 +105,7 @@ def main():
 
     # create a plot of parametric curve calculated above, and open the window
     rt.set_data("plot", pos=pos, r=r, c=0.94, geom="BezierChain", mat="plastic")
+    #rt.set_data("plot", pos=pos, r=r, c=0.94, geom="Ribbon", mat="plastic")
     #rt.set_data("plot", pos=pos, r=r, c=0.94, geom="BSplineQuad", mat="plastic")
     #rt.set_data("plot", pos=pos, r=r, c=0.94, geom="BSplineCubic", mat="plastic")
     #rt.set_data("plot", pos=pos, r=r, c=0.94, geom="SegmentChain", mat="plastic")
