@@ -70,8 +70,6 @@ def main():
 
     rt.set_data("curve", pos=xyz, r=r, c=c, geom="Beziers")
 
-    rt.show()
-
     rt.setup_camera("cam1", # cam_type="DoF",
                     eye=[-6, 4, 5], target=[0, -0.6, 0],
                     glock=True
@@ -81,6 +79,8 @@ def main():
     rt.setup_light("light2", pos=[-6, -10, 5], color=20*np.array([0.7, 0.9, 0.99]), radius=2, in_geometry=True)
 
     rt.set_param(max_accumulation_frames=256)
+
+    rt.show()
 
     print("done")
 

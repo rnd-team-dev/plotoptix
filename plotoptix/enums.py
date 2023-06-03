@@ -302,7 +302,12 @@ class Geometry(Enum):
     Beziers = 16
     """Bezier curves with data points used as **control points** for each independent segment (OptiX native implementation).
 
-    Curve thickness and color can be provided for each data point (curve node).
+    Curve thickness and color can be provided for each data point (bezier control point).
+    Each segment is described with 4 control points: start, ctrl #1, ctrl #2, end. Multiple
+    segments are described with an array of control point 3D positions (colors, radii) of
+    successive segments, i.g. N segments will require an array ``(4*N,3)`` of positions,
+    an array ``(4*N,3)`` of colors and an array ``(N,)`` of radii, see also ``2_beziers.py``
+    in basic code examples.
     """
 
     Ribbon = 17
