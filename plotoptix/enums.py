@@ -258,7 +258,7 @@ class Geometry(Enum):
     Curve thickness and color can be provided for each data point (curve node).
     You only need to provide data points. Bezier control points are calculated
     internally to obtain a smooth continuous curve. This implementation is faster
-    than the OptiX native used in :attr:`plotoptix.enums.Geometry.RawBezier` though
+    than the OptiX native used in :attr:`plotoptix.enums.Geometry.Beziers` though
     some artifacts might occur if curve sections are long.
 
     For a piecewise linear plot use :attr:`plotoptix.enums.Geometry.SegmentChain`.
