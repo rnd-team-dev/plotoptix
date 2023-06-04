@@ -157,6 +157,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         super().__init__()
 
+        self._cupy = None
         self._torch = None
 
         self._raise_on_error = False
@@ -276,8 +277,23 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._is_started: self.close()
             else: self._optix.destroy_scene()
 
+    def enable_cupy(self):
+        """Enable CuPy features.
+
+        Required before any call to CuPy related methods:
+        :meth:`plotoptix.NpOptiX.set_cupy_texture_1d`, :meth:`plotoptix.NpOptiX.set_cupy_texture_2d`,
+        or :meth:`plotoptix.NpOptiX.update_raw_data` with CuPy array used.
+
+        """
+        import importlib
+        try:
+            self._cupy = importlib.import_module("cupy")
+        except:
+            self._logger.error("CuPy is not available.")
+            self._cupy = None
+
     def enable_torch(self):
-        """Enable pytorch features.
+        """Enable PyTorch features.
 
         Required before any call to PyTorch related methods:
         :meth:`plotoptix.NpOptiX.set_torch_texture_1d`, :meth:`plotoptix.NpOptiX.set_torch_texture_2d`,
@@ -1174,55 +1190,70 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         self._optix.set_int(name, x, refresh)
 
+    def _get_contiguous_tex_mem(self, data: Any) -> Tuple[Any, bool, c_void_p, bool]:
 
-    def set_torch_texture_1d(self, name: str, data: Any,
-                             addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
-                             filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
-                             keep_on_host: bool = False,
-                             refresh: bool = False) -> None:
-        """Set texture data from pytorch tensor.
+        if data is None:
+            return None, False, 0, False
 
-        Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
-        and length are deduced from the ``data`` tensor shape and dtype. Tensor can reside in
-        the GPU or CPU memory. Use ``keep_on_host=True`` to make a copy of data in the host memory
-        (in addition to GPU memory), this option is required when (small) textures are going to be
-        saved to JSON description of the scene.
+        is_ubyte = False
+        is_cuda = False
+        data_ptr = 0
 
-        Parameters
-        ----------
-        name : string
-            Texture name.
-        data : torch.Tensor
-            Texture data.
-        addr_mode : TextureAddressMode or string, optional
-            Texture addressing mode on edge crossing.
-        filter_mode : TextureFilterMode or string, optional
-            Texture interpolation mode: nearest neighbor or trilinear.
-        keep_on_host : bool, optional
-            Store texture data copy in the host memory.
-        refresh : bool, optional
-            Set to ``True`` if the image should be re-computed.
+        if self._cupy is not None and isinstance(data, self._cupy.ndarray):
+            is_ubyte = data.dtype == self._cupy.uint8
+            if not is_ubyte and data.dtype != self._cupy.float32:
+                data = self._cupy.ascontiguousarray(data, dtype=self._cupy.float32)
 
-        See Also
-        --------
-        :meth:`plotoptix.NpOptiX.enable_torch`
-        """
-        if self._torch is None:
-            self._logger.error("Torch features are not enabled, use rt.enable_torch() first.")
-            return
+            if not data.flags['C_CONTIGUOUS']: data = self._cupy.ascontiguousarray(data)
+            data_ptr = data.data.ptr
+            is_cuda = True
 
-        if not self._torch.is_tensor(data):
-            msg = "Use this function with torch tensore only."
-            self._logger.error(msg)
-            if self._raise_on_error: raise ValueError(msg)
-            return
+        elif self._torch is not None and self._torch.is_tensor(data):
+            is_ubyte = data.dtype == self._torch.uint8
+            if not is_ubyte:                          # everything not explicitly given as uin8 upload as float32
+                data = data.type(self._torch.float32) # no copy if already float32
 
-        if not isinstance(name, str): name = str(name)
-        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
-        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
+            data = data.contiguous()                  # no copy if already contiguous
+            data_ptr = data.data_ptr()
+            is_cuda = data.is_cuda
 
-        if data.dtype != self._torch.uint8: # everything not explicitly given as uin8 upload as float32
-            data = data.type(self._torch.float32) # no copy if already float32
+        else:
+            is_ubyte = data.dtype == np.uint8
+            if not is_ubyte and data.dtype != np.float32:
+                data = np.ascontiguousarray(data, dtype=np.float32)
+
+            if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data)
+            data_ptr = data.ctypes.data
+            is_cuda = False
+
+        return data, is_ubyte, data_ptr, is_cuda
+
+    def _get_contiguous_tex1d_mem(self, data: Any) -> Tuple[Any, RtFormat, c_void_p, bool]:
+
+        if data is None:
+            return None, RtFormat.Float, 0, False
+
+        data, is_ubyte, data_ptr, is_cuda = self._get_contiguous_tex_mem(data)
+
+        if is_ubyte:
+
+            if len(data.shape) == 1:     rt_format = RtFormat.UByte
+            elif len(data.shape) == 2:
+                if data.shape[1] == 1:   rt_format = RtFormat.UByte
+                elif data.shape[1] == 2: rt_format = RtFormat.UByte2
+                elif data.shape[1] == 4: rt_format = RtFormat.UByte4
+                else:
+                    msg = "Texture 1D shape should be (length,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return None, RtFormat.UByte, 0, False
+            else:
+                msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return None, RtFormat.UByte, 0, False
+
+        else:
 
             if len(data.shape) == 1:     rt_format = RtFormat.Float
             elif len(data.shape) == 2:
@@ -1233,42 +1264,22 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     msg = "Texture 1D shape should be (length,n), where n=1,2,4."
                     self._logger.error(msg)
                     if self._raise_on_error: raise ValueError(msg)
-                    return
+                    return None, RtFormat.Float, 0, False
             else:
                 msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
-                return
-            
-        else:
-            if len(data.shape) == 1:     rt_format = RtFormat.UByte
-            elif len(data.shape) == 2:
-                if data.shape[1] == 1:   rt_format = RtFormat.UByte
-                elif data.shape[1] == 2: rt_format = RtFormat.UByte2
-                elif data.shape[1] == 4: rt_format = RtFormat.UByte4
-                else:
-                    msg = "Texture 1D shape should be (length,n), where n=1,2,4."
-                    self._logger.error(msg)
-                    if self._raise_on_error: raise ValueError(msg)
-                    return
-            else:
-                msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return
+                return None, RtFormat.Float, 0, False
 
-        self._logger.info("Set torch texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
+        return data, rt_format, data_ptr, is_cuda
 
-        if not self._optix.set_texture_1d(name,
-                                          data.contiguous().data_ptr(), data.is_cuda,
-                                          data.shape[0], rt_format.value,
-                                          addr_mode.value, filter_mode.value,
-                                          keep_on_host, refresh
-                                         ):
-            msg = "Torch texture 1D %s not uploaded." % name
-            self._logger.error(msg)
-            if self._raise_on_error: raise RuntimeError(msg)
-
+    # *** Remove in the next release ***
+    def set_torch_texture_1d(self, name: str, data: Any,
+                             addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
+                             filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
+                             keep_on_host: bool = False,
+                             refresh: bool = False) -> None:
+        raise RuntimeError("Method removed. Use set_texture_1d() for any array type.")
 
     def set_texture_1d(self, name: str, data: Any,
                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
@@ -1278,110 +1289,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Set texture data.
 
         Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
-        and length are deduced from the ``data`` array shape and dtype. Use ``keep_on_host=True``
-        to make a copy of data in the host memory (in addition to GPU memory), this
-        option is required when (small) textures are going to be saved to JSON description
-        of the scene.
+        and length are deduced from the ``data`` array shape and data type. CPU arrays (Numpy)
+        and GPU arrays/tensors (PyTorch, CuPy) are supported. Use ``keep_on_host=True`` to make
+        a copy of data in the host memory (in addition to GPU memory), this option is required
+        when (small) textures are going to be saved to JSON description of the scene.
 
         Parameters
         ----------
         name : string
             Texture name.
         data : array_like
-            Texture data.
-        addr_mode : TextureAddressMode or string, optional
-            Texture addressing mode on edge crossing.
-        filter_mode : TextureFilterMode or string, optional
-            Texture interpolation mode: nearest neighbor or trilinear.
-        keep_on_host : bool, optional
-            Store texture data copy in the host memory.
-        refresh : bool, optional
-            Set to ``True`` if the image should be re-computed.
-        """
-        if self._torch is not None and self._torch.is_tensor(data):
-            self.set_torch_texture_1d(
-                name=name, data=data,
-                addr_mode=addr_mode,
-                keep_on_host=keep_on_host,
-                refresh=refresh
-            )
-
-        if not isinstance(name, str): name = str(name)
-        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
-
-        if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
-        if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
-
-        if data.dtype != np.uint8: # everything not explicitly given as uin8 upload as float32
-
-            if len(data.shape) == 1:     rt_format = RtFormat.Float
-            elif len(data.shape) == 2:
-                if data.shape[1] == 1:   rt_format = RtFormat.Float
-                elif data.shape[1] == 2: rt_format = RtFormat.Float2
-                elif data.shape[1] == 4: rt_format = RtFormat.Float4
-                else:
-                    msg = "Texture 1D shape should be (length,n), where n=1,2,4."
-                    self._logger.error(msg)
-                    if self._raise_on_error: raise ValueError(msg)
-                    return
-            else:
-                msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return
-            
-            if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
-            if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
-
-        else:
-
-            if len(data.shape) == 1:     rt_format = RtFormat.UByte
-            elif len(data.shape) == 2:
-                if data.shape[1] == 1:   rt_format = RtFormat.UByte
-                elif data.shape[1] == 2: rt_format = RtFormat.UByte2
-                elif data.shape[1] == 4: rt_format = RtFormat.UByte4
-                else:
-                    msg = "Texture 1D shape should be (length,n), where n=1,2,4."
-                    self._logger.error(msg)
-                    if self._raise_on_error: raise ValueError(msg)
-                    return
-            else:
-                msg = "Texture 1D shape should be (length,) or (length,n), where n=1,2,4."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return
-            
-            if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.uint8)
-
-        self._logger.info("Set texture 1D %s: length=%d, format=%s.", name, data.shape[0], rt_format.name)
-        if not self._optix.set_texture_1d(name,
-                                          data.ctypes.data, False,
-                                          data.shape[0], rt_format.value,
-                                          addr_mode.value, filter_mode.value,
-                                          keep_on_host, refresh
-                                         ):
-            msg = "Texture 1D %s not uploaded." % name
-            self._logger.error(msg)
-            if self._raise_on_error: raise RuntimeError(msg)
-
-    def set_torch_texture_2d(self, name: str, data: Any,
-                             addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
-                             filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
-                             keep_on_host: bool = False,
-                             refresh: bool = False) -> None:
-        """Set texture data from pytorch tensor.
-
-        Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
-        and width/height are deduced from the ``data`` tensor shape and dtype. Tensor can reside in
-        the GPU or CPU memory. Use ``keep_on_host=True`` to make a copy of data in the host memory
-        (in addition to GPU memory), this option is required when (small) textures are going to be
-        saved to JSON description of the scene.
-
-        Parameters
-        ----------
-        name : string
-            Texture name.
-        data : torch.Tensor
             Texture data.
         addr_mode : TextureAddressMode or string, optional
             Texture addressing mode on edge crossing.
@@ -1395,24 +1312,55 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         See Also
         --------
         :meth:`plotoptix.NpOptiX.enable_torch`
+        :meth:`plotoptix.NpOptiX.enable_cupy`
         """
-
-        if self._torch is None:
-            self._logger.error("Torch features are not enabled, use rt.enable_torch() first.")
-            return
-
-        if not self._torch.is_tensor(data):
-            msg = "Use this function with torch tensore only."
-            self._logger.error(msg)
-            if self._raise_on_error: raise ValueError(msg)
-            return
 
         if not isinstance(name, str): name = str(name)
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
         if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
-        if data.dtype != self._torch.uint8: # everything not explicitly given as uin8 upload as float32
-            data = data.type(self._torch.float32) # no copy if already float32
+        data, rt_format, data_ptr, is_gpu = self._get_contiguous_tex1d_mem(data)
+
+        self._logger.info(
+            "Set texture 1D %s: length=%d, format=%s, device=%s.",
+            name, data.shape[0], rt_format.name,
+            "GPU" if is_gpu else "CPU"
+        )
+        if not self._optix.set_texture_1d(name,
+                                          data_ptr, is_gpu,
+                                          data.shape[0], rt_format.value,
+                                          addr_mode.value, filter_mode.value,
+                                          keep_on_host, refresh
+                                         ):
+            msg = "Texture 1D %s not uploaded." % name
+            self._logger.error(msg)
+            if self._raise_on_error: raise RuntimeError(msg)
+
+    def _get_contiguous_tex2d_mem(self, data: Any) -> Tuple[Any, RtFormat, c_void_p, bool]:
+
+        if data is None:
+            return None, RtFormat.Float, 0, False
+
+        data, is_ubyte, data_ptr, is_cuda = self._get_contiguous_tex_mem(data)
+
+        if is_ubyte:
+
+            if len(data.shape) == 2:     rt_format = RtFormat.UByte
+            elif len(data.shape) == 3:
+                if data.shape[2] == 1:   rt_format = RtFormat.UByte
+                elif data.shape[2] == 2: rt_format = RtFormat.UByte2
+                elif data.shape[2] == 4: rt_format = RtFormat.UByte4
+                else:
+                    msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return None, RtFormat.UByte, 0, False
+            else:
+                msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                return None, RtFormat.UByte, 0, False
+        else:
 
             if len(data.shape) == 2:     rt_format = RtFormat.Float
             elif len(data.shape) == 3:
@@ -1423,40 +1371,22 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
                     self._logger.error(msg)
                     if self._raise_on_error: raise ValueError(msg)
-                    return
+                    return None, RtFormat.Float, 0, False
             else:
                 msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
-                return
+                return None, RtFormat.Float, 0, False
 
-        else:
-            if len(data.shape) == 2:     rt_format = RtFormat.UByte
-            elif len(data.shape) == 3:
-                if data.shape[2] == 1:   rt_format = RtFormat.UByte
-                elif data.shape[2] == 2: rt_format = RtFormat.UByte2
-                elif data.shape[2] == 4: rt_format = RtFormat.UByte4
-                else:
-                    msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
-                    self._logger.error(msg)
-                    if self._raise_on_error: raise ValueError(msg)
-                    return
-            else:
-                msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return
+        return data, rt_format, data_ptr, is_cuda
 
-        self._logger.info("Set torch texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
-
-        if not self._optix.set_texture_2d(name,
-                                          data.contiguous().data_ptr(), data.is_cuda, data.shape[1], data.shape[0],
-                                          rt_format.value, addr_mode.value, filter_mode.value, keep_on_host, refresh
-                                         ):
-            msg = "Torch texture 2D %s not set." % name
-            self._logger.error(msg)
-            if self._raise_on_error: raise RuntimeError(msg)
-
+    # *** Remove in the next release ***
+    def set_torch_texture_2d(self, name: str, data: Any,
+                             addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
+                             filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
+                             keep_on_host: bool = False,
+                             refresh: bool = False) -> None:
+        raise RuntimeError("Method removed. Use set_texture_2d() for any array type.")
 
     def set_texture_2d(self, name: str, data: Any,
                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
@@ -1466,7 +1396,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Set texture data.
 
         Set texture ``name`` data. Texture format (float, float2, float4 or byte, byte2, byte4)
-        and width/height are deduced from the ``data`` array shape and dtype. Use ``keep_on_host=True``
+        and width/height are deduced from the ``data`` array shape and dtype. CPU arrays (Numpy)
+        and GPU arrays/tensors (PyTorch, CuPy) are supported. Use ``keep_on_host=True``
         to make a copy of data in the host memory (in addition to GPU memory), this
         option is required when (small) textures are going to be saved to JSON description
         of the scene.
@@ -1485,65 +1416,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             Store texture data copy in the host memory.
         refresh : bool, optional
             Set to ``True`` if the image should be re-computed.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.enable_torch`
+        :meth:`plotoptix.NpOptiX.enable_cupy`
         """
-        if self._torch is not None and self._torch.is_tensor(data):
-            self.set_torch_texture_2d(
-                name=name, data=data,
-                addr_mode=addr_mode,
-                keep_on_host=keep_on_host,
-                refresh=refresh
-            ) 
 
         if not isinstance(name, str): name = str(name)
         if isinstance(addr_mode, str): addr_mode = TextureAddressMode[addr_mode]
         if isinstance(filter_mode, str): filter_mode = TextureFilterMode[filter_mode]
 
-        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data)
+        data, rt_format, data_ptr, is_gpu = self._get_contiguous_tex2d_mem(data)
 
-        if data.dtype != np.uint8: # everything not explicitly given as uin8 upload as float32
-
-            if len(data.shape) == 2:     rt_format = RtFormat.Float
-            elif len(data.shape) == 3:
-                if data.shape[2] == 1:   rt_format = RtFormat.Float
-                elif data.shape[2] == 2: rt_format = RtFormat.Float2
-                elif data.shape[2] == 4: rt_format = RtFormat.Float4
-                else:
-                    msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
-                    self._logger.error(msg)
-                    if self._raise_on_error: raise ValueError(msg)
-                    return
-            else:
-                msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return
-
-            if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
-            if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
-
-        else: # uint8
-
-            if len(data.shape) == 2:     rt_format = RtFormat.UByte
-            elif len(data.shape) == 3:
-                if data.shape[2] == 1:   rt_format = RtFormat.UByte
-                elif data.shape[2] == 2: rt_format = RtFormat.UByte2
-                elif data.shape[2] == 4: rt_format = RtFormat.UByte4
-                else:
-                    msg = "Texture 2D shape should be (height,width,n), where n=1,2,4."
-                    self._logger.error(msg)
-                    if self._raise_on_error: raise ValueError(msg)
-                    return
-            else:
-                msg = "Texture 2D shape should be (height,width) or (height,width,n), where n=1,2,4."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return
-
-            if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.uint8)
-
-        self._logger.info("Set texture 2D %s: %d x %d, format=%s.", name, data.shape[1], data.shape[0], rt_format.name)
+        self._logger.info(
+            "Set texture 2D %s: %d x %d, format=%s, device=%s.",
+            name, data.shape[1], data.shape[0], rt_format.name,
+            "GPU" if is_gpu else "CPU"
+        )
         if not self._optix.set_texture_2d(name,
-                                          data.ctypes.data, False,
+                                          data_ptr, is_gpu,
                                           data.shape[1], data.shape[0], rt_format.value,
                                           addr_mode.value, filter_mode.value,
                                           keep_on_host, refresh
@@ -1853,7 +1745,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Get background color.
 
         **Note**, currently returns constant background color also in texture
-        based background modes.
+        based modes.
 
         Returns
         -------
@@ -1873,8 +1765,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """Set background color.
 
         Set background color or texture (shader variable ``bg_color``, texture
-        ``bg_texture`` or ``bg_texture8`` depending on the ``rt_format``). Raytrace
-        the whole scene if refresh is set to ``True``. Texture should be provided as
+        ``bg_texture`` or ``bg_texture8``, depending on the ``rt_format`` value). Run
+        raytracing if refresh is set to ``True``. Texture should be provided as
         an array of shape ``(height, width, n)``, where ``n`` is 3 or 4. 3-component
         RGB arrays are extended to 4-component RGBA shape (alpha channel is reserved
         for future implementations).
@@ -1895,8 +1787,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         bg : Any
             New backgroud color or texture data; single value is a grayscale level,
             RGB color components can be provided as an array-like values, texture
-            is provided as an array of shape ``(height, width, n)`` or string
-            with the source image file path.
+            is provided as an array of shape ``(height, width, n)`` (Numpy, CuPy,
+            PyTorch) or string with the source image file path.
         rt_format: RtFormat, optional
             Target format of the texture.
         prescale : float, optional
@@ -1917,6 +1809,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         >>> optix = TkOptiX()
         >>> optix.set_background(0.5) # set gray background
         >>> optix.set_background([0.5, 0.7, 0.9]) # set light bluish background
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.enable_torch`
+        :meth:`plotoptix.NpOptiX.enable_cupy`
         """
         if isinstance(rt_format, str): rt_format = RtFormat[rt_format]
 
@@ -1929,6 +1826,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
 
+        # set bkg from file
         if isinstance(bg, str):
             if self._optix.load_texture_2d(bg_name, bg,
                                            prescale, baseline, exposure, gamma,
@@ -1948,8 +1846,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
             return
 
-        e = 1 / exposure
+        e = 1.0 / exposure
 
+        # set const grayscale bkg color
         if isinstance(bg, float) or isinstance(bg, int):
             x = float(bg); x = e * np.power(x, gamma)
             y = float(bg); y = e * np.power(y, gamma)
@@ -1962,13 +1861,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
             return
 
-        if not isinstance(bg, np.ndarray):
-            bg = np.ascontiguousarray(bg)
-
-        if (len(bg.shape) == 1) and (bg.shape[0] == 3):
-            x = e * np.power(bg[0], gamma)
-            y = e * np.power(bg[1], gamma)
-            z = e * np.power(bg[2], gamma)
+        # set const color bkg
+        if (isinstance(bg, (list, tuple)) and len(bg) == 3) or (hasattr(bg, "shape") and len(bg.shape) == 1 and (bg.shape[0] == 3)):
+            x = e * np.power(float(bg[0]), gamma)
+            y = e * np.power(float(bg[1]), gamma)
+            z = e * np.power(float(bg[2]), gamma)
             if self._optix.set_float3("bg_color", x, y, z, refresh):
                 self._logger.info("Background constant color updated.")
             else:
@@ -1977,33 +1874,115 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
             return
 
-        if len(bg.shape) == 3:
-            if bg.shape[-1] == 3:
-                b = np.zeros((bg.shape[0], bg.shape[1], 4), dtype=bg.dtype)
-                b[...,:-1] = bg
-                bg = b
+        # set texture bkg
 
-            if bg.shape[-1] == 4:
-                if gamma != 1:
-                    if bg.dtype != np.float32 and bg.dtype != np.float64:
-                        bg = bg.astype(dtype=np.float32)
-                        bg *= 1.0/255.0
-                    bg = np.power(bg, gamma)
+        # CuPy
+        if self._cupy is not None and isinstance(bg, self._cupy.ndarray):
+            if len(bg.shape) == 2:
+                bg = self._cupy.stack([bg, bg, bg], axis=-1)
 
-                if e != 1:
-                    if bg.dtype != np.float32 and bg.dtype != np.float64:
-                        bg = bg.astype(dtype=np.float32)
-                        bg *= 1.0/255.0
-                    bg *= e
+            if len(bg.shape) == 3:
+                if bg.shape[-1] == 1:
+                    bg = self._cupy.concatenate([bg, bg, bg], axis=-1)
 
-                if rt_format == RtFormat.Float4 and bg.dtype != np.float32:
+                if bg.shape[-1] == 3:
+                    b = self._cupy.zeros((bg.shape[0], bg.shape[1], 4), dtype=bg.dtype)
+                    b[...,:-1] = bg
+                    bg = b
+
+            if gamma != 1.0 or e != 1.0:
+                if bg.dtype == self._cupy.uint8:
+                    bg = bg.astype(self._cupy.float32)
+                    bg *= 1.0/255.0
+
+                if gamma != 1.0: bg[..., :3] = self._cupy.power(bg[..., :3], gamma)
+                if e != 1.0: bg[..., :3] *= e
+
+            if rt_format == RtFormat.Float4 and bg.dtype != self._cupy.float32:
+                if bg.dtype == self._cupy.uint8:
+                    bg = bg.astype(dtype=self._cupy.float32)
+                    bg *= 1.0/255.0
+                else:
+                    bg = bg.astype(dtype=self._cupy.float32)
+            elif rt_format == RtFormat.UByte4 and bg.dtype != self._cupy.uint8:
+                if bg.dtype in [self._cupy.float16, self._cupy.float32, self._cupy.float64]:
+                    bg *= 255.0
+                    self._cupy.clip(bg, 0.0, 255.0, out=bg)
+                bg = bg.astype(dtype=self._cupy.uint8)
+
+        # PyTorch
+        elif self._torch is not None and self._torch.is_tensor(bg):
+            if len(bg.shape) == 2:
+                bg = bg.unsqueeze(-1)
+
+            if len(bg.shape) == 3:
+                if bg.shape[-1] == 1:
+                    bg = self._torch.cat([bg, bg, bg], dim=-1)
+
+                if bg.shape[-1] == 3:
+                    b = self._torch.zeros((bg.shape[0], bg.shape[1], 4), dtype=bg.dtype)
+                    b[...,:-1] = bg
+                    bg = b
+
+            if gamma != 1.0 or e != 1.0:
+                if bg.dtype == self._torch.uint8:
+                    bg = bg.type(self._torch.float32)
+                    bg *= 1.0/255.0
+
+                if gamma != 1.0: bg[..., :3] = self._torch.pow(bg[..., :3], gamma)
+                if e != 1.0: bg[..., :3] *= e
+
+            if rt_format == RtFormat.Float4 and bg.dtype != self._torch.float32:
+                if bg.dtype == self._torch.uint8:
+                    bg = bg.type(self._torch.float32)
+                    bg *= 1.0/255.0
+                else:
+                    bg = bg.type(self._torch.float32)
+            elif rt_format == RtFormat.UByte4 and bg.dtype != self._torch.uint8:
+                if bg.dtype in [self._torch.float16, self._torch.float32, self._torch.float64]:
+                    bg *= 255.0
+                    self._torch.clip(bg, 0.0, 255.0, out=bg)
+                bg = bg.type(dtype=self._torch.uint8)
+
+        # Numpy
+        else:
+            if not isinstance(bg, np.ndarray):
+                bg = np.ascontiguousarray(bg)
+
+            if len(bg.shape) == 2:
+                bg = np.stack([bg, bg, bg], axis=-1)
+
+            if len(bg.shape) == 3:
+                if bg.shape[-1] == 1:
+                    bg = np.concatenate([bg, bg, bg], axis=-1)
+
+                if bg.shape[-1] == 3:
+                    b = np.zeros((bg.shape[0], bg.shape[1], 4), dtype=bg.dtype)
+                    b[...,:-1] = bg
+                    bg = b
+
+            if gamma != 1.0 or e != 1.0:
+                if bg.dtype == np.uint8:
+                    bg = bg.astype(np.float32)
+                    bg *= 1.0/255.0
+
+                if gamma != 1.0: bg[..., :3] = np.power(bg[..., :3], gamma)
+                if e != 1.0: bg[..., :3] *= e
+
+            if rt_format == RtFormat.Float4 and bg.dtype != np.float32:
+                if bg.dtype == np.uint8:
                     bg = bg.astype(dtype=np.float32)
-                elif rt_format == RtFormat.UByte4 and bg.dtype != np.uint8:
-                    if bg.dtype == np.float32 or bg.dtype == np.float64:
-                        bg *= 255.0
-                        np.clip(bg, 0.0, 255.0, out=bg)
-                    bg = bg.astype(dtype=np.uint8)
+                    bg *= 1.0/255.0
+                else:
+                    bg = bg.astype(dtype=np.float32)
+            elif rt_format == RtFormat.UByte4 and bg.dtype != np.uint8:
+                if bg.dtype in [np.float16, np.float32, np.float64]:
+                    bg *= 255.0
+                    np.clip(bg, 0.0, 255.0, out=bg)
+                bg = bg.astype(dtype=np.uint8)
 
+
+        if len(bg.shape) == 3 and bg.shape[-1] == 4:
                 self.set_texture_2d(bg_name, bg,
                                     addr_mode=TextureAddressMode.Mirror,
                                     filter_mode=TextureFilterMode.Trilinear,
@@ -2018,11 +1997,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 self._logger.info("Background texture %s updated." % bg_name)
 
-                return
-
-        msg = "Background should be a single gray level or [r,g,b] array_like or 2D array_like of [r,g,b]/[r,g,b,a] values."
-        self._logger.error(msg)
-        if self._raise_on_error: raise ValueError(msg)
+        else:
+            msg = "Background should be a single gray level or [r,g,b] array_like or 2D array_like of gray/[r,g,b]/[r,g,b,a] values."
+            self._logger.error(msg)
+            if self._raise_on_error: raise ValueError(msg)
 
     def get_ambient(self) -> Tuple[float, float, float]:
         """Get ambient color.
@@ -3957,7 +3935,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         data : array_like
             Texture data.
         idx : int, optional
-            Texture index, the first texture if the default is left.
+            Texture index, the first texture if the default ``0`` is used.
         keep_on_host : bool, optional
             Store texture data copy in the host memory.
         refresh : bool, optional
@@ -4331,6 +4309,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
+        elif geom == Geometry.Ribbon:
+            if n_primitives < 3:
+                msg = "Ribbon requires at least 3 data points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if c is None:
+                msg = "Ribbon setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if r is None:
+                msg = "Ribbon setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
         elif geom == Geometry.BSplineCubic:
             if n_primitives < 4:
                 msg = "BSplineCubic requires at least 4 data points."
@@ -4346,6 +4343,25 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if r is None:
                 msg = "BSplineCubic setup failed, radii data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+        elif geom == Geometry.Beziers:
+            if n_primitives < 4:
+                msg = "Bezier requires at least 4 data points."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if c is None:
+                msg = "Bezier setup failed, colors data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if r is None:
+                msg = "Bezier setup failed, radii data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4405,29 +4421,39 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         depth = 2 if dim > 1 else 1
 
-        if self._torch is not None and self._torch.is_tensor(data):
-            if (len(data.shape) == depth) and (data.shape[0] == n) and (dim == 1 or data.shape[1] == dim):
-                cdata = data.type(self._torch.float32).contiguous()
-                return cdata, cdata.data_ptr(), cdata.is_cuda
-            else:
-                msg = "Tensor should be an array of shape (n, 3)."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return None, 0, False
-
-        if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
-
-        if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
-
-        if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
-
-        if (len(data.shape) == depth) and (data.shape[0] == n) and (dim == 1 or data.shape[1] == dim):
-            return data, data.ctypes.data, False
-        else:
-            msg = "Array shape should be (n, 3)."
+        if (len(data.shape) != depth) or (data.shape[0] != n) or (dim > 1 and data.shape[1] != dim):
+            msg = f"Tensor/array shape should be (%d, 3)." % n
             self._logger.error(msg)
             if self._raise_on_error: raise ValueError(msg)
             return None, 0, False
+
+        data_ptr = 0
+        is_cuda = False
+
+        if self._cupy is not None and isinstance(data, self._cupy.ndarray):
+
+            if data.dtype != self._cupy.float32: data = self._cupy.ascontiguousarray(data, dtype=self._cupy.float32)
+            if not data.flags['C_CONTIGUOUS']: data = self._cupy.ascontiguousarray(data, dtype=self._cupy.float32)
+
+            data_ptr = data.data.ptr
+            is_cuda = True
+
+        elif self._torch is not None and self._torch.is_tensor(data):
+            
+            data = data.type(self._torch.float32).contiguous()
+            data_ptr = data.data_ptr()
+            is_cuda = data.is_cuda
+
+        else:
+
+            if not isinstance(data, np.ndarray): data = np.ascontiguousarray(data, dtype=np.float32)
+            if data.dtype != np.float32: data = np.ascontiguousarray(data, dtype=np.float32)
+            if not data.flags['C_CONTIGUOUS']: data = np.ascontiguousarray(data, dtype=np.float32)
+
+            data_ptr = data.ctypes.data
+            is_cuda = False
+
+        return data, data_ptr, is_cuda
 
     def sync_raw_data(self, name: str) -> None:
         """Synchronize geometry raw data.

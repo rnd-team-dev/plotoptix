@@ -34,13 +34,13 @@ def compute(rt, delta):
     params.cells[params.cells != 0.0] = 1.0
 
     # Conversion to float32 and to contiguous memoty layout is ensured by plotoptix,
-    # though you may wamt to make it explicit like here, eg for performance reasons.
+    # though you may want to make it explicit like here, eg for performance reasons.
     params.tex2D = torch.unsqueeze(params.cells[0, 0].type(torch.float32), -1).expand(-1, -1, 4).contiguous()
 
 
 # Copy texture data to plotoptix scene.
 def update_data(rt):
-    rt.set_torch_texture_2d("tex2d", params.tex2D, refresh=True)
+    rt.set_texture_2d("tex2d", params.tex2D, refresh=True)
 
 
 def main():
@@ -52,11 +52,13 @@ def main():
     rt.set_background(0)
     rt.set_ambient(0)
 
-    # NOTE: pytorch features are not enabled by default. You need
-    # to call this method before using anything related to pytorch.
+    # NOTE: PyTorch features are not enabled by default. You need
+    # to call this method before using anything related to PyTorch.
+    # Otherwise your CPU tensors will be converted to numpy arrays
+    # (GPU tensors will rise exception)
     rt.enable_torch()
 
-    rt.set_torch_texture_2d("tex2d", params.tex2D, addr_mode="Clamp", filter_mode="Nearest")
+    rt.set_texture_2d("tex2d", params.tex2D, addr_mode="Clamp", filter_mode="Nearest")
     m_flat["ColorTextures"] = [ "tex2d" ]
     rt.setup_material("flat", m_flat)
 
