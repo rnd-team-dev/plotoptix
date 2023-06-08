@@ -7,8 +7,10 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 """
 
 import logging
+import os
 import numpy as np
 import tkinter as tk
+from tkinter import filedialog
 
 from PIL import Image, ImageTk
 from ctypes import byref, c_float, c_uint
@@ -414,7 +416,24 @@ class TkOptiX(NpOptiX):
         self._selection_index = -1
 
     def _gui_save_image(self):
-        self.save_image("render_output.jpg")
+        filename = filedialog.asksaveasfilename(
+            initialdir=".", title="Save output as image",
+            initialfile="render_output.jpg",
+            defaultextension=".jpg",
+            filetypes=(
+                ("JPEG files", "*.jpg"),
+                ("PNG files", "*.png"),
+                ("TIFF 8-bit files", "*.tif*"),
+                # sorry, have to use a different extension to be able to differentiate from 8-bit tif...
+                ("TIFF 16-bit files", "*.tiff*")
+            )
+        )
+        if filename:
+            fname, fext = os.path.splitext(filename)
+            if fext.lower() == "tiff":
+                self.save_image(filename, bps="Bps16")
+            else:
+                self.save_image(filename, bps="Bps8")
 
     def _gui_key_pressed(self, event):
         if event.keysym == "Control_L":
