@@ -35,6 +35,9 @@ With a light or an object / primitive selected:
 - scale up/down: hold ctrl + shift + left mouse button and drag up/down
 - select camera: double-click left mouse button in empty area or double-right-click anywhere
 
+Keyboard:
+
+- save image: F12
 
 You'll find here super-basic examples of displaying data, like scatter plots or line plots below:
 
