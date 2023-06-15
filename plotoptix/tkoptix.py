@@ -439,14 +439,14 @@ class TkOptiX(NpOptiX):
             filetypes=(
                 ("JPEG files", "*.jpg"),
                 ("PNG files", "*.png"),
-                ("TIFF 8-bit files", "*.tif*"),
+                ("TIFF 8-bit files", "*.tif"),
                 # sorry, have to use a different extension to be able to differentiate from 8-bit tif...
-                ("TIFF 16-bit files", "*.tiff*")
+                ("TIFF 16-bit files", "*.tiff")
             )
         )
         if filename:
             fname, fext = os.path.splitext(filename)
-            if fext.lower() == "tiff":
+            if fext.lower() == ".tiff":
                 self.save_image(filename, bps="Bps16")
             else:
                 self.save_image(filename, bps="Bps8")
