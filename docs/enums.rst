@@ -13,8 +13,8 @@ Scene
 .. autoclass:: plotoptix.enums.MissProgram
     :members:
 
-Geometry
---------
+Geometry, Materials
+-------------------
 
 .. autoclass:: plotoptix.enums.Geometry
     :members:
@@ -26,7 +26,11 @@ Geometry
     :members:
 .. autoclass:: plotoptix.enums.TextureAddressMode
     :members:
+.. autoclass:: plotoptix.enums.TextureFilterMode
+    :members:
 .. autoclass:: plotoptix.enums.DisplacementMapping
+    :members:
+.. autoclass:: plotoptix.enums.MaterialType
     :members:
 
 Camera
