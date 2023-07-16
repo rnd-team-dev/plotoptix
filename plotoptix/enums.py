@@ -450,6 +450,17 @@ class GeomBuffer(IntFlag):
     """All buffers.
     """
 
+class WorkDistribution(Enum):
+    """Work distribution mode.
+    """
+    Uniform = 0
+    """Constant numbe of rays per pixel.
+    """
+
+    NoiseBalanced = 1
+    """More rays towards noisy pixels.
+    """
+
 class Camera(Enum):
     """Cameras (ray generation programs).
     """

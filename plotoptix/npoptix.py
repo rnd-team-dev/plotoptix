@@ -2061,8 +2061,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         - ``compute_timeout``
         - ``light_shading``
+        - ``work_distribution``
         - ``max_accumulation_frames``
         - ``min_accumulation_step``
+        - ``noise_threshold``
         - ``rt_timeout``
         - ``save_albedo``
         - ``save_normals``
@@ -2093,6 +2095,11 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 v = self._optix.get_min_accumulation_step()
             elif name == "max_accumulation_frames":
                 v = self._optix.get_max_accumulation_frames()
+            elif name == "work_distribution":
+                wdistr = self._optix.get_work_distribution()
+                if wdistr >= 0: v = WorkDistribution(wdistr)
+            elif name == "noise_threshold":
+                v = self._optix.get_noise_threshold()
             elif name == "light_shading":
                 shading = self._optix.get_light_shading()
                 if shading >= 0: v = LightShading(shading)
@@ -2138,6 +2145,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         
           Set mode before adding lights.
         
+        - ``work_distribution``: how rays per pixel are distributed
+
+          Default value is :attr:`plotoptix.enums.WorkDistribution.Uniform`,
+          shooting constant number of rays per pixel (though no. of rays may
+          differ vor various materials of the primary hit).
+
+          Use :attr:`plotoptix.enums.WorkDistribution.NoiseBalanced` for dynamic
+          distribution of rays based on the estimated per pixel noise.
+
         - ``max_accumulation_frames``
         
           Number of accumulation frames computed for the scene.
@@ -2146,6 +2162,13 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
           Number of accumulation frames computed in a single step (before each
           image refresh).
+
+        - ``noise_threshold``
+
+          Average noise threshold for automatic stop of ray tracing in
+          :attr:`plotoptix.enums.WorkDistribution.NoiseBalanced` mode. Default
+          value is ``0`` which effectively disables automatic stopping. Noise
+          is calculated as average relative error of the estimated pixel brightness.
 
         - ``rt_timeout``
 
@@ -2181,6 +2204,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 elif key == "max_accumulation_frames":
                     self._optix.set_max_accumulation_frames(int(value))
+
+                elif key == "work_distribution":
+                    if isinstance(value, str): mode = WorkDistribution[value]
+                    else: mode = value
+
+                    self._optix.set_work_distribution(mode.value)
+
+                elif key == "noise_threshold":
+                    self._optix.set_noise_threshold(float(value))
 
                 elif key == "light_shading":
                     if len(self.light_handles) > 0:
