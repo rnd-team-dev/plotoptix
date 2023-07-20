@@ -2835,8 +2835,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             fov = 180 * 2*np.arctan(sensor_height/(2*fy)) / np.pi
             rxy = fx / fy
 
-            sensor_width = sensor_height * self._width / self._height
-            cx = 0.5 - camera_matrix[0, 2] / sensor_width
+            cx = 0.5 - camera_matrix[0, 2] / sensor_height
             cy = 0.5 + camera_matrix[1, 2] / sensor_height
         else:
             rxy = 1.0
@@ -2948,8 +2947,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             fov = 180 * 2*np.arctan(sensor_height/(2*fy)) / np.pi
             rxy = fx / fy
 
-            sensor_width = sensor_height * self._width / self._height
-            cx = 0.5 - camera_matrix[0, 2] / sensor_width
+            cx = 0.5 - camera_matrix[0, 2] / sensor_height
             cy = 0.5 + camera_matrix[1, 2] / sensor_height
         else:
             rxy = -1.0
