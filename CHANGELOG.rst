@@ -1,13 +1,13 @@
 Release history
 ===============
 
-`v0.17.0` - 2023-07-16
+`v0.17.0` - 2023-08-06
 ----------------------
 
 Added
 ~~~~~
 
-- Noise-balanced work distribution
+- Noise-balanced work distribution.
 
 
 `v0.16.1` - 2023-06-04
