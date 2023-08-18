@@ -102,6 +102,10 @@ Installation
 PlotOptiX was also successfully tested on the `Google Cloud Platform <https://cloud.google.com/>`__, using Compute Engine instance with 2x V100 GPU's and Ubuntu 18.04 image.
 Here are the `installation steps <https://github.com/rnd-team-dev/plotoptix/blob/master/gcp_install_gpu.txt>`__ so you can save some precious seconds (FFmpeg not included).
 
+If you'd like to work on Colab, it is possible as well. `Here is a notebook <https://colab.research.google.com/drive/1RSVKYSZl1NjfttBwyuoehaEkNWnXwy6t?usp=sharing>`__ with
+all the setup and a simple image generated with PlotOptiX. *Note*: Colab drivers usually are not up to date and the most recent PlotOptiX release may not be compatible with what
+Colab provides. The sample notebook is configured to install release wich works with the available driver.
+
 Windows should be ready to go in most cases. You need to do some more typing in Linux.
 
 Windows prerequisites
