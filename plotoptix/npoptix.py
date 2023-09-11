@@ -2144,15 +2144,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
           names ``"Hard"`` and ``"Soft"`` are accepted.
         
           Set mode before adding lights.
-        
-        - ``work_distribution``: how rays per pixel are distributed
-
-          Default value is :attr:`plotoptix.enums.WorkDistribution.Uniform`,
-          shooting constant number of rays per pixel (though no. of rays may
-          differ vor various materials of the primary hit).
-
-          Use :attr:`plotoptix.enums.WorkDistribution.NoiseBalanced` for dynamic
-          distribution of rays based on the estimated per pixel noise.
 
         - ``max_accumulation_frames``
         
@@ -2204,12 +2195,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 elif key == "max_accumulation_frames":
                     self._optix.set_max_accumulation_frames(int(value))
-
-                elif key == "work_distribution":
-                    if isinstance(value, str): mode = WorkDistribution[value]
-                    else: mode = value
-
-                    self._optix.set_work_distribution(mode.value)
 
                 elif key == "noise_threshold":
                     self._optix.set_noise_threshold(float(value))
@@ -2758,6 +2743,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                      target: Optional[Any] = None,
                      up: Optional[Any] = None,
                      cam_type: Union[Camera, str] = Camera.Pinhole,
+                     work_distribution: Union[WorkDistribution, str] = WorkDistribution.Uniform,
                      aperture_radius: float = -1,
                      aperture_fract: float = 0.15,
                      focal_scale: float = -1,
@@ -2794,6 +2780,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         cam_type : Camera enum or string, optional
             Type (pinhole, depth of field, ...), see :class:`plotoptix.enums.Camera`.
             Cannot be changed after construction.
+        work_distribution :
+            How rays per pixel are distributed. Default value is :attr:`plotoptix.enums.WorkDistribution.Uniform`,
+            shooting constant number of rays per pixel (though no. of rays may
+            differ vor various materials of the primary hit).
+            See :class:`plotoptix.enums.WorkDistribution` for dynamic
+            distribution of rays based on the estimated per pixel noise.        
         aperture_radius : float, optional
             Aperture radius (increases focus blur for depth of field cameras). Default
             `-1` is internally reset to `0.1`.
@@ -2837,6 +2829,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         
         if not isinstance(name, str): name = str(name)
         if isinstance(cam_type, str): cam_type = Camera[cam_type]
+        if isinstance(work_distribution, str): work_distribution = WorkDistribution[work_distribution]
 
         if name in self.camera_handles:
             self.update_camera(name=name, eye=eye, target=target, up=up,
@@ -2896,7 +2889,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         tex_list = ""
         if textures is not None: tex_list = ";".join(textures)
 
-        h = self._optix.setup_camera(name, cam_type.value,
+        h = self._optix.setup_camera(name, cam_type.value, work_distribution.value,
                                      eye_ptr, target_ptr, up.ctypes.data,
                                      aperture_radius, aperture_fract,
                                      focal_scale, chroma_l, chroma_t,

@@ -287,17 +287,12 @@ def _load_optix_win():
     optix.set_coordinates_geom.argtypes = [c_int, c_float]
     optix.set_coordinates_geom.restype = c_bool
 
-    optix.get_work_distribution.restype = c_int
-
-    optix.set_work_distribution.argtypes = [c_int]
-    optix.set_work_distribution.restype = c_bool
-
     optix.get_noise_threshold.restype = c_float
 
     optix.set_noise_threshold.argtypes = [c_float]
     optix.set_noise_threshold.restype = c_bool
 
-    optix.setup_camera.argtypes = [c_wchar_p, c_int, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_bool, c_wchar_p, c_bool]
+    optix.setup_camera.argtypes = [c_wchar_p, c_int, c_int, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_float, c_bool, c_wchar_p, c_bool]
     optix.setup_camera.restype = c_int
 
     optix.update_camera.argtypes = [c_wchar_p, c_void_p, c_void_p, c_void_p, c_float, c_float, c_float, c_float, c_float, c_float, c_float]
@@ -941,16 +936,12 @@ class _ClrOptiX_v2:
 
     def set_coordinates_geom(self, mode, thickness): return self._optix.set_coordinates_geom(mode, thickness)
 
-    def get_work_distribution(self): return self._optix.get_work_distribution()
-
-    def set_work_distribution(self, mode): return self._optix.set_work_distribution(mode)
-
     def get_noise_threshold(self): return self._optix.get_noise_threshold()
 
     def set_noise_threshold(self, thr): return self._optix.set_noise_threshold(thr)
 
-    def setup_camera(self, name, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, rxy, cx, cy, sensor_height, blur, glock, textures, make_current):
-        return self._optix.setup_camera_ptr(name, camera_type,
+    def setup_camera(self, name, camera_type, work_distribution, eye, target, up, aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, rxy, cx, cy, sensor_height, blur, glock, textures, make_current):
+        return self._optix.setup_camera_ptr(name, camera_type, work_distribution,
                                             IntPtr.__overloads__[Int64](eye),
                                             IntPtr.__overloads__[Int64](target),
                                             IntPtr.__overloads__[Int64](up),
@@ -1715,16 +1706,12 @@ class _ClrOptiX_v3:
 
     def set_coordinates_geom(self, mode, thickness): return self._optix.set_coordinates_geom(mode, float(thickness))
 
-    def get_work_distribution(self): return self._optix.get_work_distribution()
-
-    def set_work_distribution(self, mode): return self._optix.set_work_distribution(mode)
-
     def get_noise_threshold(self): return self._optix.get_noise_threshold()
 
     def set_noise_threshold(self, thr): return self._optix.set_noise_threshold(thr)
 
-    def setup_camera(self, name, camera_type, eye, target, up, aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, rxy, cx, cy, sensor_height, blur, glock, textures, make_current):
-        return self._optix.setup_camera_ptr(name, camera_type,
+    def setup_camera(self, name, camera_type, work_distribution, eye, target, up, aperture_r, aperture_fract, focal_scale, chroma_l, chroma_t, fov, rxy, cx, cy, sensor_height, blur, glock, textures, make_current):
+        return self._optix.setup_camera_ptr(name, camera_type, work_distribution,
                                             IntPtr(eye),
                                             IntPtr(target),
                                             IntPtr(up),
