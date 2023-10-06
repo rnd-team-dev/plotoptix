@@ -1,6 +1,15 @@
 Release history
 ===============
 
+`v0.17.1` - 2023-10-06
+----------------------
+
+Added
+~~~~~
+
+- Noise-balanced work distribution: absolute and relative noise modes 
+
+
 `v0.17.0` - 2023-08-18
 ----------------------
 
@@ -608,6 +617,8 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.17.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.17.1
+.. _`v0.17.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.17.0
 .. _`v0.16.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.16.1
 .. _`v0.16.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.16.0
 .. _`v0.15.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.15.1

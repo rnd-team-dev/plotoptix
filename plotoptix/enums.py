@@ -458,7 +458,15 @@ class WorkDistribution(Enum):
     """
 
     NoiseBalanced = 1
-    """More rays towards noisy pixels.
+    """More rays towards pixels with a higher relative noise, same as.
+    """
+    
+    RelNoiseBalanced = 1
+    """More rays towards pixels a higher relative noise.
+    """
+    
+    AbsNoiseBalanced = 2
+    """More rays towards pixels a higher absolute noise.
     """
 
 class Camera(Enum):
