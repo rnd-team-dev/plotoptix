@@ -38,6 +38,8 @@ Camera
 
 .. autoclass:: plotoptix.enums.Camera
     :members:
+.. autoclass:: plotoptix.enums.WorkDistribution
+    :members:
 
 Lights
 ------
