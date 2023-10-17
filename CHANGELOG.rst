@@ -1,13 +1,21 @@
 Release history
 ===============
 
+v0.17.2 - unreleased
+
+Fixed
+~~~~~
+
+- Require min SM 5.0 instead of 6.0.
+
+
 `v0.17.1` - 2023-10-06
 ----------------------
 
 Added
 ~~~~~
 
-- Noise-balanced work distribution: absolute and relative noise modes 
+- Noise-balanced work distribution: absolute and relative noise modes.
 
 
 `v0.17.0` - 2023-08-18
