@@ -13,7 +13,7 @@ PlotOptiX
 
 **Data visualisation and ray tracing in Python based on NVIDIA OptiX framework.**
 
-`Docs <https://plotoptix.rnd.team>`__
+`Documentation <https://plotoptix.rnd.team>`__
 
 - Have a look what is possible with PlotOptiX: `Behance <https://www.behance.net/RnDTeam>`__, `Instagram <https://www.instagram.com/rnd.team.studio/>`__, and `Facebook <https://www.facebook.com/rndteam>`__.
 - Join us on `Patreon <https://www.patreon.com/rndteam?fan_landing=true>`__ for news, release plans and hi-res content.
@@ -64,7 +64,7 @@ Features
 - *geometries*: particles (spheres), parallelepipeds, parallelograms, tetrahedrons, linear segments, bezier curves, b-splines; *meshes*: shaded surface or wireframe, automatically generated from a parametric surface or f(x,y) data, or defined with vertices and faces, e.g. created with `pygmsh <https://github.com/nschloe/pygmsh>`__, or loaded from a file, e.g. supported by `trimesh <https://github.com/mikedh/trimesh>`__, or loaded from a Wavefront .obj file with a native loader
 - *materials*: flat, diffuse, reflective, refractive; including: light dispersion, surface roughness and metalness, volume scattering, and nested volumes
 - *light sources*: spherical and parallelogram, light emission in volumes, uniform environmental light or environment map
-- *post-processing*: tonal correction curves, levels adjustment, apply mask/overlay, AI denoiser and upsampler
+- *post-processing*: tonal correction curves, levels adjustment, apply mask/overlay, AI denoisers and upsampler (OptiX native, Intel Open Image)
 - *callbacks*: at the scene initialization, start and end of each frame raytracing, end of progressive accumulation
 - 8/16/32bps(hdr) image output to `numpy <https://numpy.org>`__ array, or save to popular image file formats
 - zero-copy access to GPU buffers wrapped in ndarrays: 8/32bpc image, hit and object info, albedo, normals

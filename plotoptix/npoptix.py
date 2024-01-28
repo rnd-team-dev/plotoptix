@@ -5747,7 +5747,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         try:
             self._padlock.acquire()
             self._logger.info("Setup mesh %s...", name)
-            g_handle = self._optix.setup_mesh(name, mat, n_vertices, n_faces, n_colors, n_normals, n_uv, pos_ptr, faces_ptr, col_const_ptr, col_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr, make_normals)
+            g_handle = self._optix.setup_mesh(
+                name, mat,
+                n_vertices, n_faces, n_colors, n_normals, n_uv,
+                pos_ptr, faces_ptr, col_const_ptr, col_ptr, n_ptr, nidx_ptr, uv_ptr, uvidx_ptr,
+                make_normals
+            )
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)

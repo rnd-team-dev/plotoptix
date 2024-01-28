@@ -1,12 +1,18 @@
 Release history
 ===============
 
-v0.17.2 - unreleased
+v0.18.0 - 2024-01-28
+
+Added
+~~~~~
+
+- Intel Open Image Denoiser libraries: HDR/LDR, supporting RGB/Albedo/Normal inputs.
 
 Fixed
 ~~~~~
 
 - Require min SM 5.0 instead of 6.0.
+- Minor lighting issues with masked transparency materials.
 
 
 `v0.17.1` - 2023-10-06
@@ -625,6 +631,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.18.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.18.0
 .. _`v0.17.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.17.1
 .. _`v0.17.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.17.0
 .. _`v0.16.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.16.1
