@@ -7,7 +7,7 @@ Have a look at examples on GitHub: https://github.com/rnd-team-dev/plotoptix.
 
 import os, platform, sys
 
-from ctypes import cdll, CFUNCTYPE, POINTER, byref, cast, c_float, c_uint, c_int, c_long, c_longlong, c_bool, c_char_p, c_wchar_p, c_void_p
+from ctypes import cdll, CDLL, RTLD_GLOBAL, CFUNCTYPE, POINTER, byref, cast, c_float, c_uint, c_int, c_long, c_longlong, c_bool, c_char_p, c_wchar_p, c_void_p
 
 BIN_PATH = "bin"
 
@@ -535,6 +535,15 @@ class _ClrOptiX_v2:
     """
 
     def __init__(self):
+
+        try:
+            c_oidn_core = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise_core.so"), mode=RTLD_GLOBAL)
+            c_oidn_cuda = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise_device_cuda.so"), mode=RTLD_GLOBAL)
+            c_oidn = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise.so"), mode=RTLD_GLOBAL)
+        except:
+            print(82 * "*"); print(82 * "*")
+            print("Open Image Denoiser library initialization failed.")
+            print(82 * "*"); print(82 * "*")
 
         try:
             c_encoder = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpEncoder.so"))
@@ -1185,6 +1194,15 @@ class _ClrOptiX_v3:
     """
 
     def __init__(self):
+
+        try:
+            c_oidn_core = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise_core.so"), mode=RTLD_GLOBAL)
+            c_oidn_cuda = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise_device_cuda.so"), mode=RTLD_GLOBAL)
+            c_oidn = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise.so"), mode=RTLD_GLOBAL)
+        except:
+            print(82 * "*"); print(82 * "*")
+            print("Open Image Denoiser library initialization failed.")
+            print(82 * "*"); print(82 * "*")
 
         try:
             c_encoder = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpEncoder.so"))

@@ -235,6 +235,10 @@ class MaterialFlag(IntFlag):
     """Reserved for the future implmentation. Use colors by face index (meshes)
     or segment index (curves) instead of default indexing by vertices.
     """
+    
+    CountTransmissions = 0x00000001
+    """Include transmission segments in the limit of traced path segments (off by default).
+    """
 
 class Geometry(Enum):
     """Geometry shapes.

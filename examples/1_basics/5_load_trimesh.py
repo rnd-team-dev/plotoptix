@@ -19,7 +19,7 @@ def main():
     rt = TkOptiX() # create and configure, show the window later
 
     rt.set_param(max_accumulation_frames=500)  # accumulate up to 100 frames
-    rt.set_uint("path_seg_range", 6, 12)       # allow some more ray segments
+    rt.set_uint("path_seg_range", 3, 6)        # allow some more ray segments
     rt.set_background(0)                       # black background
     rt.set_ambient([0.1, 0.12, 0.15])          # some ambient light
     #rt.set_param(light_shading="Hard")        # nice, accurate caustics, but slower convergence
