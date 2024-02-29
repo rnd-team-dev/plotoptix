@@ -345,6 +345,14 @@ class Geometry(Enum):
     Color and U / V / W vectors can be provided for each data point.
     """
 
+    ParallelepipedsConstSize = 20
+    """Parallelepipeds with shared u / v / w vectors.
+
+    Color can be provided for each data point but geometry of each primitive
+    is identical. Shared u / v / w vectors reduce memory usage and improve
+    ray-tracing efficiency.
+    """
+
     Tetrahedrons = 9
     """Tetrahedrons.
 

@@ -4200,20 +4200,22 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             radii_ptr = r.ctypes.data
         else: radii_ptr = 0
 
+        uvw_len = n_primitives if not "ConstSize" in geom.name else 1
+
         # Prepare U vectors
-        u = _make_contiguous_3d(u, n=n_primitives)
+        u = _make_contiguous_3d(u, n=uvw_len)
         u_ptr = 0
         if u is not None:
             u_ptr = u.ctypes.data
 
         # Prepare V vectors
-        v = _make_contiguous_3d(v, n=n_primitives)
+        v = _make_contiguous_3d(v, n=uvw_len)
         v_ptr = 0
         if v is not None:
             v_ptr = v.ctypes.data
 
         # Prepare W vectors
-        w = _make_contiguous_3d(w, n=n_primitives)
+        w = _make_contiguous_3d(w, n=uvw_len)
         w_ptr = 0
         if w is not None:
             w_ptr = w.ctypes.data
@@ -4228,7 +4230,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         is_ok = True
         if geom == Geometry.ParticleSet:
             if c is None:
-                msg = "ParticleSet setup failed, colors data is missing."
+                msg = "ParticleSet setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4255,7 +4257,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         elif geom == Geometry.Parallelograms:
             if c is None:
-                msg = "Parallelograms setup failed, colors data is missing."
+                msg = "Parallelograms setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4269,7 +4271,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         elif (geom == Geometry.Parallelepipeds) or (geom == Geometry.Tetrahedrons):
             if c is None:
-                msg = "Plot setup failed, colors data is missing."
+                msg = "Plot setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4281,9 +4283,28 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     if self._raise_on_error: raise ValueError(msg)
                     is_ok = False
 
+        elif (geom == Geometry.ParallelepipedsConstSize): # or (geom == Geometry.Tetrahedrons):
+            if c is None:
+                msg = "Plot setup failed, color data is missing."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if (u is None) or (v is None) or (w is None):
+                msg = "Plot setup failed, need U, V, W vectors."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
+            if (u.shape != (1,3)) or (v.shape != (1,3)) or (w.shape != (1,3)):
+                msg = "Plot setup failed, need single 3D vector for each of U, V, W."
+                self._logger.error(msg)
+                if self._raise_on_error: raise ValueError(msg)
+                is_ok = False
+
         elif geom == Geometry.BezierChain:
             if c is None:
-                msg = "BezierChain setup failed, colors data is missing."
+                msg = "BezierChain setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4302,7 +4323,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 is_ok = False
 
             if c is None:
-                msg = "SegmentChain setup failed, colors data is missing."
+                msg = "SegmentChain setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4321,7 +4342,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 is_ok = False
 
             if c is None:
-                msg = "BSplineQuad setup failed, colors data is missing."
+                msg = "BSplineQuad setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4340,7 +4361,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 is_ok = False
 
             if c is None:
-                msg = "Ribbon setup failed, colors data is missing."
+                msg = "Ribbon setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4359,7 +4380,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 is_ok = False
 
             if c is None:
-                msg = "BSplineCubic setup failed, colors data is missing."
+                msg = "BSplineCubic setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4378,7 +4399,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 is_ok = False
 
             if c is None:
-                msg = "Bezier setup failed, colors data is missing."
+                msg = "Bezier setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4397,7 +4418,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 is_ok = False
 
             if c is None:
-                msg = "CatmullRom setup failed, colors data is missing."
+                msg = "CatmullRom setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
