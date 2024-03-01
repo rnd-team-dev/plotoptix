@@ -4128,6 +4128,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         if not isinstance(name, str): name = str(name)
         if isinstance(geom, str): geom = Geometry[geom]
         if isinstance(geom_attr, str): geom_attr = GeomAttributeProgram[geom_attr]
+        constSize = "ConstSize" in geom.name
 
         if name in self.geometry_data:
             self.update_data(name, mat=mat, pos=pos, c=c, r=r, u=u, v=v, w=w)
@@ -4139,7 +4140,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
-        if r is None: r = np.ascontiguousarray([0.05], dtype=np.float32)
+        if r is None and not constSize: r = np.ascontiguousarray([0.05], dtype=np.float32)
         if c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
         if mat is None: mat = "diffuse"
 
@@ -4176,6 +4177,8 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             else: col_ptr = 0
             col_const_ptr = 0
 
+        ruvw_len = n_primitives if not constSize else 1
+
         # Prepare radii data
         if r is not None:
             if not isinstance(r, np.ndarray): r = np.ascontiguousarray(r, dtype=np.float32)
@@ -4184,38 +4187,37 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
         if r is not None:
             if r.shape[0] == 1:
-                if n_primitives > 0: r = np.full(n_primitives, r[0], dtype=np.float32)
+                if ruvw_len > 0:
+                     if (ruvw_len != r.shape[0]): r = np.full(ruvw_len, r[0], dtype=np.float32)
                 else:
                     msg = "Cannot resolve proper radii (r) shape from preceding data arguments."
                     self._logger.error(msg)
                     if self._raise_on_error: raise ValueError(msg)
                     return
                 if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
-            if (n_primitives > 0) and (n_primitives != r.shape[0]):
+            if (ruvw_len > 0) and (ruvw_len != r.shape[0]):
                 msg = "Radii (r) shape does not match shape of preceding data arguments."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 return
-            n_primitives = r.shape[0]
+            if not constSize: n_primitives = r.shape[0]
             radii_ptr = r.ctypes.data
         else: radii_ptr = 0
 
-        uvw_len = n_primitives if not "ConstSize" in geom.name else 1
-
         # Prepare U vectors
-        u = _make_contiguous_3d(u, n=uvw_len)
+        u = _make_contiguous_3d(u, n=ruvw_len)
         u_ptr = 0
         if u is not None:
             u_ptr = u.ctypes.data
 
         # Prepare V vectors
-        v = _make_contiguous_3d(v, n=uvw_len)
+        v = _make_contiguous_3d(v, n=ruvw_len)
         v_ptr = 0
         if v is not None:
             v_ptr = v.ctypes.data
 
         # Prepare W vectors
-        w = _make_contiguous_3d(w, n=uvw_len)
+        w = _make_contiguous_3d(w, n=ruvw_len)
         w_ptr = 0
         if w is not None:
             w_ptr = w.ctypes.data
@@ -4290,17 +4292,20 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
-            if (u is None) or (v is None) or (w is None):
-                msg = "Plot setup failed, need U, V, W vectors."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
+            if (u is None) and (v is None) and (w is None):
+                if r is None:
+                    msg = "Plot setup failed, need U, V, W vectors or radius to set cube edge length."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    is_ok = False
 
-            if (u.shape != (1,3)) or (v.shape != (1,3)) or (w.shape != (1,3)):
-                msg = "Plot setup failed, need single 3D vector for each of U, V, W."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
+            else:
+                if (u is not None and u.shape != (1,3)) or (v is not None and v.shape != (1,3)) or (w is not None and w.shape != (1,3)) or (r is not None and r.shape != (1,)):
+                    print(u, v, w, r)
+                    msg = "Plot setup failed, need single 3D vector for each of U, V, W or single radius to set cube edge length."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    is_ok = False
 
         elif geom == Geometry.BezierChain:
             if c is None:

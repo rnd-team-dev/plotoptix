@@ -49,6 +49,7 @@ def main():
 
     # add plots, ParticleSet geometry is default
     rt.set_data("particles", pos=particles, r=rp, c=cp)
+    
     # and use geom parameter to specify cubes geometry;
     # Parallelepipeds can be described precisely with U, V, W vectors,
     # but here we only provide the r parameter - this results with
@@ -66,7 +67,9 @@ def main():
     #rt.set_data("cubes", pos=cubes, u=[0.05,0,0], v=v, w=[0,0,0.05], c=cc, geom="Parallelepipeds")
     
     # or maybe fix geometry of all primitives (note "ConstSize" in geom name):
-    #rt.set_data("cubes", pos=cubes, u=[0.05,0,0], v=[0,0.05,0], w=[0,0,0.05], c=cc, geom="ParallelepipedsConstSize")
+    #rt.set_data("cubes", pos=cubes, u=[0.02,0,0], v=[0,0.05,0], w=[0,0,0.08], c=cc, geom="ParallelepipedsConstSize")
+    # or, if cubes are needed, simpy:
+    #rt.set_data("cubes", pos=cubes, r=0.05, c=cc, geom="ParallelepipedsConstSize")
 
     # show coordinates box
     rt.set_coordinates()
