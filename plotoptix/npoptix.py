@@ -2274,7 +2274,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self.geometry_names = {}   # geometry handle to name dictionary
         if "Geometry" in meta:
             for key, value in meta["Geometry"].items():
-                self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"])
+                self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"], Geometry[value["Type"]])
                 self.geometry_names[value["Handle"]] = key
         else: return False
 
@@ -4206,21 +4206,15 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         # Prepare U vectors
         u = _make_contiguous_3d(u, n=ruvw_len)
-        u_ptr = 0
-        if u is not None:
-            u_ptr = u.ctypes.data
+        u_ptr = u.ctypes.data if u is not None else 0
 
         # Prepare V vectors
         v = _make_contiguous_3d(v, n=ruvw_len)
-        v_ptr = 0
-        if v is not None:
-            v_ptr = v.ctypes.data
+        v_ptr = v.ctypes.data if v is not None else 0
 
         # Prepare W vectors
         w = _make_contiguous_3d(w, n=ruvw_len)
-        w_ptr = 0
-        if w is not None:
-            w_ptr = w.ctypes.data
+        w_ptr = w.ctypes.data if w is not None else 0
 
         if n_primitives == -1:
             msg = "Could not figure out proper data shapes."
@@ -4450,7 +4444,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
                 if g_handle > 0:
                     self._logger.info("...done, handle: %d", g_handle)
-                    self.geometry_data[name] = GeometryMeta(name, g_handle, n_primitives)
+                    self.geometry_data[name] = GeometryMeta(name, g_handle, n_primitives, geom)
                     self.geometry_names[g_handle] = name
                 else:
                     msg = "Geometry setup failed."
@@ -4595,14 +4589,16 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if self._raise_on_error: raise ValueError(msg)
             return
 
+        constSize = "ConstSize" in self.geometry_data[name]._geom.name
         n_primitives = self.geometry_data[name]._size
+        ruvw_len = n_primitives if not constSize else 1
 
         p, p_ptr, p_gpu = self._get_contiguous_mem(pos, n_primitives, 3)
         c, c_ptr, c_gpu = self._get_contiguous_mem(c, n_primitives, 3)
-        r, r_ptr, r_gpu = self._get_contiguous_mem(r, n_primitives, 1)
-        u, u_ptr, u_gpu = self._get_contiguous_mem(u, n_primitives, 3)
-        v, v_ptr, v_gpu = self._get_contiguous_mem(v, n_primitives, 3)
-        w, w_ptr, w_gpu = self._get_contiguous_mem(w, n_primitives, 3)
+        r, r_ptr, r_gpu = self._get_contiguous_mem(r, ruvw_len, 1)
+        u, u_ptr, u_gpu = self._get_contiguous_mem(u, ruvw_len, 3)
+        v, v_ptr, v_gpu = self._get_contiguous_mem(v, ruvw_len, 3)
+        w, w_ptr, w_gpu = self._get_contiguous_mem(w, ruvw_len, 3)
 
         try:
             self._padlock.acquire()
@@ -4672,6 +4668,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return
 
         n_primitives = self.geometry_data[name]._size
+        constSize = "ConstSize" in self.geometry_data[name]._geom.name
         size_changed = False
 
         # Prepare positions data
@@ -4706,8 +4703,10 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 c = _make_contiguous_3d(c, n=n_primitives, extend_scalars=True)
                 if c is not None: col_ptr = c.ctypes.data
 
+        ruvw_len = n_primitives if not constSize else 1
+
         # Prepare radii data
-        if size_changed and r is None:
+        if size_changed and not constSize and r is None:
             r = np.ascontiguousarray([0.05], dtype=np.float32)
         if r is not None:
             if not isinstance(r, np.ndarray): r = np.ascontiguousarray(r, dtype=np.float32)
@@ -4716,30 +4715,28 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
         radii_ptr = 0
         if r is not None:
-            if r.shape[0] == 1:
-                r = np.full(n_primitives, r[0], dtype=np.float32)
-                if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
-            if n_primitives != r.shape[0]:
-                msg = "Radii (r) shape does not match shape of preceding data arguments."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                return
+            if not constSize:
+                if r.shape[0] == 1:
+                    r = np.full(n_primitives, r[0], dtype=np.float32)
+                if n_primitives != r.shape[0]:
+                    msg = "Radii (r) shape does not match shape of preceding data arguments."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    return
+            if not r.flags['C_CONTIGUOUS']: r = np.ascontiguousarray(r, dtype=np.float32)
             radii_ptr = r.ctypes.data
 
         # Prepare U vectors
-        u = _make_contiguous_3d(u, n=n_primitives)
-        u_ptr = 0
-        if u is not None: u_ptr = u.ctypes.data
+        u = _make_contiguous_3d(u, n=ruvw_len)
+        u_ptr = u.ctypes.data if u is not None else 0
 
         # Prepare V vectors
-        v = _make_contiguous_3d(v, n=n_primitives)
-        v_ptr = 0
-        if v is not None: v_ptr = v.ctypes.data
+        v = _make_contiguous_3d(v, n=ruvw_len)
+        v_ptr = v.ctypes.data if v is not None else 0
 
         # Prepare W vectors
-        w = _make_contiguous_3d(w, n=n_primitives)
-        w_ptr = 0
-        if w is not None: w_ptr = w.ctypes.data
+        w = _make_contiguous_3d(w, n=ruvw_len)
+        w_ptr = w.ctypes.data if w is not None else 0
 
         try:
             self._padlock.acquire()
@@ -4933,7 +4930,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
-                self.geometry_data[name] = GeometryMeta(name, g_handle, pos.shape[0] * pos.shape[1])
+                self.geometry_data[name] = GeometryMeta(name, g_handle, pos.shape[0] * pos.shape[1], geom)
                 self.geometry_names[g_handle] = name
             else:
                 msg = "Surface setup failed."
@@ -5236,7 +5233,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
-                self.geometry_data[name] = GeometryMeta(name, g_handle, pos.shape[0] * pos.shape[1])
+                self.geometry_data[name] = GeometryMeta(name, g_handle, pos.shape[0] * pos.shape[1], geom)
                 self.geometry_names[g_handle] = name
             else:
                 msg = "Surface setup failed."
@@ -5483,7 +5480,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
-                self.geometry_data[name] = GeometryMeta(name, g_handle, n_vertices)
+                self.geometry_data[name] = GeometryMeta(name, g_handle, n_vertices, Geometry.Graph)
                 self.geometry_names[g_handle] = name
             else:
                 msg = "Graph setup failed."
@@ -5782,7 +5779,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
-                self.geometry_data[name] = GeometryMeta(name, g_handle, n_vertices)
+                self.geometry_data[name] = GeometryMeta(name, g_handle, n_vertices, Geometry.Mesh)
                 self.geometry_names[g_handle] = name
             else:
                 msg = "Mesh setup failed."
@@ -6017,9 +6014,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if len(s) > 2:
                 meta = json.loads(s)
                 for key, value in meta.items():
-                    self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"])
+                    self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"], Geometry[value["Type"]])
                     self.geometry_names[value["Handle"]] = key
-                    self._logger.info("...loaded: %s (%d vertices)", key, value["Size"])
+                    self._logger.info("...loaded: %s %s (%d vertices)", key, value["Size"], value["Type"])
             else:
                 msg = "Mesh loading failed."
                 self._logger.error(msg)
@@ -6072,9 +6069,9 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if len(s) > 2:
                 meta = json.loads(s)
                 for key, value in meta.items():
-                    self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"])
+                    self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"], Geometry[value["Type"]])
                     self.geometry_names[value["Handle"]] = key
-                    self._logger.info("...loaded: %s (%d vertices)", key, value["Size"])
+                    self._logger.info("...loaded: %s %s (%d vertices)", key, value["Type"], value["Size"])
             else:
                 msg = "Mesh loading failed."
                 self._logger.error(msg)

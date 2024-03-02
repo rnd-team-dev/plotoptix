@@ -11,24 +11,28 @@ from typing import Optional, Union
 from ctypes import byref, c_ubyte, c_float, c_uint, c_int, c_longlong
 import numpy as np
 
-from plotoptix.enums import GeomBuffer
+from plotoptix.enums import Geometry, GeomBuffer
 from plotoptix._load_lib import load_optix
 
 class GeometryMeta:
 
-    _name = None
+    _name: str = None
     """Unique name for the geometry object.
     """
+    
+    _geom: Geometry = None
+    """Geometry type of the object.
+    """
 
-    _handle = None
+    _handle: int = None
     """Unique int handle for the geometry object.
     """
 
-    _size = 0
+    _size: int = 0
     """Number of primitives or data points.
     """
 
-    def __init__(self, name: str, handle: int, size: int) -> None:
+    def __init__(self, name: str, handle: int, size: int, geom: Geometry) -> None:
         """Geometry metadata for all mesh-less mesh based objects in the scene.
 
         Basic geometry properties and an interface to underlaying data buffers.
@@ -36,6 +40,7 @@ class GeometryMeta:
 
         self._optix = load_optix()
         self._name = name
+        self._geom = geom
         self._handle = handle
         self._size = size
 
