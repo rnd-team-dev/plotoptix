@@ -47,9 +47,10 @@ def main():
 
     rt = TkOptiX() # create and configure, show the window later
 
+    max_frames = 16 # accumulation frames (rays/pixel in other words)
     rt.set_param(
         min_accumulation_step=4,
-        max_accumulation_frames=16
+        max_accumulation_frames=max_frames
     )
 
     rt.set_float("scene_epsilon", 1.0e-05) # expect small cubes, lower epsilon to ensure details are correctly presented
@@ -63,7 +64,7 @@ def main():
     gamma = 2.2
     rt.set_float("tonemap_exposure", exposure)
     rt.set_float("tonemap_gamma", gamma)
-    rt.set_uint("denoiser_start", 16)
+    rt.set_uint("denoiser_start", max_frames) # denoise only the final image
     rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
     rt.add_postproc("OIDenoiser")
     
