@@ -11,6 +11,8 @@ from ctypes import cdll, CDLL, RTLD_GLOBAL, CFUNCTYPE, POINTER, byref, cast, c_f
 
 BIN_PATH = "bin"
 
+OIDN_VER = "2.2.1"
+
 PLATFORM = platform.system()
 if PLATFORM == "Linux":
     import clr
@@ -537,8 +539,8 @@ class _ClrOptiX_v2:
     def __init__(self):
 
         try:
-            c_oidn_core = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise_core.so"), mode=RTLD_GLOBAL)
-            c_oidn_cuda = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise_device_cuda.so"), mode=RTLD_GLOBAL)
+            c_oidn_core = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, f"libOpenImageDenoise_core.so.{OIDN_VER}"), mode=RTLD_GLOBAL)
+            c_oidn_cuda = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, f"libOpenImageDenoise_device_cuda.so.{OIDN_VER}"), mode=RTLD_GLOBAL)
             c_oidn = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise.so"), mode=RTLD_GLOBAL)
         except:
             print(82 * "*"); print(82 * "*")
@@ -1196,8 +1198,8 @@ class _ClrOptiX_v3:
     def __init__(self):
 
         try:
-            c_oidn_core = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise_core.so"), mode=RTLD_GLOBAL)
-            c_oidn_cuda = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise_device_cuda.so"), mode=RTLD_GLOBAL)
+            c_oidn_core = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, f"libOpenImageDenoise_core.so.{OIDN_VER}"), mode=RTLD_GLOBAL)
+            c_oidn_cuda = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, f"libOpenImageDenoise_device_cuda.so.{OIDN_VER}"), mode=RTLD_GLOBAL)
             c_oidn = CDLL(os.path.join(os.path.dirname(__file__), BIN_PATH, "libOpenImageDenoise.so"), mode=RTLD_GLOBAL)
         except:
             print(82 * "*"); print(82 * "*")
