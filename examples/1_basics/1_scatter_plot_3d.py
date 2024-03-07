@@ -47,8 +47,9 @@ def main():
     # white background
     rt.set_background(0.99)
 
-    # add plots, ParticleSet geometry is default
+    # add plots, ParticleSet geometry with variable radius is default
     rt.set_data("particles", pos=particles, r=rp, c=cp)
+    #rt.set_data("particles", pos=particles, r=0.02, c=cp, geom="ParticleSetConstSize")
     
     # and use geom parameter to specify cubes geometry;
     # Parallelepipeds can be described precisely with U, V, W vectors,

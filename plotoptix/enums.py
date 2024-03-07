@@ -263,6 +263,14 @@ class Geometry(Enum):
     U vector points to the **north** of the particle, V vector sets
     the zero **longitude** direction. V vector is orthogonalized to U.
     """
+    
+    ParticleSetConstSize = 18
+    """Spherical particle with shared radius.
+
+    Color can be provided for each data point but geometry (radius) of each
+    primitive is identical. Shared radius reduces memory usage and improves
+    ray-tracing efficiency.
+    """
 
     #ParticleNetConstL = 2
     #ParticleSetVarL = 3

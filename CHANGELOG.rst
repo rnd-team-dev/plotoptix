@@ -8,8 +8,9 @@ Added
 
 - Intel Open Image Denoiser libraries: HDR/LDR, supporting RGB/Albedo/Normal inputs.
 - Optional counting of transmission path segments (previously they were counted always and included in
-  segment range limits).
-- Fixed geometry primitives (same radii, or u/v/w vectors for all data points).
+  the segment range limits).
+- Fixed geometry primitives (same radii, or u/v/w vectors for all data points) with much lower memory
+  consumption, beneficial e.g. for volume plots.
 
 Changed
 ~~~~~~~

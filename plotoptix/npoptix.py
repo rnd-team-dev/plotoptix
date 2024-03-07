@@ -4224,7 +4224,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         # Configure according to selected geometry
         is_ok = True
-        if geom == Geometry.ParticleSet:
+        if geom in [Geometry.ParticleSet, Geometry.ParticleSetConstSize]:
             if c is None:
                 msg = "ParticleSet setup failed, color data is missing."
                 self._logger.error(msg)
@@ -4265,7 +4265,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     if self._raise_on_error: raise ValueError(msg)
                     is_ok = False
 
-        elif (geom == Geometry.Parallelepipeds) or (geom == Geometry.Tetrahedrons):
+        elif geom in [Geometry.Parallelepipeds, Geometry.Tetrahedrons]:
             if c is None:
                 msg = "Plot setup failed, color data is missing."
                 self._logger.error(msg)
@@ -4279,7 +4279,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     if self._raise_on_error: raise ValueError(msg)
                     is_ok = False
 
-        elif (geom == Geometry.ParallelepipedsConstSize): # or (geom == Geometry.Tetrahedrons):
+        elif geom == Geometry.ParallelepipedsConstSize: # or (geom == Geometry.Tetrahedrons):
             if c is None:
                 msg = "Plot setup failed, color data is missing."
                 self._logger.error(msg)

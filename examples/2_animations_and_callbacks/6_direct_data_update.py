@@ -55,7 +55,7 @@ def main():
     rt.set_float("tonemap_gamma", gamma)
     rt.add_postproc("Gamma")
 
-    rt.set_data("balls", pos=params.data, c=0.82, r=params.r)
+    rt.set_data("balls", pos=params.data, c=0.82, r=params.r, geom="ParticleSetConstSize")
 
     rt.start()
 
