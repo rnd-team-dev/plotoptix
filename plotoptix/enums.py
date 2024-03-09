@@ -347,6 +347,14 @@ class Geometry(Enum):
     data point. 
     """
 
+    ParallelogramsConstSize = 19
+    """Flat parallelograms with shared U and V vectors.
+
+    Color can be provided for each data point but geometry of each primitive
+    is identical. Shared U / V vectors reduce memory usage and improve
+    ray-tracing efficiency.
+    """
+
     Parallelepipeds = 8
     """Parallelepipeds.
 
@@ -354,10 +362,10 @@ class Geometry(Enum):
     """
 
     ParallelepipedsConstSize = 20
-    """Parallelepipeds with shared u / v / w vectors.
+    """Parallelepipeds with shared U / V / W vectors.
 
     Color can be provided for each data point but geometry of each primitive
-    is identical. Shared u / v / w vectors reduce memory usage and improve
+    is identical. Shared U / V / W vectors reduce memory usage and improve
     ray-tracing efficiency.
     """
 

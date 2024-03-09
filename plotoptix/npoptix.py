@@ -4141,7 +4141,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             return
 
         if r is None and not constSize: r = np.ascontiguousarray([0.05], dtype=np.float32)
-        if c is None: c = np.ascontiguousarray([0.94, 0.94, 0.94], dtype=np.float32)
+        if c is None: c = np.ascontiguousarray([0.95, 0.95, 0.95], dtype=np.float32)
         if mat is None: mat = "diffuse"
 
         n_primitives = -1
@@ -4225,12 +4225,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         # Configure according to selected geometry
         is_ok = True
         if geom in [Geometry.ParticleSet, Geometry.ParticleSetConstSize]:
-            if c is None:
-                msg = "ParticleSet setup failed, color data is missing."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
-
             if r is None:
                 msg = "ParticleSet setup failed, radii data is missing."
                 self._logger.error(msg)
@@ -4252,12 +4246,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     is_ok = False
 
         elif geom == Geometry.Parallelograms:
-            if c is None:
-                msg = "Parallelograms setup failed, color data is missing."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
-
             if (u is None) or (v is None):
                 if r is None:
                     msg = "Parallelograms setup failed, need U / V vectors or radii data."
@@ -4265,13 +4253,22 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     if self._raise_on_error: raise ValueError(msg)
                     is_ok = False
 
-        elif geom in [Geometry.Parallelepipeds, Geometry.Tetrahedrons]:
-            if c is None:
-                msg = "Plot setup failed, color data is missing."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
+        elif geom == Geometry.ParallelogramsConstSize:
+            if (u is None) and (v is None):
+                if r is None:
+                    msg = "Plot setup failed, need U, V vectors or radius to set parallelogram edge length."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    is_ok = False
 
+            else:
+                if (u is not None and u.shape != (1,3)) or (v is not None and v.shape != (1,3)) or (r is not None and r.shape != (1,)):
+                    msg = "Plot setup failed, need single 3D vector for each of U, V or single radius to set parallelogram edge length."
+                    self._logger.error(msg)
+                    if self._raise_on_error: raise ValueError(msg)
+                    is_ok = False
+
+        elif geom in [Geometry.Parallelepipeds, Geometry.Tetrahedrons]:
             if (u is None) or (v is None) or (w is None):
                 if r is None:
                     msg = "Plot setup failed, need U, V, W vectors or radii data."
@@ -4280,12 +4277,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                     is_ok = False
 
         elif geom == Geometry.ParallelepipedsConstSize: # or (geom == Geometry.Tetrahedrons):
-            if c is None:
-                msg = "Plot setup failed, color data is missing."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
-
             if (u is None) and (v is None) and (w is None):
                 if r is None:
                     msg = "Plot setup failed, need U, V, W vectors or radius to set cube edge length."
@@ -4295,19 +4286,12 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             else:
                 if (u is not None and u.shape != (1,3)) or (v is not None and v.shape != (1,3)) or (w is not None and w.shape != (1,3)) or (r is not None and r.shape != (1,)):
-                    print(u, v, w, r)
                     msg = "Plot setup failed, need single 3D vector for each of U, V, W or single radius to set cube edge length."
                     self._logger.error(msg)
                     if self._raise_on_error: raise ValueError(msg)
                     is_ok = False
 
         elif geom == Geometry.BezierChain:
-            if c is None:
-                msg = "BezierChain setup failed, color data is missing."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
-
             if r is None:
                 msg = "BezierChain setup failed, radii data is missing."
                 self._logger.error(msg)
@@ -4317,12 +4301,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         elif geom == Geometry.SegmentChain:
             if n_primitives < 2:
                 msg = "SegmentChain requires at least 2 data points."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
-
-            if c is None:
-                msg = "SegmentChain setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4340,12 +4318,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
-            if c is None:
-                msg = "BSplineQuad setup failed, color data is missing."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
-
             if r is None:
                 msg = "BSplineQuad setup failed, radii data is missing."
                 self._logger.error(msg)
@@ -4355,12 +4327,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         elif geom == Geometry.Ribbon:
             if n_primitives < 3:
                 msg = "Ribbon requires at least 3 data points."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
-
-            if c is None:
-                msg = "Ribbon setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
@@ -4378,12 +4344,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
-            if c is None:
-                msg = "BSplineCubic setup failed, color data is missing."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
-
             if r is None:
                 msg = "BSplineCubic setup failed, radii data is missing."
                 self._logger.error(msg)
@@ -4397,12 +4357,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
 
-            if c is None:
-                msg = "Bezier setup failed, color data is missing."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
-
             if r is None:
                 msg = "Bezier setup failed, radii data is missing."
                 self._logger.error(msg)
@@ -4412,12 +4366,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         elif geom == Geometry.CatmullRom:
             if n_primitives < 4:
                 msg = "CatmullRom requires at least 4 data points."
-                self._logger.error(msg)
-                if self._raise_on_error: raise ValueError(msg)
-                is_ok = False
-
-            if c is None:
-                msg = "CatmullRom setup failed, color data is missing."
                 self._logger.error(msg)
                 if self._raise_on_error: raise ValueError(msg)
                 is_ok = False
