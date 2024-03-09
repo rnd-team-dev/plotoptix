@@ -1,7 +1,7 @@
 Release history
 ===============
 
-v0.18.0 - 2024-01-28
+v0.18.0 - 2024-03-09
 
 Added
 ~~~~~
@@ -9,8 +9,9 @@ Added
 - Intel Open Image Denoiser libraries: HDR/LDR, supporting RGB/Albedo/Normal inputs.
 - Optional counting of transmission path segments (previously they were counted always and included in
   the segment range limits).
-- Fixed geometry primitives (same radii, or u/v/w vectors for all data points) with much lower memory
+- Const-size geometry primitives (same radii, or u/v/w vectors for all data points) with much lower memory
   consumption, beneficial e.g. for volume plots.
+- Volume coloring material for semi-transparent volume visualization (experimental).
 
 Changed
 ~~~~~~~
