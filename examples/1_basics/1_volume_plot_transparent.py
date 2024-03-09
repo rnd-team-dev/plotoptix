@@ -10,11 +10,11 @@ This example shows how to:
 
 import numpy as np
 from plotoptix import TkOptiX
-from plotoptix.materials import m_clear_glass # used to implement transparency
-from plotoptix.utils import map_to_colors     # feature to color conversion
-from plotoptix.enums import DenoiserKind      # deniser options
+from plotoptix.materials import m_volume_color # implements transparent, colored volume
+from plotoptix.utils import map_to_colors      # feature to color conversion
+from plotoptix.enums import DenoiserKind       # deniser options
 
-from plotoptix.utils import simplex           # noise generator
+from plotoptix.utils import simplex            # noise generator
 _ = simplex(np.zeros((3,3)))
 
 
@@ -27,8 +27,8 @@ def main():
     # completely transparent cells.
 
     # Note, these dimensions result with >60M cells which will require
-    # about 8GB of GPU memory to store all structures. Reduce dimensions
-    # in case of GPU with smaller memory.
+    # about 5-6GB of GPU memory to store all the structures. Reduce
+    # dimensions in case of GPU with smaller memory.
     kx, ky, kz = (500, 500, 250)
     scale = 0.02
 
@@ -68,13 +68,9 @@ def main():
     rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
     rt.add_postproc("OIDenoiser")
     
-    # set refraction index to 1.0, this removes reflections and
-    # refractions on cell borders, making each cell contributing
-    # the volum color only
-    # a mori simple and faster material kernel, dedicated to such
-    # visualisation, is coming..
-    m_clear_glass["VarFloat3"]["refraction_index"] = [1.0, 1.0, 1.0]
-    rt.setup_material("air", m_clear_glass)
+    # a simple and fast material kernel, dedicated to such visualisation;
+    # more generic features of this material are under developent
+    rt.setup_material("air", m_volume_color)
 
     rt.setup_camera("cam1",
         eye=scale * np.array([kx/2, ky/2, 5*kz]),
@@ -97,7 +93,7 @@ def main():
         # all cells will have the same shape and size:
         geom="ParallelepipedsConstSize",
         
-        # use prepared material
+        # use dedicated material
         mat="air"
     )
     

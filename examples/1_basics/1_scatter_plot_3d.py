@@ -51,10 +51,10 @@ def main():
     rt.set_data("particles", pos=particles, r=rp, c=cp)
     #rt.set_data("particles", pos=particles, r=0.02, c=cp, geom="ParticleSetConstSize")
     
-    # and use geom parameter to specify cubes geometry;
+    # use geom parameter to specify cubes geometry;
     # Parallelepipeds can be described precisely with U, V, W vectors,
     # but here we only provide the r parameter - this results with
-    # randomly rotated cubes of U, V, W lenghts equal to r 
+    # randomly rotated cubes of U, V, W lenghts equal to r
     rt.set_data("cubes", pos=cubes, r=rc, c=cc, geom="Parallelepipeds")
 
     # tetrahedrons look good as well, and they are really fast on RTX devices:
