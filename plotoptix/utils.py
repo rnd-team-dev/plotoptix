@@ -407,7 +407,7 @@ def simplex(pos: Any, noise: Optional[np.ndarray] = None) -> np.ndarray:
     Generate noise using OpenSimplex algorithm. 2D, 3D or 4D algorithm is
     used depending on the ``pos.shape[-1]`` value. Output array shape is
     ``pos.shape[:-1]``. Noise can be generated 'in place' if optional
-    ``noise`` array is provided (``pos.shape`` has to match ``pos.shape[:-1]``).
+    ``noise`` array is provided (``noise.shape`` has to match ``pos.shape[:-1]``).
 
 
     Parameters

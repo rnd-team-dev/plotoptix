@@ -68,13 +68,15 @@ def main():
     # Denoiser can use various inputs. By default it is raw RGB and surface
     # albedo, but not always it results with the optimal output quality.
     # Try one of the below settings and find best configuration for your scene. 
-    rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
+    #rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
     #rt.set_int("denoiser_kind", DenoiserKind.RgbAlbedo.value)
-    #rt.set_int("denoiser_kind", DenoiserKind.RgbAlbedoNormal.value)
+    rt.set_int("denoiser_kind", DenoiserKind.RgbAlbedoNormal.value)
 
     #rt.add_postproc("Denoiser")
     #rt.add_postproc("DenoiserHDR")
-    rt.add_postproc("DenoiserUp2x")
+    #rt.add_postproc("DenoiserUp2x")
+    rt.add_postproc("OIDenoiser")
+    #rt.add_postproc("OIDenoiserHDR")
 
     # Postprocessing stages are applied after AI denoiser (even if configured
     # in a different order).

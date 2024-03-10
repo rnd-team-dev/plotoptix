@@ -16,6 +16,7 @@ Create, load, update, and remove a plot
 .. automethod:: plotoptix.NpOptiX.update_mesh
 .. automethod:: plotoptix.NpOptiX.load_mesh_obj
 .. automethod:: plotoptix.NpOptiX.load_merged_mesh_obj
+.. automethod:: plotoptix.NpOptiX.load_multiple_mesh_obj
 .. automethod:: plotoptix.NpOptiX.set_displacement
 .. automethod:: plotoptix.NpOptiX.load_displacement
 .. automethod:: plotoptix.NpOptiX.delete_geometry

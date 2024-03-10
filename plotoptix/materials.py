@@ -363,6 +363,23 @@ Combined reflective and diffuse surface with transparency set according to alpha
 for details.
 """
 
+m_volume_color = {
+      "RadianceProgram": "materials7_radiance__volcolor.ptx::__closesthit__radiance__volcolor",
+      "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",
+      "VarUInt": { "flags": 12 },
+      "VarFloat": {
+        "radiation_length": 0.0,
+        "light_emission": 0.0
+      },
+      "VarFloat3": {
+        "surface_albedo": [ 1.0, 1.0, 1.0 ],
+        "subsurface_color": [ 1.0, 1.0, 1.0 ]
+      }
+    }
+"""
+Volume color, experimental.
+"""
+
 m_clear_glass = {
       "RadianceProgram": "materials7_radiance__glass.ptx::__closesthit__radiance__glass",
       "OcclusionProgram": "chit7_occlusion.ptx::__closesthit__occlusion",

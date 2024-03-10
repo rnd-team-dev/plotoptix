@@ -25,6 +25,9 @@ The Software includes binary libraries from the following sources. Before procee
 4. .NET components:
    MIT License (https://github.com/dotnet)
 
+5. Intel Open Image Denoise:
+   Apache License 2.0 (https://github.com/OpenImageDenoise/oidn/blob/master/LICENSE.txt)
+
 Section II: The Software End User License Agreement
 ---------------------------------------------------
 

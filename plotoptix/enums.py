@@ -138,20 +138,32 @@ class TextureAddressMode(Enum):
     """
 
     Wrap = 0
+    """Wrap texture.
+    """
 
     Clamp = 1
+    """Clamp texture.
+    """
 
     Mirror = 2
+    """Mirror texture.
+    """
 
     Border = 3
+    """Extend texture border.
+    """
 
 class TextureFilterMode(Enum):
     """Texture sampling mode.
     """
 
     Nearest = 0
+    """Nearest pixel.
+    """
 
     Trilinear = 1
+    """Linear interpolation.
+    """
 
 class MaterialType(Enum):
     """Type of the material shader.
@@ -223,6 +235,10 @@ class MaterialFlag(IntFlag):
     """Reserved for the future implmentation. Use colors by face index (meshes)
     or segment index (curves) instead of default indexing by vertices.
     """
+    
+    CountTransmissions = 0x00000001
+    """Include transmission segments in the limit of traced path segments (off by default).
+    """
 
 class Geometry(Enum):
     """Geometry shapes.
@@ -246,6 +262,14 @@ class Geometry(Enum):
 
     U vector points to the **north** of the particle, V vector sets
     the zero **longitude** direction. V vector is orthogonalized to U.
+    """
+    
+    ParticleSetConstSize = 18
+    """Spherical particle with shared radius.
+
+    Color can be provided for each data point but geometry (radius) of each
+    primitive is identical. Shared radius reduces memory usage and improves
+    ray-tracing efficiency.
     """
 
     #ParticleNetConstL = 2
@@ -323,10 +347,26 @@ class Geometry(Enum):
     data point. 
     """
 
+    ParallelogramsConstSize = 19
+    """Flat parallelograms with shared U and V vectors.
+
+    Color can be provided for each data point but geometry of each primitive
+    is identical. Shared U / V vectors reduce memory usage and improve
+    ray-tracing efficiency.
+    """
+
     Parallelepipeds = 8
     """Parallelepipeds.
 
     Color and U / V / W vectors can be provided for each data point.
+    """
+
+    ParallelepipedsConstSize = 20
+    """Parallelepipeds with shared U / V / W vectors.
+
+    Color can be provided for each data point but geometry of each primitive
+    is identical. Shared U / V / W vectors reduce memory usage and improve
+    ray-tracing efficiency.
     """
 
     Tetrahedrons = 9
@@ -861,6 +901,60 @@ class Postprocessing(Enum):
     >>> rt.set_uint("denoiser_start", 12)
     >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
     >>> rt.add_postproc("DenoiserUp2x")
+    """
+    
+    OIDenoiser = 10
+    """Intel Open Image  denoiser, LDR model.
+
+    This model is applied to the image after tone mapping. Image values are clamped
+    to the ``<0, 1>`` range at the denoiser input. Use appropriate exposure to scale the
+    image into that range; the gamma value should be about ``2.2`` (see :attr:`plotoptix.enums.Postprocessing.Gamma`).
+
+    Variables to configure:
+    
+    - denoiser_blend, float, amount of original image mixed with denoiser output
+      range: 0 (only denoiser output) to 1 (only original raytracing output)
+
+    - denoiser_start, uint, number of the accumulation frame after which denoiser is applied;
+      default velue is 4; see also denoiser_start in `raytracer configuration <npoptix_config.html#raytracer-configuration>`_
+
+    - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
+      which buffers are used as denoiser inputs
+
+    Examples
+    --------
+    >>> rt = TkOptiX()
+    >>>
+    >>> rt.set_float("denoiser_blend", 0.5)
+    >>> rt.set_uint("denoiser_start", 12)
+    >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
+    >>> rt.add_postproc("OIDenoiser")
+    """
+
+    OIDenoiserHDR = 11
+    """Intel Open Image denoiser, HDR model.
+
+    This model is applied to the raw hdr image, before any other postprocessing.
+
+    Variables to configure:
+    
+    - denoiser_blend, float, amount of original image mixed with denoiser output
+      range: 0 (only denoiser output) to 1 (only original raytracing output)
+
+    - denoiser_start, uint, number of the accumulation frame after which denoiser is applied;
+      default velue is 4; see also denoiser_start in `raytracer configuration <npoptix_config.html#raytracer-configuration>`_
+
+    - denoiser_kind, int value of :class:`plotoptix.enums.DenoiserKind`, decides
+      which buffers are used as denoiser inputs
+
+    Examples
+    --------
+    >>> rt = TkOptiX()
+    >>>
+    >>> rt.set_float("denoiser_blend", 0.5)
+    >>> rt.set_uint("denoiser_start", 12)
+    >>> rt.set_int("denoiser_kind", DenoiserKind.Rgb.value)
+    >>> rt.add_postproc("OIDenoiserHDR")
     """
 
 class DenoiserKind(IntFlag):

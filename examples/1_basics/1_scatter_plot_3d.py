@@ -39,44 +39,51 @@ def main():
 
     # Create plots:
 
-    optix = TkOptiX() # create and configure, show the window later
+    rt = TkOptiX() # create and configure, show the window later
 
     # accumulate up to 30 frames (override default of 4 frames)
-    optix.set_param(max_accumulation_frames=30)
+    rt.set_param(max_accumulation_frames=30)
 
     # white background
-    optix.set_background(0.99)
+    rt.set_background(0.99)
 
-    # add plots, ParticleSet geometry is default
-    optix.set_data("particles", pos=particles, r=rp, c=cp)
-    # and use geom parameter to specify cubes geometry;
+    # add plots, ParticleSet geometry with variable radius is default
+    rt.set_data("particles", pos=particles, r=rp, c=cp)
+    #rt.set_data("particles", pos=particles, r=0.02, c=cp, geom="ParticleSetConstSize")
+    
+    # use geom parameter to specify cubes geometry;
     # Parallelepipeds can be described precisely with U, V, W vectors,
     # but here we only provide the r parameter - this results with
-    # randomly rotated cubes of U, V, W lenghts equal to r 
-    optix.set_data("cubes", pos=cubes, r=rc, c=cc, geom="Parallelepipeds")
+    # randomly rotated cubes of U, V, W lenghts equal to r
+    rt.set_data("cubes", pos=cubes, r=rc, c=cc, geom="Parallelepipeds")
 
     # tetrahedrons look good as well, and they are really fast on RTX devices:
-    #optix.set_data("tetras", pos=cubes, r=rc, c=cc, geom="Tetrahedrons")
+    #rt.set_data("tetras", pos=cubes, r=rc, c=cc, geom="Tetrahedrons")
 
     # if you prefer cubes aligned with xyz:
-    #optix.set_data("cubes", pos=cubes, r=rc, c=cc, geom="Parallelepipeds", rnd=False)
+    #rt.set_data("cubes", pos=cubes, r=rc, c=cc, geom="Parallelepipeds", rnd=False)
 
-    # or if you'd like some edges fixed:
+    # or if you'd like to fix some edges:
     #v = np.zeros((rc.shape[0], 3)); v[:,1] = rc[:]
-    #optix.set_data("cubes", pos=cubes, u=[0.05,0,0], v=v, w=[0,0,0.05], c=cc, geom="Parallelepipeds")
+    #rt.set_data("cubes", pos=cubes, u=[0.05,0,0], v=v, w=[0,0,0.05], c=cc, geom="Parallelepipeds")
+    
+    # or maybe fix geometry of all primitives (note "ConstSize" in geom name):
+    #rt.set_data("cubes", pos=cubes, u=[0.02,0,0], v=[0,0.05,0], w=[0,0,0.08], c=cc, geom="ParallelepipedsConstSize")
+    # or, if cubes are needed, simpy:
+    #rt.set_data("cubes", pos=cubes, r=0.05, c=cc, geom="ParallelepipedsConstSize")
 
     # show coordinates box
-    optix.set_coordinates()
+    rt.set_coordinates()
 
     # show the UI window here - this method is calling some default
     # initialization for us, e.g. creates camera, so any modification
     # of these defaults should come below (or we provide on_initialization
     # callback)
-    optix.show()
+    rt.show()
 
     # camera and lighting configured by hand
-    optix.update_camera(eye=[5, 0, -8])
-    optix.setup_light("light1", color=10*np.array([0.99, 0.9, 0.7]), radius=2)
+    rt.update_camera(eye=[5, 0, -8])
+    rt.setup_light("light1", color=10*np.array([0.99, 0.9, 0.7]), radius=2)
 
     print("done")
 

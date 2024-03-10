@@ -1,13 +1,38 @@
 Release history
 ===============
 
+`v0.18.1` - 2024-03-09
+----------------------
+
+Added
+~~~~~
+
+- Intel Open Image Denoiser libraries: HDR/LDR, supporting RGB/Albedo/Normal inputs.
+- Optional counting of transmission path segments (previously they were counted always and included in
+  the segment range limits).
+- Const-size geometry primitives (same radii, or u/v/w vectors for all data points) with much lower memory
+  consumption, beneficial e.g. for volume plots.
+- Volume coloring material for semi-transparent volume visualization (experimental).
+
+Changed
+~~~~~~~
+
+- Reviewed and improved camera kernels.
+
+Fixed
+~~~~~
+
+- Require min SM 5.0 instead of 6.0.
+- Minor lighting issues with masked transparency materials.
+
+
 `v0.17.1` - 2023-10-06
 ----------------------
 
 Added
 ~~~~~
 
-- Noise-balanced work distribution: absolute and relative noise modes 
+- Noise-balanced work distribution: absolute and relative noise modes.
 
 
 `v0.17.0` - 2023-08-18
@@ -617,6 +642,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.18.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.18.1
 .. _`v0.17.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.17.1
 .. _`v0.17.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.17.0
 .. _`v0.16.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.16.1

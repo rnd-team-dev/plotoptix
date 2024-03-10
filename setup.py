@@ -147,8 +147,38 @@ except ImportError:
     bdist_wheel = None
 
 
+windows_files = [
+    "bin/avcodec-58.dll",
+    "bin/avformat-58.dll",
+    "bin/avutil-56.dll",
+    "bin/OpenImageDenoise.dll",
+    "bin/OpenImageDenoise_core.dll",
+    "bin/OpenImageDenoise_device_cuda.dll",
+    "bin/rndSharpEncoder.dll",
+    "bin/rndSharpOptiX7.dll"
+]
+linux_files = [
+    "bin/librndSharpOptiX7.so",
+    "bin/librndSharpEncoder.so",
+    "bin/libOpenImageDenoise.so",
+    "bin/libOpenImageDenoise_core.so.2.2.1",
+    "bin/libOpenImageDenoise_device_cuda.so.2.2.1"
+]
+common_files = [
+    "bin/BitMiracle.LibTiff.NET.dll",
+    "bin/BitMiracle.LibTiff.NET.xml",
+    "bin/Newtonsoft.Json.dll",
+    "bin/Newtonsoft.Json.xml",
+    "bin/RnD.SharpEncoder.dll",
+    "bin/RnD.SharpOptiX.dll",
+    "bin/RnD.SharpOptiX.dll.config",
+    "bin/cuda/*.ir"
+]
+platform_specific_files = windows_files if platform.system() == "Windows" else linux_files
+
+
 setup(name='plotoptix',
-      version='0.17.1',
+      version='0.18.1',
       url='https://rnd.team/plotoptix',
       project_urls={
           'Documentation': 'https://plotoptix.rnd.team',
@@ -191,13 +221,9 @@ setup(name='plotoptix',
           'requests>=2.25'
       ],
       long_description=open('README.rst').read(),
-      include_package_data=True,
-      exclude_package_data={
-          '': [
-              'README.rst',
-              'README.md'
-              ]
-          },
+      include_package_data=False,
+      package_data={ "plotoptix": platform_specific_files + common_files },
+      exclude_package_data={ '': ['README.rst', 'README.md'] },
       test_suite='nose2.collector.collector',
       tests_require=['nose2>=0.9'],
       zip_safe=False)
