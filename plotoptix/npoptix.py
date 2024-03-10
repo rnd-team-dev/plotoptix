@@ -2274,7 +2274,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         self.geometry_names = {}   # geometry handle to name dictionary
         if "Geometry" in meta:
             for key, value in meta["Geometry"].items():
-                self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"], Geometry[value["Type"]])
+                self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"], Geometry(value["Type"]))
                 self.geometry_names[value["Handle"]] = key
         else: return False
 
@@ -5962,7 +5962,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if len(s) > 2:
                 meta = json.loads(s)
                 for key, value in meta.items():
-                    self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"], Geometry[value["Type"]])
+                    self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"], Geometry(value["Type"]))
                     self.geometry_names[value["Handle"]] = key
                     self._logger.info("...loaded: %s %s (%d vertices)", key, value["Size"], value["Type"])
             else:
@@ -6017,7 +6017,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
             if len(s) > 2:
                 meta = json.loads(s)
                 for key, value in meta.items():
-                    self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"], Geometry[value["Type"]])
+                    self.geometry_data[key] = GeometryMeta(key, value["Handle"], value["Size"], Geometry(value["Type"]))
                     self.geometry_names[value["Handle"]] = key
                     self._logger.info("...loaded: %s %s (%d vertices)", key, value["Type"], value["Size"])
             else:
