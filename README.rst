@@ -98,7 +98,7 @@ What's Included
 Installation
 ============
 
-**Note**, at this point, PlotOptiX binaries are tested in: Windows 10/11 (any Python 3), and Linux (Python 3.8-3.10 recommended): Ubuntu 18.04, CentOS 7.
+**Note**, at this point, PlotOptiX binaries are tested in: Windows 10/11 (any Python 3), and Linux (Python 3.8-3.10 recommended): Ubuntu 22.04, CentOS 7.
 
 PlotOptiX was also successfully tested on the `Google Cloud Platform <https://cloud.google.com/>`__, using Compute Engine instance with 2x V100 GPU's and Ubuntu 18.04 image.
 Here are the `installation steps <https://github.com/rnd-team-dev/plotoptix/blob/master/gcp_install_gpu.txt>`__ so you can save some precious seconds (FFmpeg not included).
