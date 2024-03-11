@@ -30,7 +30,7 @@ def main():
     # about 5-6GB of GPU memory to store all the structures. Reduce
     # dimensions in case of GPU with smaller memory.
     kx, ky, kz = (500, 500, 250)
-    scale = 0.02
+    scale = 0.015
 
     x = np.linspace(0, kx, kx)
     y = np.linspace(0, ky, ky)
