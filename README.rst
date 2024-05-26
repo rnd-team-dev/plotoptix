@@ -45,7 +45,7 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
 
 Check `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__ for practical code samples and `documentation pages <https://plotoptix.rnd.team>`__ for a complete API reference.
 
-PlotOptiX is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. It is based on `NVIDIA OptiX 7.7 <https://developer.nvidia.com/optix>`_ framework and makes use of RTX-capable GPU's.
+PlotOptiX is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. It is based on `NVIDIA OptiX 8.0 <https://developer.nvidia.com/optix>`_ framework and makes use of RTX-capable GPU's.
 
 You can quickly display data in a simple plot:
 
@@ -82,17 +82,17 @@ System Requirements
    - NVIDIA driver >= r530;
 - **Python 3 64-bit**
 - Windows:
-   - Framework .NET >= 4.8 (present in all modern Windows)
+   - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 7.0
 - Linux:
    - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 6.6
    - `pythonnet <http://pythonnet.github.io>`__
-   - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 4.1
+   - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 7.0
 
 What's Included
 ---------------
 
 - RnD.SharpOptiX and RnD.SharpEncoder libraries
-- all other supporting 3'rd party libraries: FFmpeg (Windows only), LibTiff, Newtonsoft.Json
+- supporting 3'rd party libraries: LibTiff, Newtonsoft.Json
 - Python examples
 
 Installation
@@ -112,9 +112,10 @@ Windows should be ready to go in most cases. You need to do some more typing in 
 Windows prerequisites
 ---------------------
 
-*.NET Framework:*
+*FFmpeg:*
 
-You have it built in your Windows. Go ahead and install PlotOptiX.
+FFmpeg shared libraries >= 7.0 are required to enable video encoding features. Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and go to the site with pre-built Windows
+binaries. Download the *full-shared* package. Unpack it to a new folder. You'll need to add path to dll files (the `bin` folder) to your `PATH` environment variable.
 
 Linux prerequisites
 -------------------
@@ -161,7 +162,7 @@ After successful installation you should be able to do python's import:
 
 *FFmpeg:*
 
-FFmpeg shared libraries >= 4.1 are required to enable video encoding features in PlotOptiX. Uninstall older version first. Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and download the most recent release sources. Unpack it to a new folder, cd to it. Configure, compile and install as below::
+FFmpeg shared libraries >= 7.0 are required to enable video encoding features. Uninstall older version first. Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and download the most recent release sources. Unpack it to a new folder, cd to it. Configure, compile and install as below::
 
    ./configure --enable-shared
    make

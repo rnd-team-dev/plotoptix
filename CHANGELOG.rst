@@ -1,6 +1,16 @@
 Release history
 ===============
 
+`v0.18.2` - unreleased
+----------------------
+
+Changed
+~~~~~~~
+
+- Moved to OptiX 8.0.
+- Encoder code upgraded to use FFmpeg 7.0; FFmpeg libs excluded from the Windows release (too large to keep them within the package).
+
+
 `v0.18.1` - 2024-03-09
 ----------------------
 
