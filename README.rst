@@ -79,7 +79,7 @@ System Requirements
 -------------------
 
 - a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability 5.0 (Maxwell) to latest (Ada Lovelace);
-   - NVIDIA driver >= r530;
+   - NVIDIA driver >= r545;
 - **Python 3 64-bit**
 - Windows:
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 7.0
@@ -119,6 +119,14 @@ binaries. Download the *full-shared* package. Unpack it to a new folder. You'll 
 
 Linux prerequisites
 -------------------
+
+*NVIDIA driver*
+
+It is recommended to update to the most recent release. Check instructions for your linux distribution. E.g. in Ubuntu::
+
+   sudo add-apt-repository ppa:graphics-drivers/ppa
+   sudo apt install nvidia-driver-XXX
+   sudo reboot
 
 *Mono runtime:*
 
