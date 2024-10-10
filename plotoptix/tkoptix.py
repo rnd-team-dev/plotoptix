@@ -526,12 +526,12 @@ class TkOptiX(NpOptiX):
             if self._width / wc > self._height / hc:
                 self._image_scale = wc / self._width
                 hnew = int(self._height * self._image_scale)
-                pil_img = pil_img.resize((wc, hnew), Image.ANTIALIAS)
+                pil_img = pil_img.resize((wc, hnew), Image.Resampling.LANCZOS)
                 move_to = (0, (hc - hnew) // 2)
             else:
                 self._image_scale = hc / self._height
                 wnew = int(self._width * self._image_scale)
-                pil_img = pil_img.resize((wnew, hc), Image.ANTIALIAS)
+                pil_img = pil_img.resize((wnew, hc), Image.Resampling.LANCZOS)
                 move_to = ((wc - wnew) // 2, 0)
 
         tk_img = ImageTk.PhotoImage(pil_img)
