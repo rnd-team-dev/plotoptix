@@ -1209,9 +1209,10 @@ class _ClrOptiX_v3:
         try:
             c_encoder = cdll.LoadLibrary(os.path.join(os.path.dirname(__file__), BIN_PATH, "librndSharpEncoder.so"))
             self._encoder_available = True
-        except:
+        except Exception as e:
             print(82 * "*"); print(82 * "*")
             print("Video encoding library initialization failed, encoding features are not available.")
+            print(e)
             print(82 * "*"); print(82 * "*")
             self._encoder_available = False
 
