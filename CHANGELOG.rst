@@ -7,7 +7,7 @@ Release history
 Changed
 ~~~~~~~
 
-- Moved to OptiX 8.0.
+- Moved to OptiX 8.1.
 - Encoder code upgraded to use FFmpeg 7.0; FFmpeg libs excluded from the Windows release (too large to keep them within the package).
 
 
