@@ -178,7 +178,7 @@ platform_specific_files = windows_files if platform.system() == "Windows" else l
 
 
 setup(name='plotoptix',
-      version='0.18.1',
+      version='0.18.2',
       url='https://rnd.team/plotoptix',
       project_urls={
           'Documentation': 'https://plotoptix.rnd.team',

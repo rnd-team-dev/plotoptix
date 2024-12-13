@@ -528,6 +528,12 @@ class Camera(Enum):
     
     Actually a better name that should replace DoF at some point.
     """
+    
+    ThinLensFast = 7
+    """Fast ThinLens camera kernel.
+    
+    ThinLens implementation simplified for fast frame rendering (but also more noisy).
+    """
 
     Panoramic = 2
     """360 deg panoramic (equirectangular) camera.

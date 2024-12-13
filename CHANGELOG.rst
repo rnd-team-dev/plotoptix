@@ -1,6 +1,16 @@
 Release history
 ===============
 
+`v0.18.2` - 2024-12-13
+----------------------
+
+Changed
+~~~~~~~
+
+- Moved to OptiX 8.1.
+- Encoder code upgraded to use FFmpeg 7.0; FFmpeg libs excluded from the Windows release (too large to keep them within the package).
+
+
 `v0.18.1` - 2024-03-09
 ----------------------
 
@@ -642,6 +652,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+.. _`v0.18.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.18.2
 .. _`v0.18.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.18.1
 .. _`v0.17.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.17.1
 .. _`v0.17.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.17.0
