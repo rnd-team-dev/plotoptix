@@ -1,6 +1,16 @@
 Release history
 ===============
 
+`v0.18.3` - unreleased
+----------------------
+
+Changed
+~~~~~~~
+
+- Intel denoiser libs updated to 2.3.1. Accumulation frames before the final one are denoised using fast model, the final frame is
+  denoised using high quality / slower model.
+
+
 `v0.18.2` - 2024-12-13
 ----------------------
 
