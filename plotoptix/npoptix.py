@@ -6081,7 +6081,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
             if g_handle > 0:
                 self._logger.info("...done, handle: %d", g_handle)
-                self.geometry_data[mesh_name] = GeometryMeta(mesh_name, g_handle, self._optix.get_geometry_size(mesh_name))
+                self.geometry_data[mesh_name] = GeometryMeta(mesh_name, g_handle, self._optix.get_geometry_size(mesh_name), Geometry.Mesh)
                 self.geometry_names[g_handle] = mesh_name
             else:
                 msg = "Mesh loading failed."
