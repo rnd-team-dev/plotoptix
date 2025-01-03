@@ -11,7 +11,7 @@ from ctypes import cdll, CDLL, RTLD_GLOBAL, CFUNCTYPE, POINTER, byref, cast, c_f
 
 BIN_PATH = "bin"
 
-OIDN_VER = "2.2.1"
+OIDN_VER = "2.3.1"
 
 PLATFORM = platform.system()
 if PLATFORM == "Linux":

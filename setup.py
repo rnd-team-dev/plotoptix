@@ -148,9 +148,6 @@ except ImportError:
 
 
 windows_files = [
-    "bin/avcodec-58.dll",
-    "bin/avformat-58.dll",
-    "bin/avutil-56.dll",
     "bin/OpenImageDenoise.dll",
     "bin/OpenImageDenoise_core.dll",
     "bin/OpenImageDenoise_device_cuda.dll",
@@ -161,8 +158,8 @@ linux_files = [
     "bin/librndSharpOptiX7.so",
     "bin/librndSharpEncoder.so",
     "bin/libOpenImageDenoise.so",
-    "bin/libOpenImageDenoise_core.so.2.2.1",
-    "bin/libOpenImageDenoise_device_cuda.so.2.2.1"
+    "bin/libOpenImageDenoise_core.so.2.3.1",
+    "bin/libOpenImageDenoise_device_cuda.so.2.3.1"
 ]
 common_files = [
     "bin/BitMiracle.LibTiff.NET.dll",
@@ -178,7 +175,7 @@ platform_specific_files = windows_files if platform.system() == "Windows" else l
 
 
 setup(name='plotoptix',
-      version='0.18.2',
+      version='0.18.3',
       url='https://rnd.team/plotoptix',
       project_urls={
           'Documentation': 'https://plotoptix.rnd.team',
