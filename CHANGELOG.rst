@@ -1,8 +1,8 @@
 Release history
 ===============
 
-`v0.19.0-rc` - 2026-01-25
--------------------------
+`v0.19.0` - 2026-03-25
+----------------------
 
 Added
 ~~~~~
@@ -14,6 +14,8 @@ Added
   geom due to simplified vertex access code.
 
 - HEVC codec support.
+
+- View orientation changes in GUI, per user request. F5-F8 will flip/rotate the view.
 
 Changed
 ~~~~~~~
@@ -698,7 +700,7 @@ Added
 - this changelog, markdown description content type tag for PyPI
 - use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
-.. _`v0.19.0rc`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.19.0-rc
+.. _`v0.19.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.19.0
 .. _`v0.18.4`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.18.4
 .. _`v0.18.3`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.18.3
 .. _`v0.18.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.18.2
