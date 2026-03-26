@@ -31,6 +31,11 @@ With a light or an object / primitive selected:
 - scale up/down: hold ctrl + shift + left mouse button and drag up/down
 - select camera: double-click left mouse button in empty area or double-right-click anywhere
 
+Keyboard:
+
+- change view orientation: F5 - normal, F6 - horizontal flip, F7 - 180° rotation, F8 - vertical flip
+- save image: F12
+
 API reference
 -------------
 

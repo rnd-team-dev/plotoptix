@@ -82,11 +82,11 @@ System Requirements
    - NVIDIA driver >= r570;
 - **Python 3 64-bit**
 - Windows:
-   - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 7.0
+   - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 8.0
 - Linux:
    - `Mono <https://www.mono-project.com/download/stable/#download-lin>`__ Common Language Runtime >= 6.6
    - `pythonnet <http://pythonnet.github.io>`__
-   - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 7.0
+   - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 8.0
 
 What's Included
 ---------------
@@ -114,7 +114,7 @@ Windows prerequisites
 
 *FFmpeg:*
 
-FFmpeg shared libraries >= 7.0 are required to enable video encoding features (ffmpeg 8.0 recommended). Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and
+FFmpeg shared libraries >= 8.0 are required to enable video encoding features. Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and
 go to the site with pre-built Windows binaries. Download the *full-shared* package. Unpack it to a new folder. You'll need to add path to dll files (the `bin` folder, which
 contains exe's and dll's) to your `PATH` environment variable.
 
@@ -171,7 +171,7 @@ After successful installation you should be able to do python's import:
 
 *FFmpeg:*
 
-FFmpeg shared libraries >= 7.0 are required to enable video encoding features (ffmpeg 8.0 recommended). Uninstall older version first.
+FFmpeg shared libraries >= 8.0 are required to enable video encoding features. Uninstall older version first.
 Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and download the most recent release sources. Unpack it to a new folder, cd to it.
 Configure, compile and install as below::
 
