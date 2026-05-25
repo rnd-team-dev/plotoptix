@@ -1,6 +1,19 @@
 Release history
 ===============
 
+`v0.19.1` - unreleased
+----------------------
+
+Added
+~~~~~
+
+Changed
+~~~~~~~
+- Encoder adds frame to the output clip on the "accumulation done" signal instead of "launch finished". This allows for using
+  all the work balancing modes, while it is still possible to configure `min_accumulation_step == max_accumulation_frames` to
+  get the same behavior as before.
+
+
 `v0.19.0` - 2026-03-25
 ----------------------
 
