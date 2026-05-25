@@ -45,7 +45,7 @@ No need to write shaders, intersection algorithms, handle 3D scene technicalitie
 
 Check `examples on GitHub <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__ for practical code samples and `documentation pages <https://plotoptix.rnd.team>`__ for a complete API reference.
 
-PlotOptiX is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. It is based on `NVIDIA OptiX 9.0 <https://developer.nvidia.com/optix>`_ framework and makes use of RTX-capable GPU's.
+PlotOptiX is a set of CUDA shaders by `R&D Team <https://rnd.team>`_ wrapped in C#/C++ libraries with a Python API. It is based on `NVIDIA OptiX 9.1 <https://developer.nvidia.com/optix>`_ framework and makes use of RTX-capable GPU's.
 
 You can quickly display data in a simple plot:
 
@@ -78,8 +78,8 @@ Features
 System Requirements
 -------------------
 
-- a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability >= 5.0;
-   - NVIDIA driver >= r570;
+- a `CUDA-enabled GPU <https://developer.nvidia.com/cuda-gpus>`__ with compute capability >= 7.5;
+   - NVIDIA driver >= r590;
 - **Python 3 64-bit**
 - Windows:
    - `FFmpeg <https://ffmpeg.org/download.html>`__ >= 8.0

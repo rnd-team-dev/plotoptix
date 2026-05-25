@@ -9,6 +9,7 @@ Added
 
 Changed
 ~~~~~~~
+- Moved to OptiX 9.1, recompliled with CUDA 13.2 (note: minimal requirements are now driver r590 and compute capability 7.5).
 - Encoder adds frame to the output clip on the "accumulation done" signal instead of "launch finished". This allows for using
   all the work balancing modes, while it is still possible to configure `min_accumulation_step == max_accumulation_frames` to
   get the same behavior as before.
