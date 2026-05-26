@@ -9,6 +9,7 @@ Start, configure, get output
 .. automethod:: plotoptix.NpOptiX.save_scene
 .. automethod:: plotoptix.NpOptiX.save_image
 .. automethod:: plotoptix.NpOptiX.get_rt_output
+.. automethod:: plotoptix.NpOptiX.get_current_noise_level
 .. autoattribute:: plotoptix.NpOptiX._img_rgba
 .. autoattribute:: plotoptix.NpOptiX._raw_rgba
 .. autoattribute:: plotoptix.NpOptiX._hit_pos

@@ -933,6 +933,26 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         """
         self._optix.refresh_scene()
 
+    def get_current_noise_level(self) -> float:
+        """Get the current noise level in the image.
+
+        The average luminance noise value in the image is returned. It is either absolute noise value or relative
+        to the pixel luminance, depennding on the camera :class:`plotoptix.WorkDistribution` mode.
+        Note: function returns ``-1`` if camera is in the :attr:`plotoptix.enums.WorkDistribution.Uniform` mode,
+        where noise level is not estimated.
+
+        Returns
+        -------
+        out : float
+            Current noise level.
+
+        See Also
+        --------
+        :meth:`plotoptix.NpOptiX.setup_camera`
+        :meth:`plotoptix.NpOptiX.set_param`
+        """
+        return self._optix.get_current_noise_level()
+
     def get_float(self, name: str) -> Optional[float]:
         """Get shader ``float`` variable with given ``name``.
 
@@ -1273,14 +1293,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
 
         return data, rt_format, data_ptr, is_cuda
 
-    # *** Remove in the next release ***
-    def set_torch_texture_1d(self, name: str, data: Any,
-                             addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
-                             filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
-                             keep_on_host: bool = False,
-                             refresh: bool = False) -> None:
-        raise RuntimeError("Method removed. Use set_texture_1d() for any array type.")
-
     def set_texture_1d(self, name: str, data: Any,
                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Clamp,
                        filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
@@ -1379,14 +1391,6 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
                 return None, RtFormat.Float, 0, False
 
         return data, rt_format, data_ptr, is_cuda
-
-    # *** Remove in the next release ***
-    def set_torch_texture_2d(self, name: str, data: Any,
-                             addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
-                             filter_mode: Union[TextureFilterMode, str] = TextureFilterMode.Trilinear,
-                             keep_on_host: bool = False,
-                             refresh: bool = False) -> None:
-        raise RuntimeError("Method removed. Use set_texture_2d() for any array type.")
 
     def set_texture_2d(self, name: str, data: Any,
                        addr_mode: Union[TextureAddressMode, str] = TextureAddressMode.Wrap,
