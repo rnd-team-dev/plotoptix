@@ -140,7 +140,8 @@ try:
 
         def get_tag(self):
             python, abi, plat = _bdist_wheel.get_tag(self)
-            # python, abi, plat = 'py3', 'none', 'manylinux_2_28_x86_64'
+            python, abi = 'py3', 'none'
+            # plat = 'manylinux_2_28_x86_64'
             return python, abi, plat
 
 except ImportError:
