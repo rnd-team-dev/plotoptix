@@ -140,7 +140,7 @@ try:
 
         def get_tag(self):
             python, abi, plat = _bdist_wheel.get_tag(self)
-            python, abi = 'py3', 'none'
+            # python, abi, plat = 'py3', 'none', 'manylinux_2_28_x86_64'
             return python, abi, plat
 
 except ImportError:
@@ -175,7 +175,7 @@ platform_specific_files = windows_files if platform.system() == "Windows" else l
 
 
 setup(name='plotoptix',
-      version='0.19.0',
+      version='0.19.1',
       url='https://rnd.team/plotoptix',
       project_urls={
           'Documentation': 'https://plotoptix.rnd.team',

@@ -72,10 +72,10 @@ def main():
     #rt.set_int("denoiser_kind", DenoiserKind.RgbAlbedo.value)
     #rt.set_int("denoiser_kind", DenoiserKind.RgbAlbedoNormal.value)
 
-    #rt.add_postproc("DenoiserHDR")
+    rt.add_postproc("DenoiserHDR")
     #rt.add_postproc("DenoiserUp2x")
     #rt.add_postproc("OIDenoiser")
-    rt.add_postproc("OIDenoiserHDR")
+    #rt.add_postproc("OIDenoiserHDR")
 
     # Postprocessing stages are applied after AI denoiser (even if configured
     # in a different order).

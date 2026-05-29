@@ -488,6 +488,8 @@ def _load_optix_win():
     optix.set_max_accumulation_frames.argtypes = [c_int]
     optix.set_max_accumulation_frames.restype = c_bool
 
+    optix.get_current_noise_level.restype = c_float
+
     optix.encoder_create.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int]
     optix.encoder_create.restype = c_bool
 
@@ -1134,6 +1136,8 @@ class _ClrOptiX_v2:
     def get_max_accumulation_frames(self): return self._optix.get_max_accumulation_frames()
 
     def set_max_accumulation_frames(self, n): return self._optix.set_max_accumulation_frames(n)
+    
+    def get_current_noise_level(self): return self._optix.get_current_noise_level()
 
     def encoder_create(self, fps, bit_rate, idr_rate, codec, profile, preset):
         if self._encoder_available:
@@ -1947,6 +1951,8 @@ class _ClrOptiX_v3:
     def get_max_accumulation_frames(self): return self._optix.get_max_accumulation_frames()
 
     def set_max_accumulation_frames(self, n): return self._optix.set_max_accumulation_frames(n)
+
+    def get_current_noise_level(self): return self._optix.get_current_noise_level()
 
     def encoder_create(self, fps, bit_rate, idr_rate, codec, profile, preset):
         if self._encoder_available:

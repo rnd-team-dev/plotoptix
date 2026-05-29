@@ -1,6 +1,22 @@
 Release history
 ===============
 
+`v0.19.1` - 2026-05-28
+----------------------
+
+Added
+~~~~~
+- Function to get current noise level (value updated after each accumulation frame).
+
+Changed
+~~~~~~~
+- Moved to OptiX 9.1, recompliled with CUDA 13.2 (note: minimal requirements are now driver r590 and compute capability 7.5).
+- ``rt_completed`` callback is now executed only after the last accumulation frame instead of every accumulation frame. Also,
+  the video encoder adds frame to the output clip on the "accumulation done" signal instead of "launch finished". This allows
+  for using all the work balancing modes in animation workflows, while it is still possible to configure
+  `min_accumulation_step == max_accumulation_frames` to get the same behavior as before.
+
+
 `v0.19.0` - 2026-03-25
 ----------------------
 

@@ -23,7 +23,7 @@ def accum_done(rt: NpOptiX) -> None:
 
 def main():
     rt = NpOptiX(on_rt_accum_done=accum_done, width=800, height=500)
-    rt.set_param(min_accumulation_step=16, max_accumulation_frames=16)
+    rt.set_param(min_accumulation_step=4, max_accumulation_frames=16)
 
     n = 1000000
     xyz = 3 * (np.random.random((n, 3)) - 0.5)
