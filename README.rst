@@ -98,7 +98,7 @@ What's Included
 Installation
 ============
 
-**Note**, at this point, PlotOptiX binaries are tested in: Windows 10/11 (any Python 3), and Linux (Python 3.8-3.13 recommended): Ubuntu 22.04, CentOS 7.
+**Note**, at this point, PlotOptiX binaries are tested in: Windows 11 (any Python 3), and Linux (Python 3.8-3.14 recommended): Ubuntu 26.04.
 
 PlotOptiX was also successfully tested on the `Google Cloud Platform <https://cloud.google.com/>`__, using Compute Engine instance with 2x V100 GPU's and Ubuntu 18.04 image.
 Here are the `installation steps <https://github.com/rnd-team-dev/plotoptix/blob/master/gcp_install_gpu.txt>`__ so you can save some precious seconds (FFmpeg not included).
@@ -140,13 +140,20 @@ Check if / which Mono release is present in your system::
 	   TLS:           __thread
       ... (output cropped for clarity) ...
 
-If ``mono`` command is not available, or the reported version is < 6.6, visit `Mono download page <https://www.mono-project.com/download/stable/#download-lin>`__ and follow instructions related to your Linux distribution. You want to install **mono-complete** package.
+If ``mono`` command is not available, or the reported version is < 6.6, install it with::
+
+   sudo apt install mono-devel
+
+For older linux distributions, visit `Mono download page <https://www.mono-project.com/download/stable/#download-lin>`__ and follow instructions related to your distribution. You want to install **mono-complete** package.
 
 *pythonnet:*
 
 The `pythonnet <http://pythonnet.github.io>`__ package is available from `PyPI <https://pypi.org/project/pythonnet>`__, however, you might need some prerequisities. Instuctions below are based on APT, replace ``apt`` with ``yum`` depending on your OS::
 
-   apt update
+   apt install clang libglib2.0-dev python-dev-is-python3
+
+or, in the older linux::
+
    apt install clang libglib2.0-dev python-dev
    
 You may also need to install development tools, if not already present in your system, e.g. in Ubuntu::

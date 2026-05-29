@@ -13,7 +13,7 @@ __all__ = ["enums", "materials", "utils", "npoptix", "tkoptix"]
 __author__  = "Robert Sulej, R&D Team <dev@rnd.team>"
 __status__  = "beta"
 __version__ = "0.19.1"
-__date__    = "26 May 2026"
+__date__    = "28 May 2026"
 
 import logging
 
