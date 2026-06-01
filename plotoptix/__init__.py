@@ -52,7 +52,7 @@ def _bootstrap_ffmpeg_dlls():
             dll_path = os.path.join(ffmpeg_dir, dll)
             if os.path.isfile(dll_path):
                 # Using ALTER_RE_SEARCH_PATH helps resolve dependencies in the same folder
-                ctypes.CDLL(dll_path, winmode=0x00000008) 
+                ctypes.CDLL(dll_path, winmode=0x00000008)
                 
     except Exception as e:
         # Sandbox denied read permissions entirely
