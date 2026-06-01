@@ -6,7 +6,7 @@ Release history
 
 Added
 ~~~~~
-- Function to get current noise level (value updated after each accumulation frame).
+- Function to get current noise level (value updated after each accumulation frame): ``get_current_noise_level()``.
 
 Changed
 ~~~~~~~
