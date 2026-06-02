@@ -1,6 +1,18 @@
 Release history
 ===============
 
+`v0.19.2` - unreleased
+----------------------
+
+Changed
+~~~~~~~
+- Intel denoiser libs updated to 2.4.1.
+
+Fixed
+~~~~~
+- FFmpeg libs in Windows were not accessible for python installed via Microsoft Store, even if the correct folder was included in PATH.
+
+
 `v0.19.1` - 2026-05-28
 ----------------------
 
