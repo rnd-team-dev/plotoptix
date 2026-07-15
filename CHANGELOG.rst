@@ -7,6 +7,12 @@ Release history
 Changed
 ~~~~~~~
 - Intel denoiser libs updated to 2.4.1.
+- Intersection computing for spherical primitives with displaced surface is now controlled by two variables: ``marching_step`` and ``marching_step_eps``. Use:
+```
+rt.set_float("marching_step", 5.0e-3)
+rt.set_float("marching_step_eps", 3.0e-5)
+```
+  to set the step and precision of intersection search. The default values are 5.0e-3 and 1.0e-4.
 
 Fixed
 ~~~~~
