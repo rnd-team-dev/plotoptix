@@ -56,7 +56,7 @@ GPU variables related to the raytracer general configuraton are documented below
 
   Default value: ``[2, 6]``
 
-  Description: ``[min, max]`` range of the ray segments; if the ray is scattered, reflected
+  The ``[min, max]`` range of the ray segments; if the ray is scattered, reflected
   or refracted more than ``min`` times it may be terminated with the Russian Roulette algorithm
   but the number of segments never exceeds ``max``. Use higher values in scenes with multiple
   transparent and/or reflective objects and if you need the high quality of diffuse lights.
@@ -77,10 +77,11 @@ GPU variables related to the raytracer general configuraton are documented below
 
   Default value: ``0.002``
 
-  Description: epsilon value used whenever a geometrical computation threshold is needed, e.g.
+  Epsilon value used in several geometrical computation thresholds, e.g.
   as a minimum distance between hits or displacement of the ray next segment in the normal
-  direction. You may need to set a lower value if your scene dimensions are tiny, or increase
-  the value to avoid artifacts (e.g. in scenes with huge amounts of very small primitives).
+  direction to avoid self-intersection effects. You may need to set a lower value if your
+  scene dimensions are tiny, or increase the value to avoid artifacts (e.g. in scenes with
+  huge amounts of very small primitives).
 
   Example:
 
@@ -88,6 +89,27 @@ GPU variables related to the raytracer general configuraton are documented below
 
      rt = TkOptiX()
      rt.set_float("scene_epsilon", 1.0e-04)
+
+- **Marching step parameter**
+
+  Name: *marching_step*, *marching_step_eps*
+
+  Type: ``float``
+
+  Default value: ``0.005``, ``0.0001``
+
+  Marching step is used to find intersection points on surfaces where displacement is applied. It has
+  to be a bit of brute force to avoid missing intersections, thus the coarse marching step value. The
+  intersection is refined with the ``marching_step_eps`` precision. Depending on your scene and the
+  displacement map, you may need to adjust these values.
+
+  Example:
+
+  .. code-block:: python
+
+     rt = TkOptiX()
+     rt.set_float("marching_step", 5.0e-3)
+     rt.set_float("marching_step_eps", 3.0e-5)
 
 - **Denoiser start frame**
 

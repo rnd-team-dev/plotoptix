@@ -159,8 +159,8 @@ linux_files = [
     "bin/librndSharpOptiX7.so",
     "bin/librndSharpEncoder.so",
     "bin/libOpenImageDenoise.so",
-    "bin/libOpenImageDenoise_core.so.2.3.1",
-    "bin/libOpenImageDenoise_device_cuda.so.2.3.1"
+    "bin/libOpenImageDenoise_core.so.2.4.1",
+    "bin/libOpenImageDenoise_device_cuda.so.2.4.1"
 ]
 common_files = [
     "bin/BitMiracle.LibTiff.NET.dll",
@@ -176,7 +176,7 @@ platform_specific_files = windows_files if platform.system() == "Windows" else l
 
 
 setup(name='plotoptix',
-      version='0.19.1',
+      version='0.19.2',
       url='https://rnd.team/plotoptix',
       project_urls={
           'Documentation': 'https://plotoptix.rnd.team',
