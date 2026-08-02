@@ -159,8 +159,8 @@ linux_files = [
     "bin/librndSharpOptiX7.so",
     "bin/librndSharpEncoder.so",
     "bin/libOpenImageDenoise.so",
-    "bin/libOpenImageDenoise_core.so.2.3.1",
-    "bin/libOpenImageDenoise_device_cuda.so.2.3.1"
+    "bin/libOpenImageDenoise_core.so.2.4.1",
+    "bin/libOpenImageDenoise_device_cuda.so.2.4.1"
 ]
 common_files = [
     "bin/BitMiracle.LibTiff.NET.dll",

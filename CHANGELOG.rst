@@ -1,22 +1,24 @@
 Release history
 ===============
 
-`v0.19.2` - unreleased
+`v0.19.2` - 2026-08-02
 ----------------------
 
 Changed
 ~~~~~~~
 - Intel denoiser libs updated to 2.4.1.
-- Intersection computing for spherical primitives with displaced surface is now controlled by two variables: ``marching_step`` and ``marching_step_eps``. Use:
+- Intersection computing for spherical primitives with displaced surface is now controlled by two variables: ``marching_step`` and ``marching_step_eps``. Use
+  code below to set the step and precision of intersection search. The default values are 5.0e-3 and 1.0e-4, respectively.
+
 ```
 rt.set_float("marching_step", 5.0e-3)
 rt.set_float("marching_step_eps", 3.0e-5)
 ```
-  to set the step and precision of intersection search. The default values are 5.0e-3 and 1.0e-4.
 
 Fixed
 ~~~~~
 - FFmpeg libs in Windows were not accessible for python installed via Microsoft Store, even if the correct folder was included in PATH.
+- Denoiser memory management issues (occuring in Linux).
 
 
 `v0.19.1` - 2026-05-28
@@ -199,6 +201,7 @@ Changed
 - binaries updated to OptiX 7.6
 - raytracing and callbacks workflow explained in the docs 
 
+.. _`v0.19.2`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.19.2
 .. _`v0.19.1`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.19.1
 .. _`v0.19.0`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.19.0
 .. _`v0.18.4`: https://github.com/rnd-team-dev/plotoptix/releases/tag/v0.18.4
