@@ -206,30 +206,13 @@ From GitHub sources::
 
 Then, try running code from the top of this readme, or one of the examples. You may also need to install ``tkinter`` and/or ``PyQt`` packages, if not shipped with your Python environment.
 
-Development path
-================
-
-This is still an experimental version in many aspects.
-
-PlotOptiX is basically an interface to RnD.SharpOptiX library which we are developing and using in our Studio. RnD.SharpOptiX offers
-much more functionality than it is now available through PlotOptiX. We progressively add more to PlotOptiX based mostly on the interest
-of our patrons and applications that this project supports.
-
-Download, star, and `become our Patron <https://www.patreon.com/rndteam>`__ if you like the project. Get in touch, share your use case,
-we are always happy to help and take part in exciting ideas of our users.
-
 Examples
 ========
 
 Looking at examples is the best way to get started and explore PlotOptiX features. Have a look at the
 `readme and sample codes here <https://github.com/rnd-team-dev/plotoptix/tree/master/examples>`__.
 
-Examples in the repository head may use features not yet available in the PyPI release. In order to download examples
-compatible with PyPI release install the package::
-
-	python -m plotoptix.install examples
-
-This will create a folder with examples in the current directory.
+Get in touch, share your use case, we are happy to help and take part in exciting ideas of our users.
 
 .. image:: https://plotoptix.rnd.team/images/surface_plot.jpg
    :alt: Surface plot ray tracing with PlotOptiX
