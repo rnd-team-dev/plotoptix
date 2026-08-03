@@ -4527,7 +4527,7 @@ class NpOptiX(threading.Thread, metaclass=Singleton):
         with :meth:`plotoptix.NpOptiX.sync_raw_data`.
 
         Note: number of primitives of the geometry cannot be changed and not all properties are possible to update with
-        this function, use :meth:`plotoptix.NpOptiX.set_data` or :meth:`plotoptix.NpOptiX.update_data` for more generic
+        this function, use :meth:`plotoptix.NpOptiX.set_data` or :meth:`plotoptix.NpOptiX.update_data` for a more generic
         changes.
 
         ParticleSet, Parallelogram, Parallepiped, and BSpline geometries: all data updates are supported.

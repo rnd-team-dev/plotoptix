@@ -10,8 +10,7 @@ import numpy as np
 from plotoptix import TkOptiX
 from plotoptix.utils import simplex
 
-
-class params():
+class anim():
     n = 100
     rx = (-20, 20)
     r = 0.85 * 0.5 * (rx[1] - rx[0]) / (n - 1)
@@ -23,27 +22,36 @@ class params():
     data = np.stack([X.flatten(), np.zeros(n*n), Z.flatten()], axis=1)
     t = 0
     
-# Compute updated geometry data.
-def compute(rt, delta):
-    row = np.ones((params.data.shape[0], 1))
-    xn = simplex(np.concatenate([params.data, params.t * row], axis=1))
-    yn = simplex(np.concatenate([params.data, (params.t + 20) * row], axis=1))
-    zn = simplex(np.concatenate([params.data, (params.t - 20) * row], axis=1))
-    dv = np.stack([xn, yn, zn], axis=1)
-    params.data += 0.02 * dv
-    params.t += 0.05
+    # Compute updated geometry data.
+    def compute(rt, delta):
+        row = np.ones((anim.data.shape[0], 1))
+        xn = simplex(np.concatenate([anim.data, anim.t * row], axis=1))
+        yn = simplex(np.concatenate([anim.data, (anim.t + 20) * row], axis=1))
+        zn = simplex(np.concatenate([anim.data, (anim.t - 20) * row], axis=1))
+        dv = np.stack([xn, yn, zn], axis=1)
+        anim.data += 0.02 * dv
+        anim.t += 0.05
     
-# Fast copy to geometry buffer on device, without making a host copy.
-def update_data(rt):
-    rt.update_raw_data("balls", pos=params.data)
+    # Fast copy to geometry buffer on device, without making a host copy.
+    def update_data(rt):
+        rt.update_raw_data("balls", pos=anim.data)
 
 
 def main():
     rt = TkOptiX(
-        on_scene_compute=compute,
-        on_rt_completed=update_data
+        on_scene_compute=anim.compute, on_rt_completed=anim.update_data
     )
-    rt.set_param(min_accumulation_step=10, max_accumulation_frames=16)
+
+    # Note: this example does the real-time animation, without saving a video file.
+    # For this reason, `min_accumulation_step == max_accumulation_frames` and the
+    # scene is updated after each accumulation step. This makes each frame you see
+    # on the screen has the same noise level. In case of producing a video output,
+    # you can set `max_accumulation_frames = N * min_accumulation_step` to accumulate
+    # N frames before saving low noise frame to the video file and updating the scene.
+    # This will increase resposiveness of GUI, and also allow for statistics collection
+    # in case of noise-balanced work distribution camera modes. But, you'll see flickering
+    # noise level during rendering to the screen.
+    rt.set_param(min_accumulation_step=10, max_accumulation_frames=10)
     rt.set_background(0)
     rt.set_ambient(0)
 
@@ -55,7 +63,7 @@ def main():
     rt.set_float("tonemap_gamma", gamma)
     rt.add_postproc("Gamma")
 
-    rt.set_data("balls", pos=params.data, c=0.82, r=params.r, geom="ParticleSetConstSize")
+    rt.set_data("balls", pos=anim.data, c=0.82, r=anim.r, geom="ParticleSetConstSize")
 
     rt.start()
 
