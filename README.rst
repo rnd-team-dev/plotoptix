@@ -178,11 +178,25 @@ After successful installation you should be able to do python's import:
 
 *FFmpeg:*
 
-FFmpeg shared libraries >= 8.0 are required to enable video encoding features. Uninstall older version first.
-Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and download the most recent release sources. Unpack it to a new folder, cd to it.
-Configure, compile and install as below::
+FFmpeg shared libraries >= 8.0 are required to enable video encoding features. PlotOptiX supports H.264 and HEVC hardware acceleration via CUDA and NVENC.
+To enable support of these codecs in ffmpeg you'll need NVIDIA headers before ffmpeg compilation::
 
-   ./configure --enable-shared
+   git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
+   cd nv-codec-headers
+   make install
+
+Uninstall older ffmpeg version first. Visit `FFmpeg site <https://ffmpeg.org/download.html>`__ and download the most recent release sources. Unpack it to
+a new folder, cd to it. Configure, compile and install as below. Remember to set your path to CUDA libs and headers, and your prefered flags if needed::
+
+   ./configure \
+     --prefix=/usr/local \
+     --enable-shared \
+     --enable-pic \
+     --disable-static \
+     --enable-cuda-nvcc \
+     --extra-cflags="-I/usr/local/cuda-13.2/include" \
+     --extra-ldflags="-L/usr/local/cuda-13.2/lib64" \
+     --enable-nonfree
    make
    sudo make install
 
